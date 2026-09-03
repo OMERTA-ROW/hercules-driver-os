@@ -78,7 +78,7 @@ function OrbHome() {
         aria-hidden="true"
         viewBox="0 0 400 400"
         preserveAspectRatio="xMidYMid slice"
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.22]"
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.3]"
       >
         <path
           d={routePath}

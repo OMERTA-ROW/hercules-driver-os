@@ -350,12 +350,12 @@
   background:
     radial-gradient(
       circle at 38% 32%,
-      color-mix(in oklab, var(--orb-core) 78%, transparent) 0%,
-      color-mix(in oklab, var(--orb-core) 26%, transparent) 45%,
-      transparent 72%
+      color-mix(in oklab, var(--orb-core) 30%, transparent) 0%,
+      color-mix(in oklab, var(--orb-core) 10%, transparent) 48%,
+      transparent 74%
     ),
-    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--orb-halo) 30%, transparent), transparent 70%);
-  border: 1px solid color-mix(in oklab, var(--orb-core) 30%, transparent);
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--orb-halo) 12%, transparent), transparent 72%);
+  border: 1px solid color-mix(in oklab, var(--orb-core) 22%, transparent);
   backdrop-filter: blur(6px) saturate(120%);
 }
 
