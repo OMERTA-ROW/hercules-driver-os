@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FinancialsRouteImport } from './routes/financials'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinancialsRoute = FinancialsRouteImport.update({
+  id: '/financials',
+  path: '/financials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoadsRoute = LoadsRouteImport.update({
@@ -25,27 +37,35 @@ const LoadsRoute = LoadsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/financials': typeof FinancialsRoute
+  '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/financials': typeof FinancialsRoute
+  '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/financials': typeof FinancialsRoute
+  '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/loads'
+  fullPaths: '/' | '/financials' | '/health' | '/loads'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/loads'
-  id: '__root__' | '/' | '/loads'
+  to: '/' | '/financials' | '/health' | '/loads'
+  id: '__root__' | '/' | '/financials' | '/health' | '/loads'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FinancialsRoute: typeof FinancialsRoute
+  HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
 }
 
@@ -56,6 +76,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financials': {
+      id: '/financials'
+      path: '/financials'
+      fullPath: '/financials'
+      preLoaderRoute: typeof FinancialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loads': {
@@ -70,6 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FinancialsRoute: FinancialsRoute,
+  HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
 }
 export const routeTree = rootRouteImport

@@ -37,9 +37,9 @@ export function Metric({
   className,
 }: {
   value: ReactNode;
-  unit?: string;
-  tone?: "default" | "primary" | "go" | "warn" | "alert" | "info";
-  className?: string;
+  unit?: string | undefined;
+  tone?: "default" | "primary" | "go" | "warn" | "alert" | "info" | undefined;
+  className?: string | undefined;
 }) {
   const tones: Record<string, string> = {
     default: "text-foreground",
