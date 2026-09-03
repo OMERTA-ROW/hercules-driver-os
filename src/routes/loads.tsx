@@ -128,9 +128,9 @@ function LoadBoard() {
       title="Load Board"
       subtitle="Facility intelligence on every load — hours, closures, and parking — before you commit"
     >
+      <PlanGate feature="loads">
       <div className="space-y-3">
         {loads.map((load) => {
-      <PlanGate feature="loads">
           const isOpen = expanded === load.id;
           const isBooked = booked.includes(load.id);
           return (
