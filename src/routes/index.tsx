@@ -1,272 +1,222 @@
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Truck,
-  Clock,
-  MapPin,
-  Navigation,
-  TrendingUp,
-  Activity,
-  ShieldAlert,
-  Coffee,
-} from "lucide-react";
-import { AppShell } from "@/components/hercules/AppShell";
-import {
-  Panel,
-  PanelTitle,
-  Label,
-  Metric,
-  Pill,
-  Bar,
-  DriverApprovedNote,
-  money,
-  money2,
-  hm,
-} from "@/components/hercules/primitives";
-import { Button } from "@/components/ui/button";
-import { currentLoad, hos, driver, truckHealth, alerts, breakSuggestions } from "@/data/mock";
+import { Mic, LayoutGrid, ChevronRight } from "lucide-react";
+import { ThemeToggle } from "@/components/hercules/ThemeToggle";
+import { LoadResetButton } from "@/components/hercules/LoadReset";
+import { currentLoad, hos } from "@/data/mock";
+import { navSteps, routePath } from "@/data/navigation";
+import { hm } from "@/components/hercules/primitives";
+import { useAuth } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — HERCULES Driver OS" },
+      { title: "HERCULES — Voice-First Driver OS" },
       {
         name: "description",
         content:
-          "Current load, hours of service, ETA, live profit per mile, and truck health at a glance. Voice-first, driver approved.",
+          "The HERCULES orb: a night-safe, voice-first home screen with ghosted turn-by-turn route, next turn, ETA, miles, and hours of service.",
       },
-      { property: "og:title", content: "Dashboard — HERCULES Driver OS" },
+      { property: "og:title", content: "HERCULES — Voice-First Driver OS" },
       {
         property: "og:description",
-        content: "Your run, your clock, your margin, your truck — all on one screen.",
+        content: "Speak to it. It answers. Nothing commits without your approval.",
       },
     ],
   }),
-  component: Dashboard,
+  component: OrbHome,
 });
 
-function Dashboard() {
-  const watchItems = truckHealth.filter((m) => m.status !== "ok");
-  const nearest = alerts[0]!;
-  const nextBreak = breakSuggestions[0]!;
+type OrbState = "idle" | "listening" | "speaking";
+
+const replies = [
+  "You have 214 miles to Oklahoma City. ETA 19:42, with 1 hour 48 minutes of slack in the window.",
+  "Next turn is in four tenths — merge right onto I-44 East. Keep right, two lanes.",
+  "You have 4 hours 6 minutes of drive time left. Your own pattern says you fade around 16:30. I can suggest a stop — your call.",
+];
+
+function OrbHome() {
+  const { account, trialDaysLeft } = useAuth();
+  const [state, setState] = useState<OrbState>("idle");
+  const [line, setLine] = useState<string>("Say “Hercules” or tap the orb");
+  const [replyIdx, setReplyIdx] = useState(0);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  function wake() {
+    if (state !== "idle") {
+      setState("idle");
+      setLine("Say “Hercules” or tap the orb");
+      return;
+    }
+    setState("listening");
+    setLine("Listening…");
+    timers.current.push(
+      setTimeout(() => {
+        setState("speaking");
+        setLine(replies[replyIdx % replies.length]!);
+        setReplyIdx((i) => i + 1);
+        timers.current.push(
+          setTimeout(() => {
+            setState("idle");
+            setLine("Say “Hercules” or tap the orb");
+          }, 6000),
+        );
+      }, 1800),
+    );
+  }
+
+  const step = navSteps[0]!;
+  const active = state !== "idle";
 
   return (
-    <AppShell
-      title="Dashboard"
-      subtitle={`${driver.truck} · ${driver.trailer} · ${driver.authority}`}
-    >
-      <div className="grid gap-3 xl:grid-cols-[1.55fr_1fr]">
-        {/* Current load */}
-        <Panel className="xl:row-span-2">
-          <PanelTitle
-            right={
-              <Pill tone="go">
-                <Truck className="h-3.5 w-3.5" /> {currentLoad.status}
-              </Pill>
-            }
+    <main className="orb-canvas relative min-h-screen overflow-hidden">
+      {/* Ghosted turn-by-turn route — readable, never bright */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 400 400"
+        preserveAspectRatio="xMidYMid slice"
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.3]"
+      >
+        <path
+          d={routePath}
+          fill="none"
+          stroke="var(--orb-halo)"
+          strokeWidth="14"
+          strokeLinecap="round"
+          opacity="0.35"
+        />
+        <path
+          d={routePath}
+          fill="none"
+          stroke="var(--orb-core)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="10 14"
+          className="route-flow"
+        />
+        {[
+          [128, 258],
+          [206, 146],
+          [306, 44],
+        ].map(([x, y]) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r="4" fill="var(--orb-core)" opacity="0.5" />
+        ))}
+      </svg>
+
+      {/* Top edge readouts */}
+      <div className="relative z-10 flex items-start justify-between gap-3 px-5 pt-5">
+        <div className="min-w-0">
+          <div className="font-display text-sm uppercase tracking-[0.3em] text-muted-foreground">
+            Hercules
+          </div>
+          <div className="label-cap mt-1">Next turn in {step.in}</div>
+          <div className="mt-0.5 max-w-[22ch] text-sm text-foreground/70 sm:text-base">
+            {step.text}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle size="sm" className="bg-transparent" />
+          <Link
+            to="/dashboard"
+            aria-label="Open full dashboard"
+            className="flex h-9 items-center gap-2 rounded-full border border-border px-3 font-display text-[0.68rem] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            Current Load · {currentLoad.id}
-          </PanelTitle>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-border bg-card/60 p-3">
-              <Label>Origin</Label>
-              <div className="font-display text-xl">{currentLoad.origin}</div>
-              <p className="text-xs text-muted-foreground">Picked up {currentLoad.pickupAt}</p>
-            </div>
-            <div className="rounded-lg border border-border bg-card/60 p-3">
-              <Label>Destination</Label>
-              <div className="font-display text-xl">{currentLoad.destination}</div>
-              <p className="text-xs text-muted-foreground">Deliver by {currentLoad.deliverBy}</p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div>
-              <Label>Miles to go</Label>
-              <Metric value={currentLoad.milesRemaining} unit="mi" tone="primary" />
-              <Bar
-                className="mt-2"
-                pct={((currentLoad.miles - currentLoad.milesRemaining) / currentLoad.miles) * 100}
-              />
-            </div>
-            <div>
-              <Label>ETA</Label>
-              <Metric value={currentLoad.etaLocal} />
-              <p className="mt-2 text-xs text-muted-foreground">1h 48m of slack in the window</p>
-            </div>
-            <div>
-              <Label>Line haul</Label>
-              <Metric value={money(currentLoad.rate)} />
-              <p className="mt-2 text-xs text-muted-foreground">
-                {money2(currentLoad.rpm)}/mi gross
-              </p>
-            </div>
-            <div>
-              <Label>Commodity</Label>
-              <p className="mt-1 text-sm leading-snug">{currentLoad.commodity}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{currentLoad.broker}</p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button size="lg" variant="outline" className="gap-2">
-              <Navigation className="h-4 w-4" /> Navigate
-            </Button>
-            <Button size="lg" variant="outline" className="gap-2" asChild>
-              <Link to="/loads">
-                <MapPin className="h-4 w-4" /> Plan next load
-              </Link>
-            </Button>
-          </div>
-          <div className="mt-3">
-            <DriverApprovedNote />
-          </div>
-        </Panel>
-
-        {/* Profit per mile */}
-        <Panel>
-          <PanelTitle right={<Pill tone="primary">Live</Pill>}>Profit / Mile</PanelTitle>
-          <Metric value={money2(currentLoad.profitPerMile)} unit="/mi" tone="go" className="text-5xl" />
-          <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-            <div>
-              <Label>Gross</Label>
-              <div className="metric font-semibold">{money2(currentLoad.rpm)}</div>
-            </div>
-            <div>
-              <Label>Cost</Label>
-              <div className="metric font-semibold text-warn">{money2(currentLoad.costPerMile)}</div>
-            </div>
-            <div>
-              <Label>Deadhead</Label>
-              <div className="metric font-semibold">{currentLoad.deadhead} mi</div>
-            </div>
-          </div>
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <TrendingUp className="h-4 w-4 text-go" /> $0.32/mi above your 30-day average
-          </p>
-        </Panel>
-
-        {/* HOS */}
-        <Panel>
-          <PanelTitle
-            right={
-              <Pill tone="warn">
-                <Clock className="h-3.5 w-3.5" /> Break in {hm(hos.breakInMin)}
-              </Pill>
-            }
-          >
-            Hours of Service
-          </PanelTitle>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <Label>Drive remaining</Label>
-              <Metric value={hm(hos.driveRemainingMin)} tone="primary" />
-              <Bar className="mt-2" pct={(hos.driveRemainingMin / hos.driveTotalMin) * 100} />
-            </div>
-            <div>
-              <Label>On duty remaining</Label>
-              <Metric value={hm(hos.onDutyRemainingMin)} />
-              <Bar
-                className="mt-2"
-                tone="info"
-                pct={(hos.onDutyRemainingMin / hos.onDutyTotalMin) * 100}
-              />
-            </div>
-          </div>
-          <div className="mt-3">
-            <Label>70-hour cycle</Label>
-            <div className="flex items-center gap-3">
-              <Bar pct={(hos.cycleRemainingHrs / hos.cycleTotalHrs) * 100} tone="go" />
-              <span className="metric shrink-0 text-sm font-semibold">
-                {hos.cycleRemainingHrs} h
-              </span>
-            </div>
-          </div>
-        </Panel>
+            <LayoutGrid className="h-4 w-4" /> Panels
+          </Link>
+        </div>
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-3">
-        {/* Truck health at a glance */}
-        <Panel>
-          <PanelTitle
-            right={
-              <Pill tone={watchItems.length ? "watch" : "go"}>
-                <Activity className="h-3.5 w-3.5" /> {watchItems.length} to watch
-              </Pill>
-            }
-          >
-            Truck Health
-          </PanelTitle>
-          <div className="space-y-2">
-            {truckHealth.slice(0, 4).map((m) => (
-              <div key={m.label} className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm">{m.label}</div>
-                  <div className="truncate text-xs text-muted-foreground">{m.detail}</div>
-                </div>
-                <div
-                  className={
-                    "metric shrink-0 text-lg font-bold " +
-                    (m.status === "ok" ? "text-go" : m.status === "watch" ? "text-warn" : "text-destructive")
-                  }
-                >
-                  {m.value}
-                  <span className="ml-1 text-xs">{m.unit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="mt-3 w-full" size="lg" asChild>
-            <Link to="/health">Open truck health</Link>
-          </Button>
-        </Panel>
-
-        {/* Alerts ahead */}
-        <Panel>
-          <PanelTitle right={<Pill tone="alert">{nearest.milesAhead} mi ahead</Pill>}>
-            Prepare Ahead
-          </PanelTitle>
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-destructive" />
-              <span className="font-display uppercase tracking-wide">{nearest.kind}</span>
-            </div>
-            <p className="mt-1 text-sm">{nearest.location}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{nearest.note}</p>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Advance notice so you can get your pre-trip and paperwork in order and arrive prepared
-            and compliant.
-          </p>
-          <Button variant="outline" className="mt-3 w-full" size="lg" asChild>
-            <Link to="/alerts">Open alerts network</Link>
-          </Button>
-        </Panel>
-
-        {/* Break suggestion */}
-        <Panel>
-          <PanelTitle right={<Pill tone="info">Suggestion</Pill>}>Your Rhythm</PanelTitle>
-          <div className="rounded-lg border border-info/35 bg-info/10 p-3">
-            <div className="flex items-center gap-2">
-              <Coffee className="h-5 w-5 text-info" />
-              <span className="font-display uppercase tracking-wide">{nextBreak.when}</span>
-            </div>
-            <p className="mt-1 text-sm">{nextBreak.why}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{nextBreak.place}</p>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <Button size="lg" className="flex-1">
-              Accept
-            </Button>
-            <Button size="lg" variant="outline" className="flex-1">
-              Not now
-            </Button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            A suggestion built from your own patterns — never an order.
-          </p>
-        </Panel>
+      {/* The orb */}
+      <div className="relative z-10 flex min-h-[62vh] items-center justify-center px-4">
+        <button
+          type="button"
+          onClick={wake}
+          aria-label={active ? "Stop Hercules" : "Wake Hercules"}
+          aria-pressed={active}
+          className="group relative flex h-[min(66vw,340px)] w-[min(66vw,340px)] items-center justify-center rounded-full"
+        >
+          {active ? (
+            <>
+              <span className="orb-ripple absolute inset-0 rounded-full border border-[var(--orb-core)]/40" />
+              <span
+                className="orb-ripple absolute inset-0 rounded-full border border-[var(--orb-core)]/25"
+                style={{ animationDelay: "1.2s" }}
+              />
+            </>
+          ) : null}
+          <span
+            className={cn(
+              "orb-core absolute inset-0 rounded-full",
+              active ? "orb-active" : "orb-idle",
+            )}
+          />
+          <span className="orb-swirl absolute inset-6 rounded-full border border-[var(--orb-core)]/15" />
+          <span className="relative flex flex-col items-center gap-2">
+            <Mic
+              className={cn(
+                "h-10 w-10 transition-opacity",
+                active ? "text-[var(--orb-core)] opacity-90" : "text-[var(--orb-core)] opacity-40",
+              )}
+            />
+            <span className="font-display text-[0.68rem] uppercase tracking-[0.28em] text-muted-foreground">
+              {state === "listening" ? "Listening" : state === "speaking" ? "Speaking" : "Idle"}
+            </span>
+          </span>
+        </button>
       </div>
-    </AppShell>
+
+      {/* Spoken line */}
+      <p className="relative z-10 mx-auto max-w-2xl px-6 text-center text-sm leading-relaxed text-foreground/65 sm:text-base">
+        {line}
+      </p>
+
+      {/* Bottom edge readouts */}
+      <div className="relative z-10 mt-6 grid grid-cols-2 gap-3 px-5 pb-6 sm:grid-cols-4">
+        <Readout label="Miles left" value={String(currentLoad.milesRemaining)} unit="mi" />
+        <Readout label="ETA" value={currentLoad.etaLocal} />
+        <Readout label="Drive left" value={hm(hos.driveRemainingMin)} />
+        <Readout label="Break in" value={hm(hos.breakInMin)} />
+      </div>
+
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 px-5 pb-8">
+        <p className="text-xs text-muted-foreground">
+          Hercules proposes. You decide. Nothing books without your word.
+        </p>
+        <div className="flex items-center gap-2">
+          <LoadResetButton className="h-10" />
+          {account ? (
+            <Link
+              to="/settings"
+              className="font-display text-[0.68rem] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+            >
+              {account.status === "trial" ? `Trial · ${trialDaysLeft}d` : "Account"}
+              <ChevronRight className="ml-1 inline h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <Link
+              to="/sign-in"
+              className="font-display text-[0.68rem] uppercase tracking-[0.14em] text-primary"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Readout({ label, value, unit }: { label: string; value: string; unit?: string }) {
+  return (
+    <div>
+      <div className="label-cap">{label}</div>
+      <div className="metric mt-0.5 text-2xl font-bold text-foreground/80">
+        {value}
+        {unit ? <span className="ml-1 text-xs font-normal opacity-60">{unit}</span> : null}
+      </div>
+    </div>
   );
 }

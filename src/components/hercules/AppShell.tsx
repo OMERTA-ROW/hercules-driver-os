@@ -8,20 +8,29 @@ import {
   ShieldAlert,
   UserCog,
   Mic,
+  Truck,
+  Settings as SettingsIcon,
+  Orbit,
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
 import { driver } from "@/data/mock";
 import { Pill } from "./primitives";
+import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/lib/auth";
+import type { Feature } from "@/data/plans";
 
 const nav = [
-  { to: "/", label: "Dashboard", icon: Gauge },
-  { to: "/loads", label: "Load Board", icon: Package },
-  { to: "/health", label: "Truck Health", icon: Wrench },
-  { to: "/financials", label: "Financials", icon: DollarSign },
-  { to: "/alerts", label: "Alerts", icon: ShieldAlert },
-  { to: "/driver", label: "Driver", icon: UserCog },
-  { to: "/voice", label: "Voice", icon: Mic },
+  { to: "/", label: "Orb", icon: Orbit, feature: null },
+  { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
+  { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
+  { to: "/health", label: "Truck Health", icon: Wrench, feature: "health" },
+  { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },
+  { to: "/alerts", label: "Alerts", icon: ShieldAlert, feature: "alerts" },
+  { to: "/driver", label: "Driver", icon: UserCog, feature: "driver" },
+  { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
+  { to: "/voice", label: "Voice", icon: Mic, feature: "voice" },
+  { to: "/settings", label: "Settings", icon: SettingsIcon, feature: null },
 ] as const;
 
 export function AppShell({
@@ -33,11 +42,18 @@ export function AppShell({
   subtitle?: string;
   children: ReactNode;
 }) {
+  const { account, can, trialDaysLeft } = useAuth();
+
+  const items = nav.filter(
+    (n) => !n.feature || !account || can(n.feature as Feature),
+  );
+  const canReset = !account || can("loadReset");
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex w-full max-w-[1800px]">
         {/* Left rail — primary nav for a cab-mounted landscape tablet */}
-        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 border-r border-border bg-card/40 py-4 lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
+        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-border bg-card/40 py-4 lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
           <Link to="/" className="mb-4 px-1 text-center xl:text-left">
             <div className="font-display text-2xl font-bold uppercase tracking-[0.14em] text-primary">
               HERC
@@ -45,7 +61,7 @@ export function AppShell({
             </div>
             <div className="label-cap mt-1">by Zeus</div>
           </Link>
-          {nav.map((n) => (
+          {items.map((n) => (
             <Link
               key={n.to}
               to={n.to}
@@ -55,7 +71,7 @@ export function AppShell({
                   "border-primary/60 bg-primary/15 text-primary",
               }}
               inactiveProps={{ className: "border-transparent text-muted-foreground" }}
-              className="flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 transition-colors hover:bg-accent hover:text-foreground xl:flex-row xl:justify-start xl:gap-3"
+              className="flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 transition-colors hover:bg-accent hover:text-foreground xl:flex-row xl:justify-start xl:gap-3"
             >
               <n.icon className="h-6 w-6 shrink-0" />
               <span className="font-display text-[0.68rem] uppercase tracking-[0.1em] xl:text-sm">
@@ -81,25 +97,38 @@ export function AppShell({
                 ) : null}
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
+                <ThemeToggle size="sm" />
                 <div className="hidden text-right sm:block">
                   <div className="font-display text-sm uppercase tracking-[0.12em]">
-                    {driver.name}
+                    {account?.name ?? driver.name}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {driver.unit} · {driver.callsign}
                   </div>
                 </div>
-                <Pill tone="go" className="hidden md:inline-flex">
-                  Driver approved mode
-                </Pill>
-                <LoadResetButton />
+                {account ? (
+                  account.status === "trial" ? (
+                    <Pill tone="warn" className="hidden md:inline-flex">
+                      Trial · {trialDaysLeft} days left
+                    </Pill>
+                  ) : (
+                    <Pill tone="go" className="hidden md:inline-flex">
+                      Driver approved mode
+                    </Pill>
+                  )
+                ) : (
+                  <Link to="/sign-in">
+                    <Pill tone="primary">Sign in</Pill>
+                  </Link>
+                )}
+                {canReset ? <LoadResetButton /> : null}
               </div>
             </div>
           </header>
 
           {/* Mobile / portrait nav */}
           <nav className="flex gap-1.5 overflow-x-auto border-b border-border px-3 py-2 lg:hidden">
-            {nav.map((n) => (
+            {items.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
