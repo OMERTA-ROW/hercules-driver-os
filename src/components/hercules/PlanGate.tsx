@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
-import { featureLabels, plans, type Feature } from "@/data/plans";
+import { featureLabels, plans, planById, type Feature } from "@/data/plans";
 import { Button } from "@/components/ui/button";
 import { Panel, Label, DriverApprovedNote } from "./primitives";
 
