@@ -44,10 +44,8 @@ export function PlanGate({ feature, children }: { feature: Feature; children: Re
         <h2 className="text-2xl font-bold uppercase">{featureLabels[feature]}</h2>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        Your plan is {needed ? "" : ""}
-        <span className="text-foreground">{account.plan === "company" ? "Company Driver" : account.plan}</span>
-        . {featureLabels[feature]} is included in{" "}
-        <span className="text-foreground">{needed?.name ?? "a higher tier"}</span> at $
+        You are on <span className="text-foreground">{planById(account.plan).name}</span>. This is
+        included in <span className="text-foreground">{needed?.name ?? "a higher tier"}</span> at $
         {needed?.price}
         {needed?.unit}.
       </p>
