@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as FinancialsRouteImport } from './routes/financials'
+import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -39,6 +40,11 @@ const DriverRoute = DriverRouteImport.update({
 const FinancialsRoute = FinancialsRouteImport.update({
   id: '/financials',
   path: '/financials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FleetRoute = FleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthRoute = HealthRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
+  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
+  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
+  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/driver'
     | '/financials'
+    | '/fleet'
     | '/health'
     | '/loads'
     | '/pricing'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/driver'
     | '/financials'
+    | '/fleet'
     | '/health'
     | '/loads'
     | '/pricing'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/driver'
     | '/financials'
+    | '/fleet'
     | '/health'
     | '/loads'
     | '/pricing'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   DriverRoute: typeof DriverRoute
   FinancialsRoute: typeof FinancialsRoute
+  FleetRoute: typeof FleetRoute
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
   PricingRoute: typeof PricingRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/financials'
       fullPath: '/financials'
       preLoaderRoute: typeof FinancialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fleet': {
+      id: '/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof FleetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   DriverRoute: DriverRoute,
   FinancialsRoute: FinancialsRoute,
+  FleetRoute: FleetRoute,
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
   PricingRoute: PricingRoute,
