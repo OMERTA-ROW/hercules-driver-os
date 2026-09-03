@@ -16,6 +16,7 @@ import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as VoiceRouteImport } from './routes/voice'
@@ -55,6 +56,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/voice': typeof VoiceRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/voice': typeof VoiceRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/voice': typeof VoiceRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/pricing'
+    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/voice'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/pricing'
+    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/voice'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/pricing'
+    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/voice'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
   PricingRoute: typeof PricingRoute
+  SettingsRoute: typeof SettingsRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   VoiceRoute: typeof VoiceRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
   PricingRoute: PricingRoute,
+  SettingsRoute: SettingsRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   VoiceRoute: VoiceRoute,
