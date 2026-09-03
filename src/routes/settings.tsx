@@ -25,7 +25,7 @@ export const Route = createFileRoute("/settings")({
       },
     ],
   }),
-  component: Settings;
+  component: Settings,
 });
 
 function Settings() {
