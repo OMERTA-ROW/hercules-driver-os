@@ -59,7 +59,7 @@ function Fleet() {
             </p>
           </Panel>
           <Panel>
-            <PanelTitle right={<Pill tone="go">Consolidated</PanelTitle_right />}>Revenue</PanelTitle>
+            <PanelTitle right={<Pill tone="go">Consolidated</Pill>}>Revenue</PanelTitle>
             <Metric value={money(revenue)} tone="go" />
             <p className="mt-3 text-xs text-muted-foreground">Gross line haul, 4 trucks, week to date.</p>
           </Panel>
