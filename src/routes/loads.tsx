@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
+import { PlanGate } from "@/components/hercules/PlanGate";
 import {
   Panel,
   Label,
@@ -129,6 +130,7 @@ function LoadBoard() {
     >
       <div className="space-y-3">
         {loads.map((load) => {
+      <PlanGate feature="loads">
           const isOpen = expanded === load.id;
           const isBooked = booked.includes(load.id);
           return (
@@ -284,6 +286,7 @@ function LoadBoard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </PlanGate>
     </AppShell>
   );
 }

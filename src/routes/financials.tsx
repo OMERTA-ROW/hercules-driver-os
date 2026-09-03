@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Fuel, Receipt, Timer, Map } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
+import { PlanGate } from "@/components/hercules/PlanGate";
 import {
   Panel,
   PanelTitle,
@@ -55,6 +56,7 @@ function Financials() {
 
   return (
     <AppShell title="Financials" subtitle="Week of Sep 1 · running totals update as you roll">
+      <PlanGate feature="financials">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Panel>
           <Label>Revenue this week</Label>
@@ -274,6 +276,7 @@ function Financials() {
           </p>
         </Panel>
       </div>
+      </PlanGate>
     </AppShell>
   );
 }
