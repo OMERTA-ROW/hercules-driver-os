@@ -31,10 +31,11 @@ export function VoiceDock() {
   useEffect(() => {
     if (!listening) return;
     const t = setTimeout(() => {
+      const reply = cannedReplies[replyIdx % cannedReplies.length]!;
       setLines((prev) => [
         ...prev,
         { from: "driver", text: "Hercules, how am I doing?" },
-        cannedReplies[replyIdx % cannedReplies.length],
+        reply,
       ]);
       setReplyIdx((i) => i + 1);
       setListening(false);
