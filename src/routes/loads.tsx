@@ -47,7 +47,7 @@ export const Route = createFileRoute("/loads")({
       },
     ],
   }),
-  component: LoadBoard;
+  component: LoadBoard,
 });
 
 function FacilityCard({
