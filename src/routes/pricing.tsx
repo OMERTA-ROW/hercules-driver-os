@@ -44,7 +44,7 @@ function Pricing() {
 
   function choose(planId: (typeof plans)[number]["id"], name: string) {
     if (!account) {
-      void navigate({ to: "/sign-up", search: { plan: planId } });
+      void navigate({ to: "/sign-up" });
       return;
     }
     changePlan(planId);
@@ -59,7 +59,7 @@ function Pricing() {
         {plans.map((p) => {
           const current = account?.plan === p.id;
           return (
-            <Panel key={p.id} className={current ? "glow-ring" : undefined}>
+            <Panel key={p.id} className={current ? "glow-ring" : ""}>
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h2 className="text-2xl font-bold uppercase">{p.name}</h2>

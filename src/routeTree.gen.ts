@@ -15,6 +15,7 @@ import { Route as DriverRouteImport } from './routes/driver'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as VoiceRouteImport } from './routes/voice'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const LoadsRoute = LoadsRouteImport.update({
   path: '/loads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/financials': typeof FinancialsRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/pricing': typeof PricingRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/financials': typeof FinancialsRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/pricing': typeof PricingRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/financials': typeof FinancialsRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/pricing': typeof PricingRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/financials'
     | '/health'
     | '/loads'
+    | '/pricing'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/financials'
     | '/health'
     | '/loads'
+    | '/pricing'
     | '/voice'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/financials'
     | '/health'
     | '/loads'
+    | '/pricing'
     | '/voice'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   FinancialsRoute: typeof FinancialsRoute
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
+  PricingRoute: typeof PricingRoute
   VoiceRoute: typeof VoiceRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voice': {
       id: '/voice'
       path: '/voice'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinancialsRoute: FinancialsRoute,
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
+  PricingRoute: PricingRoute,
   VoiceRoute: VoiceRoute,
 }
 export const routeTree = rootRouteImport
