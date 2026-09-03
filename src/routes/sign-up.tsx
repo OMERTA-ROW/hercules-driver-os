@@ -45,7 +45,10 @@ function SignUp() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between">
-          <Link to="/" className="font-display text-3xl font-bold uppercase tracking-[0.14em] text-primary">
+          <Link
+            to="/"
+            className="font-display text-3xl font-bold uppercase tracking-[0.14em] text-primary"
+          >
             HERC<span className="text-foreground">ULES</span>
           </Link>
           <ThemeToggle size="sm" />
@@ -78,6 +81,7 @@ function SignUp() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Vinson Bass"
+                  aria-label="Name"
                   className="mt-1 h-12 text-base"
                 />
               </div>
@@ -86,6 +90,7 @@ function SignUp() {
                 <Input
                   type="email"
                   autoComplete="email"
+                  aria-label="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@carrier.com"
@@ -97,6 +102,7 @@ function SignUp() {
                 <Input
                   type="password"
                   autoComplete="new-password"
+                  aria-label="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -109,6 +115,7 @@ function SignUp() {
                   <Input
                     type="number"
                     min={3}
+                    aria-label="Trucks"
                     value={seats}
                     onChange={(e) => setSeats(Math.max(3, Number(e.target.value) || 3))}
                     className="mt-1 h-12 text-base"

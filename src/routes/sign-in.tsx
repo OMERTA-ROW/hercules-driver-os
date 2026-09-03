@@ -33,7 +33,10 @@ function SignIn() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-5 flex items-center justify-between">
-          <Link to="/" className="font-display text-3xl font-bold uppercase tracking-[0.14em] text-primary">
+          <Link
+            to="/"
+            className="font-display text-3xl font-bold uppercase tracking-[0.14em] text-primary"
+          >
             HERC<span className="text-foreground">ULES</span>
           </Link>
           <ThemeToggle size="sm" />
@@ -59,6 +62,7 @@ function SignIn() {
               <Input
                 type="email"
                 autoComplete="email"
+                aria-label="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@carrier.com"
@@ -70,6 +74,7 @@ function SignIn() {
               <Input
                 type="password"
                 autoComplete="current-password"
+                aria-label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
