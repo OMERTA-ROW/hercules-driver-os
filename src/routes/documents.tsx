@@ -446,7 +446,7 @@ function Documents() {
           <div>
             <Label>Load number</Label>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {docLoads.map((l) => (
+              {loadOptions.map((l) => (
                 <button
                   key={l}
                   type="button"
