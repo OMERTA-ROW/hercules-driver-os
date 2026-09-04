@@ -110,8 +110,10 @@ function Dashboard() {
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button size="lg" variant="outline" className="gap-2">
-              <Navigation className="h-4 w-4" /> Navigate
+            <Button size="lg" variant="outline" className="gap-2" asChild>
+              <Link to="/navigation">
+                <Navigation className="h-4 w-4" /> Navigate
+              </Link>
             </Button>
             <Button size="lg" variant="outline" className="gap-2" asChild>
               <Link to="/loads">
