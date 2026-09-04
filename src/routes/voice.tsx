@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Mic, Volume2, Hand, Ear } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
+import { BrightnessButton } from "@/components/hercules/ThemeToggle";
 import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -48,25 +49,32 @@ function VoicePage() {
       subtitle="The primary way to run HERCULES — hands on the wheel, eyes on the road"
     >
       <div className="grid gap-3 xl:grid-cols-[1fr_1.2fr]">
-        <Panel className="flex flex-col items-center justify-center py-10">
+        <Panel className="flex flex-col items-center justify-center bg-voice-surface bg-none py-10">
           <button
             type="button"
             aria-label={listening ? "Stop listening" : "Start listening"}
             onClick={() => setListening((v) => !v)}
             className={cn(
-              "flex h-44 w-44 items-center justify-center rounded-full border-4 transition-all sm:h-56 sm:w-56",
+              // Night-safe: dim amber glow, never a bright filled disc.
+              "relative flex h-44 w-44 items-center justify-center rounded-full border-4 bg-voice-accent/10 text-voice-accent transition-colors sm:h-56 sm:w-56",
               listening
-                ? "glow-ring animate-pulse border-primary bg-primary text-primary-foreground"
-                : "border-primary/60 bg-secondary text-primary hover:bg-primary/15",
+                ? "voice-mic-active border-voice-accent/70"
+                : "voice-mic-idle border-voice-accent/40 hover:bg-voice-accent/16",
             )}
           >
+            {listening ? (
+              <span
+                aria-hidden
+                className="voice-ripple absolute inset-0 rounded-full border border-voice-accent/40"
+              />
+            ) : null}
             <Mic className="h-20 w-20 sm:h-24 sm:w-24" />
           </button>
           <div className="mt-5 text-center">
-            <div className="font-display text-2xl uppercase tracking-[0.14em]">
+            <div className="font-display text-2xl uppercase tracking-[0.14em] text-voice-text">
               {listening ? "Listening" : "Tap or say “Hercules”"}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-voice-text-dim">
               {listening
                 ? "Speak naturally — road noise filtered"
                 : "Wake word stays active while the truck is running"}
@@ -77,13 +85,16 @@ function VoicePage() {
               {Array.from({ length: 22 }).map((_, i) => (
                 <span
                   key={i}
-                  className="w-1.5 animate-pulse rounded-full bg-primary"
+                  className="w-1.5 animate-pulse rounded-full bg-voice-accent/70"
                   style={{ height: `${8 + ((i * 13) % 44)}px`, animationDelay: `${i * 60}ms` }}
                 />
               ))}
             </div>
           ) : null}
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <div className="mt-6 flex justify-center">
+            <BrightnessButton />
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
             <Pill tone="go">
               <Hand className="h-3.5 w-3.5" /> Hands-free
             </Pill>
@@ -104,10 +115,10 @@ function VoicePage() {
                 <div
                   key={i}
                   className={cn(
-                    "rounded-lg border px-3 py-2 text-sm leading-relaxed",
+                    "rounded-lg border px-3 py-2 text-base leading-relaxed",
                     l.from === "driver"
-                      ? "border-border bg-secondary"
-                      : "border-primary/35 bg-primary/8",
+                      ? "border-voice-line bg-voice-accent-soft/12 text-voice-text-dim"
+                      : "border-voice-accent/30 bg-voice-accent/8 text-voice-text",
                   )}
                 >
                   <Label className="mb-1">{l.from === "driver" ? "You" : "Hercules"}</Label>
