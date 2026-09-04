@@ -150,14 +150,14 @@ function UnlockScreen() {
         <div className="mt-5 flex flex-wrap items-end gap-4 rounded-lg border border-primary/40 bg-primary/10 p-4">
           <div>
             <Label>Price</Label>
-            <div className="metric text-4xl font-bold text-primary">${DOC_UPLOAD_PRICE}</div>
+            <div className="metric text-4xl font-bold text-primary">${DOC_UPLOAD_PRICE}.00</div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              One time · not a subscription
+              One-time charge · not a subscription · never recurring
             </div>
           </div>
           <p className="min-w-[14rem] flex-1 text-sm text-muted-foreground">
-            Paid once, unlocked permanently on your account. No recurring charge, no add-on to your
-            monthly plan, and no prompts after this screen.
+            A single $5.00 purchase unlocks Document Upload permanently on your account. No monthly
+            fee, no add-on to your plan, and no further prompts after you buy it.
           </p>
         </div>
 
@@ -167,7 +167,7 @@ function UnlockScreen() {
           onClick={() => setConfirming(true)}
         >
           <Sparkles className="h-5 w-5" />
-          Unlock Document Upload — ${DOC_UPLOAD_PRICE}
+          Unlock Document Upload — $5 one time
         </Button>
         <div className="mt-3">
           <DriverApprovedNote>
@@ -236,7 +236,7 @@ function UnlockScreen() {
               }}
             >
               <Check className="h-5 w-5" />
-              {working ? "Processing…" : `Yes, buy for $${DOC_UPLOAD_PRICE}`}
+              {working ? "Processing…" : `Yes, buy for $5.00 one time`}
             </Button>
           </DialogFooter>
         </DialogContent>

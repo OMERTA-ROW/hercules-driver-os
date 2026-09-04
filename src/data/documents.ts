@@ -102,4 +102,4 @@ export const sendTargets = [
 ];
 
 /** One-time in-app purchase that unlocks document upload permanently. */
-export const DOC_UPLOAD_PRICE = 39;
+export const DOC_UPLOAD_PRICE = 5;
