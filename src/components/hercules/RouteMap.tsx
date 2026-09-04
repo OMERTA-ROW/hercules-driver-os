@@ -215,6 +215,22 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
           },
         }),
     );
+    // HAZARD LAYER markers (only the kinds the driver left switched on).
+    refs.current.hazards.forEach((m) => m.setMap(null));
+    refs.current.hazards = hazards.map(
+      ({ hazard, severity }) =>
+        new google.maps.Marker({
+          position: hazard.at,
+          map,
+          title: `${hazard.name} — ${hazard.detail}`,
+          icon: {
+            url:
+              "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(hazardIconSvg(hazard, severity)),
+            anchor: new google.maps.Point(30, 42),
+          },
+          zIndex: severity === "critical" ? 900 : 500,
+        }),
+    );
     refs.current.truck?.setMap(null);
     refs.current.truck = new google.maps.Marker({
       position,
@@ -231,7 +247,8 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
       zIndex: 999,
     });
     map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme]);
+  }, [mode, polyline, position, segments, offRoute, theme, hazards]);
+
 
   if (mode === "google" || mode === "loading") {
     return (
