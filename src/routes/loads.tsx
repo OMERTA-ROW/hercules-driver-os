@@ -206,6 +206,15 @@ function LoadBoard() {
                   >
                     {isOpen ? "Hide" : "Show"} facility intelligence
                   </Button>
+                  <Button variant="outline" size="lg" className="gap-2" asChild>
+                    <Link
+                      to="/documents"
+                      search={{ load: load.id, type: "bol", capture: false }}
+                    >
+                      <FileText className="h-5 w-5" />
+                      Documents
+                    </Link>
+                  </Button>
                   <Button
                     size="lg"
                     className="gap-2 font-display uppercase tracking-wider"
