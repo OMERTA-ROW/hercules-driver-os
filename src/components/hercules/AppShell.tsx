@@ -9,6 +9,7 @@ import {
   UserCog,
   Mic,
   Truck,
+  FileText,
   Settings as SettingsIcon,
   Orbit,
 } from "lucide-react";
