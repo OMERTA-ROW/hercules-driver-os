@@ -86,6 +86,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<DisplayTheme>("night");
   const [autoNight, setAutoNightState] = useState(true);
   const [brightness, setBrightnessState] = useState<BrightnessLevel>("dim");
+  // Restored-from-storage gate: the clock must not overwrite the driver's saved choice.
+  const [ready, setReady] = useState(false);
 
   const dim = useMemo(
     () => brightnessOptions.find((b) => b.id === brightness)?.dim ?? 0,
@@ -106,6 +108,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setBrightnessState(now.brightness);
       applyTheme(now.theme);
       applyDim(brightnessOptions.find((b) => b.id === now.brightness)!.dim);
+      setReady(true);
       return;
     }
     const next =
@@ -119,11 +122,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setBrightnessState(b);
     applyTheme(next);
     applyDim(brightnessOptions.find((o) => o.id === b)!.dim);
+    setReady(true);
   }, []);
 
   // AUTOMATIC NIGHT MODE — re-checks the clock while the truck rolls.
   useEffect(() => {
-    if (!autoNight) return;
+    if (!autoNight || !ready) return;
     const tick = () => {
       const now = themeForHour(new Date().getHours());
       setThemeState(now.theme);
@@ -134,7 +138,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-  }, [autoNight]);
+  }, [autoNight, ready]);
 
   /** Any manual pick is the driver overriding the clock — auto steps aside. */
   const setTheme = useCallback((t: DisplayTheme) => {
