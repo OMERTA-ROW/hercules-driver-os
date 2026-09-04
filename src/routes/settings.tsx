@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CreditCard, Monitor, LogOut, Check } from "lucide-react";
+import { CreditCard, Monitor, LogOut, Check, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { plans, planById, featureLabels, TRIAL_DAYS, type PlanId } from "@/data/plans";
 import { cn } from "@/lib/utils";
+import { useHazardLayers } from "@/lib/hazard-layer";
+import { hazardKinds, hazardMeta } from "@/data/hazards";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -162,6 +164,21 @@ function Settings() {
           )}
         </Panel>
 
+
+        <Panel>
+          <PanelTitle right={<Pill tone="info">On by default</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <TriangleAlert className="h-5 w-5 text-warn" /> Truck hazard layers
+            </span>
+          </PanelTitle>
+          <HazardToggles />
+          <p className="mt-3 text-xs text-muted-foreground">
+            Every layer is on until you switch it off. Warnings are announced by voice and shown on
+            the map well ahead of the hazard, factored for your height, weight, and length. They are
+            information — what you do with them is your call.
+          </p>
+        </Panel>
+
         <Panel>
           <PanelTitle right={<Pill tone="info">Applies app-wide</Pill>}>
             <span className="inline-flex items-center gap-2">
@@ -176,5 +193,49 @@ function Settings() {
         </Panel>
       </div>
     </AppShell>
+  );
+}
+
+function HazardToggles() {
+  const { isOn, toggle, setAll } = useHazardLayers();
+  return (
+    <div className="space-y-2">
+      {hazardKinds.map((k) => (
+        <label
+          key={k}
+          className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-lg border border-border bg-card/60 p-3"
+        >
+          <span className="min-w-0">
+            <span className="block font-display uppercase tracking-wide">{hazardMeta[k].label}</span>
+            <span className="block text-xs text-muted-foreground">{hazardMeta[k].blurb}</span>
+          </span>
+          <span
+            role="switch"
+            aria-checked={isOn(k)}
+            aria-label={hazardMeta[k].label}
+            onClick={() => toggle(k)}
+            className={cn(
+              "flex h-8 w-14 shrink-0 items-center rounded-full border-2 p-1 transition-colors",
+              isOn(k) ? "border-primary bg-primary/30" : "border-border bg-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "h-5 w-5 rounded-full bg-foreground transition-transform",
+                isOn(k) ? "translate-x-6" : "translate-x-0",
+              )}
+            />
+          </span>
+        </label>
+      ))}
+      <div className="flex gap-2">
+        <Button variant="outline" size="lg" className="flex-1" onClick={() => setAll(true)}>
+          All on
+        </Button>
+        <Button variant="outline" size="lg" className="flex-1" onClick={() => setAll(false)}>
+          All off
+        </Button>
+      </div>
+    </div>
   );
 }

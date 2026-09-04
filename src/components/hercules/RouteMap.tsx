@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
 import { useTheme } from "@/lib/theme";
 
@@ -79,20 +80,87 @@ export function RouteShield({ road, cls }: { road: string; cls: RoadClass }) {
   );
 }
 
+/**
+ * HAZARD ICONS — glanceable badges for the truck hazard layer.
+ * Data comes from the pluggable hazard provider, never from the base map.
+ */
+const hazardTone: Record<Hazard["severity"], { fill: string; text: string }> = {
+  critical: { fill: "#dc2626", text: "#ffffff" },
+  caution: { fill: "#f59e0b", text: "#12100a" },
+  info: { fill: "#e6ebf1", text: "#0b0d10" },
+};
+
+export function hazardBadgeText(h: Hazard) {
+  switch (h.kind) {
+    case "clearance":
+      return h.clearanceFt !== undefined
+        ? `${Math.floor(h.clearanceFt)}'${Math.round((h.clearanceFt % 1) * 12)}"`
+        : "LOW";
+    case "grade":
+      return `${h.gradePct !== undefined && h.gradePct > 0 ? "+" : ""}${h.gradePct}%`;
+    case "switchback":
+      return "S-CURVE";
+    case "runaway":
+      return "RAMP";
+    case "emergencyExit":
+      return "PULL-OFF";
+    case "scale":
+      return h.scaleStatus === "Closed" ? "SCALE ✕" : "SCALE";
+    case "railroad":
+      return "RR ROUGH";
+    default:
+      return "HAZARD";
+  }
+}
+
+export function hazardIconSvg(h: Hazard, severity: Hazard["severity"]) {
+  const tone = hazardTone[severity] ?? hazardTone.info;
+  const label = hazardBadgeText(h);
+  const w = Math.max(58, 20 + label.length * 11);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="42" viewBox="0 0 ${w} 42">
+  <rect x="2" y="2" width="${w - 4}" height="30" rx="7" fill="${tone.fill}" stroke="#05070a" stroke-width="3"/>
+  <path d="M${w / 2 - 7} 31 L${w / 2} 40 L${w / 2 + 7} 31 Z" fill="${tone.fill}" stroke="#05070a" stroke-width="2"/>
+  <text x="${w / 2}" y="23" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="15" font-weight="900" fill="${tone.text}">${label}</text>
+</svg>`;
+}
+
+export function HazardBadge({
+  hazard,
+  severity,
+}: {
+  hazard: Hazard;
+  severity: Hazard["severity"];
+}) {
+  return (
+    <span
+      aria-label={`${hazard.name} hazard marker`}
+      className="inline-block shrink-0 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
+      dangerouslySetInnerHTML={{ __html: hazardIconSvg(hazard, severity) }}
+    />
+  );
+}
+
+type MapHazard = { hazard: Hazard; severity: Hazard["severity"] };
+
 type Props = {
   polyline: LatLng[];
   position: LatLng;
   segments: RouteSegment[];
   offRoute: boolean;
+  hazards?: MapHazard[];
 };
 
-export function RouteMap({ polyline, position, segments, offRoute }: Props) {
+export function RouteMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
   const { theme } = useTheme();
   const holder = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"loading" | "google" | "fallback">(
     MAPS_KEY ? "loading" : "fallback",
   );
-  const refs = useRef<{ map?: any; line?: any; truck?: any; shields: any[] }>({ shields: [] });
+  const refs = useRef<{ map?: any; line?: any; truck?: any; shields: any[]; hazards: any[] }>({
+    shields: [],
+    hazards: [],
+  });
+
 
   useEffect(() => {
     if (!MAPS_KEY) return;
@@ -147,6 +215,22 @@ export function RouteMap({ polyline, position, segments, offRoute }: Props) {
           },
         }),
     );
+    // HAZARD LAYER markers (only the kinds the driver left switched on).
+    refs.current.hazards.forEach((m) => m.setMap(null));
+    refs.current.hazards = hazards.map(
+      ({ hazard, severity }) =>
+        new google.maps.Marker({
+          position: hazard.at,
+          map,
+          title: `${hazard.name} — ${hazard.detail}`,
+          icon: {
+            url:
+              "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(hazardIconSvg(hazard, severity)),
+            anchor: new google.maps.Point(30, 42),
+          },
+          zIndex: severity === "critical" ? 900 : 500,
+        }),
+    );
     refs.current.truck?.setMap(null);
     refs.current.truck = new google.maps.Marker({
       position,
@@ -163,7 +247,8 @@ export function RouteMap({ polyline, position, segments, offRoute }: Props) {
       zIndex: 999,
     });
     map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme]);
+  }, [mode, polyline, position, segments, offRoute, theme, hazards]);
+
 
   if (mode === "google" || mode === "loading") {
     return (
@@ -178,13 +263,21 @@ export function RouteMap({ polyline, position, segments, offRoute }: Props) {
     );
   }
 
-  return <SchematicMap polyline={polyline} position={position} segments={segments} offRoute={offRoute} />;
+  return (
+    <SchematicMap
+      polyline={polyline}
+      position={position}
+      segments={segments}
+      offRoute={offRoute}
+      hazards={hazards}
+    />
+  );
 }
 
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute }: Props) {
+function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
   const box = useMemo(() => {
-    const pts = [...polyline, position];
+    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at)];
     const lats = pts.map((p) => p.lat);
     const lngs = pts.map((p) => p.lng);
     return {
@@ -193,7 +286,7 @@ function SchematicMap({ polyline, position, segments, offRoute }: Props) {
       minLng: Math.min(...lngs) - 0.35,
       maxLng: Math.max(...lngs) + 0.35,
     };
-  }, [polyline, position]);
+  }, [polyline, position, hazards]);
 
   const W = 1000;
   const H = 620;
@@ -249,6 +342,19 @@ function SchematicMap({ polyline, position, segments, offRoute }: Props) {
           </g>
         );
       })}
+      {/* HAZARD LAYER badges */}
+      {hazards.map(({ hazard, severity }) => {
+        const p = px(hazard.at);
+        return (
+          <g
+            key={hazard.id}
+            transform={`translate(${p.x - 34} ${p.y + 8})`}
+            dangerouslySetInnerHTML={{ __html: hazardIconSvg(hazard, severity) }}
+          />
+        );
+      })}
+
+
       <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
       <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
     </svg>

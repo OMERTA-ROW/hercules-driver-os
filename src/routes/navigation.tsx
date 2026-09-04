@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  TriangleAlert,
+  Mountain,
   Navigation2,
   Volume2,
   X,
@@ -12,7 +14,7 @@ import {
   Route as RouteIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
-import { RouteMap, RouteShield } from "@/components/hercules/RouteMap";
+import { RouteMap, RouteShield, HazardBadge } from "@/components/hercules/RouteMap";
 import {
   Panel,
   PanelTitle,
@@ -32,6 +34,13 @@ import {
   type TruckRoute,
 } from "@/data/routing";
 import { truckRouting, metersOffRoute } from "@/lib/truck-routing";
+import {
+  hazardLayer,
+  effectiveSeverity,
+  exceedsTruck,
+  useHazardLayers,
+} from "@/lib/hazard-layer";
+import { hazardMeta, type Hazard } from "@/data/hazards";
 import { currentLoad, hos } from "@/data/mock";
 import { hm } from "@/components/hercules/primitives";
 
@@ -64,6 +73,43 @@ function NavigationScreen() {
   const [notice, setNotice] = useState<null | { step: string; miles: number; road: string }>(null);
   const [spoken, setSpoken] = useState<string | null>(null);
   const rerouting = useRef(false);
+
+  // ---------------------------------------------------------------- HAZARDS
+  const { isOn } = useHazardLayers();
+  const [allHazards, setAllHazards] = useState<Hazard[]>([]);
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const announced = useRef<string | null>(null);
+
+  useEffect(() => {
+    void hazardLayer.hazardsAhead({ profile: truckProfile }).then(setAllHazards);
+  }, []);
+
+  /** Mock odometer: the truck eats about a mile per GPS tick. */
+  const traveled = idx * 1;
+
+  const hazardsAhead = allHazards
+    .filter((h) => isOn(h.kind))
+    .map((h) => ({
+      hazard: h,
+      severity: effectiveSeverity(h, truckProfile),
+      exceeds: exceedsTruck(h, truckProfile),
+      milesAhead: Math.max(0, Math.round((h.milesAhead - traveled) * 10) / 10),
+    }))
+    .filter((h) => h.milesAhead > 0)
+    .sort((a, b) => a.milesAhead - b.milesAhead);
+
+  /** Proactive, distance-based: fires well before the hazard, not on top of it. */
+  const warning =
+    hazardsAhead.find(
+      (h) => h.milesAhead <= h.hazard.warnAtMiles && !dismissed.includes(h.hazard.id),
+    ) ?? null;
+
+  // Voice announcement, once per hazard, far enough out to act on it.
+  useEffect(() => {
+    if (!warning || announced.current === warning.hazard.id) return;
+    announced.current = warning.hazard.id;
+    setSpoken(warning.hazard.speech);
+  }, [warning]);
 
   // Live GPS tracking — the truck advances along the truck-legal polyline.
   useEffect(() => {
@@ -126,6 +172,50 @@ function NavigationScreen() {
       title="Navigation"
       subtitle={`${route.label} · truck-legal for ${truckProfile.heightFt}' / ${truckProfile.grossWeightLbs.toLocaleString()} lb / ${truckProfile.lengthFt}'`}
     >
+          {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
+      {warning ? (
+        <div
+          className={`mb-3 rounded-2xl border-2 p-4 backdrop-blur ${
+            warning.severity === "critical"
+              ? "border-destructive bg-destructive/20"
+              : warning.severity === "caution"
+                ? "border-warn bg-warn/15"
+                : "border-border bg-background/85"
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <HazardBadge hazard={warning.hazard} severity={warning.severity} />
+            <div className="min-w-0 flex-1">
+              <Label>
+                {hazardMeta[warning.hazard.kind].short} in {warning.milesAhead} mi
+              </Label>
+              <div className="font-display text-xl leading-tight sm:text-3xl">
+                {warning.hazard.name}
+              </div>
+              <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
+              {warning.exceeds ? (
+                <p className="mt-1 text-sm font-semibold text-destructive">
+                  Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
+                  {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
+                </p>
+              ) : null}
+              <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look
+                down. Your call what you do with it.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              variant="outline"
+              className="shrink-0"
+              onClick={() => setDismissed((d) => [...d, warning.hazard.id])}
+            >
+              <X className="mr-1 h-4 w-4" /> Got it
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-3 xl:grid-cols-[1.7fr_1fr]">
         {/* MAP */}
         <Panel className="relative overflow-hidden p-0 xl:row-span-2">
@@ -135,6 +225,7 @@ function NavigationScreen() {
               position={position}
               segments={route.segments}
               offRoute={offRoute}
+              hazards={hazardsAhead.map(({ hazard, severity }) => ({ hazard, severity }))}
             />
           </div>
 
@@ -157,6 +248,7 @@ function NavigationScreen() {
               {offRoute ? "Off route — recalculating" : "GPS locked · tracking"}
             </Pill>
           </div>
+
 
           {/* AUTO-REROUTE NOTICE */}
           {notice ? (
@@ -256,6 +348,68 @@ function NavigationScreen() {
           </ol>
         </Panel>
       </div>
+
+
+        {/* TRUCK HAZARDS AHEAD */}
+        <Panel>
+          <PanelTitle
+            right={
+              <Pill tone={hazardsAhead.some((h) => h.severity === "critical") ? "alert" : "info"}>
+                {hazardsAhead.length} ahead
+              </Pill>
+            }
+          >
+            <span className="inline-flex items-center gap-2">
+              <TriangleAlert className="h-5 w-5 text-warn" /> Hazards on your line
+            </span>
+          </PanelTitle>
+          <div className="space-y-2">
+            {hazardsAhead.slice(0, 9).map(({ hazard, severity, exceeds, milesAhead }) => (
+              <div
+                key={hazard.id}
+                className={`flex items-center gap-3 rounded-lg border p-2.5 ${
+                  severity === "critical"
+                    ? "border-destructive/45 bg-destructive/10"
+                    : severity === "caution"
+                      ? "border-warn/40 bg-warn/10"
+                      : "border-border bg-card/60"
+                }`}
+              >
+                <HazardBadge hazard={hazard} severity={severity} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{hazard.name}</div>
+                  <p className="text-xs text-muted-foreground">{hazard.detail}</p>
+                  {exceeds ? (
+                    <p className="text-xs font-semibold text-destructive">
+                      Over your limits — do not attempt
+                    </p>
+                  ) : null}
+                </div>
+                <span className="metric shrink-0 text-sm">{milesAhead} mi</span>
+              </div>
+            ))}
+            {hazardsAhead.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nothing flagged ahead, or every hazard layer is switched off in settings.
+              </p>
+            ) : null}
+          </div>
+          {hazardsAhead.some((h) => h.hazard.kind === "grade" && (h.hazard.gradePct ?? 0) < 0) ? (
+            <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
+              <Mountain className="mt-0.5 h-4 w-4 shrink-0 text-info" /> Marked descent ahead — every
+              runaway ramp on the grade is surfaced automatically, no request needed.
+            </p>
+          ) : null}
+          <Button variant="outline" size="lg" className="mt-3 w-full gap-2" asChild>
+            <Link to="/settings">
+              <TriangleAlert className="h-4 w-4" /> Turn hazard layers on or off
+            </Link>
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Clearance, grade, switchback, ramp, pull-off, scale and rough-crossing data comes from the
+            truck-attribute layer (mocked here, provider-pluggable) — never from the base map.
+          </p>
+        </Panel>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         {/* SHIELD LEGEND + LEGAL SEGMENTS */}

@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { PurchaseProvider } from "@/lib/purchases";
+import { HazardLayerProvider } from "@/lib/hazard-layer";
 
 function NotFoundComponent() {
   return (
@@ -130,9 +131,11 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <PurchaseProvider>
+            <HazardLayerProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
             <Toaster />
+            </HazardLayerProvider>
           </PurchaseProvider>
         </AuthProvider>
       </ThemeProvider>
