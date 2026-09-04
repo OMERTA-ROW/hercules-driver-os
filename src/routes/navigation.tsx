@@ -172,6 +172,50 @@ function NavigationScreen() {
       title="Navigation"
       subtitle={`${route.label} · truck-legal for ${truckProfile.heightFt}' / ${truckProfile.grossWeightLbs.toLocaleString()} lb / ${truckProfile.lengthFt}'`}
     >
+          {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
+      {warning ? (
+        <div
+          className={`mb-3 rounded-2xl border-2 p-4 backdrop-blur ${
+            warning.severity === "critical"
+              ? "border-destructive bg-destructive/20"
+              : warning.severity === "caution"
+                ? "border-warn bg-warn/15"
+                : "border-border bg-background/85"
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <HazardBadge hazard={warning.hazard} severity={warning.severity} />
+            <div className="min-w-0 flex-1">
+              <Label>
+                {hazardMeta[warning.hazard.kind].short} in {warning.milesAhead} mi
+              </Label>
+              <div className="font-display text-xl leading-tight sm:text-3xl">
+                {warning.hazard.name}
+              </div>
+              <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
+              {warning.exceeds ? (
+                <p className="mt-1 text-sm font-semibold text-destructive">
+                  Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
+                  {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
+                </p>
+              ) : null}
+              <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look
+                down. Your call what you do with it.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              variant="outline"
+              className="shrink-0"
+              onClick={() => setDismissed((d) => [...d, warning.hazard.id])}
+            >
+              <X className="mr-1 h-4 w-4" /> Got it
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-3 xl:grid-cols-[1.7fr_1fr]">
         {/* MAP */}
         <Panel className="relative overflow-hidden p-0 xl:row-span-2">
@@ -205,50 +249,6 @@ function NavigationScreen() {
             </Pill>
           </div>
 
-
-          {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
-          {warning ? (
-            <div
-              className={`absolute inset-x-3 top-24 rounded-2xl border-2 p-4 backdrop-blur ${
-                warning.severity === "critical"
-                  ? "border-destructive bg-destructive/20"
-                  : warning.severity === "caution"
-                    ? "border-warn bg-warn/15"
-                    : "border-border bg-background/85"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <HazardBadge hazard={warning.hazard} severity={warning.severity} />
-                <div className="min-w-0 flex-1">
-                  <Label>
-                    {hazardMeta[warning.hazard.kind].short} in {warning.milesAhead} mi
-                  </Label>
-                  <div className="font-display text-xl leading-tight sm:text-3xl">
-                    {warning.hazard.name}
-                  </div>
-                  <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
-                  {warning.exceeds ? (
-                    <p className="mt-1 text-sm font-semibold text-destructive">
-                      Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
-                      {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
-                    </p>
-                  ) : null}
-                  <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                    <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look
-                    down. Your call what you do with it.
-                  </p>
-                </div>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="shrink-0"
-                  onClick={() => setDismissed((d) => [...d, warning.hazard.id])}
-                >
-                  <X className="mr-1 h-4 w-4" /> Got it
-                </Button>
-              </div>
-            </div>
-          ) : null}
 
           {/* AUTO-REROUTE NOTICE */}
           {notice ? (
