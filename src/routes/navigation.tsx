@@ -43,6 +43,8 @@ import {
 import { hazardMeta, type Hazard } from "@/data/hazards";
 import { currentLoad, hos } from "@/data/mock";
 import { hm } from "@/components/hercules/primitives";
+import { useStops } from "@/lib/stops";
+import { ChainMarker } from "@/components/hercules/ChainMarker";
 
 export const Route = createFileRoute("/navigation")({
   head: () => ({
@@ -97,6 +99,10 @@ function NavigationScreen() {
     }))
     .filter((h) => h.milesAhead > 0)
     .sort((a, b) => a.milesAhead - b.milesAhead);
+
+  const { stops: allStops } = useStops();
+  /** Only stops on the road ahead land on the map layer. */
+  const mapStops = allStops.filter((s) => s.milesAhead <= 200);
 
   /** Proactive, distance-based: fires well before the hazard, not on top of it. */
   const warning =
@@ -226,6 +232,7 @@ function NavigationScreen() {
               segments={route.segments}
               offRoute={offRoute}
               hazards={hazardsAhead.map(({ hazard, severity }) => ({ hazard, severity }))}
+              stops={mapStops}
             />
           </div>
 
@@ -495,11 +502,37 @@ function NavigationScreen() {
               {destinationFacility.nearestSafeParkingMiles} mi)
             </p>
           </div>
-          <Button variant="outline" size="lg" className="mt-3 w-full gap-2" asChild>
-            <Link to="/loads">
-              <RouteIcon className="h-4 w-4" /> Load board facility intel
-            </Link>
-          </Button>
+          {/* TRUCK STOP LAYER — bookable stops ahead on this route */}
+          <div className="mt-3 space-y-2">
+            <Label>Truck stops ahead</Label>
+            {mapStops.slice(0, 4).map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center gap-2 rounded-lg border border-border bg-card/60 p-2.5"
+              >
+                <ChainMarker chain={s.chain} size={34} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{s.name}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {s.milesAhead} mi · ${s.dieselPrice.toFixed(3)}/gal · {s.parkingOpen}/
+                    {s.parkingTotal} spaces · {s.showersOpen} showers
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 grid gap-2">
+            <Button size="lg" className="w-full gap-2" asChild>
+              <Link to="/stops">
+                <ParkingSquare className="h-4 w-4" /> Book a shower or parking
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" className="w-full gap-2" asChild>
+              <Link to="/loads">
+                <RouteIcon className="h-4 w-4" /> Load board facility intel
+              </Link>
+            </Button>
+          </div>
         </Panel>
       </div>
 

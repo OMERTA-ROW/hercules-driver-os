@@ -561,6 +561,12 @@ export const voiceCommands = [
   { phrase: "How steep is this grade?", desc: "Grade percent and length, factored for your weight" },
   { phrase: "Where's the next runaway ramp?", desc: "Distance to the next escape ramp on the descent" },
   { phrase: "Will I clear that bridge?", desc: "Posted height checked against your configured height" },
+  {
+    phrase: "Find me a shower and parking in 100 miles",
+    desc: "Surfaces bookable stops ahead and reads price plus the $2 booking fee before anything is charged",
+  },
+  { phrase: "Book the shower at Love's 412", desc: "Reads the total back and waits for your approval" },
+  { phrase: "What's diesel at the next Pilot?", desc: "Member price if your loyalty account is linked" },
   { phrase: "Where can I park tonight?", desc: "Safe parking near your projected stop" },
   { phrase: "Reset my day", desc: "Recalculates hours, route, rest, food, and finds new loads" },
   { phrase: "Log 40 minutes of detention", desc: "Starts a billable detention timer" },
