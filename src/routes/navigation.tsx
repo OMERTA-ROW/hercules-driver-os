@@ -53,7 +53,7 @@ export const Route = createFileRoute("/navigation")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: NavigationScreen;
+  component: NavigationScreen,
 });
 
 function NavigationScreen() {
