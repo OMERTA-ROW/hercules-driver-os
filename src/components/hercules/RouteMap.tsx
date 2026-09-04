@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
-import { useDisplayTheme } from "@/lib/theme";
+import { useTheme } from "@/lib/theme";
 
 /**
  * Base map layer.
@@ -87,7 +87,7 @@ type Props = {
 };
 
 export function RouteMap({ polyline, position, segments, offRoute }: Props) {
-  const { theme } = useDisplayTheme();
+  const { theme } = useTheme();
   const holder = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"loading" | "google" | "fallback">(
     MAPS_KEY ? "loading" : "fallback",
