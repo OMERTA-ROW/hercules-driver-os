@@ -277,7 +277,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
 function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
   const box = useMemo(() => {
-    const pts = [...polyline, position];
+    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at)];
     const lats = pts.map((p) => p.lat);
     const lngs = pts.map((p) => p.lng);
     return {
@@ -286,7 +286,7 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: 
       minLng: Math.min(...lngs) - 0.35,
       maxLng: Math.max(...lngs) + 0.35,
     };
-  }, [polyline, position]);
+  }, [polyline, position, hazards]);
 
   const W = 1000;
   const H = 620;
