@@ -23,6 +23,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as StopsRouteImport } from './routes/stops'
 import { Route as VoiceRouteImport } from './routes/voice'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,11 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StopsRoute = StopsRouteImport.update({
+  id: '/stops',
+  path: '/stops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/stops': typeof StopsRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/stops': typeof StopsRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/stops': typeof StopsRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sign-in'
     | '/sign-up'
+    | '/stops'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sign-in'
     | '/sign-up'
+    | '/stops'
     | '/voice'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sign-in'
     | '/sign-up'
+    | '/stops'
     | '/voice'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  StopsRoute: typeof StopsRoute
   VoiceRoute: typeof VoiceRoute
 }
 
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stops': {
+      id: '/stops'
+      path: '/stops'
+      fullPath: '/stops'
+      preLoaderRoute: typeof StopsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voice': {
       id: '/voice'
       path: '/voice'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  StopsRoute: StopsRoute,
   VoiceRoute: VoiceRoute,
 }
 export const routeTree = rootRouteImport
