@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  TriangleAlert,
+  Mountain,
   Navigation2,
   Volume2,
   X,
@@ -12,7 +14,7 @@ import {
   Route as RouteIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
-import { RouteMap, RouteShield } from "@/components/hercules/RouteMap";
+import { RouteMap, RouteShield, HazardBadge } from "@/components/hercules/RouteMap";
 import {
   Panel,
   PanelTitle,
@@ -32,6 +34,13 @@ import {
   type TruckRoute,
 } from "@/data/routing";
 import { truckRouting, metersOffRoute } from "@/lib/truck-routing";
+import {
+  hazardLayer,
+  effectiveSeverity,
+  exceedsTruck,
+  useHazardLayers,
+} from "@/lib/hazard-layer";
+import { hazardMeta, type Hazard } from "@/data/hazards";
 import { currentLoad, hos } from "@/data/mock";
 import { hm } from "@/components/hercules/primitives";
 
@@ -64,6 +73,43 @@ function NavigationScreen() {
   const [notice, setNotice] = useState<null | { step: string; miles: number; road: string }>(null);
   const [spoken, setSpoken] = useState<string | null>(null);
   const rerouting = useRef(false);
+
+  // ---------------------------------------------------------------- HAZARDS
+  const { isOn } = useHazardLayers();
+  const [allHazards, setAllHazards] = useState<Hazard[]>([]);
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const announced = useRef<string | null>(null);
+
+  useEffect(() => {
+    void hazardLayer.hazardsAhead({ profile: truckProfile }).then(setAllHazards);
+  }, []);
+
+  /** Mock odometer: the truck eats about a mile per GPS tick. */
+  const traveled = idx * 1;
+
+  const hazardsAhead = allHazards
+    .filter((h) => isOn(h.kind))
+    .map((h) => ({
+      hazard: h,
+      severity: effectiveSeverity(h, truckProfile),
+      exceeds: exceedsTruck(h, truckProfile),
+      milesAhead: Math.max(0, Math.round((h.milesAhead - traveled) * 10) / 10),
+    }))
+    .filter((h) => h.milesAhead > 0)
+    .sort((a, b) => a.milesAhead - b.milesAhead);
+
+  /** Proactive, distance-based: fires well before the hazard, not on top of it. */
+  const warning =
+    hazardsAhead.find(
+      (h) => h.milesAhead <= h.hazard.warnAtMiles && !dismissed.includes(h.hazard.id),
+    ) ?? null;
+
+  // Voice announcement, once per hazard, far enough out to act on it.
+  useEffect(() => {
+    if (!warning || announced.current === warning.hazard.id) return;
+    announced.current = warning.hazard.id;
+    setSpoken(warning.hazard.speech);
+  }, [warning]);
 
   // Live GPS tracking — the truck advances along the truck-legal polyline.
   useEffect(() => {
@@ -135,6 +181,7 @@ function NavigationScreen() {
               position={position}
               segments={route.segments}
               offRoute={offRoute}
+              hazards={hazardsAhead.map(({ hazard, severity }) => ({ hazard, severity }))}
             />
           </div>
 
