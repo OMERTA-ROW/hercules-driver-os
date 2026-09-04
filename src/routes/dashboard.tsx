@@ -117,6 +117,11 @@ function Dashboard() {
                 <MapPin className="h-4 w-4" /> Plan next load
               </Link>
             </Button>
+            <Button size="lg" variant="outline" className="gap-2" asChild>
+              <Link to="/documents" search={{ load: undefined, type: undefined, capture: false }}>
+                <FileText className="h-4 w-4" /> Documents
+              </Link>
+            </Button>
           </div>
           <div className="mt-3">
             <DriverApprovedNote />
