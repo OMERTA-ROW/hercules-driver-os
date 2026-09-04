@@ -342,6 +342,23 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: 
           </g>
         );
       })}
+      {/* HAZARD LAYER badges */}
+      {hazards.map(({ hazard, severity }) => {
+        const p = px(hazard.at);
+        return (
+          <g
+            key={hazard.id}
+            transform={`translate(${p.x} ${p.y + 6})`}
+            dangerouslySetInnerHTML={{
+              __html: hazardIconSvg(hazard, severity).replace(
+                /^<svg[^>]*>|<\/svg>$/g,
+                (m) => (m.startsWith("</") ? "" : `<g transform="translate(-30 -42)">`) as string,
+              ) + "</g>",
+            }}
+          />
+        );
+      })}
+
       <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
       <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
     </svg>
