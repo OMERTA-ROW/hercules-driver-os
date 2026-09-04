@@ -10,6 +10,7 @@ import {
   Warehouse,
   Info,
   FileText,
+  Navigation2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
