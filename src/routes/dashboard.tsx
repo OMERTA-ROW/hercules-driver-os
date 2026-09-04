@@ -3,6 +3,7 @@ import {
   Truck,
   Clock,
   MapPin,
+  FileText,
   Navigation,
   TrendingUp,
   Activity,
