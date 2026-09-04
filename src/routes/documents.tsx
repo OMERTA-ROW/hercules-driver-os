@@ -48,15 +48,15 @@ import {
 } from "@/data/documents";
 import { cn } from "@/lib/utils";
 
-type Search = { load?: string; type?: DocTypeId; capture?: boolean };
+type Search = { load: string | undefined; type: DocTypeId | undefined; capture: boolean };
 
 export const Route = createFileRoute("/documents")({
   validateSearch: (search: Record<string, unknown>): Search => ({
-    load: typeof search.load === "string" ? search.load : undefined,
-    type: docTypes.some((t) => t.id === search.type)
-      ? (search.type as DocTypeId)
+    load: typeof search["load"] === "string" ? search["load"] : undefined,
+    type: docTypes.some((t) => t.id === search["type"])
+      ? (search["type"] as DocTypeId)
       : undefined,
-    capture: search.capture === true || search.capture === "true",
+    capture: search["capture"] === true || search["capture"] === "true",
   }),
   head: () => ({
     meta: [

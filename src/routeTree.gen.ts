@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
@@ -36,6 +37,11 @@ const AlertsRoute = AlertsRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DriverRoute = DriverRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/dashboard'
+    | '/documents'
     | '/driver'
     | '/financials'
     | '/fleet'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/dashboard'
+    | '/documents'
     | '/driver'
     | '/financials'
     | '/fleet'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/dashboard'
+    | '/documents'
     | '/driver'
     | '/financials'
     | '/fleet'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
   DashboardRoute: typeof DashboardRoute
+  DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
   FinancialsRoute: typeof FinancialsRoute
   FleetRoute: typeof FleetRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/driver': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
   DashboardRoute: DashboardRoute,
+  DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,
   FinancialsRoute: FinancialsRoute,
   FleetRoute: FleetRoute,
