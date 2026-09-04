@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/lib/theme";
+import { ThemeProvider, ScreenDim } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { PurchaseProvider } from "@/lib/purchases";
 import { HazardLayerProvider } from "@/lib/hazard-layer";
@@ -134,6 +134,7 @@ function RootComponent() {
             <HazardLayerProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
+            <ScreenDim />
             <Toaster />
             </HazardLayerProvider>
           </PurchaseProvider>
