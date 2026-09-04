@@ -12,6 +12,7 @@ import {
   FileText,
   Settings as SettingsIcon,
   Orbit,
+  Navigation2,
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
@@ -24,6 +25,7 @@ import type { Feature } from "@/data/plans";
 const nav = [
   { to: "/", label: "Orb", icon: Orbit, feature: null },
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
+  { to: "/navigation", label: "Navigation", icon: Navigation2, feature: null },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
   { to: "/health", label: "Truck Health", icon: Wrench, feature: "health" },
   { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },
