@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
+import type { TruckStop } from "@/data/stops";
+import { chainMarkerSvg } from "./ChainMarker";
 import { useTheme } from "@/lib/theme";
 
 /**
@@ -148,18 +150,24 @@ type Props = {
   segments: RouteSegment[];
   offRoute: boolean;
   hazards?: MapHazard[];
+  /** Branded truck stop / pit stop layer. */
+  stops?: TruckStop[];
 };
 
-export function RouteMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
+export function RouteMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
   const { theme } = useTheme();
   const holder = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"loading" | "google" | "fallback">(
     MAPS_KEY ? "loading" : "fallback",
   );
-  const refs = useRef<{ map?: any; line?: any; truck?: any; shields: any[]; hazards: any[] }>({
-    shields: [],
-    hazards: [],
-  });
+  const refs = useRef<{
+    map?: any;
+    line?: any;
+    truck?: any;
+    shields: any[];
+    hazards: any[];
+    stops: any[];
+  }>({ shields: [], hazards: [], stops: [] });
 
 
   useEffect(() => {
@@ -231,6 +239,21 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
           zIndex: severity === "critical" ? 900 : 500,
         }),
     );
+    // TRUCK STOP LAYER — branded chain markers.
+    refs.current.stops.forEach((m) => m.setMap(null));
+    refs.current.stops = stops.map(
+      (stop) =>
+        new google.maps.Marker({
+          position: stop.at,
+          map,
+          title: `${stop.name} — $${stop.dieselPrice.toFixed(3)}/gal · ${stop.parkingOpen}/${stop.parkingTotal} spaces · ${stop.showersOpen} showers open`,
+          icon: {
+            url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(chainMarkerSvg(stop.chain, 46)),
+            anchor: new google.maps.Point(26, 56),
+          },
+          zIndex: 400,
+        }),
+    );
     refs.current.truck?.setMap(null);
     refs.current.truck = new google.maps.Marker({
       position,
@@ -247,7 +270,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
       zIndex: 999,
     });
     map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme, hazards]);
+  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops]);
 
 
   if (mode === "google" || mode === "loading") {
@@ -270,14 +293,15 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
       segments={segments}
       offRoute={offRoute}
       hazards={hazards}
+      stops={stops}
     />
   );
 }
 
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
+function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
   const box = useMemo(() => {
-    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at)];
+    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at), ...stops.map((s) => s.at)];
     const lats = pts.map((p) => p.lat);
     const lngs = pts.map((p) => p.lng);
     return {
@@ -286,7 +310,7 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: 
       minLng: Math.min(...lngs) - 0.35,
       maxLng: Math.max(...lngs) + 0.35,
     };
-  }, [polyline, position, hazards]);
+  }, [polyline, position, hazards, stops]);
 
   const W = 1000;
   const H = 620;
@@ -355,6 +379,17 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: 
       })}
 
 
+      {/* TRUCK STOP LAYER badges */}
+      {stops.map((stop) => {
+        const p = px(stop.at);
+        return (
+          <g
+            key={stop.id}
+            transform={`translate(${p.x - 26} ${p.y - 62})`}
+            dangerouslySetInnerHTML={{ __html: chainMarkerSvg(stop.chain, 46) }}
+          />
+        );
+      })}
       <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
       <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
     </svg>
