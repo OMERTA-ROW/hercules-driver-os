@@ -300,6 +300,9 @@ function Documents() {
   const search = Route.useSearch();
   const [sets, setSets] = useState<DocSet[]>(seedSets);
   const [type, setType] = useState<DocTypeId>(search.type ?? "bol");
+  const loadOptions = search.load && !docLoads.includes(search.load)
+    ? [search.load, ...docLoads]
+    : docLoads;
   const [load, setLoad] = useState<string>(search.load ?? docLoads[0]!);
   const [note, setNote] = useState("");
   const [autoCrop, setAutoCrop] = useState(true);
