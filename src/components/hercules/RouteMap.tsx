@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
 import { useTheme } from "@/lib/theme";
 
@@ -107,11 +108,13 @@ export function hazardBadgeText(h: Hazard) {
       return h.scaleStatus === "Closed" ? "SCALE ✕" : "SCALE";
     case "railroad":
       return "RR ROUGH";
+    default:
+      return "HAZARD";
   }
 }
 
 export function hazardIconSvg(h: Hazard, severity: Hazard["severity"]) {
-  const tone = hazardTone[severity];
+  const tone = hazardTone[severity] ?? hazardTone.info;
   const label = hazardBadgeText(h);
   const w = Math.max(58, 20 + label.length * 11);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="42" viewBox="0 0 ${w} 42">
