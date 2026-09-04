@@ -558,6 +558,15 @@ export const voiceCommands = [
   { phrase: "Reset my day", desc: "Recalculates hours, route, rest, food, and finds new loads" },
   { phrase: "Log 40 minutes of detention", desc: "Starts a billable detention timer" },
   { phrase: "Report a scale open on I-35", desc: "Posts a warning to nearby drivers" },
+  {
+    phrase: "Upload my BOL for load 4471",
+    desc: "Opens the camera with the type and load already filled in",
+  },
+  { phrase: "Scan my fuel receipts", desc: "Multi-page capture, grouped into one document" },
+  {
+    phrase: "Send my POD to factoring",
+    desc: "Reads it back and waits for your approval before sending",
+  },
 ];
 
 export const transcript = [
