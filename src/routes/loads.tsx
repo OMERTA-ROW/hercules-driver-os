@@ -216,6 +216,13 @@ function LoadBoard() {
                       Documents
                     </Link>
                   </Button>
+                  <Button variant="outline" size="lg" className="gap-2" asChild>
+                    <Link to="/navigation">
+                      <Navigation2 className="h-5 w-5" />
+                      Preview truck-legal route
+                    </Link>
+                  </Button>
+
                   <Button
                     size="lg"
                     className="gap-2 font-display uppercase tracking-wider"
