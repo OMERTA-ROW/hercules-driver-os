@@ -10,7 +10,6 @@ import { plans, planById, featureLabels, TRIAL_DAYS, type PlanId } from "@/data/
 import { cn } from "@/lib/utils";
 import { useHazardLayers } from "@/lib/hazard-layer";
 import { hazardKinds, hazardMeta } from "@/data/hazards";
-import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -210,7 +209,23 @@ function HazardToggles() {
             <span className="block font-display uppercase tracking-wide">{hazardMeta[k].label}</span>
             <span className="block text-xs text-muted-foreground">{hazardMeta[k].blurb}</span>
           </span>
-          <Switch checked={isOn(k)} onCheckedChange={() => toggle(k)} aria-label={hazardMeta[k].label} />
+          <span
+            role="switch"
+            aria-checked={isOn(k)}
+            aria-label={hazardMeta[k].label}
+            onClick={() => toggle(k)}
+            className={cn(
+              "flex h-8 w-14 shrink-0 items-center rounded-full border-2 p-1 transition-colors",
+              isOn(k) ? "border-primary bg-primary/30" : "border-border bg-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "h-5 w-5 rounded-full bg-foreground transition-transform",
+                isOn(k) ? "translate-x-6" : "translate-x-0",
+              )}
+            />
+          </span>
         </label>
       ))}
       <div className="flex gap-2">
