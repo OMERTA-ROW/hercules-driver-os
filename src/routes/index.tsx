@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mic, LayoutGrid, ChevronRight } from "lucide-react";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
+import { ThemeToggle, BrightnessButton } from "@/components/hercules/ThemeToggle";
 import { LoadResetButton } from "@/components/hercules/LoadReset";
 import { currentLoad, hos } from "@/data/mock";
 import { navSteps, routePath } from "@/data/navigation";
@@ -118,6 +118,7 @@ function OrbHome() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <BrightnessButton className="bg-transparent" />
           <ThemeToggle size="sm" className="bg-transparent" />
           <Link
             to="/dashboard"

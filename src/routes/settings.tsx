@@ -3,7 +3,7 @@ import { CreditCard, Monitor, LogOut, Check, TriangleAlert } from "lucide-react"
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
-import { ThemePicker } from "@/components/hercules/ThemeToggle";
+import { ThemePicker, BrightnessPicker } from "@/components/hercules/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { plans, planById, featureLabels, TRIAL_DAYS, type PlanId } from "@/data/plans";
@@ -190,6 +190,14 @@ function Settings() {
             Night is the default and stays genuinely dark for 3am running. Gray suits dusk and dawn.
             Day is high contrast for direct sun. The theme also switches from the orb screen.
           </p>
+
+          <div className="mt-5 border-t border-border pt-4">
+            <BrightnessPicker />
+            <p className="mt-3 text-xs text-muted-foreground">
+              The brightness step also lives one tap away on the voice bar and the orb screen, so
+              you never have to dig through settings at 3am. HERCULES suggests a level — you decide.
+            </p>
+          </div>
         </Panel>
       </div>
     </AppShell>

@@ -11,6 +11,12 @@
  */
 
 @theme inline {
+  --color-voice-surface: var(--voice-surface);
+  --color-voice-line: var(--voice-line);
+  --color-voice-text: var(--voice-text);
+  --color-voice-text-dim: var(--voice-text-dim);
+  --color-voice-accent: var(--voice-accent);
+  --color-voice-accent-soft: var(--voice-accent-soft);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -119,6 +125,14 @@
   --orb-core: oklch(0.72 0.14 78);
   --orb-halo: oklch(0.45 0.1 78);
   --orb-canvas: oklch(0.055 0.005 250);
+
+  /* VOICE UI (night-safe): no white surfaces, warm low-glare type. */
+  --voice-surface: oklch(0.075 0.008 62);
+  --voice-line: oklch(0.24 0.02 62);
+  --voice-text: oklch(0.8 0.03 78);
+  --voice-text-dim: oklch(0.56 0.025 78);
+  --voice-accent: oklch(0.6 0.09 78);
+  --voice-accent-soft: oklch(0.34 0.05 78);
 }
 
 /* ---------------------------------------------------------------- GRAY (dusk / dawn) */
@@ -173,6 +187,13 @@
   --orb-core: oklch(0.78 0.15 78);
   --orb-halo: oklch(0.5 0.11 78);
   --orb-canvas: oklch(0.16 0.01 250);
+
+  --voice-surface: oklch(0.185 0.012 62);
+  --voice-line: oklch(0.32 0.02 62);
+  --voice-text: oklch(0.88 0.028 80);
+  --voice-text-dim: oklch(0.68 0.022 80);
+  --voice-accent: oklch(0.7 0.11 78);
+  --voice-accent-soft: oklch(0.44 0.06 78);
 }
 
 /* ---------------------------------------------------------------- DAY (bright sun) */
@@ -232,6 +253,13 @@
   --orb-core: oklch(0.62 0.16 62);
   --orb-halo: oklch(0.78 0.09 62);
   --orb-canvas: oklch(0.93 0.006 250);
+
+  --voice-surface: oklch(0.96 0.006 80);
+  --voice-line: oklch(0.8 0.02 80);
+  --voice-text: oklch(0.24 0.03 70);
+  --voice-text-dim: oklch(0.44 0.03 70);
+  --voice-accent: oklch(0.48 0.13 62);
+  --voice-accent-soft: oklch(0.82 0.06 70);
 }
 
 .dark {
@@ -377,4 +405,52 @@
 
 @utility route-flow {
   animation: route-flow 9s linear infinite;
+}
+
+
+/* ---------------------------------------------------------------- VOICE (night-safe) */
+@utility voice-surface {
+  background-color: var(--voice-surface);
+  border: 1px solid var(--voice-line);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 18px 44px -26px oklch(0 0 0 / 92%);
+}
+
+/* Subtle breathing halo — findable in peripheral vision, never a flash. */
+@keyframes voice-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--voice-accent) 45%, transparent),
+      0 0 18px -6px color-mix(in oklab, var(--voice-accent) 35%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px color-mix(in oklab, var(--voice-accent) 65%, transparent),
+      0 0 40px -4px color-mix(in oklab, var(--voice-accent) 55%, transparent);
+  }
+}
+
+@keyframes voice-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Idle: always faintly lit so the driver can find it by glow alone. */
+@utility voice-mic-idle {
+  animation: voice-breathe 6s ease-in-out infinite;
+}
+
+@utility voice-mic-active {
+  animation: voice-breathe 1.9s ease-in-out infinite;
+}
+
+@utility voice-ripple {
+  animation: voice-ring 2.6s ease-out infinite;
 }
