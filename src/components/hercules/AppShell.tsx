@@ -9,6 +9,7 @@ import {
   UserCog,
   Mic,
   Truck,
+  FileText,
   Settings as SettingsIcon,
   Orbit,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const nav = [
   { to: "/alerts", label: "Alerts", icon: ShieldAlert, feature: "alerts" },
   { to: "/driver", label: "Driver", icon: UserCog, feature: "driver" },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
+  { to: "/documents", label: "Docs", icon: FileText, feature: null },
   { to: "/voice", label: "Voice", icon: Mic, feature: "voice" },
   { to: "/settings", label: "Settings", icon: SettingsIcon, feature: null },
 ] as const;

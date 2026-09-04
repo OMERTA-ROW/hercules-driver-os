@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Clock,
   ParkingSquare,
@@ -9,6 +9,7 @@ import {
   Building2,
   Warehouse,
   Info,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
@@ -205,6 +206,15 @@ function LoadBoard() {
                     onClick={() => setExpanded(isOpen ? null : load.id)}
                   >
                     {isOpen ? "Hide" : "Show"} facility intelligence
+                  </Button>
+                  <Button variant="outline" size="lg" className="gap-2" asChild>
+                    <Link
+                      to="/documents"
+                      search={{ load: load.id, type: "bol", capture: false }}
+                    >
+                      <FileText className="h-5 w-5" />
+                      Documents
+                    </Link>
                   </Button>
                   <Button
                     size="lg"
