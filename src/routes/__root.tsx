@@ -16,6 +16,7 @@ import { ThemeProvider, ScreenDim } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { PurchaseProvider } from "@/lib/purchases";
 import { HazardLayerProvider } from "@/lib/hazard-layer";
+import { StopsProvider } from "@/lib/stops";
 
 function NotFoundComponent() {
   return (
@@ -132,10 +133,12 @@ function RootComponent() {
         <AuthProvider>
           <PurchaseProvider>
             <HazardLayerProvider>
+              <StopsProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
             <ScreenDim />
             <Toaster />
+              </StopsProvider>
             </HazardLayerProvider>
           </PurchaseProvider>
         </AuthProvider>
