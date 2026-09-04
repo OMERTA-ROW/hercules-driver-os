@@ -205,6 +205,51 @@ function NavigationScreen() {
             </Pill>
           </div>
 
+
+          {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
+          {warning ? (
+            <div
+              className={`absolute inset-x-3 top-24 rounded-2xl border-2 p-4 backdrop-blur ${
+                warning.severity === "critical"
+                  ? "border-destructive bg-destructive/20"
+                  : warning.severity === "caution"
+                    ? "border-warn bg-warn/15"
+                    : "border-border bg-background/85"
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <HazardBadge hazard={warning.hazard} severity={warning.severity} />
+                <div className="min-w-0 flex-1">
+                  <Label>
+                    {hazardMeta[warning.hazard.kind].short} in {warning.milesAhead} mi
+                  </Label>
+                  <div className="font-display text-xl leading-tight sm:text-3xl">
+                    {warning.hazard.name}
+                  </div>
+                  <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
+                  {warning.exceeds ? (
+                    <p className="mt-1 text-sm font-semibold text-destructive">
+                      Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
+                      {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
+                    </p>
+                  ) : null}
+                  <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look
+                    down. Your call what you do with it.
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() => setDismissed((d) => [...d, warning.hazard.id])}
+                >
+                  <X className="mr-1 h-4 w-4" /> Got it
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           {/* AUTO-REROUTE NOTICE */}
           {notice ? (
             <div className="absolute inset-x-3 bottom-3 rounded-xl border border-primary/50 bg-primary/12 p-3 backdrop-blur">
@@ -303,6 +348,68 @@ function NavigationScreen() {
           </ol>
         </Panel>
       </div>
+
+
+        {/* TRUCK HAZARDS AHEAD */}
+        <Panel>
+          <PanelTitle
+            right={
+              <Pill tone={hazardsAhead.some((h) => h.severity === "critical") ? "alert" : "info"}>
+                {hazardsAhead.length} ahead
+              </Pill>
+            }
+          >
+            <span className="inline-flex items-center gap-2">
+              <TriangleAlert className="h-5 w-5 text-warn" /> Hazards on your line
+            </span>
+          </PanelTitle>
+          <div className="space-y-2">
+            {hazardsAhead.slice(0, 9).map(({ hazard, severity, exceeds, milesAhead }) => (
+              <div
+                key={hazard.id}
+                className={`flex items-center gap-3 rounded-lg border p-2.5 ${
+                  severity === "critical"
+                    ? "border-destructive/45 bg-destructive/10"
+                    : severity === "caution"
+                      ? "border-warn/40 bg-warn/10"
+                      : "border-border bg-card/60"
+                }`}
+              >
+                <HazardBadge hazard={hazard} severity={severity} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{hazard.name}</div>
+                  <p className="text-xs text-muted-foreground">{hazard.detail}</p>
+                  {exceeds ? (
+                    <p className="text-xs font-semibold text-destructive">
+                      Over your limits — do not attempt
+                    </p>
+                  ) : null}
+                </div>
+                <span className="metric shrink-0 text-sm">{milesAhead} mi</span>
+              </div>
+            ))}
+            {hazardsAhead.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nothing flagged ahead, or every hazard layer is switched off in settings.
+              </p>
+            ) : null}
+          </div>
+          {hazardsAhead.some((h) => h.hazard.kind === "grade" && (h.hazard.gradePct ?? 0) < 0) ? (
+            <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
+              <Mountain className="mt-0.5 h-4 w-4 shrink-0 text-info" /> Marked descent ahead — every
+              runaway ramp on the grade is surfaced automatically, no request needed.
+            </p>
+          ) : null}
+          <Button variant="outline" size="lg" className="mt-3 w-full gap-2" asChild>
+            <Link to="/settings">
+              <TriangleAlert className="h-4 w-4" /> Turn hazard layers on or off
+            </Link>
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Clearance, grade, switchback, ramp, pull-off, scale and rough-crossing data comes from the
+            truck-attribute layer (mocked here, provider-pluggable) — never from the base map.
+          </p>
+        </Panel>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         {/* SHIELD LEGEND + LEGAL SEGMENTS */}
