@@ -263,11 +263,19 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [] 
     );
   }
 
-  return <SchematicMap polyline={polyline} position={position} segments={segments} offRoute={offRoute} />;
+  return (
+    <SchematicMap
+      polyline={polyline}
+      position={position}
+      segments={segments}
+      offRoute={offRoute}
+      hazards={hazards}
+    />
+  );
 }
 
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute }: Props) {
+function SchematicMap({ polyline, position, segments, offRoute, hazards = [] }: Props) {
   const box = useMemo(() => {
     const pts = [...polyline, position];
     const lats = pts.map((p) => p.lat);
