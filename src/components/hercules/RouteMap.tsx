@@ -217,7 +217,11 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           zoom: 8,
           disableDefaultUI: true,
           zoomControl: true,
+          scaleControl: true,
+          clickableIcons: false,
           gestureHandling: "greedy",
+          tilt: 0,
+          backgroundColor: "#0b0f14",
           styles: theme === "day" ? [] : darkMapStyle,
         });
         refs.current.map = map;
@@ -255,8 +259,9 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
             url:
               "data:image/svg+xml;charset=UTF-8," +
               encodeURIComponent(shieldSvg(s.road.replace(/\s*\(county\)/i, ""), s.class)),
-            anchor: new google.maps.Point(30, 46),
+            anchor: new google.maps.Point(33, 70),
           },
+          zIndex: 600,
         }),
     );
     // HAZARD LAYER markers (only the kinds the driver left switched on).
@@ -433,11 +438,21 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
 }
 
 const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#0c1014" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#8a949e" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#06080a" }] },
+  { elementType: "geometry", stylers: [{ color: "#0b0f14" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#93a1ad" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#05080b" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#2a323b" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#b9c4ce" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1b232b" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2a3745" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#070c12" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#0e141a" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1a232c" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#0a0e12" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#222d38" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#33424f" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#0a0e12" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#3d4e5e" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9aa7b3" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#060b11" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3f5566" }] },
 ];
