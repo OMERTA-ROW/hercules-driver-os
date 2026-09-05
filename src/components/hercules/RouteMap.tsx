@@ -668,7 +668,8 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img" aria-label="Truck-legal route map">
-      <rect width={W} height={H} fill="var(--map-bg, #0a0d11)" />
+      <g transform={`translate(${W / 2} ${H / 2}) scale(${zoom}) rotate(${rotate}) translate(${-truck.x} ${-truck.y})`}>
+      <rect x={-W} y={-H} width={W * 3} height={H * 3} fill="var(--map-bg, #0a0d11)" />
       {/* street grid — stands in for Google's street-level detail */}
       {Array.from({ length: 22 }).map((_, i) => (
         <line key={`v${i}`} x1={i * 48} y1={0} x2={i * 48} y2={H} stroke="#ffffff" strokeOpacity={0.05} />
