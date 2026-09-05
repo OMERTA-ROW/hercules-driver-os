@@ -208,6 +208,41 @@ const baseViews: { id: BaseView; label: string; hint: string }[] = [
   { id: "hybrid", label: "Hybrid", hint: "Imagery with road names" },
 ];
 
+/**
+ * CAMERA VIEW
+ * The map screen is the one exception to the voice-only rule: the driver needs
+ * hand controls for the view. Two camera modes mirror Google Maps navigation:
+ * a tilted, low-angle 3D view locked to the truck's heading while rolling, and
+ * a flat 2D overhead view for previewing the route before rolling. Heading-up
+ * vs north-up is a separate toggle, and the driver can always recenter on the
+ * truck or zoom out to the whole route in one tap.
+ */
+export type CameraMode = "nav3d" | "top2d";
+
+/** Heading (degrees, 0=N) of the route at the truck's current position. */
+function routeHeading(polyline: LatLng[], position: LatLng): number {
+  let best = 0;
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const a = polyline[i];
+    if (!a) continue;
+    const d = Math.abs(a.lat - position.lat) + Math.abs(a.lng - position.lng);
+    if (d < bestDist) {
+      bestDist = d;
+      const b = polyline[i + 1];
+      if (!b) continue;
+      best =
+        (Math.atan2(
+          (b.lng - a.lng) * Math.cos(((a.lat + b.lat) / 2) * (Math.PI / 180)),
+          b.lat - a.lat,
+        ) *
+          180) /
+        Math.PI;
+    }
+  }
+  return (best + 360) % 360;
+}
+
 type Props = {
   polyline: LatLng[];
   position: LatLng;
@@ -225,6 +260,10 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     MAPS_KEY ? "loading" : "fallback",
   );
   const [view, setView] = useState<BaseView>("map");
+  const [camera, setCamera] = useState<CameraMode>("nav3d");
+  const [headingUp, setHeadingUp] = useState(true);
+  const [followTruck, setFollowTruck] = useState(true);
+  const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
     map?: any;
     line?: any;
@@ -361,8 +400,51 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       },
       zIndex: 999,
     });
-    map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops]);
+    if (followTruck) map.panTo(position);
+  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops, followTruck]);
+
+  // Camera mode + orientation. 3D navigation tilts low and locks the view to
+  // the truck's heading; 2D is flat overhead. North-up overrides the heading
+  // lock in either mode.
+  useEffect(() => {
+    const map = refs.current.map;
+    if (mode !== "google" || !map) return;
+    const headingLocked = camera === "nav3d" && headingUp;
+    map.setOptions({
+      tilt: camera === "nav3d" ? 55 : 0,
+      heading: headingLocked ? heading : 0,
+    });
+    if (camera === "nav3d" && map.getZoom() < 12) map.setZoom(14);
+  }, [mode, camera, headingUp, heading]);
+
+  const recenter = () => {
+    setFollowTruck(true);
+    const map = refs.current.map;
+    if (map) {
+      map.panTo(position);
+      if (camera === "nav3d") map.setZoom(14);
+    }
+  };
+
+  const showWholeRoute = () => {
+    setFollowTruck(false);
+    setCamera("top2d");
+    const google = window.google;
+    const map = refs.current.map;
+    if (mode === "google" && google && map) {
+      const bounds = new google.maps.LatLngBounds();
+      polyline.forEach((p) => bounds.extend(p));
+      map.fitBounds(bounds, 64);
+    }
+  };
+
+  const onUserPan = () => setFollowTruck(false);
+  useEffect(() => {
+    const map = refs.current.map;
+    if (mode !== "google" || !map) return;
+    const l = map.addListener("dragstart", onUserPan);
+    return () => window.google?.maps?.event?.removeListener(l);
+  }, [mode]);
 
 
   if (mode === "google" || mode === "loading") {
@@ -376,6 +458,15 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           )}
         />
         <BaseViewSwitch view={view} onChange={setView} />
+        <MapViewControls
+          camera={camera}
+          onCamera={setCamera}
+          headingUp={headingUp}
+          onHeadingUp={setHeadingUp}
+          following={followTruck}
+          onRecenter={recenter}
+          onWholeRoute={showWholeRoute}
+        />
         {mode === "loading" ? (
           <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
             Loading street map…
@@ -394,6 +485,20 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
         offRoute={offRoute}
         hazards={hazards}
         stops={stops}
+        zoom={followTruck ? 2.6 : 1}
+        rotate={camera === "nav3d" && headingUp ? -heading : 0}
+      />
+      <MapViewControls
+        camera={camera}
+        onCamera={setCamera}
+        headingUp={headingUp}
+        onHeadingUp={setHeadingUp}
+        following={followTruck}
+        onRecenter={() => setFollowTruck(true)}
+        onWholeRoute={() => {
+          setFollowTruck(false);
+          setCamera("top2d");
+        }}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
         <p className="glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
@@ -440,8 +545,106 @@ function BaseViewSwitch({
 }
 
 
+/**
+ * MAP VIEW CONTROLS — the one visible button cluster in the app. Small glass
+ * pills tucked into the map corner: 3D/2D camera, heading-up vs north-up,
+ * recenter on the truck, and zoom out to the whole route.
+ */
+function MapViewControls({
+  camera,
+  onCamera,
+  headingUp,
+  onHeadingUp,
+  following,
+  onRecenter,
+  onWholeRoute,
+}: {
+  camera: CameraMode;
+  onCamera: (c: CameraMode) => void;
+  headingUp: boolean;
+  onHeadingUp: (v: boolean) => void;
+  following: boolean;
+  onRecenter: () => void;
+  onWholeRoute: () => void;
+}) {
+  const pill =
+    "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
+  const active = "border-primary/40 bg-primary/15 text-primary";
+  return (
+    <div className="absolute right-3 top-3 flex flex-col items-end gap-2">
+      {/* camera: tilted 3D navigation view vs flat 2D overhead */}
+      <div className="flex gap-1 rounded-xl border border-foreground/12 bg-background/60 p-1 backdrop-blur-xl">
+        {(
+          [
+            { id: "nav3d" as const, label: "3D", hint: "Navigation view — tilted, follows your heading" },
+            { id: "top2d" as const, label: "2D", hint: "Overhead view" },
+          ]
+        ).map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => onCamera(c.id)}
+            aria-pressed={camera === c.id}
+            title={c.hint}
+            className={cn(
+              "min-h-9 rounded-lg px-3 font-display text-[0.66rem] font-light uppercase tracking-[0.2em] transition-colors",
+              camera === c.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+      {/* orientation: heading-up vs north-up */}
+      <button
+        type="button"
+        onClick={() => onHeadingUp(!headingUp)}
+        aria-pressed={headingUp}
+        title={headingUp ? "Heading up — tap for north up" : "North up — tap for heading up"}
+        className={cn(pill, headingUp && active)}
+      >
+        {headingUp ? (
+          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M12 3l4 9h-8z" fill="currentColor" stroke="none" />
+            <path d="M12 15v6" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 5v3M12 5l-2 3M12 5l2 3" />
+            <text x="12" y="17" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none" fontWeight="700">N</text>
+          </svg>
+        )}
+      </button>
+      {/* recenter on truck */}
+      <button
+        type="button"
+        onClick={onRecenter}
+        aria-pressed={following}
+        title={following ? "Following your truck" : "Recenter on your truck"}
+        className={cn(pill, following && active)}
+      >
+        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="7" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+        </svg>
+      </button>
+      {/* whole route at once */}
+      <button type="button" onClick={onWholeRoute} title="Zoom out to the whole route" className={pill}>
+        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3" />
+          <circle cx="7.5" cy="16.5" r="1.4" fill="currentColor" stroke="none" />
+          <circle cx="16.5" cy="7.5" r="1.4" fill="currentColor" stroke="none" />
+          <path d="M9 15.5c2-1.5 4-3 6-6.5" strokeDasharray="2.5 2.5" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
+function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [], zoom = 1, rotate = 0 }: Props & { zoom?: number; rotate?: number }) {
   const box = useMemo(() => {
     const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at), ...stops.map((s) => s.at)];
     const lats = pts.map((p) => p.lat);
@@ -465,7 +668,8 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img" aria-label="Truck-legal route map">
-      <rect width={W} height={H} fill="var(--map-bg, #0a0d11)" />
+      <g transform={`translate(${W / 2} ${H / 2}) scale(${zoom}) rotate(${rotate}) translate(${-truck.x} ${-truck.y})`}>
+      <rect x={-W} y={-H} width={W * 3} height={H * 3} fill="var(--map-bg, #0a0d11)" />
       {/* street grid — stands in for Google's street-level detail */}
       {Array.from({ length: 22 }).map((_, i) => (
         <line key={`v${i}`} x1={i * 48} y1={0} x2={i * 48} y2={H} stroke="#ffffff" strokeOpacity={0.05} />
@@ -534,6 +738,7 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
       })}
       <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
       <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
+      </g>
     </svg>
   );
 }
