@@ -11,6 +11,14 @@ import {
 import { currentLoad, hos, loads, alerts, faultCodes, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
+import { currentFix, problems, services } from "@/data/breakdown";
+import {
+  filterByProblem,
+  problemFromSpeech,
+  rank,
+  spokenLocation,
+  spokenService,
+} from "@/lib/breakdown";
 
 /**
  * HERCULES VOICE LAYER
