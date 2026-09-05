@@ -261,7 +261,7 @@ export function Orb({
 
           {/* Surface agitation when the driver is talking */}
           {listening ? (
-            <g className="orb-agitate">
+            <g className="orb-agitate" filter={`url(#${uid}-soft)`} opacity="0.8">
               <ellipse
                 cx="200"
                 cy="212"
