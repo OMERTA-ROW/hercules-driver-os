@@ -287,11 +287,21 @@
   }
 }
 
+/* Panels are glass now — hairline edge, blurred depth, subtle sheen. */
 @utility panel {
-  background-image: var(--gradient-steel);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-panel);
-  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 0%,
+      transparent 55%
+    ),
+    color-mix(in oklab, var(--card) 55%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 11%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--foreground) 8%, transparent) inset,
+    0 30px 60px -42px oklch(0 0 0 / 85%);
+  border-radius: calc(var(--radius) + 10px);
+  backdrop-filter: blur(16px) saturate(125%);
 }
 
 @utility hazard-stripes {
@@ -312,8 +322,9 @@
 
 @utility label-cap {
   font-family: var(--font-display);
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   font-size: 0.7rem;
   color: var(--color-muted-foreground);
 }
