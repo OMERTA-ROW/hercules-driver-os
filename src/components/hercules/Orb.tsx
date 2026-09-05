@@ -226,7 +226,7 @@ export function Orb({
 
           {/* Waves radiating from the center of the liquid when HERCULES talks */}
           {speaking ? (
-            <g className="orb-wave-group">
+            <g className="orb-wave-group" filter={`url(#${uid}-soft)`} opacity="0.55">
               <circle
                 cx="200"
                 cy="200"
