@@ -14,6 +14,7 @@ import {
   Orbit,
   Navigation2,
   Fuel,
+  LifeBuoy,
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";

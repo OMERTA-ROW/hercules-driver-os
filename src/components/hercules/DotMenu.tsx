@@ -11,6 +11,7 @@ import {
   FileText,
   Navigation2,
   Fuel,
+  LifeBuoy,
   Settings as SettingsIcon,
   Mic,
   X,
