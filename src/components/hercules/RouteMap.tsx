@@ -191,6 +191,21 @@ export function HazardBadge({
 
 type MapHazard = { hazard: Hazard; severity: Hazard["severity"] };
 
+/**
+ * BASE VIEW
+ * Real Google imagery is the base layer in every view — the driver needs to see
+ * the actual roads, buildings, terrain and lot shapes under the route. Satellite
+ * and hybrid exist for the last mile into a facility or rest area, where the
+ * entrance and the lot layout matter more than road names.
+ */
+export type BaseView = "map" | "satellite" | "hybrid";
+
+const baseViews: { id: BaseView; label: string; hint: string }[] = [
+  { id: "map", label: "Map", hint: "Roads and street detail" },
+  { id: "satellite", label: "Satellite", hint: "Real imagery — lots and entrances" },
+  { id: "hybrid", label: "Hybrid", hint: "Imagery with road names" },
+];
+
 type Props = {
   polyline: LatLng[];
   position: LatLng;
@@ -207,9 +222,11 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
   const [mode, setMode] = useState<"loading" | "google" | "fallback">(
     MAPS_KEY ? "loading" : "fallback",
   );
+  const [view, setView] = useState<BaseView>("map");
   const refs = useRef<{
     map?: any;
     line?: any;
+    casing?: any;
     truck?: any;
     shields: any[];
     hazards: any[];
@@ -233,6 +250,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           gestureHandling: "greedy",
           tilt: 0,
           backgroundColor: "#0b0f14",
+          mapTypeId: "roadmap",
           styles: theme === "day" ? [] : darkMapStyle,
         });
         refs.current.map = map;
@@ -245,18 +263,38 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Base imagery choice. Custom styling only applies to the road map; satellite
+  // and hybrid imagery are dimmed with CSS instead.
+  useEffect(() => {
+    const map = refs.current.map;
+    if (mode !== "google" || !map) return;
+    map.setMapTypeId(view === "map" ? "roadmap" : view === "satellite" ? "satellite" : "hybrid");
+    map.setOptions({ styles: view === "map" && theme !== "day" ? darkMapStyle : [] });
+  }, [mode, view, theme]);
+
   // Draw only truck-legal geometry + shields on top of the Google base layer.
   useEffect(() => {
     const google = window.google;
     const map = refs.current.map;
     if (mode !== "google" || !google || !map) return;
-    map.setOptions({ styles: theme === "day" ? [] : darkMapStyle });
+    // Route line: a dark casing under a bright core, so the path stays the
+    // brightest thing on screen over street detail or satellite imagery.
+    refs.current.casing?.setMap(null);
+    refs.current.casing = new google.maps.Polyline({
+      path: polyline,
+      strokeColor: "#04121a",
+      strokeOpacity: 0.9,
+      strokeWeight: 15,
+      zIndex: 200,
+      map,
+    });
     refs.current.line?.setMap(null);
     refs.current.line = new google.maps.Polyline({
       path: polyline,
-      strokeColor: offRoute ? "#f59e0b" : "#22d3ee",
-      strokeOpacity: 0.95,
-      strokeWeight: 7,
+      strokeColor: offRoute ? "#fbbf24" : "#39e6ff",
+      strokeOpacity: 1,
+      strokeWeight: 8,
+      zIndex: 300,
       map,
     });
     refs.current.shields.forEach((m) => m.setMap(null));
@@ -314,7 +352,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 10,
-        fillColor: "#22d3ee",
+        fillColor: "#39e6ff",
         fillOpacity: 1,
         strokeColor: "#04141a",
         strokeWeight: 4,
@@ -328,7 +366,14 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
   if (mode === "google" || mode === "loading") {
     return (
       <div className="relative h-full w-full">
-        <div ref={holder} className="h-full w-full" />
+        <div
+          ref={holder}
+          className={cn(
+            "h-full w-full",
+            view === "map" ? "map-dim" : "map-dim-imagery",
+          )}
+        />
+        <BaseViewSwitch view={view} onChange={setView} />
         {mode === "loading" ? (
           <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
             Loading street map…
@@ -339,16 +384,59 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
   }
 
   return (
-    <SchematicMap
-      polyline={polyline}
-      position={position}
-      segments={segments}
-      offRoute={offRoute}
-      hazards={hazards}
-      stops={stops}
-    />
+    <div className="relative h-full w-full">
+      <SchematicMap
+        polyline={polyline}
+        position={position}
+        segments={segments}
+        offRoute={offRoute}
+        hazards={hazards}
+        stops={stops}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
+        <p className="glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
+          Schematic view. Add a Google Maps browser key to see the real roads, buildings and lot
+          layouts under the route, with satellite and hybrid for the last mile.
+        </p>
+      </div>
+    </div>
   );
 }
+
+/**
+ * Base imagery switch — big, glanceable targets in the map corner. Satellite is
+ * the one a driver reaches for on the approach, so it is never buried in a menu.
+ */
+function BaseViewSwitch({
+  view,
+  onChange,
+}: {
+  view: BaseView;
+  onChange: (v: BaseView) => void;
+}) {
+  return (
+    <div className="absolute left-3 top-3 flex gap-1 rounded-xl border border-foreground/12 bg-background/70 p-1 backdrop-blur-xl">
+      {baseViews.map((b) => (
+        <button
+          key={b.id}
+          type="button"
+          onClick={() => onChange(b.id)}
+          aria-pressed={view === b.id}
+          title={b.hint}
+          className={cn(
+            "min-h-11 rounded-lg px-4 font-display text-xs font-light uppercase tracking-[0.18em] transition-colors",
+            view === b.id
+              ? "bg-primary/20 text-primary"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          )}
+        >
+          {b.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 
 /** Schematic street-level stand-in used until a Google Maps key is linked. */
 function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
