@@ -217,6 +217,22 @@ export function respond(text: string, topic: Topic): Reply {
   const fu = followUp(topic, t);
   if (fu) return fu;
 
+  /* Reachable from anywhere in the app, and it takes priority over everything. */
+  if (
+    /(broke ?down|broken down|breakdown|stranded|disabled|shoulder|tow truck|wrecker|won'?t start|wont start|blown tire|blow ?out|air leak)/.test(
+      t,
+    )
+  ) {
+    const p = problemFromSpeech(t);
+    const list = rank(p ? filterByProblem(services, p) : services);
+    const best = list[0]!;
+    return {
+      topic: "breakdown",
+      text: `I've got you. ${spokenLocation(currentFix)} Flashers on and get your triangles out before anything else — this is a known bad stretch. I have ${list.length} options ranked. Closest is ${best.name}, ${best.milesAway.toFixed(1)} miles out, about ${best.etaMin} minutes${best.kind === "mobile" || best.kind === "tow" ? " to reach you" : " of driving"}${best.open24 ? ", open 24 hours" : ""}. Tell me what's wrong — blown tire, won't start, air leak, DEF light — and I'll narrow it down. I haven't called anybody.`,
+    };
+  }
+
+
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
       topic: "clock",
