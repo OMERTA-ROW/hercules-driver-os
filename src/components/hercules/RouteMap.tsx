@@ -84,6 +84,17 @@ function shieldSvg(label: string, cls: RoadClass) {
   const uid = `sh${label.replace(/[^a-z0-9]/gi, "")}${cls}`;
   const sx = w / 66;
 
+  // Street names and long alphanumeric designations don't take a shield —
+  // Google shows those as a plain plate, so we do the same.
+  if (!isInterstate && (/[a-z]/i.test(digits) || digits.length > 3)) {
+    const c = shieldColors(cls);
+    const pw = 26 + label.length * 11;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${pw}" height="40" viewBox="0 0 ${pw} 40">
+  <rect x="2" y="4" width="${pw - 4}" height="32" rx="7" fill="${c.fill}" stroke="${c.stroke}" stroke-width="2"/>
+  <text x="${pw / 2}" y="27" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="700" fill="${c.text}">${label}</text>
+</svg>`;
+  }
+
   if (isInterstate) {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="70" viewBox="0 0 ${w} 70">
   <defs><clipPath id="${uid}"><path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)"/></clipPath></defs>
