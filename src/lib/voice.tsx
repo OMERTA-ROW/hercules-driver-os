@@ -117,6 +117,9 @@ function hm(min: number) {
 
 type Reply = { text: string; topic: Topic; proposal?: Proposal };
 
+/** The problem the driver last named, so "call them" ranks the right shops. */
+let lastProblem: ReturnType<typeof problemFromSpeech> = null;
+
 /** Follow-ups the driver can say once a topic is on the table. */
 function followUp(topic: Topic, text: string): Reply | null {
   const t = text.toLowerCase();
