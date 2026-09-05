@@ -123,6 +123,55 @@ function followUp(topic: Topic, text: string): Reply | null {
   const wantsMore = /(more|detail|go on|keep going|what else|and\?|tell me more)/.test(t);
   const wantsNext = /(next one|the other|another|second)/.test(t);
 
+  /* BREAKDOWN: once the driver is broke down, the whole conversation stays
+     on it — problem description, fault codes, and an explicit call. */
+  if (topic === "breakdown") {
+    const p = problemFromSpeech(t);
+    if (p) {
+      const list = rank(filterByProblem(services, p));
+      const best = list[0];
+      const spec = problems.find((x) => x.id === p)!;
+      if (!best) {
+        return {
+          topic: "breakdown",
+          text: `${spec.spoken} Nobody in range handles that specifically. Say "show me everything" and I'll include heavy tow.`,
+        };
+      }
+      return {
+        topic: "breakdown",
+        text: `${spec.spoken} Closest is ${spokenService(best)} I have ${list.length} options ranked behind it.`,
+      };
+    }
+    if (/(fault|code|ecm|engine light)/.test(t)) {
+      return {
+        topic: "breakdown",
+        text: `You have ${faultCodes.length} active codes. ${faultCodes
+          .map((f) => `${f.code} on the ${f.system.toLowerCase()} — ${f.text}`)
+          .join(" ")} Read those numbers to whoever you call.`,
+      };
+    }
+    if (/(where am i|location|mile marker|read it back|say it again)/.test(t)) {
+      return { topic: "breakdown", text: spokenLocation(currentFix) };
+    }
+    if (/(triangle|safe|hazard|shoulder|traffic)/.test(t)) {
+      return {
+        topic: "breakdown",
+        text: `Flashers on first. Get out the passenger side — the traffic side is the danger side. Triangles at ten feet on the traffic side, a hundred behind, a hundred ahead. This is a known bad stretch, so put the far one at two hundred feet around that curve. Vest on, wait behind the guardrail.`,
+      };
+    }
+    if (/(call|connect|dial|get them|phone)/.test(t)) {
+      const best = rank(services)[0]!;
+      return {
+        topic: "breakdown",
+        text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I am not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
+        proposal: {
+          summary: `Place a call to ${best.name} — ${best.phone}. No dispatch or charge is authorized by HERCULES.`,
+        },
+      };
+    }
+  }
+
+
   if (topic === "loads" && (wantsMore || wantsNext)) {
     const l = loads[wantsNext ? 1 : 0]!;
     return {
