@@ -33,6 +33,7 @@ const sections = [
   { to: "/driver", label: "Driver Profile", icon: UserCog, feature: "driver" },
   { to: "/navigation", label: "Navigation", icon: Navigation2, feature: null },
   { to: "/stops", label: "Truck Stops", icon: Fuel, feature: null },
+  { to: "/breakdown", label: "Breakdown Assist", icon: LifeBuoy, feature: null },
   { to: "/documents", label: "Documents", icon: FileText, feature: null },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
   { to: "/voice", label: "Conversation", icon: Mic, feature: null },
