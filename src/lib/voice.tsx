@@ -164,7 +164,9 @@ function followUp(topic: Topic, text: string): Reply | null {
       };
     }
     if (/(call|connect|dial|get them|phone)/.test(t)) {
-      const best = rank(services)[0]!;
+      const best = rank(
+        lastProblem ? filterByProblem(services, lastProblem) : services,
+      )[0]!;
       return {
         topic: "breakdown",
         text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I am not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
