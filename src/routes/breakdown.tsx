@@ -137,7 +137,7 @@ function BreakdownPage() {
       title="Breakdown Assist"
       subtitle="HERCULES finds and ranks the help. You decide who gets called."
     >
-      <div className="grid gap-3 xl:grid-cols-3">
+      <div className="grid items-start gap-3 xl:grid-cols-3">
         {/* ------------------------------------------------ WHERE YOU ARE */}
         <Panel className="xl:col-span-2 border-destructive/40">
           <PanelTitle
@@ -260,7 +260,7 @@ function BreakdownPage() {
         </p>
       </Panel>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-3">
+      <div className="mt-3 grid items-start gap-3 xl:grid-cols-3">
         {/* ------------------------------------------------ RANKED HELP */}
         <div className="space-y-3 xl:col-span-2">
           {loading ? (
