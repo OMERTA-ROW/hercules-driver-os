@@ -230,6 +230,7 @@ export function respond(text: string, topic: Topic): Reply {
     )
   ) {
     const p = problemFromSpeech(t);
+    lastProblem = p;
     const list = rank(p ? filterByProblem(services, p) : services);
     const best = list[0]!;
     return {
