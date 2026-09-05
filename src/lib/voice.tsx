@@ -307,6 +307,7 @@ const driverPrompts = [
   "What am I making on this run?",
   "What's ahead of me on this road?",
   "Where can I shower and park tonight?",
+  "I'm broke down",
 ];
 
 /* ------------------------------------------------------------------ PROVIDER */
