@@ -458,6 +458,15 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           )}
         />
         <BaseViewSwitch view={view} onChange={setView} />
+        <MapViewControls
+          camera={camera}
+          onCamera={setCamera}
+          headingUp={headingUp}
+          onHeadingUp={setHeadingUp}
+          following={followTruck}
+          onRecenter={recenter}
+          onWholeRoute={showWholeRoute}
+        />
         {mode === "loading" ? (
           <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
             Loading street map…
@@ -476,6 +485,20 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
         offRoute={offRoute}
         hazards={hazards}
         stops={stops}
+        zoom={followTruck ? 2.6 : 1}
+        rotate={camera === "nav3d" && headingUp ? -heading : 0}
+      />
+      <MapViewControls
+        camera={camera}
+        onCamera={setCamera}
+        headingUp={headingUp}
+        onHeadingUp={setHeadingUp}
+        following={followTruck}
+        onRecenter={() => setFollowTruck(true)}
+        onWholeRoute={() => {
+          setFollowTruck(false);
+          setCamera("top2d");
+        }}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
         <p className="glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
