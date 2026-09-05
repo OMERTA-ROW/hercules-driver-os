@@ -128,6 +128,7 @@ function followUp(topic: Topic, text: string): Reply | null {
   if (topic === "breakdown") {
     const p = problemFromSpeech(t);
     if (p) {
+      lastProblem = p;
       const list = rank(filterByProblem(services, p));
       const best = list[0];
       const spec = problems.find((x) => x.id === p)!;
