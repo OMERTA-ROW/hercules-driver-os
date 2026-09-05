@@ -51,7 +51,7 @@ export function Orb({
   colorway,
   onActivate,
 }: {
-  className?: string;
+  className?: string | undefined;
   mode: VoiceMode;
   colorway: OrbColorway;
   onActivate?: () => void;
@@ -275,7 +275,7 @@ export function Orb({
 }
 
 /** Convenience wrapper bound to the live voice state. */
-export function LiveOrb({ className }: { className?: string }) {
+export function LiveOrb({ className }: { className?: string | undefined }) {
   const { mode, colorway, listen, stop } = useVoice();
   return (
     <Orb
