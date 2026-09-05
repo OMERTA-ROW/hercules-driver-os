@@ -520,7 +520,7 @@
 
 @keyframes orb-cord-wave {
   from {
-    stroke-dashoffset: 432;
+    stroke-dashoffset: 860;
   }
   to {
     stroke-dashoffset: 0;

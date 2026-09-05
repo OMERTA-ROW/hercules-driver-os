@@ -133,18 +133,27 @@ export function Orb({
             <stop offset="0%" stopColor="oklch(1 0 0)" stopOpacity="0.42" />
             <stop offset="100%" stopColor="oklch(1 0 0)" stopOpacity="0" />
           </radialGradient>
-          {/* Cord path: threads behind the sphere and back out the front. */}
+          <radialGradient id={`${uid}-core`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.95" />
+            <stop offset="45%" stopColor={GOLD} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
+          </radialGradient>
+          {/* Cord: one continuous tilted ring threaded through the sphere —
+              back half passes behind, front half in front, and the gold ripple
+              travels the whole loop without a seam. */}
+          <path id={`${uid}-cord-back`} d="M 8 200 A 196 66 0 0 1 392 200" />
+          <path id={`${uid}-cord`} d="M 392 200 A 196 66 0 0 1 8 200" />
           <path
-            id={`${uid}-cord`}
-            d="M -10 236 C 70 196 128 300 200 300 C 272 300 330 196 410 236"
+            id={`${uid}-cord-loop`}
+            d="M 8 200 A 196 66 0 0 1 392 200 A 196 66 0 0 1 8 200"
           />
-          <path id={`${uid}-cord-back`} d="M -10 236 C 70 196 128 132 200 132 C 272 132 330 196 410 236" />
           <clipPath id={`${uid}-sphere`}>
             <circle cx="200" cy="200" r="150" />
           </clipPath>
         </defs>
 
         {/* Cord behind the sphere */}
+        <g transform="rotate(-13 200 200)">
         <use
           href={`#${uid}-cord-back`}
           fill="none"
@@ -161,6 +170,7 @@ export function Orb({
           strokeLinecap="round"
           opacity="0.5"
         />
+        </g>
 
         {/* Sphere */}
         <circle cx="200" cy="200" r="150" fill={`url(#${uid}-shell)`} />
@@ -210,49 +220,51 @@ export function Orb({
           <circle
             cx="200"
             cy="200"
-            r="30"
-            fill={GOLD}
+            r="86"
+            fill={`url(#${uid}-core)`}
             className="orb-core-dot"
           />
         </g>
 
         {/* Cord in front of the sphere, with the travelling ripple on it */}
-        <use
-          href={`#${uid}-cord`}
-          fill="none"
-          stroke={s.cord}
-          strokeWidth="17"
-          strokeLinecap="round"
-        />
-        <use
-          href={`#${uid}-cord`}
-          fill="none"
-          stroke={GOLD_DIM}
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          opacity="0.6"
-        />
-        {/* Continuous wave along the cord */}
-        <use
-          href={`#${uid}-cord`}
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray="26 190"
-          className="orb-cord-wave"
-        />
-        <use
-          href={`#${uid}-cord`}
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="9"
-          strokeLinecap="round"
-          strokeDasharray="8 208"
-          opacity="0.35"
-          className="orb-cord-wave"
-          style={{ animationDelay: "-1.4s" }}
-        />
+        <g transform="rotate(-13 200 200)">
+          <use
+            href={`#${uid}-cord`}
+            fill="none"
+            stroke={s.cord}
+            strokeWidth="17"
+            strokeLinecap="round"
+          />
+          <use
+            href={`#${uid}-cord`}
+            fill="none"
+            stroke={GOLD_DIM}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            opacity="0.6"
+          />
+          {/* Continuous wave travelling the full loop */}
+          <use
+            href={`#${uid}-cord-loop`}
+            fill="none"
+            stroke={GOLD}
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeDasharray="30 400"
+            className="orb-cord-wave"
+          />
+          <use
+            href={`#${uid}-cord-loop`}
+            fill="none"
+            stroke={GOLD}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray="10 420"
+            opacity="0.3"
+            className="orb-cord-wave"
+            style={{ animationDelay: "-1.9s" }}
+          />
+        </g>
       </svg>
     </span>
   );
