@@ -14,6 +14,7 @@ import {
   Orbit,
   Navigation2,
   Fuel,
+  LifeBuoy,
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
@@ -28,6 +29,7 @@ const nav = [
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
   { to: "/navigation", label: "Navigation", icon: Navigation2, feature: null },
   { to: "/stops", label: "Stops", icon: Fuel, feature: null },
+  { to: "/breakdown", label: "Breakdown", icon: LifeBuoy, feature: null },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
   { to: "/health", label: "Truck Health", icon: Wrench, feature: "health" },
   { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },

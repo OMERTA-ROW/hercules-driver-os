@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
@@ -34,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
 const AlertsRoute = AlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BreakdownRoute = BreakdownRouteImport.update({
+  id: '/breakdown',
+  path: '/breakdown',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -110,6 +116,7 @@ const VoiceRoute = VoiceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/breakdown': typeof BreakdownRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/breakdown': typeof BreakdownRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/breakdown': typeof BreakdownRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/alerts'
+    | '/breakdown'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/alerts'
+    | '/breakdown'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/alerts'
+    | '/breakdown'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -222,6 +234,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
+  BreakdownRoute: typeof BreakdownRoute
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/alerts'
       fullPath: '/alerts'
       preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/breakdown': {
+      id: '/breakdown'
+      path: '/breakdown'
+      fullPath: '/breakdown'
+      preLoaderRoute: typeof BreakdownRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -358,6 +378,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
+  BreakdownRoute: BreakdownRoute,
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,

@@ -11,6 +11,14 @@ import {
 import { currentLoad, hos, loads, alerts, faultCodes, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
+import { currentFix, problems, services } from "@/data/breakdown";
+import {
+  filterByProblem,
+  problemFromSpeech,
+  rank,
+  spokenLocation,
+  spokenService,
+} from "@/lib/breakdown";
 
 /**
  * HERCULES VOICE LAYER
@@ -92,6 +100,7 @@ export type Turn = {
 export type VoiceMode = "idle" | "listening" | "speaking";
 
 type Topic =
+  | "breakdown"
   | "clock"
   | "loads"
   | "money"
@@ -108,11 +117,66 @@ function hm(min: number) {
 
 type Reply = { text: string; topic: Topic; proposal?: Proposal };
 
+/** The problem the driver last named, so "call them" ranks the right shops. */
+let lastProblem: ReturnType<typeof problemFromSpeech> = null;
+
 /** Follow-ups the driver can say once a topic is on the table. */
 function followUp(topic: Topic, text: string): Reply | null {
   const t = text.toLowerCase();
   const wantsMore = /(more|detail|go on|keep going|what else|and\?|tell me more)/.test(t);
   const wantsNext = /(next one|the other|another|second)/.test(t);
+
+  /* BREAKDOWN: once the driver is broke down, the whole conversation stays
+     on it — problem description, fault codes, and an explicit call. */
+  if (topic === "breakdown") {
+    const p = problemFromSpeech(t);
+    if (p) {
+      lastProblem = p;
+      const list = rank(filterByProblem(services, p));
+      const best = list[0];
+      const spec = problems.find((x) => x.id === p)!;
+      if (!best) {
+        return {
+          topic: "breakdown",
+          text: `${spec.spoken} Nobody in range handles that specifically. Say "show me everything" and I'll include heavy tow.`,
+        };
+      }
+      return {
+        topic: "breakdown",
+        text: `${spec.spoken} Closest is ${spokenService(best)} I have ${list.length} options ranked behind it.`,
+      };
+    }
+    if (/(fault|code|ecm|engine light)/.test(t)) {
+      return {
+        topic: "breakdown",
+        text: `You have ${faultCodes.length} active codes. ${faultCodes
+          .map((f) => `${f.code} on the ${f.system.toLowerCase()} — ${f.text}`)
+          .join(" ")} Read those numbers to whoever you call.`,
+      };
+    }
+    if (/(where am i|location|mile marker|read it back|say it again)/.test(t)) {
+      return { topic: "breakdown", text: spokenLocation(currentFix) };
+    }
+    if (/(triangle|safe|hazard|shoulder|traffic)/.test(t)) {
+      return {
+        topic: "breakdown",
+        text: `Flashers on first. Get out the passenger side — the traffic side is the danger side. Triangles at ten feet on the traffic side, a hundred behind, a hundred ahead. This is a known bad stretch, so put the far one at two hundred feet around that curve. Vest on, wait behind the guardrail.`,
+      };
+    }
+    if (/(call|connect|dial|get them|phone)/.test(t)) {
+      const best = rank(
+        lastProblem ? filterByProblem(services, lastProblem) : services,
+      )[0]!;
+      return {
+        topic: "breakdown",
+        text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I am not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
+        proposal: {
+          summary: `Place a call to ${best.name} — ${best.phone}. No dispatch or charge is authorized by HERCULES.`,
+        },
+      };
+    }
+  }
+
 
   if (topic === "loads" && (wantsMore || wantsNext)) {
     const l = loads[wantsNext ? 1 : 0]!;
@@ -158,6 +222,23 @@ export function respond(text: string, topic: Topic): Reply {
 
   const fu = followUp(topic, t);
   if (fu) return fu;
+
+  /* Reachable from anywhere in the app, and it takes priority over everything. */
+  if (
+    /(broke ?down|broken down|breakdown|stranded|disabled|shoulder|tow truck|wrecker|won'?t start|wont start|blown tire|blow ?out|air leak)/.test(
+      t,
+    )
+  ) {
+    const p = problemFromSpeech(t);
+    lastProblem = p;
+    const list = rank(p ? filterByProblem(services, p) : services);
+    const best = list[0]!;
+    return {
+      topic: "breakdown",
+      text: `I've got you. ${spokenLocation(currentFix)} Flashers on and get your triangles out before anything else — this is a known bad stretch. I have ${list.length} options ranked. Closest is ${best.name}, ${best.milesAway.toFixed(1)} miles out, about ${best.etaMin} minutes${best.kind === "mobile" || best.kind === "tow" ? " to reach you" : " of driving"}${best.open24 ? ", open 24 hours" : ""}. Tell me what's wrong — blown tire, won't start, air leak, DEF light — and I'll narrow it down. I haven't called anybody.`,
+    };
+  }
+
 
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
@@ -233,6 +314,7 @@ const driverPrompts = [
   "What am I making on this run?",
   "What's ahead of me on this road?",
   "Where can I shower and park tonight?",
+  "I'm broke down",
 ];
 
 /* ------------------------------------------------------------------ PROVIDER */
