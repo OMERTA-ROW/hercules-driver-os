@@ -329,7 +329,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           ),
         );
         const line = approved
-          ? `Approved by you — ${open.proposal!.confirmLine}`
+          ? `Approved by you. ${open.proposal!.summary} is confirmed. I logged it under your name.`
           : "Dropped it. Nothing was booked and nothing was charged.";
         timers.current.push(
           setTimeout(() => {
