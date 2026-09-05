@@ -10,7 +10,7 @@ import {
 } from "react";
 import { currentLoad, hos, loads, alerts, faultCodes, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
-import { stopsAheadSeed } from "@/data/stops";
+import { truckStops, BOOKING_FEE } from "@/data/stops";
 
 /**
  * HERCULES VOICE LAYER
@@ -118,14 +118,14 @@ function followUp(topic: Topic, text: string): Reply | null {
     const l = loads[wantsNext ? 1 : 0]!;
     return {
       topic: "loads",
-      text: `${l.origin} to ${l.destination}, ${l.miles} miles at $${l.ratePerMile.toFixed(2)} a mile, $${l.rate.toLocaleString()} total. Pickup ${l.pickup}. ${l.shipper.name} — ${l.shipper.parking}. Say "book it" and I'll read the whole thing back before anything is committed.`,
+      text: `${l.origin} to ${l.destination}, ${l.miles} miles at $${l.rpm.toFixed(2)} a mile, $${l.rate.toLocaleString()} total. Pickup window ${l.pickupWindow}. ${l.shipper.name} — ${l.shipper.hours24 ? "24-hour facility" : `open ${l.shipper.open} to ${l.shipper.close}`}, ${l.shipper.overnightAllowed ? "overnight parking allowed on site" : `nearest safe parking ${l.shipper.nearestSafeParkingMiles} miles out`}. Say "book it" and I'll read the whole thing back before anything is committed.`,
     };
   }
   if (topic === "loads" && /(book|take|grab) ?(it|that)?/.test(t)) {
     const l = loads[0]!;
     return {
       topic: "loads",
-      text: `Here's exactly what I'd commit to: ${l.origin} to ${l.destination}, ${l.miles} miles, $${l.rate.toLocaleString()} at $${l.ratePerMile.toFixed(2)} a mile, pickup ${l.pickup}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
+      text: `Here's exactly what I'd commit to: ${l.origin} to ${l.destination}, ${l.miles} miles, $${l.rate.toLocaleString()} at $${l.rpm.toFixed(2)} a mile, pickup ${l.pickupWindow}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
       proposal: {
         summary: `Book load ${l.id}: ${l.origin} → ${l.destination}, $${l.rate.toLocaleString()}`,
         total: `$${l.rate.toLocaleString()} revenue`,
@@ -133,13 +133,13 @@ function followUp(topic: Topic, text: string): Reply | null {
     };
   }
   if (topic === "stops" && /(book|reserve|take) ?(it|that|the shower|parking)?/.test(t)) {
-    const s = stopsAheadSeed[0]!;
+    const s = truckStops[0]!;
     return {
       topic: "stops",
-      text: `Shower at ${s.name} is 15 dollars, plus the 2 dollar HERCULES booking fee — 17 dollars total. Nothing is charged yet. Say yes to approve it.`,
+      text: `Shower at ${s.name} is ${s.showerPrice} dollars, plus the ${BOOKING_FEE} dollar HERCULES booking fee — ${s.showerPrice + BOOKING_FEE} dollars total. Nothing is charged yet. Say yes to approve it.`,
       proposal: {
-        summary: `Shower at ${s.name} — $15.00 + $2.00 HERCULES booking fee`,
-        total: "$17.00",
+        summary: `Shower at ${s.name} — $${s.showerPrice.toFixed(2)} + $${BOOKING_FEE.toFixed(2)} HERCULES booking fee`,
+        total: `$${(s.showerPrice + BOOKING_FEE).toFixed(2)}`,
       },
     };
   }
@@ -169,14 +169,14 @@ export function respond(text: string, topic: Topic): Reply {
     const l = loads[0]!;
     return {
       topic: "loads",
-      text: `Best on the board is ${l.origin} to ${l.destination} — ${l.miles} miles at $${l.ratePerMile.toFixed(2)} a mile. ${l.shipper.name} is ${l.shipper.parking.toLowerCase()}. Want the details, or should I read back a booking for your approval?`,
+      text: `Best on the board is ${l.origin} to ${l.destination} — ${l.miles} miles at $${l.rpm.toFixed(2)} a mile. ${l.shipper.name} is ${l.shipper.hours24 ? "a 24-hour facility" : "on set hours"}, ${l.shipper.appointment.toLowerCase()}. Want the details, or should I read back a booking for your approval?`,
     };
   }
   if (/(money|profit|margin|per mile|settlement|pay|fuel cost|revenue)/.test(t)) {
     const p = loadPnL[0]!;
     return {
       topic: "money",
-      text: `Current run is netting $${p.net.toLocaleString()} — that's ${p.perMile} a mile after fuel, tolls, and fixed cost. Above your 30-day average. Ask me for the breakdown and I'll read the line items.`,
+      text: `Current run is netting $${p.profit.toLocaleString()} — that's $${(p.profit / p.miles).toFixed(2)} a mile after fuel, tolls, and fixed cost. Above your 30-day average. Ask me for the breakdown and I'll read the line items.`,
     };
   }
   if (/(turn|route|navigat|reroute|eta|miles|where am i)/.test(t)) {
@@ -193,24 +193,24 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
   if (/(shower|park|stop|diesel|fuel|sleep|rest|eat|food)/.test(t)) {
-    const s = stopsAheadSeed[0]!;
+    const s = truckStops[0]!;
     return {
       topic: "stops",
-      text: `${s.name} is ${s.milesAhead} miles ahead — diesel $${s.dieselPrice.toFixed(3)}, ${s.parkingOpen} of ${s.parkingTotal} truck spaces open, ${s.showersOpen} showers free. Say "book it" and I'll read the total plus the 2 dollar booking fee before anything is charged.`,
+      text: `${s.name} is ${s.milesAhead} miles ahead — diesel $${s.dieselPrice.toFixed(3)}, ${s.parkingOpen} of ${s.parkingTotal} truck spaces open, ${s.showersOpen} showers free. Say "book it" and I'll read the total plus the ${BOOKING_FEE} dollar booking fee before anything is charged.`,
     };
   }
   if (/(fault|engine|health|tire|maintenance|def|coolant|brake)/.test(t)) {
     const f = faultCodes[0]!;
     return {
       topic: "health",
-      text: `You have ${faultCodes.length} active codes. Top one is ${f.code} — ${f.plain}. ${f.action}. Nothing shuts you down right now.`,
+      text: `You have ${faultCodes.length} active codes. Top one is ${f.code} on the ${f.system.toLowerCase()} — ${f.text} Nothing shuts you down right now.`,
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {
     const a = alerts[0]!;
     return {
       topic: "alerts",
-      text: `${a.title}. ${a.detail}. ${a.confirms} drivers confirmed it. Plenty of time to be squared away before you get there.`,
+      text: `${a.kind} ${a.milesAhead} miles ahead at ${a.location}. ${a.note} ${a.confirmations} drivers confirmed it. Plenty of time to be squared away before you get there.`,
     };
   }
   if (/(hello|hey|hi|you there|hercules)$/.test(t) || t.length < 4) {
