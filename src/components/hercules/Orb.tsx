@@ -141,6 +141,41 @@ export function Orb({
             <feGaussianBlur stdDeviation="1.6" />
           </filter>
 
+          {/* Softener for the reactive waves so they read as liquid swell,
+              never as a hard drawn ring. */}
+          <filter
+            id={`${uid}-soft`}
+            x="-25%"
+            y="-25%"
+            width="150%"
+            height="150%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.013"
+              numOctaves={2}
+              seed={5}
+              result="n2"
+            >
+              <animate
+                attributeName="baseFrequency"
+                values="0.011;0.02;0.011"
+                dur={listening ? "3s" : "5.5s"}
+                repeatCount="indefinite"
+              />
+            </feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="n2"
+              scale="22"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+            <feGaussianBlur stdDeviation="5" />
+          </filter>
+
+
           <radialGradient id={`${uid}-shell`} cx="38%" cy="30%" r="80%">
             <stop offset="0%" stopColor={s.top} />
             <stop offset="52%" stopColor={s.mid} />
