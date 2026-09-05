@@ -518,43 +518,98 @@
   }
 }
 
-@keyframes orb-cord-wave {
-  from {
-    stroke-dashoffset: 860;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes orb-ring-in {
+/* Liquid currents drifting inside the sphere. Each blob takes a different,
+   slow, non-repeating-looking path so the surface never reads as static. */
+@keyframes orb-flow-1 {
   0% {
-    transform: scale(1.42);
-    opacity: 0;
-    box-shadow: 0 0 0 1px oklch(0.92 0.02 84 / 60%);
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.75;
   }
-  35% {
-    opacity: 0.85;
+  33% {
+    transform: translate(7%, 5%) scale(1.1) rotate(28deg);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-5%, 8%) scale(0.94) rotate(-18deg);
+    opacity: 0.8;
   }
   100% {
-    transform: scale(0.98);
-    opacity: 0;
-    box-shadow: 0 0 0 2px oklch(0.92 0.02 84 / 40%);
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.75;
   }
 }
 
-@keyframes orb-ring-out {
+@keyframes orb-flow-2 {
   0% {
-    transform: scale(0.98);
+    transform: translate(0, 0) scale(1.04) rotate(0deg);
+    opacity: 0.6;
+  }
+  40% {
+    transform: translate(-9%, -6%) scale(0.92) rotate(-32deg);
+    opacity: 0.95;
+  }
+  75% {
+    transform: translate(6%, -9%) scale(1.12) rotate(20deg);
     opacity: 0.7;
-    box-shadow: 0 0 0 2px oklch(0.8 0.13 84 / 55%);
   }
   100% {
-    transform: scale(1.5);
-    opacity: 0;
-    box-shadow: 0 0 0 1px oklch(0.8 0.13 84 / 10%);
+    transform: translate(0, 0) scale(1.04) rotate(0deg);
+    opacity: 0.6;
   }
 }
+
+/* Caustic band of refracted light rolling over the wet surface. */
+@keyframes orb-caustic-roll {
+  0% {
+    transform: translate(-42%, 22%) rotate(-16deg);
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(44%, -26%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+/* HERCULES speaking: waves swelling out of the middle of the liquid. */
+@keyframes orb-wave-out {
+  0% {
+    r: 24;
+    opacity: 0;
+    stroke-width: 12;
+  }
+  25% {
+    opacity: 0.5;
+  }
+  100% {
+    r: 152;
+    opacity: 0;
+    stroke-width: 2;
+  }
+}
+
+/* Driver speaking: the surface chops and agitates. */
+@keyframes orb-agitate-line {
+  0%,
+  100% {
+    transform: translateY(0) scaleX(1);
+    opacity: 0.2;
+  }
+  30% {
+    transform: translateY(-3%) scaleX(1.06);
+    opacity: 0.6;
+  }
+  60% {
+    transform: translateY(2.5%) scaleX(0.95);
+    opacity: 0.34;
+  }
+}
+
 
 @keyframes orb-bloom-pulse {
   0%,
@@ -563,18 +618,6 @@
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes orb-core-pulse {
-  0%,
-  100% {
-    opacity: 0.22;
-    r: 26;
-  }
-  50% {
-    opacity: 0.6;
-    r: 34;
   }
 }
 
@@ -596,35 +639,98 @@
   animation: orb-bloom-pulse 2.2s ease-in-out infinite;
 }
 
-.orb-cord-wave {
-  animation: orb-cord-wave 5.2s linear infinite;
+/* --- Liquid surface --------------------------------------------------- */
+.orb-flow-a,
+.orb-flow-b,
+.orb-flow-c,
+.orb-flow-d {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
 }
 
-.orb-state-listening .orb-cord-wave {
-  animation-duration: 2.1s;
+.orb-flow-a {
+  animation: orb-flow-1 24s ease-in-out infinite;
+}
+.orb-flow-b {
+  animation: orb-flow-2 31s ease-in-out infinite;
+}
+.orb-flow-c {
+  animation: orb-flow-2 19s ease-in-out infinite reverse;
+}
+.orb-flow-d {
+  animation: orb-flow-1 27s ease-in-out infinite reverse;
 }
 
-.orb-state-speaking .orb-cord-wave {
-  animation-duration: 3s;
+/* Driver talking: the currents speed up and the surface agitates. */
+.orb-state-listening .orb-flow-a {
+  animation-duration: 7s;
+}
+.orb-state-listening .orb-flow-b {
+  animation-duration: 8.5s;
+}
+.orb-state-listening .orb-flow-c {
+  animation-duration: 6s;
+}
+.orb-state-listening .orb-flow-d {
+  animation-duration: 7.5s;
 }
 
-.orb-ring-in {
-  animation: orb-ring-in 1.5s ease-in infinite;
+/* HERCULES talking: bigger, slower internal swells. */
+.orb-state-speaking .orb-flow-a {
+  animation-duration: 11s;
+}
+.orb-state-speaking .orb-flow-b {
+  animation-duration: 13s;
+}
+.orb-state-speaking .orb-flow-c {
+  animation-duration: 9s;
+}
+.orb-state-speaking .orb-flow-d {
+  animation-duration: 12s;
 }
 
-.orb-ring-out {
-  animation: orb-ring-out 2.7s ease-out infinite;
+.orb-caustic,
+.orb-caustic-slow {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.orb-core-dot {
-  opacity: 0.22;
-  animation: orb-core-pulse 7.5s ease-in-out infinite;
+.orb-caustic {
+  animation: orb-caustic-roll 14s ease-in-out infinite;
 }
 
-.orb-state-listening .orb-core-dot,
-.orb-state-speaking .orb-core-dot {
-  animation-duration: 1.9s;
+.orb-caustic-slow {
+  animation: orb-caustic-roll 21s ease-in-out infinite reverse;
 }
+
+.orb-state-listening .orb-caustic {
+  animation-duration: 5s;
+}
+.orb-state-listening .orb-caustic-slow {
+  animation-duration: 7s;
+}
+.orb-state-speaking .orb-caustic {
+  animation-duration: 7.5s;
+}
+.orb-state-speaking .orb-caustic-slow {
+  animation-duration: 10s;
+}
+
+.orb-wave {
+  animation: orb-wave-out 2.9s ease-out infinite;
+}
+
+.orb-agitate-line {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: orb-agitate-line 1.35s ease-in-out infinite;
+}
+
+.orb-gloss {
+  opacity: 0.9;
+}
+
 
 /* Quiet fade-in for conversation turns. */
 @keyframes turn-in {
