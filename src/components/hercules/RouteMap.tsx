@@ -4,6 +4,8 @@ import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
 import type { TruckStop } from "@/data/stops";
 import { chainMarkerSvg } from "./ChainMarker";
 import { useTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+
 
 /**
  * Base map layer.
