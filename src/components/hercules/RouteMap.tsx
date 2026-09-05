@@ -208,6 +208,41 @@ const baseViews: { id: BaseView; label: string; hint: string }[] = [
   { id: "hybrid", label: "Hybrid", hint: "Imagery with road names" },
 ];
 
+/**
+ * CAMERA VIEW
+ * The map screen is the one exception to the voice-only rule: the driver needs
+ * hand controls for the view. Two camera modes mirror Google Maps navigation:
+ * a tilted, low-angle 3D view locked to the truck's heading while rolling, and
+ * a flat 2D overhead view for previewing the route before rolling. Heading-up
+ * vs north-up is a separate toggle, and the driver can always recenter on the
+ * truck or zoom out to the whole route in one tap.
+ */
+export type CameraMode = "nav3d" | "top2d";
+
+/** Heading (degrees, 0=N) of the route at the truck's current position. */
+function routeHeading(polyline: LatLng[], position: LatLng): number {
+  let best = 0;
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const a = polyline[i];
+    if (!a) continue;
+    const d = Math.abs(a.lat - position.lat) + Math.abs(a.lng - position.lng);
+    if (d < bestDist) {
+      bestDist = d;
+      const b = polyline[i + 1];
+      if (!b) continue;
+      best =
+        (Math.atan2(
+          (b.lng - a.lng) * Math.cos(((a.lat + b.lat) / 2) * (Math.PI / 180)),
+          b.lat - a.lat,
+        ) *
+          180) /
+        Math.PI;
+    }
+  }
+  return (best + 360) % 360;
+}
+
 type Props = {
   polyline: LatLng[];
   position: LatLng;
