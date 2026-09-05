@@ -400,8 +400,51 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       },
       zIndex: 999,
     });
-    map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops]);
+    if (followTruck) map.panTo(position);
+  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops, followTruck]);
+
+  // Camera mode + orientation. 3D navigation tilts low and locks the view to
+  // the truck's heading; 2D is flat overhead. North-up overrides the heading
+  // lock in either mode.
+  useEffect(() => {
+    const map = refs.current.map;
+    if (mode !== "google" || !map) return;
+    const headingLocked = camera === "nav3d" && headingUp;
+    map.setOptions({
+      tilt: camera === "nav3d" ? 55 : 0,
+      heading: headingLocked ? heading : 0,
+    });
+    if (camera === "nav3d" && map.getZoom() < 12) map.setZoom(14);
+  }, [mode, camera, headingUp, heading]);
+
+  const recenter = () => {
+    setFollowTruck(true);
+    const map = refs.current.map;
+    if (map) {
+      map.panTo(position);
+      if (camera === "nav3d") map.setZoom(14);
+    }
+  };
+
+  const showWholeRoute = () => {
+    setFollowTruck(false);
+    setCamera("top2d");
+    const google = window.google;
+    const map = refs.current.map;
+    if (mode === "google" && google && map) {
+      const bounds = new google.maps.LatLngBounds();
+      polyline.forEach((p) => bounds.extend(p));
+      map.fitBounds(bounds, 64);
+    }
+  };
+
+  const onUserPan = () => setFollowTruck(false);
+  useEffect(() => {
+    const map = refs.current.map;
+    if (mode !== "google" || !map) return;
+    const l = map.addListener("dragstart", onUserPan);
+    return () => window.google?.maps?.event?.removeListener(l);
+  }, [mode]);
 
 
   if (mode === "google" || mode === "loading") {
