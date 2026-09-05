@@ -55,19 +55,54 @@ function loadGoogleMaps(): Promise<any> {
   });
 }
 
-/** BLUE shield = interstate / US highway · WHITE shield = legal county or secondary. */
+/**
+ * REAL US HIGHWAY SHIELDS
+ * -----------------------------------------------------------------------
+ * Interstates use the true Interstate escutcheon: red crown, blue field,
+ * white numerals and white border. US and state routes use the white US-route
+ * escutcheon with black numerals. Truck-legal county/secondary routes get the
+ * white shield, matching the way Google Maps marks them.
+ */
 export function shieldColors(cls: RoadClass) {
   return cls === "county"
     ? { fill: "#f4f6f8", stroke: "#0b0d10", text: "#0b0d10" }
     : { fill: "#1d4ed8", stroke: "#e8eefc", text: "#ffffff" };
 }
 
+const INTERSTATE_OUTLINE =
+  "M33 2 C24 2 16 6 4 8 C4 30 10 48 33 63 C56 48 62 30 62 8 C50 6 42 2 33 2 Z";
+const US_OUTLINE =
+  "M5 9 C15 11 25 10 33 3 C41 10 51 11 61 9 L61 31 C61 47 48 57 33 64 C18 57 5 47 5 31 Z";
+
 function shieldSvg(label: string, cls: RoadClass) {
-  const c = shieldColors(cls);
-  const w = Math.max(52, 22 + label.length * 13);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="46" viewBox="0 0 ${w} 46">
-  <path d="M4 6 Q${w / 2} -3 ${w - 4} 6 L${w - 4} 28 Q${w / 2} 45 4 28 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="3"/>
-  <text x="${w / 2}" y="24" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="17" font-weight="900" fill="${c.text}">${label}</text>
+  const isInterstate = /^i[-\s]/i.test(label.trim());
+  const num = label.replace(/^(i[-\s]|us[-\s]|u\.s\.[-\s])/i, "").trim();
+  const digits = num.replace(/[^0-9A-Za-z]/g, "");
+  const wide = digits.length > 2;
+  const w = wide ? 78 : 66;
+  const fontSize = wide ? 25 : 30;
+  const uid = `sh${label.replace(/[^a-z0-9]/gi, "")}${cls}`;
+  const sx = w / 66;
+
+  if (isInterstate) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="70" viewBox="0 0 ${w} 70">
+  <defs><clipPath id="${uid}"><path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)"/></clipPath></defs>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="#ffffff" stroke="#0b0d10" stroke-width="2"/>
+  <g clip-path="url(#${uid})">
+    <rect x="0" y="0" width="${w}" height="70" fill="#123a8f"/>
+    <rect x="0" y="0" width="${w}" height="17" fill="#c1121f"/>
+  </g>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="#0b0d10" stroke-width="1.5"/>
+  <text x="${w / 2}" y="47" text-anchor="middle" font-family="Helvetica Neue, Arial Narrow, Arial, sans-serif" font-size="${fontSize}" font-weight="700" fill="#ffffff">${digits}</text>
+</svg>`;
+  }
+
+  const isBlue = cls !== "county";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="70" viewBox="0 0 ${w} 70">
+  <path d="${US_OUTLINE}" transform="scale(${sx} 1)" fill="${isBlue ? "#123a8f" : "#f7f8fa"}" stroke="${isBlue ? "#ffffff" : "#0b0d10"}" stroke-width="3"/>
+  <path d="${US_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="${isBlue ? "#0b0d10" : "#0b0d10"}" stroke-width="1.2" opacity="0.7"/>
+  <text x="${w / 2}" y="45" text-anchor="middle" font-family="Helvetica Neue, Arial Narrow, Arial, sans-serif" font-size="${fontSize - 3}" font-weight="700" fill="${isBlue ? "#ffffff" : "#0b0d10"}">${digits}</text>
 </svg>`;
 }
 
@@ -81,6 +116,7 @@ export function RouteShield({ road, cls }: { road: string; cls: RoadClass }) {
     />
   );
 }
+
 
 /**
  * HAZARD ICONS — glanceable badges for the truck hazard layer.
