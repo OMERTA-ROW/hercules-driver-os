@@ -92,6 +92,7 @@ export type Turn = {
 export type VoiceMode = "idle" | "listening" | "speaking";
 
 type Topic =
+  | "breakdown"
   | "clock"
   | "loads"
   | "money"
