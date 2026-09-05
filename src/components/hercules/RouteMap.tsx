@@ -738,6 +738,7 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
       })}
       <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
       <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
+      </g>
     </svg>
   );
 }
