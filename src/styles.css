@@ -641,3 +641,31 @@
 @utility turn-in {
   animation: turn-in 0.32s ease-out both;
 }
+
+/* ================================================================ BASE MAP DIM
+ * Google's own imagery does the orientation work, so it gets pushed back:
+ * tiles (http images and the vector canvas) are desaturated and darkened while
+ * our route line, shields, hazard badges and stop markers — all data-URI SVG or
+ * vector overlays — stay at full strength on top.
+ */
+.map-dim .gm-style img[src^="http"],
+.map-dim .gm-style canvas {
+  filter: saturate(0.45) brightness(0.6) contrast(1.06);
+}
+
+/* Satellite and hybrid imagery is much busier, so it gets pushed back harder. */
+.map-dim-imagery .gm-style img[src^="http"],
+.map-dim-imagery .gm-style canvas {
+  filter: saturate(0.35) brightness(0.5) contrast(1.1);
+}
+
+/* Day theme keeps more light in the base map for direct sun. */
+[data-theme="day"] .map-dim .gm-style img[src^="http"],
+[data-theme="day"] .map-dim .gm-style canvas {
+  filter: saturate(0.5) brightness(0.86) contrast(1.02);
+}
+
+[data-theme="day"] .map-dim-imagery .gm-style img[src^="http"],
+[data-theme="day"] .map-dim-imagery .gm-style canvas {
+  filter: saturate(0.42) brightness(0.72) contrast(1.06);
+}
