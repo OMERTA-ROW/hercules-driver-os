@@ -260,6 +260,10 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     MAPS_KEY ? "loading" : "fallback",
   );
   const [view, setView] = useState<BaseView>("map");
+  const [camera, setCamera] = useState<CameraMode>("nav3d");
+  const [headingUp, setHeadingUp] = useState(true);
+  const [followTruck, setFollowTruck] = useState(true);
+  const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
     map?: any;
     line?: any;
