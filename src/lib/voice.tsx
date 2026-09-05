@@ -301,12 +301,45 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const push = useCallback((turn: Turn) => setTurns((prev) => [...prev, turn]), []);
 
+  /* Latest turns, readable inside callbacks without re-creating them. */
+  const turnsRef = useRef<Turn[]>(turns);
+  turnsRef.current = turns;
+
+  /* Spoken confirmation must be explicit — a clear yes or no, nothing inferred. */
+  const YES = /^(yes|yeah|yep|yes[, ]+(do it|book it|approve.*)|do it|book it|approve it|go ahead|confirm it?)\b/i;
+  const NO = /^(no|nope|no[, ]+(thanks|don'?t|drop it)|don'?t|cancel( that)?|drop it|skip it|forget it)\b/i;
+
   /** Driver line in → HERCULES thinks → HERCULES speaks. */
   const say = useCallback(
     (text: string) => {
       clearTimers();
       push({ id: nextId(), from: "driver", text });
       setMode("speaking");
+
+      // DRIVER APPROVED: an open proposal is only settled by an explicit
+      // spoken yes or no. Anything else is treated as a normal question and
+      // the proposal stays pending, uncommitted.
+      const open = [...turnsRef.current].reverse().find((t) => t.proposal && !t.status);
+      const t = text.trim();
+      if (open && (YES.test(t) || NO.test(t))) {
+        const approved = YES.test(t);
+        setTurns((prev) =>
+          prev.map((x) =>
+            x.id === open.id ? { ...x, status: approved ? "approved" : "declined" } : x,
+          ),
+        );
+        const line = approved
+          ? `Approved by you — ${open.proposal!.confirmLine}`
+          : "Dropped it. Nothing was booked and nothing was charged.";
+        timers.current.push(
+          setTimeout(() => {
+            push({ id: nextId(), from: "hercules", text: line });
+            timers.current.push(setTimeout(() => setMode("idle"), 2600));
+          }, 600),
+        );
+        return;
+      }
+
       const reply = respond(text, topic);
       setTopic(reply.topic);
       timers.current.push(
