@@ -55,19 +55,65 @@ function loadGoogleMaps(): Promise<any> {
   });
 }
 
-/** BLUE shield = interstate / US highway · WHITE shield = legal county or secondary. */
+/**
+ * REAL US HIGHWAY SHIELDS
+ * -----------------------------------------------------------------------
+ * Interstates use the true Interstate escutcheon: red crown, blue field,
+ * white numerals and white border. US and state routes use the white US-route
+ * escutcheon with black numerals. Truck-legal county/secondary routes get the
+ * white shield, matching the way Google Maps marks them.
+ */
 export function shieldColors(cls: RoadClass) {
   return cls === "county"
     ? { fill: "#f4f6f8", stroke: "#0b0d10", text: "#0b0d10" }
     : { fill: "#1d4ed8", stroke: "#e8eefc", text: "#ffffff" };
 }
 
+const INTERSTATE_OUTLINE =
+  "M33 2 C24 2 16 6 4 8 C4 30 10 48 33 63 C56 48 62 30 62 8 C50 6 42 2 33 2 Z";
+const US_OUTLINE =
+  "M5 9 C15 11 25 10 33 3 C41 10 51 11 61 9 L61 31 C61 47 48 57 33 64 C18 57 5 47 5 31 Z";
+
 function shieldSvg(label: string, cls: RoadClass) {
-  const c = shieldColors(cls);
-  const w = Math.max(52, 22 + label.length * 13);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="46" viewBox="0 0 ${w} 46">
-  <path d="M4 6 Q${w / 2} -3 ${w - 4} 6 L${w - 4} 28 Q${w / 2} 45 4 28 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="3"/>
-  <text x="${w / 2}" y="24" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="17" font-weight="900" fill="${c.text}">${label}</text>
+  const isInterstate = /^i[-\s]/i.test(label.trim());
+  const num = label.replace(/^(i[-\s]|us[-\s]|u\.s\.[-\s])/i, "").trim();
+  const digits = num.replace(/[^0-9A-Za-z]/g, "");
+  const wide = digits.length > 2;
+  const w = wide ? 78 : 66;
+  const fontSize = wide ? 25 : 30;
+  const uid = `sh${label.replace(/[^a-z0-9]/gi, "")}${cls}`;
+  const sx = w / 66;
+
+  // Street names and long alphanumeric designations don't take a shield —
+  // Google shows those as a plain plate, so we do the same.
+  if (!isInterstate && (/[a-z]/i.test(digits) || digits.length > 3)) {
+    const c = shieldColors(cls);
+    const pw = 26 + label.length * 11;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${pw}" height="40" viewBox="0 0 ${pw} 40">
+  <rect x="2" y="4" width="${pw - 4}" height="32" rx="7" fill="${c.fill}" stroke="${c.stroke}" stroke-width="2"/>
+  <text x="${pw / 2}" y="27" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="700" fill="${c.text}">${label}</text>
+</svg>`;
+  }
+
+  if (isInterstate) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="70" viewBox="0 0 ${w} 70">
+  <defs><clipPath id="${uid}"><path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)"/></clipPath></defs>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="#ffffff" stroke="#0b0d10" stroke-width="2"/>
+  <g clip-path="url(#${uid})">
+    <rect x="0" y="0" width="${w}" height="70" fill="#123a8f"/>
+    <rect x="0" y="0" width="${w}" height="17" fill="#c1121f"/>
+  </g>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <path d="${INTERSTATE_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="#0b0d10" stroke-width="1.5"/>
+  <text x="${w / 2}" y="47" text-anchor="middle" font-family="Helvetica Neue, Arial Narrow, Arial, sans-serif" font-size="${fontSize}" font-weight="700" fill="#ffffff">${digits}</text>
+</svg>`;
+  }
+
+  const isBlue = cls !== "county";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="70" viewBox="0 0 ${w} 70">
+  <path d="${US_OUTLINE}" transform="scale(${sx} 1)" fill="${isBlue ? "#123a8f" : "#f7f8fa"}" stroke="${isBlue ? "#ffffff" : "#0b0d10"}" stroke-width="3"/>
+  <path d="${US_OUTLINE}" transform="scale(${sx} 1)" fill="none" stroke="${isBlue ? "#0b0d10" : "#0b0d10"}" stroke-width="1.2" opacity="0.7"/>
+  <text x="${w / 2}" y="45" text-anchor="middle" font-family="Helvetica Neue, Arial Narrow, Arial, sans-serif" font-size="${fontSize - 3}" font-weight="700" fill="${isBlue ? "#ffffff" : "#0b0d10"}">${digits}</text>
 </svg>`;
 }
 
@@ -81,6 +127,7 @@ export function RouteShield({ road, cls }: { road: string; cls: RoadClass }) {
     />
   );
 }
+
 
 /**
  * HAZARD ICONS — glanceable badges for the truck hazard layer.
@@ -181,7 +228,11 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           zoom: 8,
           disableDefaultUI: true,
           zoomControl: true,
+          scaleControl: true,
+          clickableIcons: false,
           gestureHandling: "greedy",
+          tilt: 0,
+          backgroundColor: "#0b0f14",
           styles: theme === "day" ? [] : darkMapStyle,
         });
         refs.current.map = map;
@@ -219,8 +270,9 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
             url:
               "data:image/svg+xml;charset=UTF-8," +
               encodeURIComponent(shieldSvg(s.road.replace(/\s*\(county\)/i, ""), s.class)),
-            anchor: new google.maps.Point(30, 46),
+            anchor: new google.maps.Point(33, 70),
           },
+          zIndex: 600,
         }),
     );
     // HAZARD LAYER markers (only the kinds the driver left switched on).
@@ -397,11 +449,21 @@ function SchematicMap({ polyline, position, segments, offRoute, hazards = [], st
 }
 
 const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#0c1014" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#8a949e" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#06080a" }] },
+  { elementType: "geometry", stylers: [{ color: "#0b0f14" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#93a1ad" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#05080b" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#2a323b" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#b9c4ce" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1b232b" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2a3745" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#070c12" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#0e141a" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1a232c" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#0a0e12" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#222d38" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#33424f" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#0a0e12" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#3d4e5e" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9aa7b3" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#060b11" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3f5566" }] },
 ];

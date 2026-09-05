@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CreditCard, Monitor, LogOut, Check, TriangleAlert } from "lucide-react";
+import { CreditCard, Monitor, LogOut, Check, TriangleAlert, Volume2, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
 import { ThemePicker, BrightnessPicker } from "@/components/hercules/ThemeToggle";
+import { Orb } from "@/components/hercules/Orb";
+import { useVoice, orbColorways, voiceOptions } from "@/lib/voice";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { plans, planById, featureLabels, TRIAL_DAYS, type PlanId } from "@/data/plans";
@@ -180,6 +182,24 @@ function Settings() {
         </Panel>
 
         <Panel>
+          <PanelTitle right={<Pill tone="primary">Voice-first</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <Circle className="h-5 w-5 text-primary" /> Orb look
+            </span>
+          </PanelTitle>
+          <OrbPicker />
+        </Panel>
+
+        <Panel>
+          <PanelTitle right={<Pill tone="info">Hercules is default</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <Volume2 className="h-5 w-5 text-primary" /> Voice
+            </span>
+          </PanelTitle>
+          <VoicePicker />
+        </Panel>
+
+        <Panel>
           <PanelTitle right={<Pill tone="info">Applies app-wide</Pill>}>
             <span className="inline-flex items-center gap-2">
               <Monitor className="h-5 w-5 text-primary" /> Display theme
@@ -245,5 +265,77 @@ function HazardToggles() {
         </Button>
       </div>
     </div>
+  );
+}
+
+/** Orb colorway — black, grey, or white, gold accent in all three. */
+function OrbPicker() {
+  const { colorway, setColorway, mode } = useVoice();
+  return (
+    <div className="grid gap-2 sm:grid-cols-3">
+      {orbColorways.map((o) => {
+        const active = colorway === o.id;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            onClick={() => setColorway(o.id)}
+            aria-pressed={active}
+            className={cn(
+              "flex flex-col items-center gap-3 rounded-xl border p-4 transition-colors",
+              active ? "border-primary/60 bg-primary/10" : "border-border bg-card/50 hover:bg-accent",
+            )}
+          >
+            <Orb className="w-24" mode={active ? mode : "idle"} colorway={o.id} />
+            <span className="font-display text-sm font-light uppercase tracking-[0.18em]">
+              {o.label}
+            </span>
+            <span className="text-center text-xs text-muted-foreground">{o.hint}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Voice cast — male and female options, Hercules is the principal voice. */
+function VoicePicker() {
+  const { voice, setVoice } = useVoice();
+  return (
+    <>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {voiceOptions.map((v) => {
+          const active = voice.id === v.id;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setVoice(v.id)}
+              aria-pressed={active}
+              className={cn(
+                "min-h-16 rounded-xl border p-4 text-left transition-colors",
+                active ? "border-primary/60 bg-primary/10" : "border-border bg-card/50 hover:bg-accent",
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-display text-base font-light uppercase tracking-[0.16em]">
+                  {v.name}
+                </span>
+                <span className="tech-label">{v.gender}</span>
+                {v.principal ? <span className="tech-label ml-auto text-primary">Default</span> : null}
+                {active && !v.principal ? (
+                  <Check className="ml-auto h-4 w-4 text-primary" />
+                ) : null}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">{v.hint}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Whichever voice you pick reads everything aloud the same way. It still asks before it books,
+        spends, or commits anything.
+      </p>
+    </>
   );
 }

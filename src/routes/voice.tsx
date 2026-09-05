@@ -1,26 +1,24 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Mic, Volume2, Hand, Ear } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
-import { BrightnessButton } from "@/components/hercules/ThemeToggle";
-import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { transcript, voiceCommands } from "@/data/mock";
+import { Orb } from "@/components/hercules/Orb";
+import { Conversation } from "@/components/hercules/Conversation";
+import { DriverApprovedNote } from "@/components/hercules/primitives";
+import { useVoice } from "@/lib/voice";
 
 export const Route = createFileRoute("/voice")({
   head: () => ({
     meta: [
-      { title: "Voice Interface — HERCULES" },
+      { title: "Conversation — HERCULES" },
       {
         name: "description",
         content:
-          "Run the whole truck by voice: ask about your clock, loads, parking, faults, and margin. HERCULES answers out loud, hands on the wheel.",
+          "A continuous conversation with HERCULES: ask, follow up, and have your clock, loads, money, and road read aloud. Nothing commits without your explicit yes.",
       },
-      { property: "og:title", content: "Voice Interface — HERCULES" },
+      { property: "og:title", content: "Conversation — HERCULES" },
       {
         property: "og:description",
-        content: "Hands on the wheel, eyes on the road. Speak and HERCULES reads your data aloud.",
+        content: "Talk to HERCULES like a partner — hands on the wheel, eyes on the road.",
       },
     ],
   }),
@@ -28,129 +26,58 @@ export const Route = createFileRoute("/voice")({
 });
 
 function VoicePage() {
-  const [listening, setListening] = useState(false);
-  const [lines, setLines] = useState(transcript);
-
-  function say(phrase: string) {
-    setLines((prev) => [
-      ...prev,
-      { from: "driver" as const, text: phrase },
-      {
-        from: "hercules" as const,
-        text:
-          "Here's what I have on that. Reading it back now — say “details” for the full breakdown, or “that's all” to stop. I won't change anything without your say-so.",
-      },
-    ]);
-  }
+  const { mode, colorway, listen, stop, clear, voice, turns } = useVoice();
 
   return (
     <AppShell
-      title="Voice Interface"
-      subtitle="The primary way to run HERCULES — hands on the wheel, eyes on the road"
+      title="Conversation"
+      subtitle={`Talking with ${voice.name} — ask, follow up, keep going`}
     >
-      <div className="grid gap-3 xl:grid-cols-[1fr_1.2fr]">
-        <Panel className="flex flex-col items-center justify-center bg-voice-surface bg-none py-10">
-          <button
-            type="button"
-            aria-label={listening ? "Stop listening" : "Start listening"}
-            onClick={() => setListening((v) => !v)}
-            className={cn(
-              // Night-safe: dim amber glow, never a bright filled disc.
-              "relative flex h-44 w-44 items-center justify-center rounded-full border-4 bg-voice-accent/10 text-voice-accent transition-colors sm:h-56 sm:w-56",
-              listening
-                ? "voice-mic-active border-voice-accent/70"
-                : "voice-mic-idle border-voice-accent/40 hover:bg-voice-accent/16",
-            )}
-          >
-            {listening ? (
-              <span
-                aria-hidden
-                className="voice-ripple absolute inset-0 rounded-full border border-voice-accent/40"
-              />
-            ) : null}
-            <Mic className="h-20 w-20 sm:h-24 sm:w-24" />
-          </button>
-          <div className="mt-5 text-center">
-            <div className="font-display text-2xl uppercase tracking-[0.14em] text-voice-text">
-              {listening ? "Listening" : "Tap or say “Hercules”"}
-            </div>
-            <p className="mt-1 text-sm text-voice-text-dim">
-              {listening
-                ? "Speak naturally — road noise filtered"
-                : "Wake word stays active while the truck is running"}
+      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="glass flex flex-col items-center justify-center gap-6 p-8">
+          <Orb
+            className="w-[min(52vw,300px)]"
+            mode={mode}
+            colorway={colorway}
+            onActivate={mode === "idle" ? listen : stop}
+          />
+          <div className="text-center">
+            <p className="tech-label">
+              {mode === "listening"
+                ? "Listening"
+                : mode === "speaking"
+                  ? `${voice.name} speaking`
+                  : "Tap the orb or say “Hercules”"}
+            </p>
+            <p className="mt-2 max-w-[34ch] text-sm font-light text-muted-foreground">
+              It holds the thread — ask a follow-up like “how much?” or “book it” and it knows what
+              you mean.
             </p>
           </div>
-          {listening ? (
-            <div className="mt-5 flex items-end gap-1.5">
-              {Array.from({ length: 22 }).map((_, i) => (
-                <span
-                  key={i}
-                  className="w-1.5 animate-pulse rounded-full bg-voice-accent/70"
-                  style={{ height: `${8 + ((i * 13) % 44)}px`, animationDelay: `${i * 60}ms` }}
-                />
-              ))}
-            </div>
-          ) : null}
-          <div className="mt-6 flex justify-center">
-            <BrightnessButton />
-          </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
-            <Pill tone="go">
-              <Hand className="h-3.5 w-3.5" /> Hands-free
-            </Pill>
-            <Pill tone="info">
-              <Ear className="h-3.5 w-3.5" /> Reads data aloud
-            </Pill>
-            <Pill tone="primary">
-              <Volume2 className="h-3.5 w-3.5" /> Cab-noise tuned
-            </Pill>
-          </div>
-        </Panel>
+        </div>
 
-        <div className="space-y-3">
-          <Panel>
-            <PanelTitle right={<Pill tone="neutral">Live</Pill>}>Transcript</PanelTitle>
-            <div className="max-h-[42vh] space-y-2 overflow-y-auto pr-1">
-              {lines.map((l, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-base leading-relaxed",
-                    l.from === "driver"
-                      ? "border-voice-line bg-voice-accent-soft/12 text-voice-text-dim"
-                      : "border-voice-accent/30 bg-voice-accent/8 text-voice-text",
-                  )}
-                >
-                  <Label className="mb-1">{l.from === "driver" ? "You" : "Hercules"}</Label>
-                  {l.text}
-                </div>
-              ))}
-            </div>
-            <div className="mt-3">
-              <DriverApprovedNote>
-                Voice never commits anything on its own. HERCULES will always read back the plan and
-                wait for your yes.
-              </DriverApprovedNote>
-            </div>
-          </Panel>
-
-          <Panel>
-            <PanelTitle right={<Pill tone="primary">Tap to try</Pill>}>Example Commands</PanelTitle>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {voiceCommands.map((c) => (
-                <Button
-                  key={c.phrase}
-                  variant="outline"
-                  size="lg"
-                  className="h-auto flex-col items-start gap-1 whitespace-normal py-3 text-left"
-                  onClick={() => say(c.phrase)}
-                >
-                  <span className="font-semibold text-primary">“{c.phrase}”</span>
-                  <span className="text-xs font-normal text-muted-foreground">{c.desc}</span>
-                </Button>
-              ))}
-            </div>
-          </Panel>
+        <div className="glass flex min-h-[52vh] flex-col p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="tech-label">Conversation</span>
+            {turns.length > 0 ? (
+              <button
+                type="button"
+                onClick={clear}
+                className="tech-label flex items-center gap-2 rounded-full hairline px-4 py-2"
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> Start over
+              </button>
+            ) : null}
+          </div>
+          <div className="flex-1 overflow-y-auto pr-1">
+            <Conversation />
+          </div>
+          <div className="mt-4">
+            <DriverApprovedNote>
+              Voice can propose and read anything aloud, but booking, spending, or committing always
+              waits for your explicit yes.
+            </DriverApprovedNote>
+          </div>
         </div>
       </div>
     </AppShell>

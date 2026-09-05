@@ -35,7 +35,7 @@ const nav = [
   { to: "/driver", label: "Driver", icon: UserCog, feature: "driver" },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
   { to: "/documents", label: "Docs", icon: FileText, feature: null },
-  { to: "/voice", label: "Voice", icon: Mic, feature: "voice" },
+  { to: "/voice", label: "Talk", icon: Mic, feature: "voice" },
   { to: "/settings", label: "Settings", icon: SettingsIcon, feature: null },
 ] as const;
 
@@ -59,7 +59,7 @@ export function AppShell({
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex w-full max-w-[1800px]">
         {/* Left rail — primary nav for a cab-mounted landscape tablet */}
-        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-border bg-card/40 py-4 lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
+        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-foreground/10 bg-card/25 backdrop-blur-xl py-4 lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
           <Link to="/" className="mb-4 px-1 text-center xl:text-left">
             <div className="font-display text-2xl font-bold uppercase tracking-[0.14em] text-primary">
               HERC
@@ -80,7 +80,7 @@ export function AppShell({
               className="flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 transition-colors hover:bg-accent hover:text-foreground xl:flex-row xl:justify-start xl:gap-3"
             >
               <n.icon className="h-6 w-6 shrink-0" />
-              <span className="font-display text-[0.68rem] uppercase tracking-[0.1em] xl:text-sm">
+              <span className="font-display text-[0.66rem] font-light uppercase tracking-[0.18em] xl:text-[0.8rem]">
                 {n.label}
               </span>
             </Link>
@@ -88,8 +88,8 @@ export function AppShell({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
-            <div className="hazard-stripes h-1 w-full opacity-80" />
+          <header className="sticky top-0 z-30 border-b border-foreground/10 bg-background/70 backdrop-blur-xl">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
               <div className="min-w-0">
                 <div className="lg:hidden">
@@ -97,7 +97,7 @@ export function AppShell({
                     HERC<span className="text-foreground">ULES</span>
                   </span>
                 </div>
-                <h1 className="truncate text-2xl font-bold uppercase sm:text-3xl">{title}</h1>
+                <h1 className="truncate font-display text-2xl font-light uppercase tracking-[0.14em] sm:text-3xl">{title}</h1>
                 {subtitle ? (
                   <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
                 ) : null}

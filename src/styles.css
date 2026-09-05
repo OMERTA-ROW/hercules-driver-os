@@ -287,11 +287,21 @@
   }
 }
 
+/* Panels are glass now — hairline edge, blurred depth, subtle sheen. */
 @utility panel {
-  background-image: var(--gradient-steel);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-panel);
-  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 0%,
+      transparent 55%
+    ),
+    color-mix(in oklab, var(--card) 55%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 11%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--foreground) 8%, transparent) inset,
+    0 30px 60px -42px oklch(0 0 0 / 85%);
+  border-radius: calc(var(--radius) + 10px);
+  backdrop-filter: blur(16px) saturate(125%);
 }
 
 @utility hazard-stripes {
@@ -312,8 +322,9 @@
 
 @utility label-cap {
   font-family: var(--font-display);
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   font-size: 0.7rem;
   color: var(--color-muted-foreground);
 }
@@ -453,4 +464,180 @@
 
 @utility voice-ripple {
   animation: voice-ring 2.6s ease-out infinite;
+}
+
+/* ================================================================ FUTURISTIC SHELL
+ * Glassy surfaces, hairline borders, thin precise type. Used across the app so
+ * every screen reads like a cockpit instead of a form.
+ */
+@utility glass {
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-radius: calc(var(--radius) + 10px);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--foreground) 8%, transparent) inset,
+    0 30px 60px -40px oklch(0 0 0 / 85%);
+}
+
+@utility glass-line {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+@utility hairline {
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+@utility tech-label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  font-size: 0.62rem;
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+}
+
+/* ================================================================ ORB */
+@keyframes orb-breathe-soft {
+  0%,
+  100% {
+    transform: scale(0.985);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+@keyframes orb-breathe-fast {
+  0%,
+  100% {
+    transform: scale(0.99);
+  }
+  50% {
+    transform: scale(1.028);
+  }
+}
+
+@keyframes orb-cord-wave {
+  from {
+    stroke-dashoffset: 860;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes orb-ring-in {
+  0% {
+    transform: scale(1.42);
+    opacity: 0;
+    box-shadow: 0 0 0 1px oklch(0.92 0.02 84 / 60%);
+  }
+  35% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(0.98);
+    opacity: 0;
+    box-shadow: 0 0 0 2px oklch(0.92 0.02 84 / 40%);
+  }
+}
+
+@keyframes orb-ring-out {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.7;
+    box-shadow: 0 0 0 2px oklch(0.8 0.13 84 / 55%);
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+    box-shadow: 0 0 0 1px oklch(0.8 0.13 84 / 10%);
+  }
+}
+
+@keyframes orb-bloom-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes orb-core-pulse {
+  0%,
+  100% {
+    opacity: 0.22;
+    r: 26;
+  }
+  50% {
+    opacity: 0.6;
+    r: 34;
+  }
+}
+
+.orb-body {
+  animation: orb-breathe-soft 7.5s ease-in-out infinite;
+}
+
+.orb-state-listening .orb-body,
+.orb-state-speaking .orb-body {
+  animation: orb-breathe-fast 2.4s ease-in-out infinite;
+}
+
+.orb-bloom {
+  animation: orb-bloom-pulse 7.5s ease-in-out infinite;
+}
+
+.orb-state-listening .orb-bloom,
+.orb-state-speaking .orb-bloom {
+  animation: orb-bloom-pulse 2.2s ease-in-out infinite;
+}
+
+.orb-cord-wave {
+  animation: orb-cord-wave 5.2s linear infinite;
+}
+
+.orb-state-listening .orb-cord-wave {
+  animation-duration: 2.1s;
+}
+
+.orb-state-speaking .orb-cord-wave {
+  animation-duration: 3s;
+}
+
+.orb-ring-in {
+  animation: orb-ring-in 1.5s ease-in infinite;
+}
+
+.orb-ring-out {
+  animation: orb-ring-out 2.7s ease-out infinite;
+}
+
+.orb-core-dot {
+  opacity: 0.22;
+  animation: orb-core-pulse 7.5s ease-in-out infinite;
+}
+
+.orb-state-listening .orb-core-dot,
+.orb-state-speaking .orb-core-dot {
+  animation-duration: 1.9s;
+}
+
+/* Quiet fade-in for conversation turns. */
+@keyframes turn-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility turn-in {
+  animation: turn-in 0.32s ease-out both;
 }
