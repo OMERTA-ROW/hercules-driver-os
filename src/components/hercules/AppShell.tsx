@@ -61,7 +61,7 @@ export function AppShell({
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex w-full max-w-[1800px]">
         {/* Left rail — primary nav for a cab-mounted landscape tablet */}
-        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-foreground/10 bg-card/25 backdrop-blur-xl py-4 lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
+        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-primary/20 bg-background py-4 shadow-[8px_0_28px_-22px_var(--primary)] lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
           <Link to="/" className="mb-4 px-1 text-center xl:text-left">
             <div className="font-display text-2xl font-bold uppercase tracking-[0.14em] text-primary">
               HERC
@@ -90,8 +90,8 @@ export function AppShell({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-foreground/10 bg-background/70 backdrop-blur-xl">
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <header className="sticky top-0 z-30 border-b border-primary/20 bg-background/95 backdrop-blur-xl shadow-[0_8px_28px_-24px_var(--primary)]">
+            <div className="h-px w-full bg-primary/55 shadow-[0_0_14px_var(--primary)]" />
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
               <div className="min-w-0">
                 <div className="lg:hidden">
