@@ -220,7 +220,7 @@ export function ScreenDim() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[90] bg-[oklch(0.02_0.004_250)]"
+      className="pointer-events-none fixed inset-0 z-[90] bg-background"
       style={{ opacity: dim }}
     />
   );

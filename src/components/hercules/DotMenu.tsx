@@ -75,25 +75,32 @@ export function DotMenu({ className }: { className?: string | undefined }) {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/85 p-5 backdrop-blur-xl">
+        <>
           <button
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="absolute right-5 top-5 flex h-12 w-12 items-center justify-center rounded-full hairline text-foreground/60 transition-colors hover:text-foreground"
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          <nav className="w-full max-w-3xl">
-            <p className="tech-label mb-4 text-center">Every section · or just ask</p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            className="fixed inset-0 z-[70] cursor-default bg-background/30"
+          />
+          <nav className="glass fixed right-4 top-18 z-[80] flex max-h-[min(72vh,640px)] w-[min(calc(100vw-2rem),420px)] flex-col overflow-hidden shadow-[0_0_34px_-12px_color-mix(in_oklab,var(--primary)_55%,var(--violet))]">
+            <div className="flex shrink-0 items-center justify-between border-b border-primary/25 px-4 py-3">
+              <p className="tech-label text-primary">Every section · or just ask</p>
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setOpen(false)}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full hairline text-foreground/70 transition-colors hover:border-primary/60 hover:text-primary"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto overscroll-contain p-3">
               {items.map((s) => (
                 <Link
                   key={s.to}
                   to={s.to}
                   onClick={() => setOpen(false)}
-                  className="glass flex min-h-[84px] flex-col justify-between p-4 transition-colors hover:border-primary/40"
+                  className="flex min-h-[76px] flex-col justify-between rounded-lg border border-primary/20 bg-background p-3 transition-all hover:border-primary/60 hover:bg-primary/8 hover:shadow-[0_0_18px_-8px_var(--primary)]"
                 >
                   <s.icon className="h-5 w-5 text-primary/80" />
                   <span className="font-display text-sm font-light uppercase tracking-[0.16em]">
@@ -103,7 +110,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
               ))}
             </div>
             {!account ? (
-              <div className="mt-3 flex justify-center gap-2">
+              <div className="flex shrink-0 justify-center gap-2 border-t border-primary/20 p-3">
                 <Link
                   to="/sign-in"
                   onClick={() => setOpen(false)}
@@ -121,7 +128,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
               </div>
             ) : null}
           </nav>
-        </div>
+        </>
       ) : null}
     </>
   );
