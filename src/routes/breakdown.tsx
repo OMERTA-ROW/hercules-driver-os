@@ -49,7 +49,7 @@ import {
   spokenService,
 } from "@/lib/breakdown";
 import { useVoice } from "@/lib/voice";
-import { countdownLabel, minutesOut, useArrivals } from "@/lib/arrivals";
+import { countdownLabel, useArrivals } from "@/lib/arrivals";
 
 export const Route = createFileRoute("/breakdown")({
   head: () => ({
