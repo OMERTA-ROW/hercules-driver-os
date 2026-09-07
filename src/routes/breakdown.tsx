@@ -360,7 +360,7 @@ function BreakdownPage() {
                     <span className="metric font-bold">{f.code}</span>
                     <Pill tone={f.severity === "alert" ? "alert" : "watch"}>{f.system}</Pill>
                   </div>
-                  <p className="mt-1 text-sm leading-snug">{f.text}</p>
+                  <p className="mt-1 text-sm leading-snug">{f.plain}</p>
                 </div>
               ))}
             </div>
@@ -371,7 +371,7 @@ function BreakdownPage() {
               onClick={() =>
                 toast.info("HERCULES is reading your fault codes aloud", {
                   description: boltFaults
-                    .map((f) => `${f.code} on the ${f.system.toLowerCase()}. ${f.text}`)
+                    .map((f) => `${f.code} on the ${f.system.toLowerCase()}. ${f.plain}`)
                     .join(" "),
                 })
               }
