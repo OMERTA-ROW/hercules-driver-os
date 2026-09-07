@@ -84,6 +84,8 @@ function SupplyScreen() {
     cancel,
     provider,
   } = useDelivery();
+  const { expectDelivery } = useArrivals();
+
 
   const [spokenLine, setSpokenLine] = useState<string | null>(null);
   const [pending, setPending] = useState<OrderOption | null>(null);
