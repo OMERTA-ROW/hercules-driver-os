@@ -42,6 +42,7 @@ const sections = [
   { to: "/supply", label: "Delivery & Supply", icon: ShoppingBasket, feature: null },
   { to: "/store", label: "Store", icon: ShoppingBag, feature: null },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
+  { to: "/zeus", label: "ZEUS Fleet Side", icon: Building2, feature: null },
   { to: "/voice", label: "Conversation", icon: Mic, feature: null },
   { to: "/settings", label: "Settings", icon: SettingsIcon, feature: null },
 ] as const;
