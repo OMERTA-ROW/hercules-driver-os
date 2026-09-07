@@ -629,6 +629,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     approve,
     decline,
     clear,
+    announce,
     lastLine,
     pending,
   };
