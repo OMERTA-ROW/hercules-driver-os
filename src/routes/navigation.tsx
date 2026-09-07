@@ -143,24 +143,27 @@ function NavigationScreen() {
    * applied. The driver can dismiss or keep the old path (DRIVER APPROVED) —
    * but they are never left without a path.
    */
-  const autoReroute = useCallback(async (fix: LatLng) => {
-    if (rerouting.current) return;
-    rerouting.current = true;
-    const next = await truckRouting.reroute({
-      position: fix,
-      destination: primaryRoute.polyline[primaryRoute.polyline.length - 1]!,
-      profile: vehicle,
-    });
-    setRoute(next);
-    setOffRoute(false);
-    const step = next.steps[0]!;
-    setNotice({ step: step.text, miles: next.remainingMiles, road: step.road });
-    // Voice announcement so the driver never has to look down.
-    setSpoken(
-      `Route recalculated. ${step.text}. ${next.remainingMiles} miles remaining, new ETA ${next.etaLocal}. Truck legal for your 13 foot 6 configuration.`,
-    );
-    rerouting.current = false;
-  }, []);
+  const autoReroute = useCallback(
+    async (fix: LatLng) => {
+      if (rerouting.current) return;
+      rerouting.current = true;
+      const next = await truckRouting.reroute({
+        position: fix,
+        destination: primaryRoute.polyline[primaryRoute.polyline.length - 1]!,
+        profile: vehicle,
+      });
+      setRoute(next);
+      setOffRoute(false);
+      const step = next.steps[0]!;
+      setNotice({ step: step.text, miles: next.remainingMiles, road: step.road });
+      // Voice announcement so the driver never has to look down.
+      setSpoken(
+        `Route recalculated. ${step.text}. ${next.remainingMiles} miles remaining, new ETA ${next.etaLocal}. Legal for your ${vehicle.label} at ${vehicle.heightFt} feet and ${vehicle.grossWeightLbs.toLocaleString()} pounds.`,
+      );
+      rerouting.current = false;
+    },
+    [vehicle],
+  );
 
   // Off-route detection runs on every GPS fix.
   useEffect(() => {
