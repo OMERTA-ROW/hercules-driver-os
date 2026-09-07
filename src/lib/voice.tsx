@@ -593,6 +593,19 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setMode("idle");
   }, [clearTimers]);
 
+  /* Unprompted HERCULES speech: arrival countdowns, timers, warnings. */
+  const announce = useCallback(
+    (text: string) => {
+      clearTimers();
+      setMode("speaking");
+      push({ id: nextId(), from: "hercules", text });
+      const readMs = Math.min(9000, 1800 + text.length * 28);
+      timers.current.push(setTimeout(() => setMode("idle"), readMs));
+    },
+    [clearTimers, push],
+  );
+
+
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
     return last?.text ?? "";
