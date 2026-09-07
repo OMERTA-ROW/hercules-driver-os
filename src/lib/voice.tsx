@@ -24,6 +24,7 @@ import {
   coverageFor as coverageAt,
 } from "@/data/delivery";
 import { currentFix, problems, services } from "@/data/breakdown";
+import { seedRecords, statusOf, spokenExpiry, daysUntil } from "@/data/compliance";
 import {
   filterByProblem,
   problemFromSpeech,
@@ -123,7 +124,23 @@ type Topic =
   | "supply"
   | "alerts"
   | "equipment"
+  | "compliance"
   | "none";
+
+/**
+ * Paperwork on the driver's own account that is expired or inside its warning
+ * window. Reads the shared compliance records — the same ones the carrier sees.
+ */
+function complianceAttention() {
+  const mine = ["DR-114", "HERC-114", "TRL-9920"];
+  return seedRecords
+    .filter((r) => mine.includes(r.subjectId))
+    .filter((r) => {
+      const s = statusOf(r);
+      return s === "expired" || s === "expiring";
+    })
+    .sort((a, b) => daysUntil(a.expires) - daysUntil(b.expires));
+}
 
 /** Match a spoken equipment name to a saved-profile spec. */
 function spokenVehicle(t: string): VehicleSpec | null {
