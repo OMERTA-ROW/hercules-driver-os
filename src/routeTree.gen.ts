@@ -29,6 +29,7 @@ import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as ZeusRouteImport } from './routes/zeus'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -130,6 +131,11 @@ const VoiceRoute = VoiceRouteImport.update({
   path: '/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZeusRoute = ZeusRouteImport.update({
+  id: '/zeus',
+  path: '/zeus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   id:
     | '__root__'
     | '/'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -288,6 +300,7 @@ export interface RootRouteChildren {
   StoreRoute: typeof StoreRoute
   SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
+  ZeusRoute: typeof ZeusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zeus': {
+      id: '/zeus'
+      path: '/zeus'
+      fullPath: '/zeus'
+      preLoaderRoute: typeof ZeusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -456,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoreRoute: StoreRoute,
   SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
+  ZeusRoute: ZeusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
