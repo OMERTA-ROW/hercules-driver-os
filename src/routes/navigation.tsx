@@ -29,7 +29,7 @@ import {
   offRoutePosition,
   routeParking,
   destinationFacility,
-  truckProfile,
+  vehicle,
   type LatLng,
   type TruckRoute,
 } from "@/data/routing";
@@ -83,7 +83,7 @@ function NavigationScreen() {
   const announced = useRef<string | null>(null);
 
   useEffect(() => {
-    void hazardLayer.hazardsAhead({ profile: truckProfile }).then(setAllHazards);
+    void hazardLayer.hazardsAhead({ profile: vehicle }).then(setAllHazards);
   }, []);
 
   /** Mock odometer: the truck eats about a mile per GPS tick. */
@@ -93,8 +93,8 @@ function NavigationScreen() {
     .filter((h) => isOn(h.kind))
     .map((h) => ({
       hazard: h,
-      severity: effectiveSeverity(h, truckProfile),
-      exceeds: exceedsTruck(h, truckProfile),
+      severity: effectiveSeverity(h, vehicle),
+      exceeds: exceedsTruck(h, vehicle),
       milesAhead: Math.max(0, Math.round((h.milesAhead - traveled) * 10) / 10),
     }))
     .filter((h) => h.milesAhead > 0)
@@ -144,7 +144,7 @@ function NavigationScreen() {
     const next = await truckRouting.reroute({
       position: fix,
       destination: primaryRoute.polyline[primaryRoute.polyline.length - 1]!,
-      profile: truckProfile,
+      profile: vehicle,
     });
     setRoute(next);
     setOffRoute(false);
@@ -176,7 +176,7 @@ function NavigationScreen() {
   return (
     <AppShell
       title="Navigation"
-      subtitle={`${route.label} · truck-legal for ${truckProfile.heightFt}' / ${truckProfile.grossWeightLbs.toLocaleString()} lb / ${truckProfile.lengthFt}'`}
+      subtitle={`${route.label} · truck-legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
     >
           {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
       {warning ? (
@@ -201,8 +201,8 @@ function NavigationScreen() {
               <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
               {warning.exceeds ? (
                 <p className="mt-1 text-sm font-semibold text-destructive">
-                  Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
-                  {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
+                  Exceeds your configuration: {vehicle.heightFt}' ·{" "}
+                  {vehicle.grossWeightLbs.toLocaleString()} lb · {vehicle.lengthFt}'
                 </p>
               ) : null}
               <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -451,7 +451,7 @@ function NavigationScreen() {
         <Panel>
           <PanelTitle right={<Pill tone="alert">Excluded</Pill>}>Kept off your route</PanelTitle>
           <div className="space-y-2">
-            {truckRouting.restrictions(truckProfile).map((r) => (
+            {truckRouting.restrictions(vehicle).map((r) => (
               <div
                 key={r.road}
                 className="flex items-start gap-2 rounded-lg border border-destructive/35 bg-destructive/10 p-2.5"
