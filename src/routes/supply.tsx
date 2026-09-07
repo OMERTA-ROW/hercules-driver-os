@@ -9,7 +9,13 @@ import {
   Check,
   X,
   Clock,
+  Lock,
+  ExternalLink,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { useAddons } from "@/lib/addons";
+import { addonById } from "@/data/addons";
+import { NO_FEE_HANDOFF } from "@/data/fees";
 import { useArrivals } from "@/lib/arrivals";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
@@ -80,11 +86,14 @@ function SupplyScreen() {
     meetNote,
     setMeetNote,
     orders,
-    place,
+    handOff,
     cancel,
     provider,
   } = useDelivery();
   const { expectDelivery } = useArrivals();
+  const { has, enable } = useAddons();
+  const addon = addonById("voiceHandoff");
+  const unlocked = has("voiceHandoff");
 
 
   const [spokenLine, setSpokenLine] = useState<string | null>(null);
@@ -104,7 +113,7 @@ function SupplyScreen() {
     const first = reachable[0];
     setSpokenLine(
       first
-        ? `You are at ${location.label}. ${noFoodHere ? "No restaurant delivery reaches this lot at all." : ""} Best I can actually get to you is ${serviceOf(first.service).name} — ${first.vendor}, ${first.summary}. ${money2(first.subtotal)} plus ${money2(first.deliveryFee)} delivery, ${money2(first.subtotal + first.deliveryFee)} total, about ${first.etaMin} minutes to ${meetNote || "the truck"}. Say "order it" and I will read it back once more before anything is placed.`
+        ? `You are at ${location.label}. ${noFoodHere ? "No restaurant delivery reaches this lot at all." : ""} Best I can actually get to you is ${serviceOf(first.service).name} — ${first.vendor}, ${first.summary}. ${money2(first.subtotal)} plus ${money2(first.deliveryFee)} delivery, ${money2(first.subtotal + first.deliveryFee)} total, about ${first.etaMin} minutes to ${meetNote || "the truck"}. Say "order it" and I will read it back, then hand it straight into ${serviceOf(first.service).name} pre-filled — you just hit submit. ${NO_FEE_HANDOFF}`
         : `Nothing can reach you at ${location.label}. ${nearestCoveredAhead ? `${nearestCoveredAhead.label}, ${nearestCoveredAhead.milesAhead} miles ahead, has coverage — eat there before you shut down.` : ""}`,
     );
   }
@@ -122,14 +131,14 @@ function SupplyScreen() {
     const opt = options.find((o) => o.service === fav.service) ?? options[0];
     if (!opt) return;
     setSpokenLine(
-      `Reordering ${fav.label} from ${fav.vendor} on ${serviceOf(fav.service).name}. Last time it came to ${money2(fav.lastTotal)}. Nothing is placed yet — approve it below or say yes.`,
+      `Reordering ${fav.label} from ${fav.vendor} on ${serviceOf(fav.service).name}. Last time it came to ${money2(fav.lastTotal)}. Nothing is handed off yet — approve it below or say yes.`,
     );
     setPending({ ...opt, vendor: fav.vendor, items: fav.items, summary: fav.label });
   }
 
   async function confirm() {
     if (!pending) return;
-    const order = await place(pending);
+    const order = await handOff(pending);
     // INBOUND ARRIVAL: HERCULES now tracks the courier and calls out the
     // countdown by name, unprompted, so the driver can rest until they're here.
     expectDelivery({
@@ -140,14 +149,62 @@ function SupplyScreen() {
     });
     setPending(null);
     setSpokenLine(
-      `Placed on your word. ${serviceOf(order.service).name} — ${order.vendor}, ${money2(order.total)} total, about ${order.etaMin} minutes to ${order.dropLabel}. Meet note: ${order.meetNote}. You can cancel it from this screen.`,
+      `Handed off on your word. ${serviceOf(order.service).name} is open with the whole cart filled in — ${order.vendor}, ${money2(order.total)}, about ${order.etaMin} minutes to ${order.dropLabel}. Meet note: ${order.meetNote}. Hit submit in the app and it is placed. ${NO_FEE_HANDOFF}`,
+    );
+  }
+
+  if (!unlocked) {
+    return (
+      <AppShell
+        title="Delivery & Supply"
+        subtitle="Voice Hand-Off Ordering — a $5.00 per month add-on, separate from your plan"
+      >
+        <Panel className="border-primary/40 bg-primary/6">
+          <PanelTitle right={<Pill tone="primary">{addon.priceLabel}</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" /> {addon.name}
+            </span>
+          </PanelTitle>
+          <p className="max-w-3xl text-sm leading-relaxed text-foreground/85">{addon.blurb}</p>
+          <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+            {addon.includes.map((i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                {i}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              onClick={() => enable("voiceHandoff")}
+              className="min-h-[60px] gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Check className="h-5 w-5" />
+              Add it — $5.00 / month
+            </Button>
+            <Button asChild variant="outline" className="min-h-[60px] border-primary/30">
+              <Link to="/settings">See my monthly total first</Link>
+            </Button>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            $5.00 a month on top of your plan. No per-order fee — the delivery app takes the payment,
+            not HERCULES. Switch it off any time in Settings.
+          </p>
+          <div className="mt-3">
+            <DriverApprovedNote>
+              Nothing is added to your bill until you tap it, and your running monthly total updates
+              in front of you in Settings.
+            </DriverApprovedNote>
+          </div>
+        </Panel>
+      </AppShell>
     );
   }
 
   return (
     <AppShell
       title="Delivery & Supply"
-      subtitle="Food, groceries and essentials brought to the truck — coverage checked where you sit"
+      subtitle="Voice hand-off ordering — HERCULES fills the cart, the app takes the payment"
     >
       {/* WHERE THE TRUCK IS + coverage headline. Proactive, before any ordering. */}
       <Panel
@@ -365,8 +422,8 @@ function SupplyScreen() {
           </div>
           <div className="mt-3">
             <DriverApprovedNote>
-              HERCULES reads prices and ETAs aloud and waits. Nothing is ordered, charged, or
-              dispatched until you say yes.
+              HERCULES reads prices and ETAs aloud and waits. Nothing is handed into a delivery
+              app until you say yes — and HERCULES never charges you for a hand-off.
             </DriverApprovedNote>
           </div>
         </Panel>
@@ -404,15 +461,15 @@ function SupplyScreen() {
               })}
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Say “reorder the usual” and HERCULES reads the whole thing back before placing it.
+              Say “reorder the usual” and HERCULES reads the whole thing back before handing it off.
             </p>
           </Panel>
 
           <Panel>
-            <PanelTitle>Orders</PanelTitle>
+            <PanelTitle>Handed off</PanelTitle>
             {orders.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Nothing placed. Orders you approve show here with a cancel option.
+                Nothing handed off yet. Orders you approve show here — submit them in the app.
               </p>
             ) : (
               <div className="space-y-2">
@@ -434,13 +491,17 @@ function SupplyScreen() {
                       {serviceOf(o.service).name} · {money2(o.total)} · {o.dropLabel}
                     </p>
                     <p className="text-xs text-muted-foreground">Meet: {o.meetNote}</p>
+                    <p className="flex items-center gap-1 text-xs text-primary">
+                      <ExternalLink className="h-3 w-3" />
+                      Pre-filled in {serviceOf(o.service).name} · $0.00 HERCULES fee
+                    </p>
                     <button
                       type="button"
                       onClick={() => cancel(o.id)}
                       className="tech-label mt-2 flex min-h-[48px] items-center gap-2 text-muted-foreground hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
-                      Cancel this order
+                      Clear this hand-off
                     </button>
                   </div>
                 ))}
@@ -456,7 +517,9 @@ function SupplyScreen() {
           <div className="glass w-full max-w-lg p-5 shadow-[0_0_40px_-12px_color-mix(in_oklab,var(--primary)_60%,var(--violet))]">
             <div className="flex items-center gap-3">
               <ShoppingBasket className="h-6 w-6 text-primary" />
-              <h3 className="text-lg font-semibold uppercase tracking-wide">Read back before I order</h3>
+              <h3 className="text-lg font-semibold uppercase tracking-wide">
+                Read back before I hand it off
+              </h3>
             </div>
             <div className="mt-3 space-y-1 text-sm">
               <p className="text-foreground/85">
@@ -476,10 +539,15 @@ function SupplyScreen() {
                   <span className="text-muted-foreground">Delivery</span>
                   <span>{money2(pending.deliveryFee)}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">HERCULES service fee</span>
+                  <span className="text-go">$0.00</span>
+                </div>
                 <div className="flex justify-between font-semibold text-primary">
-                  <span>Total charged</span>
+                  <span>{serviceOf(pending.service).name} charges you</span>
                   <span>{money2(pending.subtotal + pending.deliveryFee)}</span>
                 </div>
+                <p className="pt-1 text-xs text-muted-foreground">{NO_FEE_HANDOFF}</p>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 To {location.label} · meet: {meetNote || "At the truck"} · about {pending.etaMin}{" "}
@@ -492,7 +560,7 @@ function SupplyScreen() {
                 className="min-h-[60px] flex-1 gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Check className="h-5 w-5" />
-                Approve &amp; order
+                Approve &amp; hand off
               </Button>
               <Button
                 variant="outline"
