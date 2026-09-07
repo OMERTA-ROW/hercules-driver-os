@@ -121,7 +121,22 @@ type Topic =
   | "health"
   | "supply"
   | "alerts"
+  | "equipment"
   | "none";
+
+/** Match a spoken equipment name to a saved-profile spec. */
+function spokenVehicle(t: string): VehicleSpec | null {
+  if (/(sprinter|cargo van)/.test(t)) return specFor("cargoVan");
+  if (/(heavy haul)/.test(t)) return specFor("heavyHaul");
+  if (/(car haul)/.test(t)) return specFor("carHaul");
+  if (/(intermodal)/.test(t)) return specFor("eighteen", "intermodal");
+  if (/(line ?haul)/.test(t)) return specFor("eighteen", "lineHaul");
+  if (/(dry van)/.test(t)) return specFor("eighteen", "dryVan");
+  if (/(flat ?bed)/.test(t)) return specFor("flatbed");
+  if (/(18 ?wheeler|eighteen wheeler)/.test(t)) return specFor("eighteen", "dryVan");
+  return null;
+}
+
 
 function hm(min: number) {
   return `${Math.floor(min / 60)} hours ${min % 60} minutes`;
