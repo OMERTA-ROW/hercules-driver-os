@@ -16,6 +16,7 @@ import {
   Mic,
   ShoppingBag,
   ShoppingBasket,
+  Building2,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
