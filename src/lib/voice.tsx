@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { currentLoad, hos, loads, alerts, faultCodes, loadPnL } from "@/data/mock";
+import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
 import { boltFaults, boltPredictions } from "@/data/bolt";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
