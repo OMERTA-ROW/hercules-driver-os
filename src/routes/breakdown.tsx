@@ -612,7 +612,10 @@ function BreakdownPage() {
                     // the call replaces it — by voice or with one tap.
                     expectMechanic({
                       company: confirm.name,
-                      reason: activeProblem.label.toLowerCase(),
+                      reason:
+                        problem === "unknown"
+                          ? "a breakdown you haven't pinned down yet"
+                          : activeProblem.label.toLowerCase(),
                       etaMin: confirm.etaMin,
                       phone: confirm.phone,
                     });
