@@ -77,6 +77,10 @@ function NavigationScreen() {
   const [spoken, setSpoken] = useState<string | null>(null);
   const rerouting = useRef(false);
 
+  // ------------------------------------------------- ACTIVE EQUIPMENT PROFILE
+  // The profile picked for this trip drives legality and hazard filtering.
+  const { active: vehicle, rules } = useVehicle();
+
   // ---------------------------------------------------------------- HAZARDS
   const { isOn } = useHazardLayers();
   const [allHazards, setAllHazards] = useState<Hazard[]>([]);
@@ -85,13 +89,13 @@ function NavigationScreen() {
 
   useEffect(() => {
     void hazardLayer.hazardsAhead({ profile: vehicle }).then(setAllHazards);
-  }, []);
+  }, [vehicle]);
 
   /** Mock odometer: the truck eats about a mile per GPS tick. */
   const traveled = idx * 1;
 
   const hazardsAhead = allHazards
-    .filter((h) => isOn(h.kind))
+    .filter((h) => isOn(h.kind) && relevantToVehicle(h, vehicle))
     .map((h) => ({
       hazard: h,
       severity: effectiveSeverity(h, vehicle),
