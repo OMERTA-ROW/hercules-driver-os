@@ -12,6 +12,16 @@ import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
 import { boltFaults, boltPredictions } from "@/data/bolt";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
+import {
+  currentLocation as dropLocation,
+  favorites as supplyFavorites,
+  nearestCovered,
+  orderOptions,
+  serviceOf,
+  services as supplyServices,
+  spokenCoverage,
+  coverageFor as coverageAt,
+} from "@/data/delivery";
 import { currentFix, problems, services } from "@/data/breakdown";
 import {
   filterByProblem,
@@ -109,6 +119,7 @@ type Topic =
   | "hazards"
   | "stops"
   | "health"
+  | "supply"
   | "alerts"
   | "none";
 
@@ -120,6 +131,34 @@ type Reply = { text: string; topic: Topic; proposal?: Proposal };
 
 /** The problem the driver last named, so "call them" ranks the right shops. */
 let lastProblem: ReturnType<typeof problemFromSpeech> = null;
+
+/** Options a service can actually deliver to where the truck is sitting. */
+function reachableOrders() {
+  return orderOptions.filter((o) => coverageAt(dropLocation, o.service).status !== "none");
+}
+
+/** The coverage rundown HERCULES reads aloud for the spot the truck is in. */
+function coverageLine() {
+  const food = supplyServices.filter((s) => s.category === "food");
+  const dead = food.filter((s) => coverageAt(dropLocation, s.id).status === "none");
+  const live = reachableOrders();
+  const ahead = nearestCovered("food");
+  const head =
+    dead.length === food.length
+      ? `You're at ${dropLocation.label}, and no restaurant delivery covers this lot. ${dead
+          .map((s) => `No ${s.name} available in this area.`)
+          .join(" ")}`
+      : `You're at ${dropLocation.label}. ${food
+          .map((s) => spokenCoverage(dropLocation, s.id))
+          .join(" ")}`;
+  const rest = live[0]
+    ? ` What can still reach you: ${serviceOf(live[0].service).name} — ${live[0].vendor}, about ${live[0].etaMin} minutes.`
+    : "";
+  const tail = ahead
+    ? ` Nearest coverage on your route is ${ahead.label}, ${ahead.milesAhead} miles ahead — eat there before you shut down here.`
+    : "";
+  return `${head}${rest}${tail}`;
+}
 
 /** Follow-ups the driver can say once a topic is on the table. */
 function followUp(topic: Topic, text: string): Reply | null {
@@ -208,6 +247,52 @@ function followUp(topic: Topic, text: string): Reply | null {
       },
     };
   }
+  /* SUPPLY: ordering food or goods to the truck stays a conversation until the
+     driver either approves the read-back or drops it. */
+  if (topic === "supply") {
+    if (/(reorder|the usual|favou?rite|same as last|again)/.test(t)) {
+      const fav = supplyFavorites[0]!;
+      const cov = coverageAt(dropLocation, fav.service);
+      if (cov.status === "none") {
+        const ahead = nearestCovered("food");
+        return {
+          topic: "supply",
+          text: `${fav.label} runs on ${serviceOf(fav.service).name}, and no ${serviceOf(fav.service).name} is available in this area.${ahead ? ` It works again at ${ahead.label}, ${ahead.milesAhead} miles ahead.` : ""} Want me to look at what can still reach you here?`,
+        };
+      }
+      return {
+        topic: "supply",
+        text: `${fav.label} — ${fav.vendor} on ${serviceOf(fav.service).name}: ${fav.items.join(", ")}. Last time that was ${fav.lastTotal.toFixed(2)} dollars, about ${cov.etaMin} minutes to the truck. Say yes and I'll place it. Nothing is ordered yet.`,
+        proposal: {
+          summary: `Reorder ${fav.label} — ${fav.vendor} on ${serviceOf(fav.service).name}, delivered to ${dropLocation.label}`,
+          total: `$${fav.lastTotal.toFixed(2)}`,
+        },
+      };
+    }
+    if (/(coverage|available|any delivery|no doordash|no uber|works|where)/.test(t)) {
+      return { topic: "supply", text: coverageLine() };
+    }
+    if (/(order|place|get me|send it|do it|buy|that one|first one)/.test(t)) {
+      const o = reachableOrders()[0];
+      if (!o) {
+        const ahead = nearestCovered("food");
+        return {
+          topic: "supply",
+          text: `I can't place anything here — nothing delivers to ${dropLocation.label}.${ahead ? ` ${ahead.label} is ${ahead.milesAhead} miles ahead and has coverage.` : ""}`,
+        };
+      }
+      const total = o.subtotal + o.deliveryFee;
+      return {
+        topic: "supply",
+        text: `Reading it back: ${serviceOf(o.service).name}, ${o.vendor} — ${o.summary}. ${o.subtotal.toFixed(2)} dollars plus ${o.deliveryFee.toFixed(2)} delivery, ${total.toFixed(2)} total, about ${o.etaMin} minutes, delivered to ${dropLocation.label}. Tell me where to meet you — bay, gate or lot — and say yes. Nothing is ordered or charged until you do.`,
+        proposal: {
+          summary: `Order from ${o.vendor} on ${serviceOf(o.service).name} — ${o.summary}, delivered to ${dropLocation.label}`,
+          total: `$${total.toFixed(2)}`,
+        },
+      };
+    }
+  }
+
   if (topic === "clock" && wantsMore) {
     return {
       topic: "clock",
@@ -274,6 +359,13 @@ export function respond(text: string, topic: Topic): Reply {
       text: `Nearest thing worth knowing: ${h.name}. ${h.detail}. I'll call it out well before you get there, sized so you don't have to look down.`,
     };
   }
+  if (
+    /(deliver|delivery|uber ?eats|door ?dash|grub ?hub|instacart|gopuff|go ?puff|walmart|walgreens|cvs|amazon|pharmacy|prescription|grocer|order|hungry|starving|dinner|lunch|breakfast|coffee|supplies|snack)/.test(
+      t,
+    )
+  ) {
+    return { topic: "supply", text: `${coverageLine()} Say "order it" and I'll read the whole thing back before anything is placed.` };
+  }
   if (/(shower|park|stop|diesel|fuel|sleep|rest|eat|food)/.test(t)) {
     const s = truckStops[0]!;
     return {
@@ -317,6 +409,7 @@ const driverPrompts = [
   "What's ahead of me on this road?",
   "Where can I shower and park tonight?",
   "I'm broke down",
+  "Can anything deliver food to me here?",
 ];
 
 /* ------------------------------------------------------------------ PROVIDER */

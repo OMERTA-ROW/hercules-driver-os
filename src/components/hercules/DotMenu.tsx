@@ -15,6 +15,7 @@ import {
   Settings as SettingsIcon,
   Mic,
   ShoppingBag,
+  ShoppingBasket,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -37,6 +38,7 @@ const sections = [
   { to: "/stops", label: "Truck Stops", icon: Fuel, feature: null },
   { to: "/breakdown", label: "Breakdown Assist", icon: LifeBuoy, feature: null },
   { to: "/documents", label: "Documents", icon: FileText, feature: null },
+  { to: "/supply", label: "Delivery & Supply", icon: ShoppingBasket, feature: null },
   { to: "/store", label: "Store", icon: ShoppingBag, feature: null },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
   { to: "/voice", label: "Conversation", icon: Mic, feature: null },
