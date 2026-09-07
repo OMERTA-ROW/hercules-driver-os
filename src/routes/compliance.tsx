@@ -290,7 +290,7 @@ function RecordRow({ rec, onShare }: { rec: DocRecord; onShare?: () => void }) {
             {rec.uploadedAt}
           </span>
         </span>
-        <Pill tone={status === "expired" ? "stop" : status === "expiring" ? "warn" : "go"}>
+        <Pill tone={status === "expired" ? "alert" : status === "expiring" ? "warn" : "go"}>
           {status === "expired"
             ? "Expired"
             : status === "expiring"
@@ -402,7 +402,7 @@ function ApprovalQueue() {
                 <Pill
                   tone={
                     outcome.state === "rejected"
-                      ? "stop"
+                      ? "alert"
                       : outcome.state === "requested"
                         ? "warn"
                         : "info"
