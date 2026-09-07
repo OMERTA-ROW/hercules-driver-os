@@ -14,6 +14,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePurchases } from "@/lib/purchases";
+import { useAddons } from "@/lib/addons";
+import { addonById } from "@/data/addons";
+import { Mic } from "lucide-react";
+import { toast as notify } from "sonner";
 import { BOLT } from "@/data/bolt";
 import { DOC_UPLOAD_PRICE } from "@/data/documents";
 
@@ -41,6 +45,9 @@ export const Route = createFileRoute("/store")({
 
 function StorePage() {
   const { owns, purchase } = usePurchases();
+  const { has, toggle, monthlyTotal } = useAddons();
+  const handoff = addonById("voiceHandoff");
+  const hasHandoff = has("voiceHandoff");
   const [confirming, setConfirming] = useState<null | "bolt" | "documents">(null);
   const hasBolt = owns("bolt");
   const hasDocs = owns("documents");
@@ -148,6 +155,53 @@ function StorePage() {
                   Unlock — ${DOC_UPLOAD_PRICE}.00 one time
                 </Button>
               )}
+            </div>
+          </Panel>
+
+          <Panel>
+            <PanelTitle
+              right={
+                hasHandoff ? (
+                  <Pill tone="go">
+                    <Check className="h-3.5 w-3.5" /> On
+                  </Pill>
+                ) : (
+                  <Pill tone="primary">$5 / month</Pill>
+                )
+              }
+            >
+              Voice Hand-Off Ordering
+            </PanelTitle>
+            <Mic className="h-10 w-10 text-primary" />
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{handoff.blurb}</p>
+            <p className="mt-2 text-xs text-go">
+              No per-order fee. The delivery app takes the payment — HERCULES only fills the order in
+              for you.
+            </p>
+            <div className="mt-3 space-y-2">
+              <Button
+                size="lg"
+                variant={hasHandoff ? "outline" : "default"}
+                className="w-full"
+                onClick={() => {
+                  toggle("voiceHandoff");
+                  notify.success(
+                    hasHandoff ? "Voice Hand-Off Ordering switched off" : "Voice Hand-Off Ordering added",
+                    {
+                      description: hasHandoff
+                        ? "Removed from your monthly total on your word."
+                        : "$5.00 a month on top of your plan, on your word.",
+                    },
+                  );
+                }}
+              >
+                {hasHandoff ? "Switch it off" : "Add it — $5.00 / month"}
+              </Button>
+              <Button asChild size="lg" variant="outline" className="w-full">
+                <Link to="/settings">
+                  My monthly total — ${monthlyTotal.toFixed(2)}
+                </Link>
+              </Button>
             </div>
           </Panel>
 

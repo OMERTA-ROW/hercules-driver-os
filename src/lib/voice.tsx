@@ -278,16 +278,16 @@ function followUp(topic: Topic, text: string): Reply | null {
         const ahead = nearestCovered("food");
         return {
           topic: "supply",
-          text: `I can't place anything here — nothing delivers to ${dropLocation.label}.${ahead ? ` ${ahead.label} is ${ahead.milesAhead} miles ahead and has coverage.` : ""}`,
+          text: `Nothing delivers to ${dropLocation.label}, so there is nothing for me to hand off.${ahead ? ` ${ahead.label} is ${ahead.milesAhead} miles ahead and has coverage.` : ""}`,
         };
       }
       const total = o.subtotal + o.deliveryFee;
       return {
         topic: "supply",
-        text: `Reading it back: ${serviceOf(o.service).name}, ${o.vendor} — ${o.summary}. ${o.subtotal.toFixed(2)} dollars plus ${o.deliveryFee.toFixed(2)} delivery, ${total.toFixed(2)} total, about ${o.etaMin} minutes, delivered to ${dropLocation.label}. Tell me where to meet you — bay, gate or lot — and say yes. Nothing is ordered or charged until you do.`,
+        text: `Reading it back: ${serviceOf(o.service).name}, ${o.vendor} — ${o.summary}. ${o.subtotal.toFixed(2)} dollars plus ${o.deliveryFee.toFixed(2)} delivery, ${total.toFixed(2)} total, about ${o.etaMin} minutes to ${dropLocation.label}. Tell me where to meet you — bay, gate or lot — and say yes, and I'll hand it into ${serviceOf(o.service).name} filled in so you just hit submit. No HERCULES fee on this one; ${serviceOf(o.service).name} charges you directly.`,
         proposal: {
-          summary: `Order from ${o.vendor} on ${serviceOf(o.service).name} — ${o.summary}, delivered to ${dropLocation.label}`,
-          total: `$${total.toFixed(2)}`,
+          summary: `Hand off to ${serviceOf(o.service).name} — ${o.vendor}, ${o.summary}, delivered to ${dropLocation.label}. HERCULES fee $0.00`,
+          total: `$${total.toFixed(2)} charged by ${serviceOf(o.service).name}`,
         },
       };
     }
