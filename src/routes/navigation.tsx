@@ -184,7 +184,6 @@ function NavigationScreen() {
   return (
     <AppShell
       title="Navigation"
-      subtitle={`${route.label} · truck-legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
       subtitle={`${vehicle.label} · ${route.label} · legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
     >
       {/* ACTIVE EQUIPMENT — the profile that produced this route */}
