@@ -10,6 +10,7 @@ import {
   X,
   Clock,
 } from "lucide-react";
+import { useArrivals } from "@/lib/arrivals";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
   Panel,
@@ -127,6 +128,14 @@ function SupplyScreen() {
   async function confirm() {
     if (!pending) return;
     const order = await place(pending);
+    // INBOUND ARRIVAL: HERCULES now tracks the courier and calls out the
+    // countdown by name, unprompted, so the driver can rest until they're here.
+    expectDelivery({
+      service: order.service,
+      vendor: order.vendor,
+      etaMin: order.etaMin,
+      summary: pending.summary,
+    });
     setPending(null);
     setSpokenLine(
       `Placed on your word. ${serviceOf(order.service).name} — ${order.vendor}, ${money2(order.total)} total, about ${order.etaMin} minutes to ${order.dropLabel}. Meet note: ${order.meetNote}. You can cancel it from this screen.`,
