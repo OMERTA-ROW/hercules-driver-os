@@ -153,7 +153,7 @@ function BreakdownPage() {
         >
           <PanelTitle
             right={
-              <Pill tone={tracked.status === "overdue" ? "alert" : "good"}>
+              <Pill tone={tracked.status === "overdue" ? "alert" : "primary"}>
                 {tracked.status === "overdue" ? "past window" : countdownLabel(tracked, now)}
               </Pill>
             }
