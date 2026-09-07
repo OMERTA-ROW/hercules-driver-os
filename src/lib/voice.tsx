@@ -326,8 +326,29 @@ export function respond(text: string, topic: Topic): Reply {
   }
 
 
+  /* EQUIPMENT / VOCATION — what the driver is in today drives the whole route. */
+  if (
+    /(what am i in|i'?m in the|im in the|today i'?m|equipment|vocation|sprinter|cargo van|flat ?bed|18 ?wheeler|eighteen wheeler|dry van|line ?haul|intermodal|car haul|heavy haul|bobtail)/.test(
+      t,
+    )
+  ) {
+    const said = spokenVehicle(t);
+    if (said) {
+      const rules = rulesFor(said);
+      return {
+        topic: "equipment",
+        text: `${said.label} it is. ${rules.spoken} I've set that for this trip and filtered the hazard warnings to what actually matters for it. Say the word if you swap units.`,
+      };
+    }
+    return {
+      topic: "equipment",
+      text: `Tell me what you're in today — cargo van, flatbed, eighteen wheeler dry van, line haul, intermodal, car haul, or heavy haul. A van I'll run down county and back roads. Anything pulling a trailer stays on blue-shield interstate and legal county highway, with low bridge clearances checked either way. Heavy haul adds grades, switchbacks and posted weight limits.`,
+    };
+  }
+
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
+
       topic: "clock",
       text: `You have ${hm(hos.driveRemainingMin)} of drive time left and ${hm(hos.breakInMin)} until your break is due. ${currentLoad.milesRemaining} miles to ${currentLoad.destination}, ETA ${currentLoad.etaLocal} — that leaves you slack in the window.`,
     };
