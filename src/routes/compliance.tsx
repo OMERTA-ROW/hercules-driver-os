@@ -149,10 +149,10 @@ function AttentionStrip() {
             key={r.id}
             className={cn(
               "flex flex-wrap items-center gap-3 rounded-xl border p-3",
-              gone ? "border-stop/60 bg-stop/12" : "border-warn/50 bg-warn/10",
+              gone ? "border-destructive/60 bg-destructive/12" : "border-warn/50 bg-warn/10",
             )}
           >
-            <AlertTriangle className={cn("h-6 w-6 shrink-0", gone ? "text-stop" : "text-warn")} />
+            <AlertTriangle className={cn("h-6 w-6 shrink-0", gone ? "text-destructive" : "text-warn")} />
             <span className="min-w-0">
               <span className="block font-display text-base uppercase tracking-[0.1em]">
                 {kindSpec(r.kind).label} · {subjectName(r.subjectKind, r.subjectId)}
@@ -325,9 +325,9 @@ function RecordRow({ rec, onShare }: { rec: DocRecord; onShare?: () => void }) {
                   {k.pass ? (
                     <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-go" />
                   ) : (
-                    <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stop" />
+                    <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
                   )}
-                  <span className={k.pass ? "" : "text-stop"}>{k.label}</span>
+                  <span className={k.pass ? "" : "text-destructive"}>{k.label}</span>
                 </li>
               ))}
             </ul>
@@ -350,7 +350,7 @@ function RecordRow({ rec, onShare }: { rec: DocRecord; onShare?: () => void }) {
               </Button>
             ) : null}
             {failed.length ? (
-              <p className="mt-2 text-xs text-stop">
+              <p className="mt-2 text-xs text-destructive">
                 {failed.length} thing{failed.length === 1 ? "" : "s"} I could not clear on this one.
               </p>
             ) : null}
@@ -439,7 +439,7 @@ function ApprovalQueue() {
                 <Label>Missing or expired</Label>
                 <ul className="mt-1 space-y-1.5">
                   {blocking.map((r) => (
-                    <li key={r.id} className="flex items-start gap-1.5 text-xs text-stop">
+                    <li key={r.id} className="flex items-start gap-1.5 text-xs text-destructive">
                       <FileWarning className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                       {kindSpec(r.kind).label} — {statusOf(r) === "expired" ? "expired" : "expiring"}{" "}
                       {fmtDate(r.expires)}
@@ -532,7 +532,7 @@ function ApprovalQueue() {
             </div>
 
             {outcome.state === "rejected" ? (
-              <p className="mt-2 text-xs text-stop">
+              <p className="mt-2 text-xs text-destructive">
                 Rejected {outcome.at} by {outcome.by} — “{outcome.reason}”
               </p>
             ) : null}
