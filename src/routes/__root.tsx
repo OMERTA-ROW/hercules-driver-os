@@ -147,17 +147,21 @@ function RootComponent() {
               <StopsProvider>
                 <DeliveryProvider>
                 <BoltProvider>
+                <VehicleProvider>
                 <ArrivalsProvider>
                 <VoiceProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
+            <TripVehiclePrompt />
             <ArrivalBridge />
             <ArrivalStack />
             <ScreenDim />
             <Toaster />
                 </VoiceProvider>
                 </ArrivalsProvider>
+                </VehicleProvider>
                 </BoltProvider>
+
                 </DeliveryProvider>
               </StopsProvider>
             </HazardLayerProvider>
