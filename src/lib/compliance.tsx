@@ -302,12 +302,15 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
           [driverId]: { state: "requested", at: stamp(), by, kind, note },
         }),
 
-      pendingDrivers: (companyCode) =>
-        drivers.filter(
-          (d) =>
-            (approvals[d.id]?.state ?? "pending") !== "approved" &&
-            (!companyCode || d.companyCode === companyCode),
-        ),
+      pendingDrivers: (companyCode) => {
+        const waiting = drivers.filter(
+          (d) => (approvals[d.id]?.state ?? "pending") !== "approved",
+        );
+        const mine = companyCode ? waiting.filter((d) => d.companyCode === companyCode) : [];
+        /* A carrier sees its own linked drivers; a broker onboarding carriers
+           direct, or a fleet with nobody linked yet, sees the open queue. */
+        return mine.length ? mine : waiting;
+      },
 
       shareWithBroker: (recordId) =>
         saveRecords(
