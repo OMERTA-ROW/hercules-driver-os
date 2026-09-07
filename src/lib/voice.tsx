@@ -394,7 +394,7 @@ export function respond(text: string, topic: Topic): Reply {
     }
     return {
       topic: "compliance",
-      text: `${due.map(spokenExpiry).join(" ")} Nothing gets sent to a broker or a carrier unless you tell me to — say the word and I'll pull the set together.`,
+      text: `${due.map((r) => spokenExpiry(r)).join(" ")} Nothing gets sent to a broker or a carrier unless you tell me to — say the word and I'll pull the set together.`,
     };
   }
 
