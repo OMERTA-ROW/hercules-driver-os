@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
+import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
@@ -44,6 +45,11 @@ const AlertsRoute = AlertsRouteImport.update({
 const BreakdownRoute = BreakdownRouteImport.update({
   id: '/breakdown',
   path: '/breakdown',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceRoute = ComplianceRouteImport.update({
+  id: '/compliance',
+  path: '/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/compliance'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/compliance'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/compliance'
     | '/dashboard'
     | '/documents'
     | '/driver'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
   BreakdownRoute: typeof BreakdownRoute
+  ComplianceRoute: typeof ComplianceRoute
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/breakdown'
       fullPath: '/breakdown'
       preLoaderRoute: typeof BreakdownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance': {
+      id: '/compliance'
+      path: '/compliance'
+      fullPath: '/compliance'
+      preLoaderRoute: typeof ComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -459,6 +479,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
   BreakdownRoute: BreakdownRoute,
+  ComplianceRoute: ComplianceRoute,
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,

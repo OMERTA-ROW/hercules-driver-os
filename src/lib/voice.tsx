@@ -24,6 +24,7 @@ import {
   coverageFor as coverageAt,
 } from "@/data/delivery";
 import { currentFix, problems, services } from "@/data/breakdown";
+import { seedRecords, statusOf, spokenExpiry, daysUntil } from "@/data/compliance";
 import {
   filterByProblem,
   problemFromSpeech,
@@ -123,7 +124,23 @@ type Topic =
   | "supply"
   | "alerts"
   | "equipment"
+  | "compliance"
   | "none";
+
+/**
+ * Paperwork on the driver's own account that is expired or inside its warning
+ * window. Reads the shared compliance records — the same ones the carrier sees.
+ */
+function complianceAttention() {
+  const mine = ["DR-114", "HERC-114", "TRL-9920"];
+  return seedRecords
+    .filter((r) => mine.includes(r.subjectId))
+    .filter((r) => {
+      const s = statusOf(r);
+      return s === "expired" || s === "expiring";
+    })
+    .sort((a, b) => daysUntil(a.expires) - daysUntil(b.expires));
+}
 
 /** Match a spoken equipment name to a saved-profile spec. */
 function spokenVehicle(t: string): VehicleSpec | null {
@@ -359,6 +376,25 @@ export function respond(text: string, topic: Topic): Reply {
     return {
       topic: "equipment",
       text: `Tell me what you're in today — cargo van, flatbed, eighteen wheeler dry van, line haul, intermodal, car haul, or heavy haul. A van I'll run down county and back roads. Anything pulling a trailer stays on blue-shield interstate and legal county highway, with low bridge clearances checked either way. Heavy haul adds grades, switchbacks and posted weight limits.`,
+    };
+  }
+
+  /* COMPLIANCE PAPERWORK — expiries, what's missing, who can read it. */
+  if (
+    /(medical card|med card|physical|cdl|licen[cs]e|insurance|authority|mvr|drug and alcohol|drug test|registration|inspection|paperwork|compliance|expir)/.test(
+      t,
+    )
+  ) {
+    const due = complianceAttention();
+    if (!due.length) {
+      return {
+        topic: "compliance",
+        text: `Your paperwork is clean. Licence, medical card, insurance, authority, MVR, drug and alcohol, registration and inspection are all on file and current, and your carrier is reading the same records you are. I'll speak up on my own the moment anything gets inside its warning window.`,
+      };
+    }
+    return {
+      topic: "compliance",
+      text: `${due.map((r) => spokenExpiry(r)).join(" ")} Nothing gets sent to a broker or a carrier unless you tell me to — say the word and I'll pull the set together.`,
     };
   }
 
