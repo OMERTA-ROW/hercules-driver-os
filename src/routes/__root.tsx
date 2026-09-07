@@ -162,6 +162,7 @@ function RootComponent() {
             <ScreenDim />
             <Toaster />
                 </VoiceProvider>
+                </ComplianceProvider>
                 </ArrivalsProvider>
                 </VehicleProvider>
                 </BoltProvider>
