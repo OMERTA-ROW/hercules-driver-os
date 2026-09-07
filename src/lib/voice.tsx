@@ -10,6 +10,7 @@ import {
 } from "react";
 import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
+import { rulesFor, specFor, type VehicleSpec } from "@/data/vehicles";
 import { boltFaults, boltPredictions } from "@/data/bolt";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
 import {
