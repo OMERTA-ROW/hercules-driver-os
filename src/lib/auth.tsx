@@ -96,21 +96,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(
-    (email: string) => {
+    (email: string, kind: AccountKind = "solo") => {
+      const door = doorFor(kind);
       persist({
         name: email.split("@")[0]?.replace(/[._]/g, " ") || "Driver",
         email,
-        plan: "owner",
-        seats: 1,
+        plan: door.plan,
+        seats: kind === "zeusFleet" ? 3 : 1,
         trialEndsAt: trialEnd(4),
         status: "trial",
+        kind,
+        ...(kind === "zeusFleet"
+          ? { company: { name: "Your carrier", code: makeCompanyCode(email) } }
+          : {}),
       });
     },
     [persist],
   );
 
   const signUp = useCallback(
-    ({ name, email, plan, seats }: { name: string; email: string; plan: PlanId; seats?: number }) => {
+    ({ name, email, plan, seats, kind = "solo", companyCode, companyName }: SignUpInput) => {
+      const linked = companyCode ? companyByCode(companyCode) : null;
+      const company =
+        kind === "zeusFleet"
+          ? { name: companyName || "New carrier", code: makeCompanyCode(companyName || email) }
+          : linked
+            ? { name: linked.name, code: linked.code }
+            : undefined;
       persist({
         name: name || "Driver",
         email,
@@ -118,6 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         seats: plan === "fleet" ? Math.max(3, seats ?? 3) : 1,
         trialEndsAt: trialEnd(),
         status: "trial",
+        kind,
+        ...(company ? { company } : {}),
       });
     },
     [persist],
