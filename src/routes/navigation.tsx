@@ -185,7 +185,24 @@ function NavigationScreen() {
     <AppShell
       title="Navigation"
       subtitle={`${route.label} · truck-legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
+      subtitle={`${vehicle.label} · ${route.label} · legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
     >
+      {/* ACTIVE EQUIPMENT — the profile that produced this route */}
+      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/8 p-3">
+        <span className="tech-label text-primary">Routing for</span>
+        <span className="font-display text-lg uppercase tracking-[0.1em]">{vehicle.label}</span>
+        <span className="text-xs text-muted-foreground">
+          {vehicle.unit} · {rules.backRoadsAllowed
+            ? "county and back roads permitted"
+            : "blue-shield interstate and white-shield legal county highway only"}
+          {rules.weightRestrictionChecks ? " · weight limits checked" : ""}
+          {rules.gradeAndSwitchbackChecks ? " · grades and switchbacks checked" : ""}
+        </span>
+        <Button variant="outline" size="lg" className="ml-auto" asChild>
+          <Link to="/equipment">Change equipment</Link>
+        </Button>
+      </div>
+
           {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
       {warning ? (
         <div
