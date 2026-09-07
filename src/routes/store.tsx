@@ -139,7 +139,9 @@ function StorePage() {
             <div className="mt-3">
               {hasDocs ? (
                 <Button asChild size="lg" className="w-full">
-                  <Link to="/documents">Open Documents</Link>
+                  <Link to="/documents" search={{ load: undefined, type: undefined, capture: false }}>
+                    Open Documents
+                  </Link>
                 </Button>
               ) : (
                 <Button size="lg" className="w-full" onClick={() => setConfirming("documents")}>
