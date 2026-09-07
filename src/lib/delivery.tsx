@@ -29,14 +29,21 @@ import {
  *
  * `deliveryProvider` is the single place real service APIs get wired in:
  * per-service coverage check for the truck's lat/lng, storefront search, quote,
- * and order placement. Today it answers from mock data and keeps placed orders
+ * and the hand-off itself. Today it answers from mock data and keeps hand-offs
  * in local storage so the whole voice flow is drivable.
  *
- * DRIVER APPROVED: `place` is only ever called after the driver explicitly
- * approves a read-back order. Nothing here places anything on its own.
+ * HERCULES DOES NOT PROCESS THESE ORDERS. DoorDash, Uber Eats, Grubhub,
+ * Instacart, GoPuff, Walmart, Walgreens, CVS and Amazon do not permit
+ * third-party order placement, so `handOff` builds the cart and opens the
+ * platform's own app pre-filled — the driver submits it there and the platform
+ * charges them. There is no HERCULES per-order fee on a hand-off; the Voice
+ * Hand-Off Ordering add-on is what pays for this feature.
+ *
+ * DRIVER APPROVED: `handOff` is only ever called after the driver explicitly
+ * approves a read-back order. Nothing here submits anything on its own.
  */
 
-export type PlacedOrder = {
+export type HandOff = {
   id: string;
   service: ServiceId;
   vendor: string;
@@ -47,19 +54,26 @@ export type PlacedOrder = {
   etaMin: number;
   dropLabel: string;
   meetNote: string;
-  status: "placed" | "cancelled";
+  /** HERCULES never charges on a hand-off. Kept explicit so the UI can say so. */
+  herculesFee: 0;
+  /** Deep link into the platform's own app with the cart pre-filled. */
+  appLink: string;
+  status: "handed-off" | "cancelled";
   placedAt: string;
 };
+
+/** Back-compat alias — a hand-off is what used to be a placed order. */
+export type PlacedOrder = HandOff;
 
 export type DeliveryProviderApi = {
   name: string;
   checkCoverage: (loc: DropLocation) => Promise<Coverage[]>;
   quote: (category: ServiceCategory | "all") => Promise<OrderOption[]>;
-  place: (input: {
+  handOff: (input: {
     option: OrderOption;
     dropLabel: string;
     meetNote: string;
-  }) => Promise<PlacedOrder>;
+  }) => Promise<HandOff>;
   cancel: (id: string) => Promise<void>;
 };
 
@@ -73,7 +87,7 @@ export const mockDeliveryProvider: DeliveryProviderApi = {
       ? orderOptions
       : orderOptions.filter((o) => serviceOf(o.service).category === category);
   },
-  async place({ option, dropLabel, meetNote }) {
+  async handOff({ option, dropLabel, meetNote }) {
     return {
       id: `ord-${Date.now()}`,
       service: option.service,
@@ -82,10 +96,12 @@ export const mockDeliveryProvider: DeliveryProviderApi = {
       subtotal: option.subtotal,
       deliveryFee: option.deliveryFee,
       total: option.subtotal + option.deliveryFee,
+      herculesFee: 0,
+      appLink: `${option.service}://cart/prefilled`,
       etaMin: option.etaMin,
       dropLabel,
       meetNote,
-      status: "placed",
+      status: "handed-off",
       placedAt: new Date().toISOString(),
     };
   },
@@ -114,8 +130,9 @@ type Ctx = {
   favorites: Favorite[];
   meetNote: string;
   setMeetNote: (n: string) => void;
-  orders: PlacedOrder[];
-  place: (option: OrderOption) => Promise<PlacedOrder>;
+  orders: HandOff[];
+  /** Builds the cart and opens the platform app pre-filled. No HERCULES charge. */
+  handOff: (option: OrderOption) => Promise<HandOff>;
   cancel: (id: string) => void;
 };
 
@@ -131,13 +148,13 @@ export function DeliveryProvider({
   const [ready, setReady] = useState(false);
   const [coverage, setCoverage] = useState<Coverage[]>([]);
   const [options, setOptions] = useState<OrderOption[]>([]);
-  const [orders, setOrders] = useState<PlacedOrder[]>([]);
+  const [orders, setOrders] = useState<HandOff[]>([]);
   const [meetNote, setMeetNoteState] = useState("");
 
   useEffect(() => {
     try {
       const o = localStorage.getItem(ORDERS_KEY);
-      if (o) setOrders(JSON.parse(o) as PlacedOrder[]);
+      if (o) setOrders(JSON.parse(o) as HandOff[]);
       const n = localStorage.getItem(NOTE_KEY);
       if (n) setMeetNoteState(n);
     } catch {
@@ -155,7 +172,7 @@ export function DeliveryProvider({
     };
   }, [provider]);
 
-  const saveOrders = useCallback((next: PlacedOrder[]) => {
+  const saveOrders = useCallback((next: HandOff[]) => {
     setOrders(next);
     localStorage.setItem(ORDERS_KEY, JSON.stringify(next));
   }, []);
@@ -165,9 +182,9 @@ export function DeliveryProvider({
     localStorage.setItem(NOTE_KEY, n);
   }, []);
 
-  const place = useCallback(
+  const handOff = useCallback(
     async (option: OrderOption) => {
-      const order = await provider.place({
+      const order = await provider.handOff({
         option,
         dropLabel: currentLocation.label,
         meetNote: meetNote || "At the truck",
@@ -222,7 +239,7 @@ export function DeliveryProvider({
       meetNote,
       setMeetNote,
       orders,
-      place,
+      handOff,
       cancel,
     }),
     [
@@ -237,7 +254,7 @@ export function DeliveryProvider({
       meetNote,
       setMeetNote,
       orders,
-      place,
+      handOff,
       cancel,
     ],
   );
