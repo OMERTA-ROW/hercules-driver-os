@@ -43,6 +43,7 @@ import {
   type TruckStop,
 } from "@/data/stops";
 import { useStops } from "@/lib/stops";
+import { CoverageNotice } from "@/components/hercules/CoverageNotice";
 
 export const Route = createFileRoute("/stops")({
   head: () => ({
@@ -145,6 +146,9 @@ function StopsScreen() {
       title="Truck Stops"
       subtitle="Fuel, showers, parking and scales ahead of you — book without leaving HERCULES"
     >
+      {/* Proactive delivery-coverage warning for where the truck sits. */}
+      <CoverageNotice />
+
       {/* Proactive, clock-aware suggestion. Still only a suggestion. */}
       {clockTight ? (
         <Panel className="mb-3 border-warn/50 bg-warn/8">

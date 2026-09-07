@@ -26,6 +26,7 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
+import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 
 const IndexRoute = IndexRouteImport.update({
@@ -113,6 +114,11 @@ const StoreRoute = StoreRouteImport.update({
   path: '/store',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupplyRoute = SupplyRouteImport.update({
+  id: '/supply',
+  path: '/supply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
+  '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
+  '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesById {
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
+  '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRouteTypes {
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/stops'
     | '/store'
+    | '/supply'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/stops'
     | '/store'
+    | '/supply'
     | '/voice'
   id:
     | '__root__'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/stops'
     | '/store'
+    | '/supply'
     | '/voice'
   fileRoutesById: FileRoutesById
 }
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   StopsRoute: typeof StopsRoute
   StoreRoute: typeof StoreRoute
+  SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
 }
 
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/supply': {
+      id: '/supply'
+      path: '/supply'
+      fullPath: '/supply'
+      preLoaderRoute: typeof SupplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voice': {
       id: '/voice'
       path: '/voice'
@@ -413,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   StopsRoute: StopsRoute,
   StoreRoute: StoreRoute,
+  SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
 }
 export const routeTree = rootRouteImport

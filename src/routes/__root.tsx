@@ -17,6 +17,7 @@ import { AuthProvider } from "@/lib/auth";
 import { PurchaseProvider } from "@/lib/purchases";
 import { HazardLayerProvider } from "@/lib/hazard-layer";
 import { StopsProvider } from "@/lib/stops";
+import { DeliveryProvider } from "@/lib/delivery";
 import { VoiceProvider } from "@/lib/voice";
 import { BoltProvider } from "@/lib/bolt";
 
@@ -136,6 +137,7 @@ function RootComponent() {
           <PurchaseProvider>
             <HazardLayerProvider>
               <StopsProvider>
+                <DeliveryProvider>
                 <BoltProvider>
                 <VoiceProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -144,6 +146,7 @@ function RootComponent() {
             <Toaster />
                 </VoiceProvider>
                 </BoltProvider>
+                </DeliveryProvider>
               </StopsProvider>
             </HazardLayerProvider>
           </PurchaseProvider>
