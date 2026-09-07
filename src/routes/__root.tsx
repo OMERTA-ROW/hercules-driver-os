@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider, ScreenDim } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { PurchaseProvider } from "@/lib/purchases";
+import { AddonProvider } from "@/lib/addons";
 import { HazardLayerProvider } from "@/lib/hazard-layer";
 import { StopsProvider } from "@/lib/stops";
 import { DeliveryProvider } from "@/lib/delivery";
@@ -138,7 +139,9 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <PurchaseProvider>
+            <AddonProvider>
             <HazardLayerProvider>
+
               <StopsProvider>
                 <DeliveryProvider>
                 <BoltProvider>
@@ -156,6 +159,7 @@ function RootComponent() {
                 </DeliveryProvider>
               </StopsProvider>
             </HazardLayerProvider>
+            </AddonProvider>
           </PurchaseProvider>
         </AuthProvider>
       </ThemeProvider>

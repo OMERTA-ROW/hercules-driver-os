@@ -11,6 +11,9 @@ import { useAuth } from "@/lib/auth";
 import { plans, planById, featureLabels, TRIAL_DAYS, type PlanId } from "@/data/plans";
 import { cn } from "@/lib/utils";
 import { useHazardLayers } from "@/lib/hazard-layer";
+import { useAddons } from "@/lib/addons";
+import { feeBands, feeCategories } from "@/data/fees";
+import { Layers, Receipt } from "lucide-react";
 import { hazardKinds, hazardMeta } from "@/data/hazards";
 
 export const Route = createFileRoute("/settings")({
@@ -166,6 +169,9 @@ function Settings() {
           )}
         </Panel>
 
+        <AddonsPanel />
+
+        <FeePanel />
 
         <Panel>
           <PanelTitle right={<Pill tone="info">On by default</Pill>}>
@@ -337,5 +343,183 @@ function VoicePicker() {
         spends, or commits anything.
       </p>
     </>
+  );
+}
+
+/**
+ * ADD-ONS — stackable on top of the base plan, with the running monthly total
+ * updating as the driver switches them on and off. New modules appear here
+ * automatically from `src/data/addons.ts`.
+ */
+function AddonsPanel() {
+  const { account } = useAuth();
+  const { all, has, toggle, baseMonthly, addonMonthly, monthlyTotal } = useAddons();
+  const monthly = all.filter((a) => a.billing === "monthly");
+  const oneTime = all.filter((a) => a.billing === "one-time");
+
+  return (
+    <Panel>
+      <PanelTitle
+        right={
+          <Pill tone="primary">
+            ${monthlyTotal.toFixed(2)} / month
+          </Pill>
+        }
+      >
+        <span className="inline-flex items-center gap-2">
+          <Layers className="h-5 w-5 text-primary" /> Add-ons
+        </span>
+      </PanelTitle>
+
+      <div className="space-y-2">
+        {monthly.map((a) => {
+          const on = has(a.id);
+          return (
+            <div
+              key={a.id}
+              className={cn(
+                "rounded-lg border p-3",
+                on ? "border-primary/60 bg-primary/10" : "border-border bg-card/50",
+              )}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-display text-sm uppercase tracking-[0.1em]">{a.name}</div>
+                  <p className="text-xs text-muted-foreground">{a.tagline}</p>
+                </div>
+                <div className="text-right">
+                  <div className="metric font-bold text-primary">${a.price.toFixed(2)}</div>
+                  <div className="text-xs text-muted-foreground">per month</div>
+                </div>
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{a.blurb}</p>
+              {a.noPerOrderFee ? (
+                <p className="mt-1 text-xs text-go">No per-order fee — the app charges you, not HERCULES.</p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  size="lg"
+                  variant={on ? "outline" : "default"}
+                  className="min-h-[56px]"
+                  onClick={() => {
+                    toggle(a.id);
+                    toast.success(on ? `${a.name} switched off` : `${a.name} added`, {
+                      description: on
+                        ? "Removed from your monthly total on your word."
+                        : `$${a.price.toFixed(2)} a month added on your word.`,
+                    });
+                  }}
+                >
+                  {on ? "Switch it off" : `Add it — $${a.price.toFixed(2)} / month`}
+                </Button>
+                <Button size="lg" variant="outline" className="min-h-[56px]" asChild>
+                  <Link to={a.href}>Open it</Link>
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+
+        {oneTime.map((a) => (
+          <div key={a.id} className="rounded-lg border border-border bg-card/50 p-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-display text-sm uppercase tracking-[0.1em]">{a.name}</div>
+                <p className="text-xs text-muted-foreground">{a.tagline}</p>
+              </div>
+              <div className="text-right">
+                <div className="metric font-bold text-primary">${a.price.toFixed(2)}</div>
+                <div className="text-xs text-muted-foreground">one time</div>
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {has(a.id)
+                ? "Bought and yours for good. Nothing recurring, ever."
+                : "One-time unlock — not a subscription. It never touches your monthly total."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="lg" variant="outline" className="min-h-[56px]" asChild>
+                <Link to={has(a.id) ? a.href : "/store"}>
+                  {has(a.id) ? "Open it" : "See it in the Store"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-lg border border-primary/40 bg-primary/8 p-3">
+        <Label>What you pay every month</Label>
+        <div className="mt-2 space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">
+              Base plan{account?.plan === "fleet" ? ` · ${account.seats} trucks` : ""}
+            </span>
+            <span className="metric">${baseMonthly.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Add-ons</span>
+            <span className="metric">${addonMonthly.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between border-t border-primary/25 pt-1 font-semibold text-primary">
+            <span>Monthly total</span>
+            <span className="metric">${monthlyTotal.toFixed(2)}</span>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          This updates the second you toggle an add-on. One-time unlocks are listed separately and
+          never recur.
+        </p>
+      </div>
+      <div className="mt-3">
+        <DriverApprovedNote>
+          Nothing is added or removed from your bill except by your own tap or your spoken yes.
+        </DriverApprovedNote>
+      </div>
+    </Panel>
+  );
+}
+
+/** Where a per-order HERCULES fee applies — and where it does not. */
+function FeePanel() {
+  return (
+    <Panel>
+      <PanelTitle right={<Pill tone="info">Always shown before you approve</Pill>}>
+        <span className="inline-flex items-center gap-2">
+          <Receipt className="h-5 w-5 text-primary" /> Per-order service fee
+        </span>
+      </PanelTitle>
+      <p className="text-sm text-muted-foreground">
+        HERCULES charges a service fee only where it actually places and pays the order for you. It
+        scales with the size of the order and it is on screen and read aloud before you approve
+        anything. It is what keeps HERCULES running.
+      </p>
+      <ul className="mt-3 grid gap-1 text-sm sm:grid-cols-2">
+        {feeCategories.map((c) => (
+          <li key={c.id} className="flex gap-2">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>
+              {c.label}
+              <span className="block text-xs text-muted-foreground">{c.note}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Label className="mt-4">How it scales</Label>
+      <div className="mt-1 grid gap-1 sm:grid-cols-3">
+        {feeBands.map((b) => (
+          <div key={b.label} className="rounded-lg border border-border bg-card/50 p-2">
+            <div className="text-xs text-muted-foreground">{b.label}</div>
+            <div className="metric font-bold text-primary">${b.fee.toFixed(2)}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-go">
+        Food, grocery, retail and pharmacy delivery carry no HERCULES fee at all. Those platforms do
+        not allow anyone else to place or process the order, so HERCULES hands it off pre-filled and
+        the app charges you directly. The Voice Hand-Off Ordering add-on pays for that feature
+        instead.
+      </p>
+    </Panel>
   );
 }
