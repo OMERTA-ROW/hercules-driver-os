@@ -7,6 +7,14 @@ import {
   type ReactNode,
 } from "react";
 import { TRIAL_DAYS, planHas, type Feature, type PlanId } from "@/data/plans";
+import {
+  companyByCode,
+  doorFor,
+  hasScope,
+  makeCompanyCode,
+  type AccountKind,
+  type Scope,
+} from "@/data/accounts";
 
 export type Account = {
   name: string;
@@ -15,6 +23,11 @@ export type Account = {
   seats: number;
   trialEndsAt: string; // ISO date
   status: "trial" | "active";
+  /** Which login door this account came through — HERCULES solo, HERCULES
+   *  company driver, or the ZEUS fleet side. Same shared model, different scope. */
+  kind: AccountKind;
+  /** Set for a company driver linked by invite/code, and for a ZEUS fleet. */
+  company?: { name: string; code: string };
 };
 
 const STORAGE_KEY = "hercules.account";
@@ -23,15 +36,29 @@ function trialEnd(days = TRIAL_DAYS) {
   return new Date(Date.now() + days * 86_400_000).toISOString();
 }
 
+type SignUpInput = {
+  name: string;
+  email: string;
+  plan: PlanId;
+  seats?: number;
+  kind?: AccountKind;
+  /** Company code a driver was given, or the carrier name a fleet onboards as. */
+  companyCode?: string;
+  companyName?: string;
+};
+
 type Ctx = {
   account: Account | null;
   ready: boolean;
-  signIn: (email: string) => void;
-  signUp: (input: { name: string; email: string; plan: PlanId; seats?: number }) => void;
+  signIn: (email: string, kind?: AccountKind) => void;
+  signUp: (input: SignUpInput) => void;
   signOut: () => void;
   changePlan: (plan: PlanId, seats?: number) => void;
   trialDaysLeft: number;
   can: (feature: Feature) => boolean;
+  /** Permission scope for the door this account signed in through. */
+  allows: (scope: Scope) => boolean;
+  kind: AccountKind;
 };
 
 const AuthContext = createContext<Ctx>({
@@ -43,7 +70,10 @@ const AuthContext = createContext<Ctx>({
   changePlan: () => {},
   trialDaysLeft: 0,
   can: () => false,
+  allows: () => false,
+  kind: "solo",
 });
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);

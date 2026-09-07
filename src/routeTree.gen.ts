@@ -15,6 +15,7 @@ import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
+import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
@@ -57,6 +58,11 @@ const DocumentsRoute = DocumentsRouteImport.update({
 const DriverRoute = DriverRouteImport.update({
   id: '/driver',
   path: '/driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentRoute = EquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinancialsRoute = FinancialsRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
+  EquipmentRoute: typeof EquipmentRoute
   FinancialsRoute: typeof FinancialsRoute
   FleetRoute: typeof FleetRoute
   HealthRoute: typeof HealthRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/driver'
       fullPath: '/driver'
       preLoaderRoute: typeof DriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment': {
+      id: '/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof EquipmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financials': {
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,
+  EquipmentRoute: EquipmentRoute,
   FinancialsRoute: FinancialsRoute,
   FleetRoute: FleetRoute,
   HealthRoute: HealthRoute,
