@@ -50,6 +50,7 @@ import {
 } from "@/lib/breakdown";
 import { useVoice } from "@/lib/voice";
 import { countdownLabel, useArrivals } from "@/lib/arrivals";
+import { feeBands } from "@/data/fees";
 
 export const Route = createFileRoute("/breakdown")({
   head: () => ({
@@ -583,6 +584,18 @@ function BreakdownPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {confirm.milesAway.toFixed(1)} mi · {confirm.etaMin} min ·{" "}
                   {confirm.open24 ? "open 24 hours" : confirm.hours}
+                </p>
+              </div>
+              <div className="rounded-lg border border-primary/40 bg-primary/8 p-3">
+                <Label>If HERCULES pays this one for you</Label>
+                <p className="text-sm leading-snug text-muted-foreground">
+                  Pay the shop yourself and HERCULES charges you nothing. If you have HERCULES book
+                  and pay it — roadside, parts, tires — the service fee scales with the bill and is
+                  shown and read to you first: {feeBands
+                    .slice(0, 3)
+                    .map((b) => `${b.label} → $${b.fee.toFixed(2)}`)
+                    .join(" · ")}, up to ${feeBands[feeBands.length - 1]?.fee.toFixed(2)} on the
+                  largest parts orders. It is what keeps HERCULES running.
                 </p>
               </div>
               <div className="rounded-lg border border-primary/40 bg-primary/10 p-3">
