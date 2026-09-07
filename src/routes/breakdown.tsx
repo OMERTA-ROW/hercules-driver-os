@@ -40,7 +40,8 @@ import {
   type ProblemId,
   type Service,
 } from "@/data/breakdown";
-import { faultCodes, currentLoad } from "@/data/mock";
+import { currentLoad } from "@/data/mock";
+import { boltFaults } from "@/data/bolt";
 import {
   getBreakdownProvider,
   label as kindLabel,
@@ -338,14 +339,14 @@ function BreakdownPage() {
         {/* ------------------------------------------------ FAULT CODES + DAY REBUILD */}
         <div className="space-y-3">
           <Panel>
-            <PanelTitle right={<Pill tone="alert">{faultCodes.length} active</Pill>}>
+            <PanelTitle right={<Pill tone="alert">{boltFaults.length} active</Pill>}>
               Live Fault Codes
             </PanelTitle>
             <p className="mb-2 text-xs text-muted-foreground">
               Straight off the ECM, so you can describe it accurately on the phone.
             </p>
             <div className="space-y-2">
-              {faultCodes.map((f) => (
+              {boltFaults.map((f) => (
                 <div
                   key={f.code}
                   className={
@@ -359,7 +360,7 @@ function BreakdownPage() {
                     <span className="metric font-bold">{f.code}</span>
                     <Pill tone={f.severity === "alert" ? "alert" : "watch"}>{f.system}</Pill>
                   </div>
-                  <p className="mt-1 text-sm leading-snug">{f.text}</p>
+                  <p className="mt-1 text-sm leading-snug">{f.plain}</p>
                 </div>
               ))}
             </div>
@@ -369,8 +370,8 @@ function BreakdownPage() {
               className="mt-3 h-14 w-full gap-2"
               onClick={() =>
                 toast.info("HERCULES is reading your fault codes aloud", {
-                  description: faultCodes
-                    .map((f) => `${f.code} on the ${f.system.toLowerCase()}. ${f.text}`)
+                  description: boltFaults
+                    .map((f) => `${f.code} on the ${f.system.toLowerCase()}. ${f.plain}`)
                     .join(" "),
                 })
               }

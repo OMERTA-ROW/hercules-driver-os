@@ -1,24 +1,40 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, Gauge, Wrench, CircleDot, BrainCircuit } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  AlertTriangle,
+  Gauge,
+  Wrench,
+  CircleDot,
+  Zap,
+  ZapOff,
+  Volume2,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Metric, Pill, Bar } from "@/components/hercules/primitives";
+import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
-import { truckHealth, faultCodes, tires, predictions, driver } from "@/data/mock";
+import { driver } from "@/data/mock";
+import { BOLT, boltPairingSteps } from "@/data/bolt";
+import { useBolt } from "@/lib/bolt";
+import { usePurchases } from "@/lib/purchases";
 
 export const Route = createFileRoute("/health")({
   head: () => ({
     meta: [
-      { title: "Truck Health — HERCULES" },
+      { title: "Truck Health — live engine diagnostics from THE BOLT" },
       {
         name: "description",
         content:
-          "Live ECM and sensor readouts: fuel economy, engine hours, fault codes, tire pressure, brake wear, coolant and oil temp, DEF level, and idle time.",
+          "THE BOLT streams live J1939 engine data to HERCULES: fault codes in plain English, fuel economy, engine hours, temps, DEF, tire pressure, brake wear and predictive maintenance.",
       },
-      { property: "og:title", content: "Truck Health — HERCULES" },
+      { property: "og:title", content: "Truck Health — live engine diagnostics" },
       {
         property: "og:description",
-        content: "ECM readouts and predictive maintenance warnings in plain language.",
+        content:
+          "Automated monitoring over Bluetooth. HERCULES speaks up on its own when the engine needs attention.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: HealthPage,
@@ -27,25 +43,141 @@ export const Route = createFileRoute("/health")({
 const tone = (s: "ok" | "watch" | "alert") =>
   s === "ok" ? ("go" as const) : s === "watch" ? ("warn" as const) : ("alert" as const);
 
-function HealthPage() {
-  const alertsCount = truckHealth.filter((m) => m.status !== "ok").length + faultCodes.length;
+function BoltStatus() {
+  const { state, signal, startPairing, disconnect } = useBolt();
+  const { owns } = usePurchases();
+  const hasBolt = owns("bolt");
+  const connected = state === "connected";
 
   return (
-    <AppShell title="Truck Health" subtitle={`${driver.truck} · ${driver.unit} · ECM live feed`}>
+    <Panel>
+      <PanelTitle
+        right={
+          <Pill tone={connected ? "go" : state === "pairing" ? "watch" : "alert"}>
+            {connected ? <Zap className="h-3.5 w-3.5" /> : <ZapOff className="h-3.5 w-3.5" />}
+            {connected
+              ? "Connected"
+              : state === "pairing"
+                ? "Pairing"
+                : state === "paired"
+                  ? "Paired"
+                  : "Not detected"}
+          </Pill>
+        }
+      >
+        THE BOLT
+      </PanelTitle>
+
+      <div className="flex items-center gap-3">
+        <Zap
+          className={
+            "h-12 w-12 shrink-0 " +
+            (connected
+              ? "text-primary drop-shadow-[0_0_16px_var(--primary)]"
+              : "text-muted-foreground")
+          }
+        />
+        <div className="min-w-0">
+          <Label>{BOLT.tagline}</Label>
+          <p className="text-sm text-muted-foreground">
+            {connected
+              ? `Bluetooth signal ${signal}/4 · streaming J1939 from the nine-pin port`
+              : hasBolt
+                ? "Plug into the nine-pin port and pair to start the live stream."
+                : `${BOLT.name} is a one-time purchase in the store — ${BOLT.priceLabel}.`}
+          </p>
+        </div>
+      </div>
+
+      {connected ? (
+        <Button variant="outline" size="lg" className="mt-3 w-full" onClick={disconnect}>
+          Disconnect THE BOLT
+        </Button>
+      ) : hasBolt ? (
+        <>
+          <ol className="mt-3 space-y-2">
+            {boltPairingSteps.map((s, i) => (
+              <li key={s.title} className="rounded-lg border border-border bg-card/60 p-3">
+                <div className="font-display text-sm uppercase tracking-[0.12em] text-primary">
+                  {i + 1}. {s.title}
+                </div>
+                <p className="mt-1 text-xs leading-snug text-muted-foreground">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          <Button
+            size="lg"
+            className="mt-3 w-full"
+            disabled={state === "pairing"}
+            onClick={() => void startPairing()}
+          >
+            {state === "pairing" ? "Looking for THE BOLT…" : "Pair over Bluetooth"}
+          </Button>
+        </>
+      ) : (
+        <Button asChild size="lg" className="mt-3 w-full">
+          <Link to="/store">Get THE BOLT — {BOLT.priceLabel} one time</Link>
+        </Button>
+      )}
+    </Panel>
+  );
+}
+
+function HealthPage() {
+  const { state, snapshot, autoAlerts, dismissAlert } = useBolt();
+  const { values, faults, tires, predictions } = snapshot;
+  const connected = state === "connected";
+  const flagged = values.filter((v) => v.status !== "ok").length + faults.length;
+
+  return (
+    <AppShell
+      title="Truck Health"
+      subtitle={`${driver.truck} · ${driver.unit} · ${connected ? "THE BOLT live stream" : "last sync"}`}
+    >
+      {autoAlerts.length ? (
+        <div className="mb-3 space-y-2">
+          {autoAlerts.map((a) => (
+            <div
+              key={a.id}
+              className={
+                "flex items-start gap-3 rounded-lg border p-3 " +
+                (a.severity === "alert"
+                  ? "border-destructive/50 bg-destructive/10"
+                  : "border-warn/45 bg-warn/10")
+              }
+            >
+              <Zap className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <Label>HERCULES spoke up on its own</Label>
+                <p className="text-sm leading-snug">{a.spoken}</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Dismiss"
+                onClick={() => dismissAlert(a.id)}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full hairline"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="grid gap-3 lg:grid-cols-3">
         <Panel className="lg:col-span-2">
           <PanelTitle
             right={
-              <Pill tone={alertsCount ? "warn" : "go"}>
-                <Gauge className="h-3.5 w-3.5" /> {alertsCount} items flagged
+              <Pill tone={flagged ? "warn" : "go"}>
+                <Gauge className="h-3.5 w-3.5" /> {flagged} items flagged
               </Pill>
             }
           >
-            Sensor Readouts
+            Live Stream
           </PanelTitle>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {truckHealth.map((m) => (
-              <div key={m.label} className="rounded-lg border border-border bg-card/60 p-3">
+            {values.map((m) => (
+              <div key={m.key} className="rounded-lg border border-border bg-card/60 p-3">
                 <div className="flex items-start justify-between gap-2">
                   <Label>{m.label}</Label>
                   {m.status !== "ok" ? (
@@ -66,12 +198,16 @@ function HealthPage() {
           </div>
         </Panel>
 
+        <BoltStatus />
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-3">
         <Panel>
-          <PanelTitle right={<Pill tone="alert">{faultCodes.length} active</Pill>}>
+          <PanelTitle right={<Pill tone="alert">{faults.length} active</Pill>}>
             Fault Codes
           </PanelTitle>
           <div className="space-y-2">
-            {faultCodes.map((f) => (
+            {faults.map((f) => (
               <div
                 key={f.code}
                 className={
@@ -85,21 +221,35 @@ function HealthPage() {
                   <span className="metric font-bold">{f.code}</span>
                   <Pill tone={f.severity === "alert" ? "alert" : "watch"}>{f.system}</Pill>
                 </div>
-                <p className="mt-1 text-sm">{f.text}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{f.firstSeen}</p>
+                <p className="mt-1 text-sm">{f.plain}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  First seen {f.firstSeen} · {f.occurrences}×
+                </p>
               </div>
             ))}
           </div>
-          <Button variant="outline" size="lg" className="mt-3 w-full">
-            Have HERCULES read these aloud
+          <Button
+            variant="outline"
+            size="lg"
+            className="mt-3 w-full"
+            onClick={() =>
+              toast.info("HERCULES is reading your codes aloud", {
+                description: faults.map((f) => f.plain).join(" "),
+              })
+            }
+          >
+            <Volume2 className="mr-2 h-4 w-4" /> Read these aloud in plain English
           </Button>
+          <div className="mt-2">
+            <Button asChild variant="ghost" size="sm" className="w-full">
+              <Link to="/breakdown">Take these codes to Breakdown Assist</Link>
+            </Button>
+          </div>
         </Panel>
-      </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
         <Panel>
-          <PanelTitle right={<Pill tone="watch">1 low</Pill>}>Tire Pressure</PanelTitle>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <PanelTitle right={<Pill tone="watch">TPMS</Pill>}>Tire Pressure</PanelTitle>
+          <div className="grid gap-2">
             {tires.map((t) => (
               <div
                 key={t.pos}
@@ -164,11 +314,12 @@ function HealthPage() {
               </div>
             ))}
           </div>
-          <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-            <BrainCircuit className="mt-0.5 h-4 w-4 shrink-0" />
-            Learned from your truck's own history. HERCULES never schedules service without your
-            approval.
-          </p>
+          <div className="mt-3">
+            <DriverApprovedNote>
+              HERCULES watches the stream and tells you what it sees. No service is booked and no
+              money is spent without your say-so.
+            </DriverApprovedNote>
+          </div>
         </Panel>
       </div>
     </AppShell>

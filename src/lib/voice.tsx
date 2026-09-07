@@ -8,8 +8,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { currentLoad, hos, loads, alerts, faultCodes, loadPnL } from "@/data/mock";
+import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
+import { boltFaults, boltPredictions } from "@/data/bolt";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
 import { currentFix, problems, services } from "@/data/breakdown";
 import {
@@ -149,8 +150,8 @@ function followUp(topic: Topic, text: string): Reply | null {
     if (/(fault|code|ecm|engine light)/.test(t)) {
       return {
         topic: "breakdown",
-        text: `You have ${faultCodes.length} active codes. ${faultCodes
-          .map((f) => `${f.code} on the ${f.system.toLowerCase()} — ${f.text}`)
+        text: `THE BOLT has ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"}. ${boltFaults
+          .map((f) => `${f.code} on the ${f.system.toLowerCase()} — ${f.plain}`)
           .join(" ")} Read those numbers to whoever you call.`,
       };
     }
@@ -280,11 +281,12 @@ export function respond(text: string, topic: Topic): Reply {
       text: `${s.name} is ${s.milesAhead} miles ahead — diesel $${s.dieselPrice.toFixed(3)}, ${s.parkingOpen} of ${s.parkingTotal} truck spaces open, ${s.showersOpen} showers free. Say "book it" and I'll read the total plus the ${BOOKING_FEE} dollar booking fee before anything is charged.`,
     };
   }
-  if (/(fault|engine|health|tire|maintenance|def|coolant|brake)/.test(t)) {
-    const f = faultCodes[0]!;
+  if (/(fault|engine|health|tire|maintenance|def|coolant|brake|bolt|diagnostic|mpg|fuel economy|what'?s wrong)/.test(t)) {
+    const f = boltFaults[0]!;
+    const pred = boltPredictions[0]!;
     return {
       topic: "health",
-      text: `You have ${faultCodes.length} active codes. Top one is ${f.code} on the ${f.system.toLowerCase()} — ${f.text} Nothing shuts you down right now.`,
+      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now.`,
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {
