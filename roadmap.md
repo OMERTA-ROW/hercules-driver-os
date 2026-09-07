@@ -10,3 +10,5 @@
 
 - [x] Inbound arrival notifications: spoken + visual countdowns for delivery couriers and roadside techs, mechanic quoted-ETA timer with 5-minute-out prompt and overdue flag on Breakdown Assist
 - [x] Monetization: voice hand-off ordering $5/mo add-on (no per-order fee, platforms process payment); scaled per-order service fee kept only where HERCULES transacts (parts, tires, roadside, fuel/DEF, showers/parking, securement); stackable add-on architecture with live monthly total in Settings
+- [x] Account doors: HERCULES Solo, HERCULES Company Driver, ZEUS Fleet with shared model and separate permission scopes; ZEUS company onboarding with company code
+- [x] Vehicle/vocation profiles drive routing and hazard filtering; multi-unit drivers asked "What are you in today?" by voice each trip; hazards at real corridor coordinates on the map layer

@@ -20,9 +20,17 @@ import {
   type ReactNode,
 } from "react";
 import { hazardKinds, hazards as mockHazards, type Hazard, type HazardKind } from "@/data/hazards";
-import { truckProfile } from "@/data/routing";
+import { rulesFor, type VehicleSpec } from "@/data/vehicles";
 
-export type TruckProfile = typeof truckProfile;
+/**
+ * Only the dimensions the hazard checks need. Satisfied by both the legacy
+ * truck profile and any saved vehicle profile.
+ */
+export type TruckProfile = {
+  minClearanceFt: number;
+  lengthFt: number;
+  grossWeightLbs: number;
+};
 
 export type HazardProvider = {
   name: string;
@@ -54,6 +62,27 @@ export function effectiveSeverity(h: Hazard, profile: TruckProfile): Hazard["sev
   if (exceedsTruck(h, profile)) return "critical";
   return h.severity;
 }
+
+/**
+ * VEHICLE-PROFILE FILTER — the active equipment decides which hazard kinds are
+ * on the map at all. Low bridge clearances apply to every trailer profile,
+ * including line haul and intermodal; grades, switchbacks and weight limits are
+ * hard checks for heavy haul; a cargo van sees only what can actually stop it.
+ */
+export function relevantToVehicle(h: Hazard, spec: VehicleSpec) {
+  const rules = rulesFor(spec);
+  if (!rules.hazardKinds.includes(h.kind)) return false;
+  // A posted weight limit above a van's gross is noise for that driver.
+  if (
+    h.weightLimitLbs !== undefined &&
+    !rules.weightRestrictionChecks &&
+    spec.grossWeightLbs < h.weightLimitLbs
+  ) {
+    return false;
+  }
+  return true;
+}
+
 
 // ---------------------------------------------------------------- toggles ---
 

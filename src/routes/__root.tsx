@@ -24,6 +24,8 @@ import { ArrivalsProvider } from "@/lib/arrivals";
 import { ArrivalBridge } from "@/components/hercules/ArrivalBridge";
 import { ArrivalStack } from "@/components/hercules/ArrivalStack";
 import { BoltProvider } from "@/lib/bolt";
+import { VehicleProvider } from "@/lib/vehicles";
+import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
 
 function NotFoundComponent() {
   return (
@@ -145,17 +147,21 @@ function RootComponent() {
               <StopsProvider>
                 <DeliveryProvider>
                 <BoltProvider>
+                <VehicleProvider>
                 <ArrivalsProvider>
                 <VoiceProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
+            <TripVehiclePrompt />
             <ArrivalBridge />
             <ArrivalStack />
             <ScreenDim />
             <Toaster />
                 </VoiceProvider>
                 </ArrivalsProvider>
+                </VehicleProvider>
                 </BoltProvider>
+
                 </DeliveryProvider>
               </StopsProvider>
             </HazardLayerProvider>

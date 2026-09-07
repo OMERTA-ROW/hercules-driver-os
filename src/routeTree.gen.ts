@@ -15,6 +15,7 @@ import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
+import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
@@ -28,6 +29,7 @@ import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as ZeusRouteImport } from './routes/zeus'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +59,11 @@ const DocumentsRoute = DocumentsRouteImport.update({
 const DriverRoute = DriverRouteImport.update({
   id: '/driver',
   path: '/driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentRoute = EquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinancialsRoute = FinancialsRouteImport.update({
@@ -124,6 +131,11 @@ const VoiceRoute = VoiceRouteImport.update({
   path: '/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZeusRoute = ZeusRouteImport.update({
+  id: '/zeus',
+  path: '/zeus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -145,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,6 +167,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -166,6 +181,7 @@ export interface FileRoutesByTo {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -175,6 +191,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
+  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
@@ -188,6 +205,7 @@ export interface FileRoutesById {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/zeus': typeof ZeusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -198,6 +216,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -211,6 +230,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +239,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -232,6 +253,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   id:
     | '__root__'
     | '/'
@@ -240,6 +262,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/driver'
+    | '/equipment'
     | '/financials'
     | '/fleet'
     | '/health'
@@ -253,6 +276,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/zeus'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -262,6 +286,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
+  EquipmentRoute: typeof EquipmentRoute
   FinancialsRoute: typeof FinancialsRoute
   FleetRoute: typeof FleetRoute
   HealthRoute: typeof HealthRoute
@@ -275,6 +300,7 @@ export interface RootRouteChildren {
   StoreRoute: typeof StoreRoute
   SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
+  ZeusRoute: typeof ZeusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -319,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/driver'
       fullPath: '/driver'
       preLoaderRoute: typeof DriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment': {
+      id: '/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof EquipmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financials': {
@@ -412,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zeus': {
+      id: '/zeus'
+      path: '/zeus'
+      fullPath: '/zeus'
+      preLoaderRoute: typeof ZeusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -422,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,
+  EquipmentRoute: EquipmentRoute,
   FinancialsRoute: FinancialsRoute,
   FleetRoute: FleetRoute,
   HealthRoute: HealthRoute,
@@ -435,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoreRoute: StoreRoute,
   SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
+  ZeusRoute: ZeusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

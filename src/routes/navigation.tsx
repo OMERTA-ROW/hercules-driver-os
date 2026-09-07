@@ -29,7 +29,6 @@ import {
   offRoutePosition,
   routeParking,
   destinationFacility,
-  truckProfile,
   type LatLng,
   type TruckRoute,
 } from "@/data/routing";
@@ -38,12 +37,14 @@ import {
   hazardLayer,
   effectiveSeverity,
   exceedsTruck,
+  relevantToVehicle,
   useHazardLayers,
 } from "@/lib/hazard-layer";
 import { hazardMeta, type Hazard } from "@/data/hazards";
 import { currentLoad, hos } from "@/data/mock";
 import { hm } from "@/components/hercules/primitives";
 import { useStops } from "@/lib/stops";
+import { useVehicle } from "@/lib/vehicles";
 import { ChainMarker } from "@/components/hercules/ChainMarker";
 
 export const Route = createFileRoute("/navigation")({
@@ -76,6 +77,10 @@ function NavigationScreen() {
   const [spoken, setSpoken] = useState<string | null>(null);
   const rerouting = useRef(false);
 
+  // ------------------------------------------------- ACTIVE EQUIPMENT PROFILE
+  // The profile picked for this trip drives legality and hazard filtering.
+  const { active: vehicle, rules } = useVehicle();
+
   // ---------------------------------------------------------------- HAZARDS
   const { isOn } = useHazardLayers();
   const [allHazards, setAllHazards] = useState<Hazard[]>([]);
@@ -83,18 +88,18 @@ function NavigationScreen() {
   const announced = useRef<string | null>(null);
 
   useEffect(() => {
-    void hazardLayer.hazardsAhead({ profile: truckProfile }).then(setAllHazards);
-  }, []);
+    void hazardLayer.hazardsAhead({ profile: vehicle }).then(setAllHazards);
+  }, [vehicle]);
 
   /** Mock odometer: the truck eats about a mile per GPS tick. */
   const traveled = idx * 1;
 
   const hazardsAhead = allHazards
-    .filter((h) => isOn(h.kind))
+    .filter((h) => isOn(h.kind) && relevantToVehicle(h, vehicle))
     .map((h) => ({
       hazard: h,
-      severity: effectiveSeverity(h, truckProfile),
-      exceeds: exceedsTruck(h, truckProfile),
+      severity: effectiveSeverity(h, vehicle),
+      exceeds: exceedsTruck(h, vehicle),
       milesAhead: Math.max(0, Math.round((h.milesAhead - traveled) * 10) / 10),
     }))
     .filter((h) => h.milesAhead > 0)
@@ -138,24 +143,27 @@ function NavigationScreen() {
    * applied. The driver can dismiss or keep the old path (DRIVER APPROVED) —
    * but they are never left without a path.
    */
-  const autoReroute = useCallback(async (fix: LatLng) => {
-    if (rerouting.current) return;
-    rerouting.current = true;
-    const next = await truckRouting.reroute({
-      position: fix,
-      destination: primaryRoute.polyline[primaryRoute.polyline.length - 1]!,
-      profile: truckProfile,
-    });
-    setRoute(next);
-    setOffRoute(false);
-    const step = next.steps[0]!;
-    setNotice({ step: step.text, miles: next.remainingMiles, road: step.road });
-    // Voice announcement so the driver never has to look down.
-    setSpoken(
-      `Route recalculated. ${step.text}. ${next.remainingMiles} miles remaining, new ETA ${next.etaLocal}. Truck legal for your 13 foot 6 configuration.`,
-    );
-    rerouting.current = false;
-  }, []);
+  const autoReroute = useCallback(
+    async (fix: LatLng) => {
+      if (rerouting.current) return;
+      rerouting.current = true;
+      const next = await truckRouting.reroute({
+        position: fix,
+        destination: primaryRoute.polyline[primaryRoute.polyline.length - 1]!,
+        profile: vehicle,
+      });
+      setRoute(next);
+      setOffRoute(false);
+      const step = next.steps[0]!;
+      setNotice({ step: step.text, miles: next.remainingMiles, road: step.road });
+      // Voice announcement so the driver never has to look down.
+      setSpoken(
+        `Route recalculated. ${step.text}. ${next.remainingMiles} miles remaining, new ETA ${next.etaLocal}. Legal for your ${vehicle.label} at ${vehicle.heightFt} feet and ${vehicle.grossWeightLbs.toLocaleString()} pounds.`,
+      );
+      rerouting.current = false;
+    },
+    [vehicle],
+  );
 
   // Off-route detection runs on every GPS fix.
   useEffect(() => {
@@ -176,8 +184,24 @@ function NavigationScreen() {
   return (
     <AppShell
       title="Navigation"
-      subtitle={`${route.label} · truck-legal for ${truckProfile.heightFt}' / ${truckProfile.grossWeightLbs.toLocaleString()} lb / ${truckProfile.lengthFt}'`}
+      subtitle={`${vehicle.label} · ${route.label} · legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
     >
+      {/* ACTIVE EQUIPMENT — the profile that produced this route */}
+      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/8 p-3">
+        <span className="tech-label text-primary">Routing for</span>
+        <span className="font-display text-lg uppercase tracking-[0.1em]">{vehicle.label}</span>
+        <span className="text-xs text-muted-foreground">
+          {vehicle.unit} · {rules.backRoadsAllowed
+            ? "county and back roads permitted"
+            : "blue-shield interstate and white-shield legal county highway only"}
+          {rules.weightRestrictionChecks ? " · weight limits checked" : ""}
+          {rules.gradeAndSwitchbackChecks ? " · grades and switchbacks checked" : ""}
+        </span>
+        <Button variant="outline" size="lg" className="ml-auto" asChild>
+          <Link to="/equipment">Change equipment</Link>
+        </Button>
+      </div>
+
           {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
       {warning ? (
         <div
@@ -201,8 +225,8 @@ function NavigationScreen() {
               <p className="text-sm sm:text-base">{warning.hazard.detail}</p>
               {warning.exceeds ? (
                 <p className="mt-1 text-sm font-semibold text-destructive">
-                  Exceeds your configuration: {truckProfile.heightFt}' ·{" "}
-                  {truckProfile.grossWeightLbs.toLocaleString()} lb · {truckProfile.lengthFt}'
+                  Exceeds your configuration: {vehicle.heightFt}' ·{" "}
+                  {vehicle.grossWeightLbs.toLocaleString()} lb · {vehicle.lengthFt}'
                 </p>
               ) : null}
               <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -451,7 +475,7 @@ function NavigationScreen() {
         <Panel>
           <PanelTitle right={<Pill tone="alert">Excluded</Pill>}>Kept off your route</PanelTitle>
           <div className="space-y-2">
-            {truckRouting.restrictions(truckProfile).map((r) => (
+            {truckRouting.restrictions(vehicle).map((r) => (
               <div
                 key={r.road}
                 className="flex items-start gap-2 rounded-lg border border-destructive/35 bg-destructive/10 p-2.5"

@@ -23,12 +23,13 @@ import {
   primaryRoute,
   rerouteOption,
   excludedRoads,
-  truckProfile,
   type LatLng,
   type TruckRoute,
 } from "@/data/routing";
+import { rulesFor, type VehicleProfile } from "@/data/vehicles";
 
-export type TruckProfile = typeof truckProfile;
+/** The routing engine is driven by the active vehicle profile, not a constant. */
+export type TruckProfile = VehicleProfile;
 
 export type TruckRoutingProvider = {
   name: string;
@@ -45,26 +46,51 @@ export type TruckRoutingProvider = {
     profile: TruckProfile;
   }): Promise<TruckRoute>;
   /** Roads excluded for this configuration — surfaced so the driver sees WHY. */
-  restrictions(profile: TruckProfile): typeof excludedRoads;
+  restrictions(profile: TruckProfile): typeof excludedRoads[number][];
 };
 
 export const mockTruckRoutingProvider: TruckRoutingProvider = {
   name: "HERCULES mock truck-routing provider",
-  async route() {
-    return primaryRoute;
+  async route({ profile }) {
+    return legalFor(primaryRoute, profile);
   },
-  async reroute() {
+  async reroute({ profile }) {
     // A real provider recalculates from the live GPS fix using the same truck
     // constraint set, guaranteeing the returned path is legal for this unit.
-    return rerouteOption;
+    return legalFor(rerouteOption, profile);
   },
-  restrictions() {
-    return excludedRoads;
+  restrictions(profile) {
+    const rules = rulesFor(profile);
+    // A cargo van is legal on the back roads a trailer is kept off of.
+    if (rules.backRoadsAllowed) {
+      return excludedRoads.filter((r) => r.kind === "Height" || r.kind === "Hazmat").map((r) => r);
+    }
+    return excludedRoads.map((r) => r);
   },
 };
 
+/**
+ * PROFILE-DRIVEN LEGALITY.
+ * Anything pulling a trailer is held to blue-shield interstate and white-shield
+ * legal county highway. A van-class unit may use county and back roads, so its
+ * route keeps the short connectors a trailer route drops.
+ */
+export function legalFor(route: TruckRoute, profile: TruckProfile): TruckRoute {
+  const rules = rulesFor(profile);
+  const segments = route.segments.filter(
+    (s) => s.truckLegal && rules.allowedClasses.includes(s.class),
+  );
+  return {
+    ...route,
+    segments,
+    label: rules.backRoadsAllowed ? `${route.label} · shortest legal line` : route.label,
+    provider: `${route.provider} · ${profile.label} profile`,
+  };
+}
+
 /** Swap this line for a HERE/Trimble implementation when going live. */
 export const truckRouting: TruckRoutingProvider = mockTruckRoutingProvider;
+
 
 /** Straight-line off-route test. Real providers return a corridor offset in meters. */
 export function metersOffRoute(p: LatLng, polyline: LatLng[]) {
