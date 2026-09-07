@@ -430,10 +430,16 @@ type Ctx = {
   approve: (turnId: string) => void;
   decline: (turnId: string) => void;
   clear: () => void;
+  /**
+   * HERCULES speaks unprompted — inbound arrival countdowns, timers running
+   * out. No driver turn, no proposal: it is information, not a commitment.
+   */
+  announce: (text: string) => void;
   /** The line currently being spoken or the last thing said. */
   lastLine: string;
   pending: Turn | undefined;
 };
+
 
 const VoiceContext = createContext<Ctx | null>(null);
 
