@@ -29,7 +29,6 @@ import {
   offRoutePosition,
   routeParking,
   destinationFacility,
-  vehicle,
   type LatLng,
   type TruckRoute,
 } from "@/data/routing";
@@ -38,12 +37,14 @@ import {
   hazardLayer,
   effectiveSeverity,
   exceedsTruck,
+  relevantToVehicle,
   useHazardLayers,
 } from "@/lib/hazard-layer";
 import { hazardMeta, type Hazard } from "@/data/hazards";
 import { currentLoad, hos } from "@/data/mock";
 import { hm } from "@/components/hercules/primitives";
 import { useStops } from "@/lib/stops";
+import { useVehicle } from "@/lib/vehicles";
 import { ChainMarker } from "@/components/hercules/ChainMarker";
 
 export const Route = createFileRoute("/navigation")({
