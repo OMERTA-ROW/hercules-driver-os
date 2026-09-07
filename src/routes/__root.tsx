@@ -138,7 +138,9 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <PurchaseProvider>
+            <AddonProvider>
             <HazardLayerProvider>
+
               <StopsProvider>
                 <DeliveryProvider>
                 <BoltProvider>
