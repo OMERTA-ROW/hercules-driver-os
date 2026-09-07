@@ -382,7 +382,7 @@ export const seedRecords: DocRecord[] = [
     expires: iso(2026, 9, 21),
     checks: [
       { label: "VIN matches the unit on file", pass: true },
-      { label: "Apportioned weight covers the配 configuration", pass: true },
+      { label: "Apportioned weight covers the configuration", pass: true },
     ],
     source: "driver",
     uploadedBy: "Vinson Bass",
