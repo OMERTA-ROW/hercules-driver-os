@@ -362,6 +362,25 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
 
+  /* COMPLIANCE PAPERWORK — expiries, what's missing, who can read it. */
+  if (
+    /(medical card|med card|physical|cdl|licen[cs]e|insurance|authority|mvr|drug and alcohol|drug test|registration|inspection|paperwork|compliance|expir)/.test(
+      t,
+    )
+  ) {
+    const due = complianceAttention();
+    if (!due.length) {
+      return {
+        topic: "compliance",
+        text: `Your paperwork is clean. Licence, medical card, insurance, authority, MVR, drug and alcohol, registration and inspection are all on file and current, and your carrier is reading the same records you are. I'll speak up on my own the moment anything gets inside its warning window.`,
+      };
+    }
+    return {
+      topic: "compliance",
+      text: `${due.map(spokenExpiry).join(" ")} Nothing gets sent to a broker or a carrier unless you tell me to — say the word and I'll pull the set together.`,
+    };
+  }
+
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
 
