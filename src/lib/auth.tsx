@@ -167,9 +167,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [account],
   );
 
+  const kind: AccountKind = account?.kind ?? "solo";
+
+  const allows = useCallback(
+    (scope: Scope) => (account ? hasScope(account.kind, scope) : false),
+    [account],
+  );
+
   return (
     <AuthContext.Provider
-      value={{ account, ready, signIn, signUp, signOut, changePlan, trialDaysLeft, can }}
+      value={{
+        account,
+        ready,
+        signIn,
+        signUp,
+        signOut,
+        changePlan,
+        trialDaysLeft,
+        can,
+        allows,
+        kind,
+      }}
     >
       {children}
     </AuthContext.Provider>
