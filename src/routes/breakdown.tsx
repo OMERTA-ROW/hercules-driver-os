@@ -49,6 +49,7 @@ import {
   spokenService,
 } from "@/lib/breakdown";
 import { useVoice } from "@/lib/voice";
+import { countdownLabel, useArrivals } from "@/lib/arrivals";
 
 export const Route = createFileRoute("/breakdown")({
   head: () => ({
@@ -73,7 +74,10 @@ export const Route = createFileRoute("/breakdown")({
 });
 
 function BreakdownPage() {
-  const { say } = useVoice();
+  const { say, announce } = useVoice();
+  const { inbound, expectMechanic, setQuote, markArrived, dismiss, now } = useArrivals();
+  /* The mechanic HERCULES is currently timing, if any. */
+  const tracked = inbound.find((a) => a.kind === "mechanic");
   const [fix, setFix] = useState<Fix | null>(null);
   const [problem, setProblem] = useState<ProblemId>("unknown");
   const [results, setResults] = useState<Service[]>([]);
@@ -138,6 +142,104 @@ function BreakdownPage() {
       title="Breakdown Assist"
       subtitle="HERCULES finds and ranks the help. You decide who gets called."
     >
+      {/* --------------------------------- MECHANIC ETA TIMER (running clock) */}
+      {tracked ? (
+        <Panel
+          className={
+            tracked.status === "overdue"
+              ? "mb-3 border-destructive/60"
+              : "mb-3 border-primary/50"
+          }
+        >
+          <PanelTitle
+            right={
+              <Pill tone={tracked.status === "overdue" ? "alert" : "primary"}>
+                {tracked.status === "overdue" ? "past window" : countdownLabel(tracked, now)}
+              </Pill>
+            }
+          >
+            {tracked.who} · {tracked.org}
+          </PanelTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Coming for {tracked.what}. Quoted {tracked.quotedMin ?? "—"} minutes — HERCULES started
+            this timer for you, and calls out the countdown out loud.
+          </p>
+          <p
+            className={`metric mt-2 text-4xl font-bold ${
+              tracked.status === "overdue" ? "text-destructive" : "text-primary"
+            }`}
+          >
+            {countdownLabel(tracked, now)}
+          </p>
+          <div className="mt-3">
+            <Label>What did they quote you on the call?</Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[20, 30, 45, 60, 90, 120].map((m) => (
+                <Button
+                  key={m}
+                  size="lg"
+                  variant={tracked.quotedMin === m ? "default" : "outline"}
+                  className="h-14 min-w-[6rem]"
+                  onClick={() => {
+                    setQuote(tracked.id, m);
+                    announce(
+                      `Got it — ${m} minutes for ${tracked.who} at ${tracked.org}. Timer running. I'll check in with you five minutes before it's up.`,
+                    );
+                  }}
+                >
+                  {m} min
+                </Button>
+              ))}
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-14 gap-2"
+                onClick={() => say("He said about an hour")}
+              >
+                <Volume2 className="h-5 w-5" /> Just tell HERCULES
+              </Button>
+            </div>
+          </div>
+          {tracked.status === "overdue" ? (
+            <div className="mt-3 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+              <p className="text-sm">
+                The window they gave you is gone and nobody has shown up. Call them again, or have
+                HERCULES rank the next provider.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tracked.phone ? (
+                  <a href={`tel:${tracked.phone.replace(/[^0-9]/g, "")}`}>
+                    <Button size="lg" className="h-14 gap-2">
+                      <Phone className="h-5 w-5" /> Call {tracked.org} again
+                    </Button>
+                  </a>
+                ) : null}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14"
+                  onClick={() => say("Find me another mechanic, they never showed")}
+                >
+                  Find someone else
+                </Button>
+              </div>
+            </div>
+          ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="lg" variant="secondary" className="h-14" onClick={() => markArrived(tracked.id)}>
+              <Check className="mr-2 h-5 w-5" /> They showed up
+            </Button>
+            <Button size="lg" variant="ghost" className="h-14" onClick={() => dismiss(tracked.id)}>
+              <X className="mr-2 h-5 w-5" /> Stop the timer
+            </Button>
+          </div>
+          <DriverApprovedNote>
+            HERCULES watches the clock and tells you. It does not call anyone or re-dispatch
+            anything without your word.
+          </DriverApprovedNote>
+        </Panel>
+      ) : null}
+
       <div className="grid items-start gap-3 xl:grid-cols-3">
         {/* ------------------------------------------------ WHERE YOU ARE */}
         <Panel className="xl:col-span-2 border-destructive/40">
@@ -504,6 +606,18 @@ function BreakdownPage() {
                   onClick={() => {
                     toast.success(`Connecting you to ${confirm.name}`, {
                       description: "Your location is on screen — read it to them.",
+                    });
+                    // MECHANIC ETA TIMER: HERCULES starts its own clock from
+                    // their published window right away. Whatever they quote on
+                    // the call replaces it — by voice or with one tap.
+                    expectMechanic({
+                      company: confirm.name,
+                      reason:
+                        problem === "unknown"
+                          ? "a breakdown you haven't pinned down yet"
+                          : activeProblem.label.toLowerCase(),
+                      etaMin: confirm.etaMin,
+                      phone: confirm.phone,
                     });
                     setConfirm(null);
                   }}

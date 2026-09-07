@@ -7,3 +7,5 @@
 - [x] Truck Health reads the live BOLT stream, pairing flow, automated alerts
 - [x] Voice and Breakdown Assist use plain-English BOLT fault translations
 - [x] Delivery & Supply: voice ordering, per-service coverage notices, favourites
+
+- [x] Inbound arrival notifications: spoken + visual countdowns for delivery couriers and roadside techs, mechanic quoted-ETA timer with 5-minute-out prompt and overdue flag on Breakdown Assist

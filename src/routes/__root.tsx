@@ -19,6 +19,9 @@ import { HazardLayerProvider } from "@/lib/hazard-layer";
 import { StopsProvider } from "@/lib/stops";
 import { DeliveryProvider } from "@/lib/delivery";
 import { VoiceProvider } from "@/lib/voice";
+import { ArrivalsProvider } from "@/lib/arrivals";
+import { ArrivalBridge } from "@/components/hercules/ArrivalBridge";
+import { ArrivalStack } from "@/components/hercules/ArrivalStack";
 import { BoltProvider } from "@/lib/bolt";
 
 function NotFoundComponent() {
@@ -139,12 +142,16 @@ function RootComponent() {
               <StopsProvider>
                 <DeliveryProvider>
                 <BoltProvider>
+                <ArrivalsProvider>
                 <VoiceProvider>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
+            <ArrivalBridge />
+            <ArrivalStack />
             <ScreenDim />
             <Toaster />
                 </VoiceProvider>
+                </ArrivalsProvider>
                 </BoltProvider>
                 </DeliveryProvider>
               </StopsProvider>
