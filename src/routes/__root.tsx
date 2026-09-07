@@ -24,6 +24,8 @@ import { ArrivalsProvider } from "@/lib/arrivals";
 import { ArrivalBridge } from "@/components/hercules/ArrivalBridge";
 import { ArrivalStack } from "@/components/hercules/ArrivalStack";
 import { BoltProvider } from "@/lib/bolt";
+import { VehicleProvider } from "@/lib/vehicles";
+import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
 
 function NotFoundComponent() {
   return (
