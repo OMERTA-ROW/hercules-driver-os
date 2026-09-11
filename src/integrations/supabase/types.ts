@@ -516,7 +516,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      current_company_code: { Args: never; Returns: string }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
