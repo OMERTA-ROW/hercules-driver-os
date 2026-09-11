@@ -24,6 +24,19 @@ import {
   coverageFor as coverageAt,
 } from "@/data/delivery";
 import { currentFix, problems, services } from "@/data/breakdown";
+import {
+  bestListing,
+  categoryById,
+  categoryFromSpeech,
+  itemsIn,
+  matchParts,
+  partForFault,
+  spokenListing,
+  supplierById,
+  type Listing,
+  type SupplyCategoryId,
+} from "@/data/parts";
+import { serviceFeeFor, spokenFee, totalWithFee } from "@/data/fees";
 import { seedRecords, statusOf, spokenExpiry, daysUntil } from "@/data/compliance";
 import {
   filterByProblem,
@@ -104,6 +117,7 @@ type Topic =
   | "stops"
   | "health"
   | "supply"
+  | "parts"
   | "alerts"
   | "equipment"
   | "compliance"
@@ -173,6 +187,70 @@ function coverageLine() {
     ? ` Nearest coverage on your route is ${ahead.label}, ${ahead.milesAhead} miles ahead — eat there before you shut down here.`
     : "";
   return `${head}${rest}${tail}`;
+}
+
+/* ------------------------------------------------- PARTS & SUPPLY (TRANSACTED) */
+
+type SupplyPick = {
+  label: string;
+  category: SupplyCategoryId;
+  listing: Listing;
+  partNumber?: string;
+};
+
+/** The part or supply item HERCULES last put on the table for the driver. */
+let lastSupplyPick: SupplyPick | null = null;
+
+function lastSupply(): SupplyPick | null {
+  return lastSupplyPick;
+}
+
+/** Turn something the driver said into a part or a supply item with a price. */
+function pickSupply(text: string): SupplyPick | null {
+  const parts = matchParts(text);
+  const part = parts[0];
+  if (part) {
+    const listing = bestListing(part.listings);
+    if (listing) {
+      return { label: part.name, category: "parts", listing, partNumber: part.partNumber };
+    }
+  }
+  const cat = categoryFromSpeech(text);
+  if (cat && cat !== "parts") {
+    const item = itemsIn(cat)[0];
+    const listing = item ? bestListing(item.listings) : undefined;
+    if (item && listing) return { label: item.name, category: cat, listing };
+  }
+  return null;
+}
+
+/**
+ * DRIVER APPROVED: the read-back proposal for anything HERCULES transacts. The
+ * HERCULES service fee is inside both the spoken line and the on-screen summary,
+ * and nothing is ordered until the driver approves it.
+ */
+function partsProposal(
+  label: string,
+  category: SupplyCategoryId,
+  listing: Listing,
+  partNumber?: string,
+): Reply {
+  const feeCategory = categoryById(category).fee;
+  const { subtotal, fee, total } = totalWithFee(listing.price, feeCategory);
+  const vendor = supplierById(listing.supplierId).name;
+  lastSupplyPick = { label, category, listing, ...(partNumber ? { partNumber } : {}) };
+  return {
+    topic: "parts",
+    text: `Reading it back: ${label}${
+      partNumber ? `, part number ${partNumber}` : ""
+    }, from ${vendor}. ${spokenFee(subtotal, feeCategory)} ${listing.ready}. Say yes and I'll order it.`,
+    proposal: {
+      summary: `${label} — ${vendor}, ${listing.location}. ${listing.ready}. Order $${subtotal.toFixed(
+        2,
+      )} + $${fee.toFixed(2)} HERCULES service fee`,
+      total: `$${total.toFixed(2)}`,
+    },
+  };
 }
 
 /** Follow-ups the driver can say once a topic is on the table. */
@@ -262,6 +340,34 @@ function followUp(topic: Topic, text: string): Reply | null {
       },
     };
   }
+  /* PARTS & SUPPLY that HERCULES actually transacts — the scaled HERCULES
+     service fee is read out inside the proposal, every time, before the yes. */
+  if (topic === "parts") {
+    if (/(order|buy|get it|place it|do it|source it|yes get)/.test(t)) {
+      const found = lastSupply();
+      if (found) return partsProposal(found.label, found.category, found.listing, found.partNumber);
+    }
+    if (/(cheaper|cheapest|price|how much|somewhere else|another)/.test(t)) {
+      const found = lastSupply();
+      if (found) {
+        const fee = serviceFeeFor(found.listing.price, categoryById(found.category).fee);
+        return {
+          topic: "parts",
+          text: `Cheapest I can actually get you is ${spokenListing(found.label, found.listing)} On top of that there's a ${fee.toFixed(
+            2,
+          )} dollar HERCULES service fee, because HERCULES places it and pays the supplier. Say order it and I'll read the whole thing back.`,
+        };
+      }
+    }
+    if (/(mechanic|fit it|install|who'?ll put it on|labour|labor)/.test(t)) {
+      const best = rank(services)[0]!;
+      return {
+        topic: "parts",
+        text: `Part and hands in one go: closest is ${spokenService(best)} Order the part from me and call them yourself, or have me book and pay the service call — that one carries the HERCULES fee and I'll read it to you first. Nothing is dispatched either way until you say so.`,
+      };
+    }
+  }
+
   /* SUPPLY: ordering food or goods to the truck stays a conversation until the
      driver either approves the read-back or drops it. */
   if (topic === "supply") {
@@ -414,6 +520,33 @@ export function respond(text: string, topic: Topic): Reply {
       text: `Nearest thing worth knowing: ${h.name}. ${h.detail}. I'll call it out well before you get there, sized so you don't have to look down.`,
     };
   }
+  /* SUPPLY & PARTS — anything HERCULES sources, places and pays for. Checked
+     before food delivery so "order me an air dryer" doesn't land on Uber Eats. */
+  if (
+    /(part|parts|alternator|starter|turbo|injector|water pump|air dryer|fan clutch|def pump|doser|brake shoe|casing|retread|strap|chain|tarp|binder|load bar|securement|permit|oversize|toll|prepass|bestpass|scale bypass|glove|vest|flashlight|ppe|wrench|socket|laundry|spn ?\d|part number)/.test(
+      t,
+    )
+  ) {
+    const pick = pickSupply(t);
+    if (!pick) {
+      return {
+        topic: "parts",
+        text: `Tell me the symptom, the part name or the code and I'll name the part and price it. I can also handle tires and road service, fuel and DEF, showers, parking and laundry, straps, chains and tarps, tools and PPE, and permits, scales and tolling. Anything I place and pay for carries the HERCULES service fee, and I read it to you before you approve it.`,
+      };
+    }
+    lastSupplyPick = pick;
+    const codeMatch = /spn ?\d+/.exec(t);
+    const fromCode = codeMatch ? partForFault(codeMatch[0]) : undefined;
+    const fee = serviceFeeFor(pick.listing.price, categoryById(pick.category).fee);
+    return {
+      topic: "parts",
+      text: `${
+        fromCode ? `${codeMatch?.[0].toUpperCase()} points at the ${fromCode.name}. ${fromCode.why} ` : ""
+      }Best I can get you: ${spokenListing(pick.label, pick.listing)} Plus a ${fee.toFixed(
+        2,
+      )} dollar HERCULES service fee, because I place it and pay the supplier — that's what keeps HERCULES running. Say "order it" and I'll read the whole thing back. Nothing is ordered yet.`,
+    };
+  }
   if (
     /(deliver|delivery|uber ?eats|door ?dash|grub ?hub|instacart|gopuff|go ?puff|walmart|walgreens|cvs|amazon|pharmacy|prescription|grocer|order|hungry|starving|dinner|lunch|breakfast|coffee|supplies|snack)/.test(
       t,
@@ -433,7 +566,7 @@ export function respond(text: string, topic: Topic): Reply {
     const pred = boltPredictions[0]!;
     return {
       topic: "health",
-      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now.`,
+      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now. Say "source the part" and I'll name it, price it at the counters ahead of you, and show you the fee before anything is ordered.`,
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {

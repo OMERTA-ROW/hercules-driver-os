@@ -240,7 +240,10 @@ function HealthPage() {
           >
             <Volume2 className="mr-2 h-4 w-4" /> Read these aloud in plain English
           </Button>
-          <div className="mt-2">
+          <div className="mt-2 space-y-2">
+            <Button asChild variant="outline" size="lg" className="h-14 w-full">
+              <Link to="/parts">Source the parts for these codes</Link>
+            </Button>
             <Button asChild variant="ghost" size="sm" className="w-full">
               <Link to="/breakdown">Take these codes to Breakdown Assist</Link>
             </Button>

@@ -481,6 +481,15 @@ function BreakdownPage() {
             >
               <Volume2 className="h-5 w-5" /> Read my codes aloud
             </Button>
+            <Button asChild size="lg" variant="secondary" className="mt-2 h-14 w-full gap-2">
+              <Link to="/parts">
+                <Wrench className="h-5 w-5" /> Source the part for these codes
+              </Link>
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Part and mechanic in one flow — HERCULES prices the part, shows the service fee, and
+              waits for your yes on both.
+            </p>
             <Link
               to="/health"
               className="mt-2 block text-center text-xs uppercase tracking-wider text-primary"

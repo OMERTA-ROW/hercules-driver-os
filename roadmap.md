@@ -23,3 +23,10 @@
 - Named ZEUS/HERCULES cast in src/data/voices.ts: Hercules (principal), Zeus, Ares, Atlas, Apollo, Athena, Medusa, Hera, Artemis.
 - Real premium speech via src/lib/speech.functions.ts (Lovable AI TTS, per-persona delivery direction + speed).
 - Compact scrollable picker with descriptors and per-voice preview: src/components/hercules/VoicePicker.tsx; selection persists in the driver profile.
+
+## Supply & Parts module (done)
+- src/data/fees.ts: fee logic now per-category and fully tunable (feeConfig: ladder + floor + ceiling per category). Parts scale $2 → $100; tires/roadside/permits/securement lower ceilings; fuel/showers/laundry/tools flat small. Food/grocery/retail delivery stays $0 (platforms transact, not HERCULES).
+- src/data/parts.ts: dealer + aftermarket supplier network (Freightliner, Rush, Navistar/International, Peterbilt, Kenworth, Volvo, Mack, FleetPride, TruckPro, NAPA HD, Amazon, Love's, TA/Petro, Pilot, permit desk); part catalog with fault-code → part mapping, route-aware listings (miles ahead, off-route, stock, ready-by, comes-to-you), and supply items for tires/roadside/fuel & DEF/showers & parking/laundry/securement/tools & PPE/permits, scales & tolling.
+- src/lib/parts.tsx: provider seam (real supplier API drops in), identify by speech or fault code, quoting with the HERCULES fee, approval-only order placement, order history + cancel, fees-paid total; persisted locally.
+- /parts: voice-first sourcing, live BOLT codes with one-tap "source the part", category rail, branded supplier rows with price/stock/ETA, read-back confirmation showing order + HERCULES fee + total, part-plus-mechanic flow into Breakdown Assist.
+- Voice: "parts" topic with part/fault-code identification, cheaper-option follow-up, mechanic follow-up, and a DRIVER APPROVED read-back proposal carrying the fee. Diagnostics and Breakdown both offer to source the part.
