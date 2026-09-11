@@ -304,47 +304,7 @@ function OrbPicker() {
   );
 }
 
-/** Voice cast — male and female options, Hercules is the principal voice. */
-function VoicePicker() {
-  const { voice, setVoice } = useVoice();
-  return (
-    <>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {voiceOptions.map((v) => {
-          const active = voice.id === v.id;
-          return (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => setVoice(v.id)}
-              aria-pressed={active}
-              className={cn(
-                "min-h-16 rounded-xl border p-4 text-left transition-colors",
-                active ? "border-primary/60 bg-primary/10" : "border-border bg-card/50 hover:bg-accent",
-              )}
-            >
-              <span className="flex items-center gap-2">
-                <span className="font-display text-base font-light uppercase tracking-[0.16em]">
-                  {v.name}
-                </span>
-                <span className="tech-label">{v.gender}</span>
-                {v.principal ? <span className="tech-label ml-auto text-primary">Default</span> : null}
-                {active && !v.principal ? (
-                  <Check className="ml-auto h-4 w-4 text-primary" />
-                ) : null}
-              </span>
-              <span className="mt-1 block text-xs text-muted-foreground">{v.hint}</span>
-            </button>
-          );
-        })}
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Whichever voice you pick reads everything aloud the same way. It still asks before it books,
-        spends, or commits anything.
-      </p>
-    </>
-  );
-}
+/* The persona picker itself lives in components/hercules/VoicePicker.tsx. */
 
 /**
  * ADD-ONS — stackable on top of the base plan, with the running monthly total
