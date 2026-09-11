@@ -34,6 +34,8 @@ import {
 } from "@/lib/breakdown";
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
 import { speakLine } from "@/lib/speech.functions";
+import { attachAudioLevel, setVoiceLevel, startSynthLevel } from "@/lib/voice-level";
+
 
 /**
  * HERCULES VOICE LAYER
@@ -543,12 +545,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
      Every HERCULES line is spoken in the chosen persona's character. If the
      speech service can't be reached the conversation still reads on screen. */
   const audio = useRef<HTMLAudioElement | null>(null);
+  const detachLevel = useRef<(() => void) | null>(null);
   const spokenIds = useRef<Set<string>>(new Set());
   const voiceRef = useRef<VoiceId>(voiceId);
   voiceRef.current = voiceId;
   const [previewing, setPreviewing] = useState<VoiceId | null>(null);
 
   const killAudio = useCallback(() => {
+    detachLevel.current?.();
+    detachLevel.current = null;
     if (audio.current) {
       audio.current.pause();
       audio.current.src = "";
@@ -563,7 +568,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         if (!res.ok) return;
         killAudio();
         const el = new Audio(res.audio);
+        el.crossOrigin = "anonymous";
         audio.current = el;
+        // The orb's ripples ride the real loudness of the line.
+        detachLevel.current = attachAudioLevel(el);
         await el.play().catch(() => {});
       } catch {
         /* screen text still carries the line */
@@ -571,6 +579,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     },
     [killAudio],
   );
+
 
   const preview = useCallback(
     async (id: VoiceId) => {
@@ -719,6 +728,18 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, [turns, playAs]);
 
   useEffect(() => killAudio, [killAudio]);
+
+  /* While the driver holds the floor there's no audio stream to meter yet, so
+     the surface rides a wandering envelope of the same shape. */
+  useEffect(() => {
+    if (mode !== "listening") return;
+    return startSynthLevel(0.5);
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode === "idle") setVoiceLevel(0);
+  }, [mode]);
+
 
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
