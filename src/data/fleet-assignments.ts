@@ -75,7 +75,20 @@ export function assignmentFor(companyCode: string | undefined, driver: string | 
   const mine = fleetAssignments.find(
     (a) => a.companyCode === code && driver && a.driver.toLowerCase() === driver.toLowerCase(),
   );
-  return mine ?? fleetAssignments.find((a) => a.companyCode === code && a.driver === "any") ?? null;
+  const anyForCompany = fleetAssignments.find((a) => a.companyCode === code && a.driver === "any");
+  if (mine || anyForCompany) return mine ?? anyForCompany!;
+  /* A carrier that just onboarded has no board yet — it still assigns equipment
+     at the company level, so HERCULES inherits a default tractor-trailer rather
+     than asking the driver. */
+  return {
+    companyCode: code,
+    driver: "any",
+    unit: "Company unit",
+    trailer: "Dry van 53'",
+    kind: "eighteen",
+    sub: "dryVan",
+    assignedBy: "Company assignment",
+  };
 }
 
 /** The routing profile that assignment produces. Same shape a driver would save. */

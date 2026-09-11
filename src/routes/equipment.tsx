@@ -120,6 +120,8 @@ function EquipmentScreen() {
                         <Pill tone="go">
                           <Check className="h-3.5 w-3.5" /> In it today
                         </Pill>
+                      ) : resolution === "inherited" ? (
+                        <Pill tone="info">Company assigns</Pill>
                       ) : (
                         <Button size="lg" onClick={() => chooseForTrip(p.id)}>
                           Use for this trip
