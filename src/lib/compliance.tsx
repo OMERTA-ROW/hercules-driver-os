@@ -125,6 +125,42 @@ type Ctx = {
   /** Share one record out to a broker without duplicating it. */
   shareWithBroker: (recordId: string) => void;
   exportSet: (scope: ExportScope) => { fileName: string; count: number; pages: number; csv: string };
+
+  /* ---- THE SINGLE STATUS INDICATOR, ONE BOT PER ACCOUNT ---- */
+  /** Compliance for one driver or one vehicle: missing, expired, coming due. */
+  subjectStatus: (kind: SubjectKind, id: string) => SubjectCompliance;
+  /** The driver's own account rolled into one light. */
+  myStatus: { status: AccountStatus; parts: SubjectCompliance[] };
+  /** Every driver and vehicle under a carrier, for the roster view. */
+  roster: (companyCode?: string | null) => {
+    status: AccountStatus;
+    drivers: SubjectCompliance[];
+    vehicles: SubjectCompliance[];
+  };
+  /** Where the next scheduled MVR pull stands for a driver. */
+  mvrSchedule: (driverId: string) => ReturnType<typeof mvrDue>;
+
+  /* ---- FMCSA SERVICE LAYER (mocked, real seam) ---- */
+  fmcsaName: string;
+  fmcsaLive: boolean;
+  authority: Record<string, FmcsaAuthority>;
+  safety: Record<string, FmcsaSafety>;
+  clearinghouse: Record<string, ClearinghouseResult>;
+  checkAuthority: (dot: string) => Promise<FmcsaAuthority>;
+  checkSafety: (dot: string) => Promise<FmcsaSafety>;
+  runClearinghouse: (driverId: string, queryType: "limited" | "full", by: string) => Promise<ClearinghouseResult>;
+  refreshMvr: (driverId: string, by: string) => Promise<MvrPull>;
+
+  /* ---- BROKER VERIFICATION ---- */
+  verifications: VerificationRequest[];
+  requestVerification: (input: {
+    carrierName: string;
+    dot: string;
+    items: DocKind[];
+    note: string;
+    requestedBy: string;
+  }) => VerificationRequest;
+  runVerification: (id: string) => Promise<VerificationRequest>;
 };
 
 const ComplianceContext = createContext<Ctx | null>(null);
