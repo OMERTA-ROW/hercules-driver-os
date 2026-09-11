@@ -70,6 +70,8 @@ export type PlacedSupplyOrder = {
   ready: string;
   location: string;
   comesToYou: boolean;
+  /** Snapshot of the counter this was bought from — pickup routing reads it. */
+  listing: Listing;
   placedAt: number;
   status: "placed" | "cancelled";
 };
@@ -218,6 +220,7 @@ export function PartsProviderRoot({ children }: { children: ReactNode }) {
         ready: q.listing.ready,
         location: q.listing.location,
         comesToYou: !!q.listing.comesToYou,
+        listing: q.listing,
         placedAt: Date.now(),
         status: "placed",
       };
