@@ -13,17 +13,22 @@ import {
   autoChecks,
   bothSides,
   classify,
+  complianceFor,
   daysUntil,
   drivers,
   exportPackage,
+  fmtDate,
   kindSpec,
   manifestCsv,
   missingFor,
+  mvrDue,
+  rollUp,
   seedRecords,
   spokenExpiry,
   statusOf,
   subjectName,
   vehicles,
+  type AccountStatus,
   type ApprovalOutcome,
   type Classified,
   type DocKind,
@@ -31,8 +36,30 @@ import {
   type DriverRow,
   type ExportScope,
   type Side,
+  type SubjectCompliance,
   type SubjectKind,
 } from "@/data/compliance";
+import {
+  fmcsaProvider,
+  type ClearinghouseResult,
+  type FmcsaAuthority,
+  type FmcsaSafety,
+  type MvrPull,
+} from "@/lib/fmcsa";
+
+/** A broker's standing request to see a carrier's insurance and authority. */
+export type VerificationRequest = {
+  id: string;
+  carrierName: string;
+  dot: string;
+  requestedBy: string;
+  requestedAt: string;
+  items: DocKind[];
+  note: string;
+  state: "open" | "verified" | "failed";
+  result?: string;
+};
+
 
 /**
  * THE COMPLIANCE BOT'S STATE
