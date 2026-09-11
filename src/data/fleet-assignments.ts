@@ -69,7 +69,10 @@ export const fleetAssignments: FleetAssignment[] = [
 ];
 
 /** The assignment the fleet holds for this driver, if the company has one. */
-export function assignmentFor(companyCode: string | undefined, driver: string | undefined) {
+export function assignmentFor(
+  companyCode: string | undefined,
+  driver: string | undefined,
+): FleetAssignment | null {
   if (!companyCode) return null;
   const code = companyCode.trim().toUpperCase();
   const mine = fleetAssignments.find(
