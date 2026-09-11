@@ -76,6 +76,7 @@ export const Route = createFileRoute("/breakdown")({
 
 function BreakdownPage() {
   const { say, announce } = useVoice();
+  const boltFaults = useBolt().snapshot.faults;
   const { inbound, expectMechanic, setQuote, markArrived, dismiss, now } = useArrivals();
   /* The mechanic HERCULES is currently timing, if any. */
   const tracked = inbound.find((a) => a.kind === "mechanic");

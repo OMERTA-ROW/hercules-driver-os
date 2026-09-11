@@ -76,6 +76,8 @@ export const Route = createFileRoute("/parts")({
 
 function PartsPage() {
   const { say, announce } = useVoice();
+  const { snapshot: bolt, adapter: boltAdapter } = useBolt();
+  const boltFaults = bolt.faults;
   const {
     identify,
     identifying,
@@ -183,7 +185,7 @@ function PartsPage() {
       {/* ------------------------------------------------- FAULT CODE SOURCING */}
       <Panel className="mt-3">
         <PanelTitle right={<Pill tone="alert">{boltFaults.length} live codes</Pill>}>
-          Straight Off THE BOLT
+          Straight Off {boltAdapter.name}
         </PanelTitle>
         <p className="mb-2 text-sm text-muted-foreground">
           A code comes in, HERCULES already knows the likely part. One tap and it's priced.
