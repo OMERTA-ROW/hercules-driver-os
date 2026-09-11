@@ -276,6 +276,34 @@ function followUp(topic: Topic, text: string): Reply | null {
       },
     };
   }
+  /* PARTS & SUPPLY that HERCULES actually transacts — the scaled HERCULES
+     service fee is read out inside the proposal, every time, before the yes. */
+  if (topic === "parts") {
+    if (/(order|buy|get it|place it|do it|source it|yes get)/.test(t)) {
+      const found = lastSupply();
+      if (found) return partsProposal(found.label, found.category, found.listing, found.partNumber);
+    }
+    if (/(cheaper|cheapest|price|how much|somewhere else|another)/.test(t)) {
+      const found = lastSupply();
+      if (found) {
+        const fee = serviceFeeFor(found.listing.price, categoryById(found.category).fee);
+        return {
+          topic: "parts",
+          text: `Cheapest I can actually get you is ${spokenListing(found.label, found.listing)} On top of that there's a ${fee.toFixed(
+            2,
+          )} dollar HERCULES service fee, because HERCULES places it and pays the supplier. Say order it and I'll read the whole thing back.`,
+        };
+      }
+    }
+    if (/(mechanic|fit it|install|who'?ll put it on|labour|labor)/.test(t)) {
+      const best = rank(services)[0]!;
+      return {
+        topic: "parts",
+        text: `Part and hands in one go: closest is ${spokenService(best)} Order the part from me and call them yourself, or have me book and pay the service call — that one carries the HERCULES fee and I'll read it to you first. Nothing is dispatched either way until you say so.`,
+      };
+    }
+  }
+
   /* SUPPLY: ordering food or goods to the truck stays a conversation until the
      driver either approves the read-back or drops it. */
   if (topic === "supply") {
