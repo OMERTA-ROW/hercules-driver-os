@@ -232,6 +232,15 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const saveVerifications = useCallback((next: VerificationRequest[]) => {
+    setVerifications(next);
+    try {
+      localStorage.setItem(VERIFY_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const stamp = () =>
     new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
