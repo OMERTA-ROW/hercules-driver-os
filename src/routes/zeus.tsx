@@ -142,7 +142,29 @@ function ZeusOnboarding() {
                   />
                 </div>
                 <div>
-                  <Label>Trucks (minimum 3)</Label>
+                  <Label>How many trucks do you run?</Label>
+                  <div className="mt-1 grid gap-2 sm:grid-cols-3">
+                    {fleetTiers.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        aria-pressed={tier.id === t.id}
+                        onClick={() => setTrucks(t.id === "tier1" ? 3 : t.id === "tier2" ? 25 : 120)}
+                        className={cn(
+                          "min-h-[76px] rounded-lg border p-3 text-left transition-colors",
+                          tier.id === t.id
+                            ? "border-primary/60 bg-primary/12 text-primary"
+                            : "border-border bg-card/50 hover:bg-accent",
+                        )}
+                      >
+                        <span className="block font-display text-sm uppercase tracking-[0.12em]">
+                          {t.label}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">{t.range}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <Label className="mt-3 block">Exact truck count (minimum 3)</Label>
                   <Input
                     type="number"
                     min={3}
@@ -151,6 +173,15 @@ function ZeusOnboarding() {
                     onChange={(e) => setTrucks(Math.max(3, Number(e.target.value) || 3))}
                     className="mt-1 h-12 text-base"
                   />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Recorded as <span className="text-primary">{tier.label} · {tier.range}</span>.
+                    No ceiling at any tier — a hundred-plus truck carrier onboards every driver it
+                    has.
+                  </p>
+                  <p className="mt-1 flex items-start gap-2 text-xs">
+                    <Volume2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {tier.resolution}
+                  </p>
                 </div>
                 <Button type="submit" size="lg" className="w-full gap-2">
                   <UserPlus className="h-4 w-4" /> Onboard this carrier
