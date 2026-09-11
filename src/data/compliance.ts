@@ -851,3 +851,89 @@ export const rejectReasons = [
   "Insurance limits below our minimum",
   "Name on the documents does not match the application",
 ];
+
+/* ------------------------------------------------------------- ACCOUNT STATUS */
+
+/**
+ * THE SINGLE COMPLIANCE INDICATOR
+ * ===============================
+ * One light for the whole account. Green only when nothing is missing and
+ * nothing is inside a warning window. Anything expired or missing that would
+ * put the driver out of service reads BLOCKED — the bot does not soften it.
+ */
+export type AccountStatus = "compliant" | "expiring" | "blocked";
+
+/** Trailers do not carry IFTA, IRP or a power-unit cab card of their own. */
+export function isPowerUnit(vehicleId: string) {
+  const label = vehicles.find((v) => v.id === vehicleId)?.label ?? "";
+  return !/trailer|van\b|reefer|flatbed/i.test(label);
+}
+
+export function requiredForVehicle(vehicleId: string) {
+  const all = requiredFor("vehicle");
+  return isPowerUnit(vehicleId) ? all : all.filter((k) => k.id !== "ifta" && k.id !== "irp");
+}
+
+export type SubjectCompliance = {
+  subjectKind: SubjectKind;
+  subjectId: string;
+  name: string;
+  status: AccountStatus;
+  /** Required documents with nothing on file at all. */
+  missing: DocKindSpec[];
+  /** On file but expired — these are the out-of-service ones. */
+  expired: DocRecord[];
+  /** On file, still valid, inside the warning window. */
+  expiring: DocRecord[];
+};
+
+export function complianceFor(
+  subjectKind: SubjectKind,
+  subjectId: string,
+  records: DocRecord[],
+  from: Date = TODAY,
+): SubjectCompliance {
+  const held = records.filter((r) => r.subjectKind === subjectKind && r.subjectId === subjectId);
+  const required = subjectKind === "vehicle" ? requiredForVehicle(subjectId) : requiredFor("driver");
+  const missing = required.filter((k) => !held.some((r) => r.kind === k.id));
+  const expired = held.filter((r) => statusOf(r, from) === "expired");
+  const expiring = held.filter((r) => statusOf(r, from) === "expiring");
+  const status: AccountStatus =
+    missing.length || expired.length ? "blocked" : expiring.length ? "expiring" : "compliant";
+  return {
+    subjectKind,
+    subjectId,
+    name: subjectName(subjectKind, subjectId),
+    status,
+    missing,
+    expired,
+    expiring,
+  };
+}
+
+/** Worst status wins — an account is only as compliant as its weakest file. */
+export function rollUp(parts: SubjectCompliance[]): AccountStatus {
+  if (parts.some((p) => p.status === "blocked")) return "blocked";
+  if (parts.some((p) => p.status === "expiring")) return "expiring";
+  return "compliant";
+}
+
+export function statusLine(status: AccountStatus) {
+  if (status === "compliant") return "Fully compliant — nothing outstanding";
+  if (status === "expiring") return "Compliant, but something is coming due";
+  return "Blocked — a required document is missing or expired";
+}
+
+/* ------------------------------------------------------------- MVR SCHEDULE */
+
+/** MVRs are pulled on a clock, not on request. This is the refresh cadence. */
+export const MVR_REFRESH_DAYS = 365;
+export const MVR_REMIND_DAYS = 30;
+
+export function mvrDue(records: DocRecord[], driverId: string, from: Date = TODAY) {
+  const mvr = records
+    .filter((r) => r.kind === "mvr" && r.subjectId === driverId)
+    .sort((a, b) => daysUntil(b.expires, from) - daysUntil(a.expires, from))[0];
+  if (!mvr) return { has: false as const, dueInDays: 0 };
+  return { has: true as const, record: mvr, dueInDays: daysUntil(mvr.expires, from) };
+}
