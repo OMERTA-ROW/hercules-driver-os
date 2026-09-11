@@ -11,7 +11,7 @@ import {
 import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
 import { hazards } from "@/data/hazards";
 import { rulesFor, specFor, type VehicleSpec } from "@/data/vehicles";
-import { boltFaults, boltPredictions } from "@/data/bolt";
+import { activeAdapter, activeFaults, activePredictions } from "@/lib/bolt";
 import { truckStops, BOOKING_FEE } from "@/data/stops";
 import {
   currentLocation as dropLocation,
@@ -282,7 +282,7 @@ function followUp(topic: Topic, text: string): Reply | null {
     if (/(fault|code|ecm|engine light)/.test(t)) {
       return {
         topic: "breakdown",
-        text: `THE BOLT has ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"}. ${boltFaults
+        text: `${activeAdapter().name} has ${activeFaults().length} active ${activeFaults().length === 1 ? "code" : "codes"}. ${activeFaults()
           .map((f) => `${f.code} on the ${f.system.toLowerCase()} — ${f.plain}`)
           .join(" ")} Read those numbers to whoever you call.`,
       };
@@ -562,11 +562,11 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
   if (/(fault|engine|health|tire|maintenance|def|coolant|brake|bolt|diagnostic|mpg|fuel economy|what'?s wrong)/.test(t)) {
-    const f = boltFaults[0]!;
-    const pred = boltPredictions[0]!;
+    const f = activeFaults()[0]!;
+    const pred = activePredictions()[0]!;
     return {
       topic: "health",
-      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now. Say "source the part" and I'll name it, price it at the counters ahead of you, and show you the fee before anything is ordered.`,
+      text: `${activeAdapter().name} is reading ${activeFaults().length} active ${activeFaults().length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now. Say "source the part" and I'll name it, price it at the counters ahead of you, and show you the fee before anything is ordered.`,
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {

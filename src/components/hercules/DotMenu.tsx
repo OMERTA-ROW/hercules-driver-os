@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 const sections = [
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
-  { to: "/health", label: "Truck Health", icon: Wrench, feature: "health" },
+  { to: "/health", label: "Vehicle Health", icon: Wrench, feature: "health" },
   { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },
   { to: "/alerts", label: "Alerts", icon: ShieldAlert, feature: "alerts" },
   { to: "/driver", label: "Driver Profile", icon: UserCog, feature: "driver" },

@@ -153,8 +153,8 @@ function RootComponent() {
               <StopsProvider>
                 <DeliveryProvider>
                 <PartsProviderRoot>
-                <BoltProvider>
                 <VehicleProvider>
+                <BoltProvider>
                 <PickupProvider>
                 <ArrivalsProvider>
                 <ComplianceProvider>
@@ -173,8 +173,8 @@ function RootComponent() {
                 </ComplianceProvider>
                 </ArrivalsProvider>
                 </PickupProvider>
-                </VehicleProvider>
                 </BoltProvider>
+                </VehicleProvider>
                 </PartsProviderRoot>
 
 

@@ -44,3 +44,10 @@
 - `src/lib/vehicles.tsx`: resolution is `asked` (solo + ≤10 trucks) or `inherited` (Tier 2/3, silent, from the fleet record); exposes `resolution`, `assignment`, `fleetTier`; `askForTrip` never fires for larger fleets.
 - `src/lib/auth.tsx`: `fleetTier` recorded at ZEUS onboarding and on plan/seat change.
 - `/zeus`: truck-count tier picker, recorded tier, per-tier trip-question behaviour; `/equipment`: shows assigned-by-company vs asked-out-loud.
+
+## Two adapter families + Vehicle Health — done
+- `src/data/bolt.ts`: `adapters` record for THE BOLT (J1939 nine-pin, $149, heavy Class 7–8) and THE BOLT LT (OBD-II sixteen-pin, $99, cars/vans/Sprinters/hotshot Class 3–5/light-medium). Each declares `reports` (live-value keys), `hasTires`, `hasReadiness`, pairing steps, compatibility. Separate fault sets (SPN/FMI vs P-codes), baselines, predictions, auto alerts, OBD emissions readiness monitors. `adapterForSpec()` maps a vehicle profile to its bus.
+- `src/lib/bolt.tsx`: active bus follows the resolved vehicle profile (VehicleProvider now wraps BoltProvider); pairing state keyed per family; snapshot filtered to what the bus reports; `activeFaults()/activePredictions()/activeAdapter()` for non-React callers (voice).
+- `/health`: renamed Vehicle Health; adapter recommendation + reason + pairing card; capability-filtered metric grid; TPMS only on J1939; emissions readiness only on OBD-II.
+- `/store`: both adapter cards with the profile-matched one flagged, plus a "which adapter your truck needs" panel; one-time purchases (`bolt`, `boltObd`) confirmed explicitly, separate from the subscription.
+- Breakdown Assist and `/parts` read faults from the live adapter; menu/dashboard labels renamed.
