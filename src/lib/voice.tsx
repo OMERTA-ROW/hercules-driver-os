@@ -24,6 +24,19 @@ import {
   coverageFor as coverageAt,
 } from "@/data/delivery";
 import { currentFix, problems, services } from "@/data/breakdown";
+import {
+  bestListing,
+  categoryById,
+  categoryFromSpeech,
+  itemsIn,
+  matchParts,
+  partForFault,
+  spokenListing,
+  supplierById,
+  type Listing,
+  type SupplyCategoryId,
+} from "@/data/parts";
+import { serviceFeeFor, spokenFee, totalWithFee } from "@/data/fees";
 import { seedRecords, statusOf, spokenExpiry, daysUntil } from "@/data/compliance";
 import {
   filterByProblem,
