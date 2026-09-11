@@ -608,13 +608,14 @@
 }
 
 .orb-body {
-  animation: orb-breathe-soft 7.5s ease-in-out infinite;
+  animation: orb-breathe-soft 11s ease-in-out infinite;
 }
 
 .orb-state-listening .orb-body,
 .orb-state-speaking .orb-body {
-  animation: orb-breathe-fast 2.4s ease-in-out infinite;
+  animation: orb-breathe-fast 5.5s ease-in-out infinite;
 }
+
 
 .orb-bloom {
   animation: orb-bloom-pulse 7.5s ease-in-out infinite;
