@@ -170,8 +170,7 @@ export const fleetTiers: FleetTierSpec[] = [
 
 export function tierForTrucks(trucks: number): FleetTier {
   if (trucks > 50) return "tier3";
-  if (trucks > 10) return "tier2";
-  if (trucks >= 5) return trucks <= 5 ? "tier1" : "tier2";
+  if (trucks > 5) return "tier2";
   return "tier1";
 }
 
