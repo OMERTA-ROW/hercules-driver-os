@@ -18,6 +18,9 @@
 - Provider (src/lib/compliance.tsx): filing, bulk import, review queue, approvals, exports, spoken expiry queue.
 - /compliance: attention strip, my documents, approval queue (approve / reject with reason / request specific doc), folder-drop bulk import with classify + read + match, human review queue, driver/vehicle/fleet export with CSV manifest.
 - ComplianceBridge speaks expiries unprompted; voice intent added for paperwork questions. Imported docs tracked identically to camera uploads.
+- Added Clearinghouse / IFTA / IRP document kinds, single account compliance light (compliant / expiring / blocked), roster view for company + fleet accounts, scheduled MVR refresh (365-day cycle, 30-day warning).
+- FMCSA service layer scaffold (src/lib/fmcsa.ts): provider interface + mock implementation for authority, safety rating, Clearinghouse query and MVR pull; swap in a live implementation behind fmcsaProvider() with no UI change.
+- Broker carrier verification: request insurance + authority, verified against FMCSA authority and the carrier's shared vault records. Compliance docs stay part of the account; the $5 unlock remains only for load paperwork.
 
 ## Voice personas (done)
 - Named ZEUS/HERCULES cast in src/data/voices.ts: Hercules (principal), Zeus, Ares, Atlas, Apollo, Athena, Medusa, Hera, Artemis.
