@@ -535,6 +535,52 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(VOICE_KEY, id);
   }, []);
 
+  /* ---- REAL SPEECH -------------------------------------------------------
+     Every HERCULES line is spoken in the chosen persona's character. If the
+     speech service can't be reached the conversation still reads on screen. */
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const spokenIds = useRef<Set<string>>(new Set());
+  const voiceRef = useRef<VoiceId>(voiceId);
+  voiceRef.current = voiceId;
+  const [previewing, setPreviewing] = useState<VoiceId | null>(null);
+
+  const killAudio = useCallback(() => {
+    if (audio.current) {
+      audio.current.pause();
+      audio.current.src = "";
+      audio.current = null;
+    }
+  }, []);
+
+  const playAs = useCallback(
+    async (id: VoiceId, text: string) => {
+      try {
+        const res = await speakLine({ data: { voiceId: id, text } });
+        if (!res.ok) return;
+        killAudio();
+        const el = new Audio(res.audio);
+        audio.current = el;
+        await el.play().catch(() => {});
+      } catch {
+        /* screen text still carries the line */
+      }
+    },
+    [killAudio],
+  );
+
+  const preview = useCallback(
+    async (id: VoiceId) => {
+      const persona = voiceById(id);
+      setPreviewing(id);
+      await playAs(id, persona.sample);
+      const el = audio.current;
+      if (el) el.onended = () => setPreviewing(null);
+      else setPreviewing(null);
+    },
+    [playAs],
+  );
+
+
   const push = useCallback((turn: Turn) => setTurns((prev) => [...prev, turn]), []);
 
   /* Latest turns, readable inside callbacks without re-creating them. */
