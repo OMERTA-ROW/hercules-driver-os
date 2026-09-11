@@ -547,6 +547,55 @@ export const seedRecords: DocRecord[] = [
     uploadedAt: "Sep 5, 2026",
     visibleTo: bothSides,
   },
+  /* --- The account-level compliance set the bot chases on the driver side --- */
+  {
+    id: "CD-1009",
+    kind: "clearinghouse",
+    subjectKind: "driver",
+    subjectId: "DR-114",
+    fileName: "clearinghouse-limited-query.pdf",
+    pages: 1,
+    read: {
+      "Query type": "Limited annual query",
+      Status: "No prohibitions on record",
+      "Query date": "Jan 12, 2026",
+      "Valid through": "Jan 12, 2027",
+    },
+    issued: iso(2026, 1, 12),
+    expires: iso(2027, 1, 12),
+    checks: [
+      { label: "Driver consent on file for the query", pass: true },
+      { label: "Registered with the FMCSA Clearinghouse", pass: true },
+    ],
+    source: "driver",
+    uploadedBy: "Vinson Bass",
+    uploadedAt: "Jan 12, 2026",
+    visibleTo: bothSides,
+  },
+  {
+    id: "CD-1010",
+    kind: "ifta",
+    subjectKind: "vehicle",
+    subjectId: "HERC-114",
+    fileName: "ifta-2026-tx.pdf",
+    pages: 1,
+    read: {
+      "IFTA account": "TX-IFTA-448210",
+      "Base state": "TX",
+      "Decal year": "2026",
+      Expires: "Sep 27, 2026",
+    },
+    issued: iso(2026, 1, 1),
+    expires: iso(2026, 9, 27),
+    checks: [
+      { label: "Decals shown on both doors", pass: true },
+      { label: "Quarterly filings up to date", pass: true },
+    ],
+    source: "driver",
+    uploadedBy: "Vinson Bass",
+    uploadedAt: "Jan 2, 2026",
+    visibleTo: bothSides,
+  },
 ];
 
 /* ------------------------------------------------------------- EXPIRY */
