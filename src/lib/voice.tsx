@@ -729,6 +729,18 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => killAudio, [killAudio]);
 
+  /* While the driver holds the floor there's no audio stream to meter yet, so
+     the surface rides a wandering envelope of the same shape. */
+  useEffect(() => {
+    if (mode !== "listening") return;
+    return startSynthLevel(0.5);
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode === "idle") setVoiceLevel(0);
+  }, [mode]);
+
+
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
     return last?.text ?? "";
