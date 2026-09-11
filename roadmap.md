@@ -37,3 +37,10 @@
 - `PickupBridge` speaks announcements and accepts voice dispatch/decline/status ("send it to my map", "where's my part"); `PickupStack` shows the global offer card.
 - `/parts` Part Pickup Routing panel; `/navigation` dispatched-run banner with hazards on the way in and "Got the part".
 - DRIVER APPROVED: route is only offered; nothing dispatched without explicit confirmation.
+
+## Fleet size tiers → how the vehicle profile is resolved — done
+- `src/data/accounts.ts`: `FleetTier` (Tier 1 1–5, Tier 2 5–50, Tier 3 50–100+, open ended), `tierForTrucks`, `fleetTierSpec`, `asksVehiclePerTrip` with a ~10 truck ask ceiling. No seat/driver ceiling at any tier.
+- `src/data/fleet-assignments.ts`: company truck/trailer assignment per driver, with a default assignment for a freshly onboarded carrier.
+- `src/lib/vehicles.tsx`: resolution is `asked` (solo + ≤10 trucks) or `inherited` (Tier 2/3, silent, from the fleet record); exposes `resolution`, `assignment`, `fleetTier`; `askForTrip` never fires for larger fleets.
+- `src/lib/auth.tsx`: `fleetTier` recorded at ZEUS onboarding and on plan/seat change.
+- `/zeus`: truck-count tier picker, recorded tier, per-tier trip-question behaviour; `/equipment`: shows assigned-by-company vs asked-out-loud.

@@ -109,3 +109,83 @@ export function companyByCode(code: string) {
   const c = code.trim().toUpperCase();
   return knownCompanies.find((k) => k.code === c) ?? null;
 }
+
+/* ------------------------------------------------------------------ *
+ * FLEET SIZE TIERS
+ * A carrier states how many trucks it runs at onboarding and it is kept
+ * as a tier. Tier 3 is deliberately open-ended: a hundred-plus truck
+ * carrier onboards every driver it has, with no seat ceiling anywhere.
+ * ------------------------------------------------------------------ */
+
+export type FleetTier = "tier1" | "tier2" | "tier3";
+
+export type FleetTierSpec = {
+  id: FleetTier;
+  label: string;
+  range: string;
+  trucksMin: number;
+  /** null = open ended. No ceiling on how many drivers can be onboarded. */
+  trucksMax: number | null;
+  who: string;
+  /** Does HERCULES ask the driver what they are in at the start of a trip? */
+  asksPerTrip: boolean;
+  /** How the routing profile is resolved for a trip. */
+  resolution: string;
+};
+
+export const fleetTiers: FleetTierSpec[] = [
+  {
+    id: "tier1",
+    label: "Tier 1",
+    range: "1–5 trucks",
+    trucksMin: 1,
+    trucksMax: 5,
+    who: "Small operation — drivers swap equipment constantly.",
+    asksPerTrip: true,
+    resolution: "HERCULES asks by voice at the start of every trip: “What are you in today?”",
+  },
+  {
+    id: "tier2",
+    label: "Tier 2",
+    range: "5–50 trucks",
+    trucksMin: 5,
+    trucksMax: 50,
+    who: "Established carrier — equipment is assigned by the company.",
+    asksPerTrip: false,
+    resolution:
+      "No question asked. HERCULES reads the truck and trailer assignment off the company record and applies the routing rules silently.",
+  },
+  {
+    id: "tier3",
+    label: "Tier 3",
+    range: "50–100+ trucks",
+    trucksMin: 50,
+    trucksMax: null,
+    who: "Large fleet — dispatch owns the equipment assignment. No seat ceiling.",
+    asksPerTrip: false,
+    resolution:
+      "No question asked. The profile is inherited from the fleet's truck and trailer assignment for that driver.",
+  },
+];
+
+export function tierForTrucks(trucks: number): FleetTier {
+  if (trucks > 50) return "tier3";
+  if (trucks > 5) return "tier2";
+  return "tier1";
+}
+
+export function fleetTierSpec(id: FleetTier): FleetTierSpec {
+  return fleetTiers.find((t) => t.id === id) ?? fleetTiers[0]!;
+}
+
+/**
+ * Small operations get asked. Roughly ten trucks and under, equipment moves
+ * around too much to assume anything — so the driver answers out loud. Above
+ * that, the company record decides and HERCULES stays quiet about it.
+ */
+export const ASK_PER_TRIP_TRUCK_CEILING = 10;
+
+export function asksVehiclePerTrip(kind: AccountKind, trucks: number): boolean {
+  if (kind === "solo") return true;
+  return trucks <= ASK_PER_TRIP_TRUCK_CEILING;
+}

@@ -23,6 +23,8 @@ import {
 } from "@/data/vehicles";
 import { hazardMeta } from "@/data/hazards";
 import { useVehicle } from "@/lib/vehicles";
+import { fleetTierSpec } from "@/data/accounts";
+import { spokenAssignment } from "@/data/fleet-assignments";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/equipment")({
@@ -48,7 +50,9 @@ export const Route = createFileRoute("/equipment")({
 });
 
 function EquipmentScreen() {
-  const { profiles, active, chooseForTrip, addProfile, removeProfile } = useVehicle();
+  const { profiles, active, chooseForTrip, addProfile, removeProfile, resolution, assignment, fleetTier } =
+    useVehicle();
+  const tier = fleetTier ? fleetTierSpec(fleetTier) : null;
   const [kind, setKind] = useState<VehicleKind>("eighteen");
   const [sub, setSub] = useState<EighteenSub>("dryVan");
   const [unit, setUnit] = useState("");
@@ -116,6 +120,8 @@ function EquipmentScreen() {
                         <Pill tone="go">
                           <Check className="h-3.5 w-3.5" /> In it today
                         </Pill>
+                      ) : resolution === "inherited" ? (
+                        <Pill tone="info">Company assigns</Pill>
                       ) : (
                         <Button size="lg" onClick={() => chooseForTrip(p.id)}>
                           Use for this trip
@@ -139,7 +145,17 @@ function EquipmentScreen() {
               );
             })}
           </div>
-          {profiles.length > 1 ? (
+          {/* HOW THE PROFILE IS RESOLVED — asked out loud, or inherited from the fleet */}
+          {resolution === "inherited" && assignment ? (
+            <div className="mt-3 rounded-lg border border-go/35 bg-go/10 p-2.5">
+              <Label>Assigned by your company</Label>
+              <p className="mt-1 text-xs">
+                {spokenAssignment(assignment)}. {tier ? `${tier.label} · ${tier.range} — ` : ""}I do
+                not ask what you are in: the fleet's truck and trailer assignment sets your routing
+                rules and hazard checks automatically.
+              </p>
+            </div>
+          ) : profiles.length > 1 ? (
             <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
               <Volume2 className="mt-0.5 h-4 w-4 shrink-0 text-info" /> You run more than one, so at
               the start of every trip I ask out loud: “What are you in today?” Whatever you answer is

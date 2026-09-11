@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Building2, Copy, UserPlus, Truck, ShieldCheck } from "lucide-react";
+import { Building2, Copy, UserPlus, Truck, ShieldCheck, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Panel,
@@ -12,7 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import { doorFor, knownCompanies } from "@/data/accounts";
+import {
+  doorFor,
+  fleetTierSpec,
+  fleetTiers,
+  knownCompanies,
+  tierForTrucks,
+} from "@/data/accounts";
+import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { vehicleCatalog } from "@/data/vehicles";
 
@@ -46,6 +53,9 @@ function ZeusOnboarding() {
   const [trucks, setTrucks] = useState(3);
 
   const door = doorFor("zeusFleet");
+  /* The stated truck count becomes the tier, and the tier decides whether
+     HERCULES asks each driver what they are in or inherits it from the fleet. */
+  const tier = fleetTierSpec(tierForTrucks(trucks));
   const onboarded = account?.kind === "zeusFleet" ? account : null;
 
   return (
@@ -91,6 +101,13 @@ function ZeusOnboarding() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   {onboarded.company.name} · {onboarded.seats} trucks in rotation. A driver enters
                   this code on the HERCULES Company Driver door and they are linked to your fleet.
+                </p>
+                <p className="mt-2 text-xs">
+                  <span className="text-primary">
+                    {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).label} ·{" "}
+                    {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).range}
+                  </span>{" "}
+                  — {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).resolution}
                 </p>
                 <Button size="lg" className="mt-3 w-full gap-2" asChild>
                   <Link to="/fleet">
@@ -142,7 +159,29 @@ function ZeusOnboarding() {
                   />
                 </div>
                 <div>
-                  <Label>Trucks (minimum 3)</Label>
+                  <Label>How many trucks do you run?</Label>
+                  <div className="mt-1 grid gap-2 sm:grid-cols-3">
+                    {fleetTiers.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        aria-pressed={tier.id === t.id}
+                        onClick={() => setTrucks(t.id === "tier1" ? 3 : t.id === "tier2" ? 25 : 120)}
+                        className={cn(
+                          "min-h-[76px] rounded-lg border p-3 text-left transition-colors",
+                          tier.id === t.id
+                            ? "border-primary/60 bg-primary/12 text-primary"
+                            : "border-border bg-card/50 hover:bg-accent",
+                        )}
+                      >
+                        <span className="block font-display text-sm uppercase tracking-[0.12em]">
+                          {t.label}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">{t.range}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <Label className="mt-3 block">Exact truck count (minimum 3)</Label>
                   <Input
                     type="number"
                     min={3}
@@ -151,6 +190,15 @@ function ZeusOnboarding() {
                     onChange={(e) => setTrucks(Math.max(3, Number(e.target.value) || 3))}
                     className="mt-1 h-12 text-base"
                   />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Recorded as <span className="text-primary">{tier.label} · {tier.range}</span>.
+                    No ceiling at any tier — a hundred-plus truck carrier onboards every driver it
+                    has.
+                  </p>
+                  <p className="mt-1 flex items-start gap-2 text-xs">
+                    <Volume2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {tier.resolution}
+                  </p>
                 </div>
                 <Button type="submit" size="lg" className="w-full gap-2">
                   <UserPlus className="h-4 w-4" /> Onboard this carrier
@@ -226,6 +274,32 @@ function ZeusOnboarding() {
               <p className="mt-2 text-xs text-muted-foreground">
                 Every driver's saved equipment drives their own routing. A van gets back roads; a
                 trailer never gets a road that isn't legal for it.
+              </p>
+            </Panel>
+
+            <Panel>
+              <PanelTitle right={<Pill tone="info">Fleet size</Pill>}>
+                Tiers and the per-trip question
+              </PanelTitle>
+              <div className="space-y-2">
+                {fleetTiers.map((t) => (
+                  <div key={t.id} className="rounded-lg border border-border bg-card/60 p-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-display text-sm uppercase tracking-[0.12em]">
+                        {t.label} · {t.range}
+                      </span>
+                      <Pill tone={t.asksPerTrip ? "primary" : "go"}>
+                        {t.asksPerTrip ? "Driver is asked" : "Inherited silently"}
+                      </Pill>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{t.who}</p>
+                    <p className="mt-1 text-xs">{t.resolution}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Tier 3 is open ended. A hundred-plus truck carrier onboards every driver and every
+                unit it runs — there is no ceiling on the company side.
               </p>
             </Panel>
           </div>
