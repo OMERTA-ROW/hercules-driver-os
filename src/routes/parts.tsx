@@ -487,9 +487,7 @@ function PartsPage() {
                 {pending.partNumber ? (
                   <p className="metric text-sm text-primary">{pending.partNumber}</p>
                 ) : null}
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {pending.vendor} · {pending.listing.location}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{pending.listing.location}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{pending.listing.ready}</p>
               </div>
               <div className="rounded-lg border border-primary/45 bg-primary/10 p-3">
