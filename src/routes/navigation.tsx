@@ -246,6 +246,8 @@ function NavigationScreen() {
         </div>
       ) : null}
 
+      <PickupBanner />
+
       <div className="grid gap-3 xl:grid-cols-[1.7fr_1fr]">
         {/* MAP */}
         <Panel className="relative overflow-hidden p-0 xl:row-span-2">
