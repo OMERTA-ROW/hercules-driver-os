@@ -32,6 +32,8 @@ import {
   spokenLocation,
   spokenService,
 } from "@/lib/breakdown";
+import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
+import { speakLine } from "@/lib/speech.functions";
 
 /**
  * HERCULES VOICE LAYER
@@ -61,34 +63,12 @@ export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = 
 
 /* ---------------------------------------------------------------- VOICE CAST */
 
-export type VoiceId = "hercules" | "atlas" | "orion" | "athena" | "nova" | "juno";
+/* The named personas live in one place so the picker, the profile and the
+   speech service all read the same cast. */
+export { voiceOptions, voiceById, maleVoices, femaleVoices } from "@/data/voices";
+export type { VoiceId, VoiceOption } from "@/data/voices";
 
-export type VoiceOption = {
-  id: VoiceId;
-  name: string;
-  gender: "male" | "female";
-  hint: string;
-  principal?: boolean;
-};
 
-export const voiceOptions: VoiceOption[] = [
-  {
-    id: "hercules",
-    name: "Hercules",
-    gender: "male",
-    hint: "Deep and steady — cuts under engine noise",
-    principal: true,
-  },
-  { id: "atlas", name: "Atlas", gender: "male", hint: "Slower cadence, flat and calm" },
-  { id: "orion", name: "Orion", gender: "male", hint: "Clipped, dispatcher-quick" },
-  { id: "athena", name: "Athena", gender: "female", hint: "Even and clear at highway speed" },
-  { id: "nova", name: "Nova", gender: "female", hint: "Bright, quick, high intelligibility" },
-  { id: "juno", name: "Juno", gender: "female", hint: "Low and unhurried, built for night runs" },
-];
-
-export function voiceById(id: VoiceId) {
-  return voiceOptions.find((v) => v.id === id) ?? voiceOptions[0]!;
-}
 
 /* ------------------------------------------------------------------ CONVERSATION */
 
@@ -511,6 +491,10 @@ type Ctx = {
   /** The line currently being spoken or the last thing said. */
   lastLine: string;
   pending: Turn | undefined;
+  /** Play a persona's sample line so the driver can hear it before choosing. */
+  preview: (id: VoiceId) => Promise<void>;
+  /** The persona currently previewing, if any. */
+  previewing: VoiceId | null;
 };
 
 
@@ -554,6 +538,52 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setVoiceIdState(id);
     localStorage.setItem(VOICE_KEY, id);
   }, []);
+
+  /* ---- REAL SPEECH -------------------------------------------------------
+     Every HERCULES line is spoken in the chosen persona's character. If the
+     speech service can't be reached the conversation still reads on screen. */
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const spokenIds = useRef<Set<string>>(new Set());
+  const voiceRef = useRef<VoiceId>(voiceId);
+  voiceRef.current = voiceId;
+  const [previewing, setPreviewing] = useState<VoiceId | null>(null);
+
+  const killAudio = useCallback(() => {
+    if (audio.current) {
+      audio.current.pause();
+      audio.current.src = "";
+      audio.current = null;
+    }
+  }, []);
+
+  const playAs = useCallback(
+    async (id: VoiceId, text: string) => {
+      try {
+        const res = await speakLine({ data: { voiceId: id, text } });
+        if (!res.ok) return;
+        killAudio();
+        const el = new Audio(res.audio);
+        audio.current = el;
+        await el.play().catch(() => {});
+      } catch {
+        /* screen text still carries the line */
+      }
+    },
+    [killAudio],
+  );
+
+  const preview = useCallback(
+    async (id: VoiceId) => {
+      const persona = voiceById(id);
+      setPreviewing(id);
+      await playAs(id, persona.sample);
+      const el = audio.current;
+      if (el) el.onended = () => setPreviewing(null);
+      else setPreviewing(null);
+    },
+    [playAs],
+  );
+
 
   const push = useCallback((turn: Turn) => setTurns((prev) => [...prev, turn]), []);
 
@@ -630,8 +660,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     clearTimers();
+    killAudio();
+    setPreviewing(null);
     setMode("idle");
-  }, [clearTimers]);
+  }, [clearTimers, killAudio]);
 
   const settle = useCallback(
     (turnId: string, status: "approved" | "declined", line: string) => {
@@ -678,6 +710,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     [clearTimers, push],
   );
 
+  /* Speak each new HERCULES line aloud in the chosen persona. */
+  useEffect(() => {
+    const last = turns[turns.length - 1];
+    if (!last || last.from !== "hercules" || spokenIds.current.has(last.id)) return;
+    spokenIds.current.add(last.id);
+    void playAs(voiceRef.current, last.text);
+  }, [turns, playAs]);
+
+  useEffect(() => killAudio, [killAudio]);
 
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
@@ -696,6 +737,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setColorway,
     voice: voiceById(voiceId),
     setVoice,
+    preview,
+    previewing,
     listen,
     stop,
     say,
@@ -706,6 +749,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     lastLine,
     pending,
   };
+
 
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }
