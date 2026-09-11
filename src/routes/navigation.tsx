@@ -46,6 +46,7 @@ import { hm } from "@/components/hercules/primitives";
 import { useStops } from "@/lib/stops";
 import { useVehicle } from "@/lib/vehicles";
 import { ChainMarker } from "@/components/hercules/ChainMarker";
+import { usePickup } from "@/lib/pickup";
 
 export const Route = createFileRoute("/navigation")({
   head: () => ({
@@ -567,5 +568,52 @@ function NavigationScreen() {
         attributes: commercial routing layer (mocked in this pass, provider-pluggable).
       </p>
     </AppShell>
+  );
+}
+
+/**
+ * PART PICKUP — the dispatched run, on the screen that owns the road ahead.
+ * The route only appears here after the driver approved it.
+ */
+function PickupBanner() {
+  const { activeRun, minutesOut, collected } = usePickup();
+  if (!activeRun?.route) return null;
+  const r = activeRun;
+  return (
+    <div className="mb-3 rounded-xl border border-primary/55 bg-primary/8 p-3 shadow-[0_0_36px_-14px_hsl(var(--primary)/0.5)]">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Label>Part pickup · dispatched on your word</Label>
+          <p className="font-display text-lg font-semibold uppercase tracking-wide">
+            {r.label} · {r.vendor}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {r.site.name} — {r.site.milesAhead} mi ahead, {r.site.milesOffRoute.toFixed(1)} mi off
+            the mainline · {r.route!.profile} legal
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {r.site.counter} · {r.site.parking}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{r.site.hours} · {r.ready}</p>
+          {r.route!.hazards.length ? (
+            <p className="mt-1 text-xs text-primary">
+              On the way in: {r.route!.hazards.map((h) => h.name).join(" · ")}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <Metric value={`${Math.max(0, minutesOut(r))}m`} label="to the counter" />
+          </div>
+          <Button size="lg" variant="secondary" className="h-14" onClick={() => collected(r.id)}>
+            Got the part
+          </Button>
+        </div>
+      </div>
+      <DriverApprovedNote>
+        You dispatched this run. HERCULES holds the route, calls the hazards on the way in, and
+        reminds you before the counter closes.
+      </DriverApprovedNote>
+    </div>
   );
 }
