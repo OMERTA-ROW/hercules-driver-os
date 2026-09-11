@@ -30,3 +30,10 @@
 - src/lib/parts.tsx: provider seam (real supplier API drops in), identify by speech or fault code, quoting with the HERCULES fee, approval-only order placement, order history + cancel, fees-paid total; persisted locally.
 - /parts: voice-first sourcing, live BOLT codes with one-tap "source the part", category rail, branded supplier rows with price/stock/ETA, read-back confirmation showing order + HERCULES fee + total, part-plus-mechanic flow into Breakdown Assist.
 - Voice: "parts" topic with part/fault-code identification, cheaper-option follow-up, mechanic follow-up, and a DRIVER APPROVED read-back proposal carrying the fee. Diagnostics and Breakdown both offer to source the part.
+
+## Part pickup routing — done
+- `src/data/pickup.ts`: supplier site templates (hours, will-call counter, truck parking, phone), route-corridor coordinates, readiness parsing, drive-time estimate.
+- `src/lib/pickup.tsx`: pickup runs (held/offered/routed/collected/declined), auto-offer on pickup orders, truck-legal route via `truckRouting.route()` with the active vehicle profile, hazard filtering, spoken reminders (ready, 15/5 min out, passing the supplier, counter closing, overdue).
+- `PickupBridge` speaks announcements and accepts voice dispatch/decline/status ("send it to my map", "where's my part"); `PickupStack` shows the global offer card.
+- `/parts` Part Pickup Routing panel; `/navigation` dispatched-run banner with hazards on the way in and "Got the part".
+- DRIVER APPROVED: route is only offered; nothing dispatched without explicit confirmation.
