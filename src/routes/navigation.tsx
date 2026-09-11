@@ -603,7 +603,8 @@ function PickupBanner() {
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <Metric value={`${Math.max(0, minutesOut(r))}m`} label="to the counter" />
+            <Label>To the counter</Label>
+            <Metric value={`${Math.max(0, minutesOut(r))}m`} tone="primary" />
           </div>
           <Button size="lg" variant="secondary" className="h-14" onClick={() => collected(r.id)}>
             Got the part
