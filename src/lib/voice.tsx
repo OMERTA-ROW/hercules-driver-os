@@ -61,34 +61,11 @@ export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = 
 
 /* ---------------------------------------------------------------- VOICE CAST */
 
-export type VoiceId = "hercules" | "atlas" | "orion" | "athena" | "nova" | "juno";
+/* The named personas live in one place so the picker, the profile and the
+   speech service all read the same cast. */
+export { voiceOptions, voiceById, maleVoices, femaleVoices } from "@/data/voices";
+export type { VoiceId, VoiceOption } from "@/data/voices";
 
-export type VoiceOption = {
-  id: VoiceId;
-  name: string;
-  gender: "male" | "female";
-  hint: string;
-  principal?: boolean;
-};
-
-export const voiceOptions: VoiceOption[] = [
-  {
-    id: "hercules",
-    name: "Hercules",
-    gender: "male",
-    hint: "Deep and steady — cuts under engine noise",
-    principal: true,
-  },
-  { id: "atlas", name: "Atlas", gender: "male", hint: "Slower cadence, flat and calm" },
-  { id: "orion", name: "Orion", gender: "male", hint: "Clipped, dispatcher-quick" },
-  { id: "athena", name: "Athena", gender: "female", hint: "Even and clear at highway speed" },
-  { id: "nova", name: "Nova", gender: "female", hint: "Bright, quick, high intelligibility" },
-  { id: "juno", name: "Juno", gender: "female", hint: "Low and unhurried, built for night runs" },
-];
-
-export function voiceById(id: VoiceId) {
-  return voiceOptions.find((v) => v.id === id) ?? voiceOptions[0]!;
-}
 
 /* ------------------------------------------------------------------ CONVERSATION */
 
