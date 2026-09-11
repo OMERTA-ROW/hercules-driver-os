@@ -32,6 +32,8 @@ import {
   spokenLocation,
   spokenService,
 } from "@/lib/breakdown";
+import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
+import { speakLine } from "@/lib/speech.functions";
 
 /**
  * HERCULES VOICE LAYER
