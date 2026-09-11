@@ -12,7 +12,9 @@ import {
   doorFor,
   hasScope,
   makeCompanyCode,
+  tierForTrucks,
   type AccountKind,
+  type FleetTier,
   type Scope,
 } from "@/data/accounts";
 
@@ -28,6 +30,12 @@ export type Account = {
   kind: AccountKind;
   /** Set for a company driver linked by invite/code, and for a ZEUS fleet. */
   company?: { name: string; code: string };
+  /**
+   * Fleet size tier stated at ZEUS onboarding. It decides whether HERCULES asks
+   * the driver what they are in each trip or inherits the equipment from the
+   * company record. Tier 3 is open ended — no ceiling on trucks or drivers.
+   */
+  fleetTier?: FleetTier;
 };
 
 const STORAGE_KEY = "hercules.account";
@@ -107,7 +115,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         status: "trial",
         kind,
         ...(kind === "zeusFleet"
-          ? { company: { name: "Your carrier", code: makeCompanyCode(email) } }
+          ? {
+              company: { name: "Your carrier", code: makeCompanyCode(email) },
+              fleetTier: tierForTrucks(3),
+            }
           : {}),
       });
     },
@@ -132,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         status: "trial",
         kind,
         ...(company ? { company } : {}),
+        ...(kind === "zeusFleet" ? { fleetTier: tierForTrucks(Math.max(1, seats ?? 3)) } : {}),
       });
     },
     [persist],
@@ -148,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           plan,
           seats: plan === "fleet" ? Math.max(3, seats ?? prev.seats ?? 3) : 1,
         };
+        if (next.plan === "fleet") next.fleetTier = tierForTrucks(next.seats);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         return next;
       });
