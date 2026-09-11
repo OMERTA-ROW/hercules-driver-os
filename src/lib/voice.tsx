@@ -704,6 +704,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     [clearTimers, push],
   );
 
+  /* Speak each new HERCULES line aloud in the chosen persona. */
+  useEffect(() => {
+    const last = turns[turns.length - 1];
+    if (!last || last.from !== "hercules" || spokenIds.current.has(last.id)) return;
+    spokenIds.current.add(last.id);
+    void playAs(voiceRef.current, last.text);
+  }, [turns, playAs]);
+
+  useEffect(() => killAudio, [killAudio]);
 
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
@@ -722,6 +731,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setColorway,
     voice: voiceById(voiceId),
     setVoice,
+    preview,
+    previewing,
     listen,
     stop,
     say,
@@ -732,6 +743,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     lastLine,
     pending,
   };
+
 
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }
