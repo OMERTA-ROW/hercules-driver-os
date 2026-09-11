@@ -200,6 +200,8 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
       if (a) setApprovals(JSON.parse(a) as Record<string, ApprovalOutcome>);
       const s = localStorage.getItem(SPOKEN_KEY);
       if (s) setSpoken(JSON.parse(s) as string[]);
+      const v = localStorage.getItem(VERIFY_KEY);
+      if (v) setVerifications(JSON.parse(v) as VerificationRequest[]);
     } catch {
       /* ignore malformed local state */
     }
