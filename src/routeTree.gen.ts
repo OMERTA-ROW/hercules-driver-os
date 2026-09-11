@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
+import { Route as BrokerRouteImport } from './routes/broker'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as EquipmentRouteImport } from './routes/equipment'
@@ -48,6 +50,11 @@ const BreakdownRoute = BreakdownRouteImport.update({
   path: '/breakdown',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrokerRoute = BrokerRouteImport.update({
+  id: '/broker',
+  path: '/broker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComplianceRoute = ComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
@@ -56,6 +63,11 @@ const ComplianceRoute = ComplianceRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DispatchRoute = DispatchRouteImport.update({
+  id: '/dispatch',
+  path: '/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentsRoute = DocumentsRouteImport.update({
@@ -153,8 +165,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -178,8 +192,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -204,8 +220,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
+  '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -231,8 +249,10 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/broker'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -256,8 +276,10 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/broker'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -281,8 +303,10 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
+    | '/broker'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -307,8 +331,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
   BreakdownRoute: typeof BreakdownRoute
+  BrokerRoute: typeof BrokerRoute
   ComplianceRoute: typeof ComplianceRoute
   DashboardRoute: typeof DashboardRoute
+  DispatchRoute: typeof DispatchRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
   EquipmentRoute: typeof EquipmentRoute
@@ -352,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BreakdownRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/broker': {
+      id: '/broker'
+      path: '/broker'
+      fullPath: '/broker'
+      preLoaderRoute: typeof BrokerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compliance': {
       id: '/compliance'
       path: '/compliance'
@@ -364,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dispatch': {
+      id: '/dispatch'
+      path: '/dispatch'
+      fullPath: '/dispatch'
+      preLoaderRoute: typeof DispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documents': {
@@ -499,8 +539,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
   BreakdownRoute: BreakdownRoute,
+  BrokerRoute: BrokerRoute,
   ComplianceRoute: ComplianceRoute,
   DashboardRoute: DashboardRoute,
+  DispatchRoute: DispatchRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,
   EquipmentRoute: EquipmentRoute,
