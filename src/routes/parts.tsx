@@ -129,6 +129,8 @@ function PartsPage() {
       title="Supply & Parts"
       subtitle="Describe it or read me the code. HERCULES prices it, shows the fee, and waits for your yes."
     >
+      <PickupRuns />
+
       {/* ------------------------------------------------------- VOICE FIRST */}
       <Panel className="border-primary/45">
         <PanelTitle
