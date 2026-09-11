@@ -7,7 +7,7 @@
  * dispatch/broker app without touching HERCULES driver components.
  */
 
-import type { VehicleKind, VehicleSubtype } from "./vehicles";
+import type { EighteenSub, VehicleKind } from "./vehicles";
 
 /* ------------------------------------------------------------------ *
  * FLEET-WIDE TRUCK STATE (dispatcher scope)
@@ -40,7 +40,7 @@ export type NetworkTruck = {
   driver: string;
   companyCode: string;
   /** Active vehicle profile for the trip — asked or inherited. */
-  profile: { kind: VehicleKind; sub?: VehicleSubtype; label: string };
+  profile: { kind: VehicleKind; sub?: EighteenSub; label: string };
   status: TruckStatus;
   /** Where it is right now. */
   lat: number;
