@@ -466,7 +466,7 @@ function FeePanel() {
           </li>
         ))}
       </ul>
-      <Label className="mt-4">How it scales</Label>
+      <Label className="mt-4">How it scales on a parts order</Label>
       <div className="mt-1 grid gap-1 sm:grid-cols-3">
         {feeBands.map((b) => (
           <div key={b.label} className="rounded-lg border border-border bg-card/50 p-2">
