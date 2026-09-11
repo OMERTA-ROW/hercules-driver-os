@@ -19,6 +19,7 @@ import { AddonProvider } from "@/lib/addons";
 import { HazardLayerProvider } from "@/lib/hazard-layer";
 import { StopsProvider } from "@/lib/stops";
 import { DeliveryProvider } from "@/lib/delivery";
+import { PartsProviderRoot } from "@/lib/parts";
 import { VoiceProvider } from "@/lib/voice";
 import { ArrivalsProvider } from "@/lib/arrivals";
 import { ArrivalBridge } from "@/components/hercules/ArrivalBridge";
@@ -148,6 +149,7 @@ function RootComponent() {
 
               <StopsProvider>
                 <DeliveryProvider>
+                <PartsProviderRoot>
                 <BoltProvider>
                 <VehicleProvider>
                 <ArrivalsProvider>
@@ -166,6 +168,8 @@ function RootComponent() {
                 </ArrivalsProvider>
                 </VehicleProvider>
                 </BoltProvider>
+                </PartsProviderRoot>
+
 
                 </DeliveryProvider>
               </StopsProvider>
