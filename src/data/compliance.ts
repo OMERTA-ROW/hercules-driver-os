@@ -28,7 +28,10 @@ export type DocKind =
   | "mvr"
   | "drugAlcohol"
   | "registration"
-  | "inspection";
+  | "inspection"
+  | "clearinghouse"
+  | "ifta"
+  | "irp";
 
 export type SubjectKind = "driver" | "vehicle";
 
