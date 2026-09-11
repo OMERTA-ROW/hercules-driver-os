@@ -276,6 +276,32 @@ function ZeusOnboarding() {
                 trailer never gets a road that isn't legal for it.
               </p>
             </Panel>
+
+            <Panel>
+              <PanelTitle right={<Pill tone="info">Fleet size</Pill>}>
+                Tiers and the per-trip question
+              </PanelTitle>
+              <div className="space-y-2">
+                {fleetTiers.map((t) => (
+                  <div key={t.id} className="rounded-lg border border-border bg-card/60 p-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-display text-sm uppercase tracking-[0.12em]">
+                        {t.label} · {t.range}
+                      </span>
+                      <Pill tone={t.asksPerTrip ? "primary" : "go"}>
+                        {t.asksPerTrip ? "Driver is asked" : "Inherited silently"}
+                      </Pill>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{t.who}</p>
+                    <p className="mt-1 text-xs">{t.resolution}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Tier 3 is open ended. A hundred-plus truck carrier onboards every driver and every
+                unit it runs — there is no ceiling on the company side.
+              </p>
+            </Panel>
           </div>
         </div>
 
