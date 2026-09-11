@@ -189,6 +189,70 @@ function coverageLine() {
   return `${head}${rest}${tail}`;
 }
 
+/* ------------------------------------------------- PARTS & SUPPLY (TRANSACTED) */
+
+type SupplyPick = {
+  label: string;
+  category: SupplyCategoryId;
+  listing: Listing;
+  partNumber?: string;
+};
+
+/** The part or supply item HERCULES last put on the table for the driver. */
+let lastSupplyPick: SupplyPick | null = null;
+
+function lastSupply(): SupplyPick | null {
+  return lastSupplyPick;
+}
+
+/** Turn something the driver said into a part or a supply item with a price. */
+function pickSupply(text: string): SupplyPick | null {
+  const parts = matchParts(text);
+  const part = parts[0];
+  if (part) {
+    const listing = bestListing(part.listings);
+    if (listing) {
+      return { label: part.name, category: "parts", listing, partNumber: part.partNumber };
+    }
+  }
+  const cat = categoryFromSpeech(text);
+  if (cat && cat !== "parts") {
+    const item = itemsIn(cat)[0];
+    const listing = item ? bestListing(item.listings) : undefined;
+    if (item && listing) return { label: item.name, category: cat, listing };
+  }
+  return null;
+}
+
+/**
+ * DRIVER APPROVED: the read-back proposal for anything HERCULES transacts. The
+ * HERCULES service fee is inside both the spoken line and the on-screen summary,
+ * and nothing is ordered until the driver approves it.
+ */
+function partsProposal(
+  label: string,
+  category: SupplyCategoryId,
+  listing: Listing,
+  partNumber?: string,
+): Reply {
+  const feeCategory = categoryById(category).fee;
+  const { subtotal, fee, total } = totalWithFee(listing.price, feeCategory);
+  const vendor = supplierById(listing.supplierId).name;
+  lastSupplyPick = { label, category, listing, ...(partNumber ? { partNumber } : {}) };
+  return {
+    topic: "parts",
+    text: `Reading it back: ${label}${
+      partNumber ? `, part number ${partNumber}` : ""
+    }, from ${vendor}. ${spokenFee(subtotal, feeCategory)} ${listing.ready}. Say yes and I'll order it.`,
+    proposal: {
+      summary: `${label} — ${vendor}, ${listing.location}. ${listing.ready}. Order $${subtotal.toFixed(
+        2,
+      )} + $${fee.toFixed(2)} HERCULES service fee`,
+      total: `$${total.toFixed(2)}`,
+    },
+  };
+}
+
 /** Follow-ups the driver can say once a topic is on the table. */
 function followUp(topic: Topic, text: string): Reply | null {
   const t = text.toLowerCase();
