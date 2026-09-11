@@ -117,6 +117,7 @@ type Topic =
   | "stops"
   | "health"
   | "supply"
+  | "parts"
   | "alerts"
   | "equipment"
   | "compliance"
