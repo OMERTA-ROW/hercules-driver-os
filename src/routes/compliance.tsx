@@ -29,6 +29,9 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { useCompliance } from "@/lib/compliance";
 import {
+  MVR_REFRESH_DAYS,
+  MVR_REMIND_DAYS,
+  statusLine,
   daysUntil,
   docKinds,
   drivers,
@@ -68,17 +71,20 @@ export const Route = createFileRoute("/compliance")({
   component: ComplianceScreen,
 });
 
-type Tab = "mine" | "approvals" | "import" | "export";
+type Tab = "mine" | "roster" | "approvals" | "fmcsa" | "verify" | "import" | "export";
 
 function ComplianceScreen() {
   const { account, allows } = useAuth();
   const c = useCompliance();
   const companySide = allows("fleet.onboarding") || allows("fleet.drivers");
-  const [tab, setTab] = useState<Tab>(companySide ? "approvals" : "mine");
+  const [tab, setTab] = useState<Tab>(companySide ? "roster" : "mine");
 
   const tabs: { id: Tab; label: string; show: boolean }[] = [
     { id: "mine", label: "My documents", show: true },
+    { id: "roster", label: "Roster", show: companySide },
     { id: "approvals", label: "Approval queue", show: companySide },
+    { id: "fmcsa", label: "FMCSA", show: true },
+    { id: "verify", label: "Carrier verification", show: true },
     { id: "import", label: "Bulk import", show: companySide },
     { id: "export", label: "Export", show: true },
   ];
@@ -86,8 +92,11 @@ function ComplianceScreen() {
   return (
     <AppShell
       title="Compliance"
-      subtitle="One shared record per document — same set on the driver side and the company side"
+      subtitle="One bot per account — it holds the vault, reads what you send, and chases what is missing or expiring"
     >
+      {/* THE SINGLE COMPLIANCE LIGHT */}
+      <StatusIndicator companySide={companySide} />
+
       {/* WHAT NEEDS ATTENTION — spoken as well as shown */}
       <AttentionStrip />
 
@@ -113,7 +122,10 @@ function ComplianceScreen() {
       </div>
 
       {tab === "mine" ? <MyDocuments /> : null}
+      {tab === "roster" && companySide ? <RosterView /> : null}
       {tab === "approvals" && companySide ? <ApprovalQueue /> : null}
+      {tab === "fmcsa" ? <FmcsaPanel /> : null}
+      {tab === "verify" ? <VerifyPanel /> : null}
       {tab === "import" && companySide ? <BulkImport /> : null}
       {tab === "export" ? <ExportPanel /> : null}
 
@@ -127,9 +139,424 @@ function ComplianceScreen() {
             same record — nobody keeps a second copy that can drift out of date.
             {account?.company ? ` Linked to ${account.company.name}.` : " You are solo, so nothing goes to a carrier."}
           </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Compliance documents are part of your account at no extra charge. The $5.00 one-time
+            document upload unlock is separate — that covers load paperwork like bills of lading and
+            proofs of delivery.
+          </p>
         </Panel>
       ) : null}
     </AppShell>
+  );
+}
+
+/* -------------------------------------------------------------- STATUS LIGHT */
+
+function StatusIndicator({ companySide }: { companySide: boolean }) {
+  const { account } = useAuth();
+  const c = useCompliance();
+  const roster = c.roster(account?.company?.code ?? null);
+  const status = companySide ? roster.status : c.myStatus.status;
+  const parts = companySide ? [...roster.drivers, ...roster.vehicles] : c.myStatus.parts;
+  const blocked = parts.filter((p) => p.status === "blocked");
+  const expiring = parts.filter((p) => p.status === "expiring");
+
+  const tone =
+    status === "compliant"
+      ? "border-go/50 bg-go/10 text-go"
+      : status === "expiring"
+        ? "border-warn/50 bg-warn/10 text-warn"
+        : "border-destructive/60 bg-destructive/12 text-destructive";
+
+  return (
+    <div className={cn("mb-3 rounded-xl border p-3", tone)}>
+      <div className="flex flex-wrap items-center gap-3">
+        <ShieldCheck className="h-7 w-7 shrink-0" />
+        <span className="min-w-0">
+          <span className="block font-display text-lg uppercase tracking-[0.12em]">
+            {status === "compliant" ? "Compliant" : status === "expiring" ? "Expiring soon" : "Blocked"}
+          </span>
+          <span className="block text-xs text-foreground/80">{statusLine(status)}</span>
+        </span>
+        <span className="ml-auto text-xs text-foreground/80">
+          {blocked.length ? `${blocked.length} blocked · ` : ""}
+          {expiring.length ? `${expiring.length} coming due · ` : ""}
+          {parts.length} {companySide ? "records on the roster" : "files watched"}
+        </span>
+      </div>
+      {blocked.length ? (
+        <p className="mt-2 text-xs text-foreground/80">
+          {blocked
+            .map(
+              (p) =>
+                `${p.name}: ${[
+                  ...p.missing.map((m) => `${m.short} missing`),
+                  ...p.expired.map((e) => `${kindSpec(e.kind).short} expired`),
+                ].join(", ")}`,
+            )
+            .join(" · ")}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------- ROSTER */
+
+function RosterView() {
+  const { account } = useAuth();
+  const c = useCompliance();
+  const roster = c.roster(account?.company?.code ?? null);
+  const rows = [...roster.drivers, ...roster.vehicles];
+
+  return (
+    <Panel>
+      <PanelTitle
+        right={
+          <Pill tone={roster.status === "compliant" ? "go" : roster.status === "expiring" ? "warn" : "alert"}>
+            {roster.status === "compliant" ? "All clear" : roster.status === "expiring" ? "Watch list" : "Blocked"}
+          </Pill>
+        }
+      >
+        Roster — who is compliant, who is expiring, who is blocked
+      </PanelTitle>
+      <div className="space-y-2">
+        {rows.map((p) => (
+          <div
+            key={`${p.subjectKind}-${p.subjectId}`}
+            className={cn(
+              "rounded-lg border p-3",
+              p.status === "compliant"
+                ? "border-border bg-card/50"
+                : p.status === "expiring"
+                  ? "border-warn/40 bg-warn/8"
+                  : "border-destructive/50 bg-destructive/10",
+            )}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <span className="font-display text-base uppercase tracking-[0.1em]">{p.name}</span>
+              <Pill
+                tone={p.status === "compliant" ? "go" : p.status === "expiring" ? "warn" : "alert"}
+              >
+                {p.status === "compliant" ? "Compliant" : p.status === "expiring" ? "Expiring" : "Blocked"}
+              </Pill>
+              {p.subjectKind === "driver" ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto gap-2"
+                  onClick={async () => {
+                    const res = await c.refreshMvr(p.subjectId, account?.name ?? "Compliance bot");
+                    toast.success(`MVR pulled — ${p.name}`, {
+                      description: `${res.state} record, ${res.violations}. Next refresh due ${fmtDate(res.validThrough)}.`,
+                    });
+                  }}
+                >
+                  Refresh MVR
+                </Button>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {p.missing.length ? `Missing: ${p.missing.map((m) => m.short).join(", ")}. ` : ""}
+              {p.expired.length
+                ? `Expired: ${p.expired.map((e) => `${kindSpec(e.kind).short} (${fmtDate(e.expires)})`).join(", ")}. `
+                : ""}
+              {p.expiring.length
+                ? `Coming due: ${p.expiring
+                    .map((e) => `${kindSpec(e.kind).short} in ${daysUntil(e.expires)} days`)
+                    .join(", ")}.`
+                : ""}
+              {!p.missing.length && !p.expired.length && !p.expiring.length
+                ? "Everything on file and in date."
+                : ""}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3">
+        <DriverApprovedNote>
+          I chase what is outstanding and say it out loud. Nothing is filed, pulled or shared out
+          without a person approving it.
+        </DriverApprovedNote>
+      </div>
+    </Panel>
+  );
+}
+
+/* -------------------------------------------------------------- FMCSA */
+
+function FmcsaPanel() {
+  const { account } = useAuth();
+  const c = useCompliance();
+  const [dot, setDot] = useState("3992471");
+  const [driverId, setDriverId] = useState("DR-114");
+  const auth = c.authority[dot];
+  const safety = c.safety[dot];
+  const query = c.clearinghouse[driverId];
+  const mvr = c.mvrSchedule(driverId);
+
+  return (
+    <div className="grid gap-3 xl:grid-cols-2">
+      <Panel>
+        <PanelTitle right={<Pill tone={c.fmcsaLive ? "go" : "info"}>{c.fmcsaLive ? "Live" : "Mock"}</Pill>}>
+          Authority and safety rating
+        </PanelTitle>
+        <Label>DOT number</Label>
+        <Input
+          value={dot}
+          onChange={(e) => setDot(e.target.value)}
+          className="mt-1 h-12"
+          inputMode="numeric"
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button
+            size="lg"
+            className="gap-2"
+            onClick={async () => {
+              const res = await c.checkAuthority(dot);
+              toast.success(`Authority ${res.status}`, {
+                description: `${res.legalName} — ${res.mc ?? res.dot}.`,
+              });
+            }}
+          >
+            <ShieldCheck className="h-4 w-4" /> Check authority
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2"
+            onClick={async () => {
+              const res = await c.checkSafety(dot);
+              toast.success(`Safety rating: ${res.rating}`, {
+                description: `${res.inspectionsTwoYears} inspections and ${res.crashesTwoYears} crashes in 24 months.`,
+              });
+            }}
+          >
+            <Eye className="h-4 w-4" /> Safety rating
+          </Button>
+        </div>
+
+        {auth ? (
+          <div className="mt-3 rounded-lg border border-border bg-card/50 p-3 text-sm">
+            <p className="font-display uppercase tracking-[0.1em]">{auth.legalName}</p>
+            <p className="text-xs text-muted-foreground">
+              {auth.mc ?? "no MC"} · DOT {auth.dot} · authority {auth.status} · common authority{" "}
+              {auth.commonAuthority}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {auth.insuranceOnFile
+                .map((i) => `${i.type} ${i.amount} (${i.carrier})`)
+                .join(" · ")}
+            </p>
+          </div>
+        ) : null}
+
+        {safety ? (
+          <div className="mt-2 rounded-lg border border-border bg-card/50 p-3 text-sm">
+            <p className="font-display uppercase tracking-[0.1em]">Rating: {safety.rating}</p>
+            <p className="text-xs text-muted-foreground">
+              {safety.powerUnits} power units · {safety.drivers} drivers · vehicle OOS{" "}
+              {safety.outOfServiceRate.vehicle} · driver OOS {safety.outOfServiceRate.driver}
+            </p>
+            <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+              {safety.basics.map((b) => (
+                <li key={b.label}>
+                  {b.label}: {b.percentile === null ? "not public" : `${b.percentile}th percentile`}
+                  {b.alert ? " — alert" : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <p className="mt-3 text-xs text-muted-foreground">
+          Source: {c.fmcsaName}. Answers are stand-ins until the live FMCSA connection is switched
+          on — the screen will say Live when it is.
+        </p>
+      </Panel>
+
+      <Panel>
+        <PanelTitle right={<Pill tone="primary">On a schedule</Pill>}>
+          Clearinghouse and MVR
+        </PanelTitle>
+        <Label>Driver</Label>
+        <div className="mt-1 grid gap-2 sm:grid-cols-2">
+          {drivers.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              aria-pressed={driverId === d.id}
+              onClick={() => setDriverId(d.id)}
+              className={cn(
+                "min-h-[56px] rounded-lg border p-2.5 text-left text-sm transition-colors",
+                driverId === d.id
+                  ? "border-primary/60 bg-primary/12 text-primary"
+                  : "border-border bg-card/50 hover:bg-accent",
+              )}
+            >
+              {d.name}
+              <span className="block text-xs text-muted-foreground">{d.cdlState} CDL</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button
+            size="lg"
+            className="gap-2"
+            onClick={async () => {
+              const res = await c.runClearinghouse(driverId, "limited", account?.name ?? "Compliance bot");
+              toast.success(`Clearinghouse: ${res.status}`, {
+                description: `Filed as a document. Next annual query due ${fmtDate(res.validThrough)}.`,
+              });
+            }}
+          >
+            <ShieldCheck className="h-4 w-4" /> Run limited query
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2"
+            onClick={async () => {
+              const res = await c.refreshMvr(driverId, account?.name ?? "Compliance bot");
+              toast.success("MVR refreshed", {
+                description: `${res.state} — ${res.violations}. Valid through ${fmtDate(res.validThrough)}.`,
+              });
+            }}
+          >
+            <FolderInput className="h-4 w-4" /> Pull MVR now
+          </Button>
+        </div>
+
+        <div className="mt-3 rounded-lg border border-border bg-card/50 p-3 text-xs text-muted-foreground">
+          {query ? (
+            <p>
+              Last query {fmtDate(query.queriedAt)} — {query.status}, {query.violations} violations,
+              valid through {fmtDate(query.validThrough)}.
+            </p>
+          ) : (
+            <p>No Clearinghouse query run in this session.</p>
+          )}
+          <p className="mt-1">
+            MVR:{" "}
+            {mvr.has
+              ? `on file, next refresh in ${mvr.dueInDays} days (${MVR_REFRESH_DAYS}-day cycle, I warn ${MVR_REMIND_DAYS} days out).`
+              : `nothing on file — this one blocks the account. I pull it on a ${MVR_REFRESH_DAYS}-day cycle once it is set up.`}
+          </p>
+        </div>
+
+        <div className="mt-3">
+          <DriverApprovedNote>
+            Queries and pulls run when you approve them. Every result is filed as a dated document
+            you can see.
+          </DriverApprovedNote>
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------- BROKER VERIFY */
+
+const verifyItems: DocKind[] = ["insurance", "authority"];
+
+function VerifyPanel() {
+  const { account } = useAuth();
+  const c = useCompliance();
+  const [carrierName, setCarrierName] = useState("Vinson Bass Trucking LLC");
+  const [dot, setDot] = useState("3992471");
+  const [note, setNote] = useState("Need the certificate naming us before we tender the load.");
+
+  return (
+    <div className="grid gap-3 xl:grid-cols-[1fr_1.1fr]">
+      <Panel>
+        <PanelTitle right={<Pill tone="info">Broker side</Pill>}>
+          Request insurance and authority
+        </PanelTitle>
+        <Label>Carrier</Label>
+        <Input value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className="mt-1 h-12" />
+        <Label className="mt-3 block">DOT number</Label>
+        <Input value={dot} onChange={(e) => setDot(e.target.value)} className="mt-1 h-12" inputMode="numeric" />
+        <Label className="mt-3 block">Note to the carrier</Label>
+        <Input value={note} onChange={(e) => setNote(e.target.value)} className="mt-1 h-12" />
+        <Button
+          size="lg"
+          className="mt-3 w-full gap-2"
+          onClick={() => {
+            c.requestVerification({
+              carrierName,
+              dot,
+              items: verifyItems,
+              note,
+              requestedBy: account?.name ?? "Broker desk",
+            });
+            toast.success("Request sent", {
+              description: "Proof of insurance and operating authority requested from the carrier.",
+            });
+          }}
+        >
+          <Mail className="h-4 w-4" /> Send the request
+        </Button>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Verification reads the carrier's shared vault records and checks the authority through
+          FMCSA. Nothing is pulled out of the carrier's file that they have not shared.
+        </p>
+      </Panel>
+
+      <Panel>
+        <PanelTitle right={<Pill tone="primary">{c.verifications.length} on the desk</Pill>}>
+          Requests and results
+        </PanelTitle>
+        {c.verifications.length ? (
+          <div className="space-y-2">
+            {c.verifications.map((v) => (
+              <div key={v.id} className="rounded-lg border border-border bg-card/50 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <FileWarning className="h-5 w-5 text-primary" />
+                  <span className="font-display text-base uppercase tracking-[0.1em]">
+                    {v.carrierName}
+                  </span>
+                  <Pill tone={v.state === "verified" ? "go" : v.state === "failed" ? "alert" : "warn"}>
+                    {v.state === "verified" ? "Verified" : v.state === "failed" ? "Not verified" : "Open"}
+                  </Pill>
+                  {v.state === "open" ? (
+                    <Button
+                      size="sm"
+                      className="ml-auto gap-2"
+                      onClick={async () => {
+                        const res = await c.runVerification(v.id);
+                        toast[res.state === "verified" ? "success" : "error"](
+                          res.state === "verified" ? "Carrier verified" : "Could not verify",
+                          { description: res.result },
+                        );
+                      }}
+                    >
+                      <Check className="h-4 w-4" /> Verify now
+                    </Button>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  DOT {v.dot} · requested {v.requestedAt} by {v.requestedBy} ·{" "}
+                  {v.items.map((k) => kindSpec(k).short).join(", ")}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{v.result ?? v.note}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No verification requests yet. Send one and it lands here with the result.
+          </p>
+        )}
+        <div className="mt-3">
+          <DriverApprovedNote>
+            A carrier decides what a broker can see. Sharing a record out is always the carrier's
+            call.
+          </DriverApprovedNote>
+        </div>
+      </Panel>
+    </div>
   );
 }
 

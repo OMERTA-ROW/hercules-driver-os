@@ -28,7 +28,10 @@ export type DocKind =
   | "mvr"
   | "drugAlcohol"
   | "registration"
-  | "inspection";
+  | "inspection"
+  | "clearinghouse"
+  | "ifta"
+  | "irp";
 
 export type SubjectKind = "driver" | "vehicle";
 
@@ -151,6 +154,39 @@ export const docKinds: DocKindSpec[] = [
     fields: ["Inspector", "Report number", "Inspected", "Expires"],
     cues: ["inspection", "annual", "dvir", "periodic", "bit"],
     spoken: "the annual inspection",
+  },
+  {
+    id: "clearinghouse",
+    label: "FMCSA Clearinghouse query",
+    short: "Clearinghouse",
+    subject: "driver",
+    expires: true,
+    warnDays: 45,
+    fields: ["Query type", "Status", "Query date", "Valid through"],
+    cues: ["clearinghouse", "query", "fmcsa clearinghouse", "limited query"],
+    spoken: "your Clearinghouse query",
+  },
+  {
+    id: "ifta",
+    label: "IFTA licence and decals",
+    short: "IFTA",
+    subject: "vehicle",
+    expires: true,
+    warnDays: 45,
+    fields: ["IFTA account", "Base state", "Decal year", "Expires"],
+    cues: ["ifta", "fuel tax", "decal"],
+    spoken: "your IFTA licence",
+  },
+  {
+    id: "irp",
+    label: "IRP apportioned registration",
+    short: "IRP",
+    subject: "vehicle",
+    expires: true,
+    warnDays: 45,
+    fields: ["IRP account", "Base state", "Registered weight", "Expires"],
+    cues: ["irp", "apportioned", "plate registration"],
+    spoken: "your IRP registration",
   },
 ];
 
@@ -511,6 +547,55 @@ export const seedRecords: DocRecord[] = [
     uploadedAt: "Sep 5, 2026",
     visibleTo: bothSides,
   },
+  /* --- The account-level compliance set the bot chases on the driver side --- */
+  {
+    id: "CD-1009",
+    kind: "clearinghouse",
+    subjectKind: "driver",
+    subjectId: "DR-114",
+    fileName: "clearinghouse-limited-query.pdf",
+    pages: 1,
+    read: {
+      "Query type": "Limited annual query",
+      Status: "No prohibitions on record",
+      "Query date": "Jan 12, 2026",
+      "Valid through": "Jan 12, 2027",
+    },
+    issued: iso(2026, 1, 12),
+    expires: iso(2027, 1, 12),
+    checks: [
+      { label: "Driver consent on file for the query", pass: true },
+      { label: "Registered with the FMCSA Clearinghouse", pass: true },
+    ],
+    source: "driver",
+    uploadedBy: "Vinson Bass",
+    uploadedAt: "Jan 12, 2026",
+    visibleTo: bothSides,
+  },
+  {
+    id: "CD-1010",
+    kind: "ifta",
+    subjectKind: "vehicle",
+    subjectId: "HERC-114",
+    fileName: "ifta-2026-tx.pdf",
+    pages: 1,
+    read: {
+      "IFTA account": "TX-IFTA-448210",
+      "Base state": "TX",
+      "Decal year": "2026",
+      Expires: "Sep 27, 2026",
+    },
+    issued: iso(2026, 1, 1),
+    expires: iso(2026, 9, 27),
+    checks: [
+      { label: "Decals shown on both doors", pass: true },
+      { label: "Quarterly filings up to date", pass: true },
+    ],
+    source: "driver",
+    uploadedBy: "Vinson Bass",
+    uploadedAt: "Jan 2, 2026",
+    visibleTo: bothSides,
+  },
 ];
 
 /* ------------------------------------------------------------- EXPIRY */
@@ -766,3 +851,89 @@ export const rejectReasons = [
   "Insurance limits below our minimum",
   "Name on the documents does not match the application",
 ];
+
+/* ------------------------------------------------------------- ACCOUNT STATUS */
+
+/**
+ * THE SINGLE COMPLIANCE INDICATOR
+ * ===============================
+ * One light for the whole account. Green only when nothing is missing and
+ * nothing is inside a warning window. Anything expired or missing that would
+ * put the driver out of service reads BLOCKED — the bot does not soften it.
+ */
+export type AccountStatus = "compliant" | "expiring" | "blocked";
+
+/** Trailers do not carry IFTA, IRP or a power-unit cab card of their own. */
+export function isPowerUnit(vehicleId: string) {
+  const label = vehicles.find((v) => v.id === vehicleId)?.label ?? "";
+  return !/trailer|van\b|reefer|flatbed/i.test(label);
+}
+
+export function requiredForVehicle(vehicleId: string) {
+  const all = requiredFor("vehicle");
+  return isPowerUnit(vehicleId) ? all : all.filter((k) => k.id !== "ifta" && k.id !== "irp");
+}
+
+export type SubjectCompliance = {
+  subjectKind: SubjectKind;
+  subjectId: string;
+  name: string;
+  status: AccountStatus;
+  /** Required documents with nothing on file at all. */
+  missing: DocKindSpec[];
+  /** On file but expired — these are the out-of-service ones. */
+  expired: DocRecord[];
+  /** On file, still valid, inside the warning window. */
+  expiring: DocRecord[];
+};
+
+export function complianceFor(
+  subjectKind: SubjectKind,
+  subjectId: string,
+  records: DocRecord[],
+  from: Date = TODAY,
+): SubjectCompliance {
+  const held = records.filter((r) => r.subjectKind === subjectKind && r.subjectId === subjectId);
+  const required = subjectKind === "vehicle" ? requiredForVehicle(subjectId) : requiredFor("driver");
+  const missing = required.filter((k) => !held.some((r) => r.kind === k.id));
+  const expired = held.filter((r) => statusOf(r, from) === "expired");
+  const expiring = held.filter((r) => statusOf(r, from) === "expiring");
+  const status: AccountStatus =
+    missing.length || expired.length ? "blocked" : expiring.length ? "expiring" : "compliant";
+  return {
+    subjectKind,
+    subjectId,
+    name: subjectName(subjectKind, subjectId),
+    status,
+    missing,
+    expired,
+    expiring,
+  };
+}
+
+/** Worst status wins — an account is only as compliant as its weakest file. */
+export function rollUp(parts: SubjectCompliance[]): AccountStatus {
+  if (parts.some((p) => p.status === "blocked")) return "blocked";
+  if (parts.some((p) => p.status === "expiring")) return "expiring";
+  return "compliant";
+}
+
+export function statusLine(status: AccountStatus) {
+  if (status === "compliant") return "Fully compliant — nothing outstanding";
+  if (status === "expiring") return "Compliant, but something is coming due";
+  return "Blocked — a required document is missing or expired";
+}
+
+/* ------------------------------------------------------------- MVR SCHEDULE */
+
+/** MVRs are pulled on a clock, not on request. This is the refresh cadence. */
+export const MVR_REFRESH_DAYS = 365;
+export const MVR_REMIND_DAYS = 30;
+
+export function mvrDue(records: DocRecord[], driverId: string, from: Date = TODAY) {
+  const mvr = records
+    .filter((r) => r.kind === "mvr" && r.subjectId === driverId)
+    .sort((a, b) => daysUntil(b.expires, from) - daysUntil(a.expires, from))[0];
+  if (!mvr) return { has: false as const, dueInDays: 0 };
+  return { has: true as const, record: mvr, dueInDays: daysUntil(mvr.expires, from) };
+}
