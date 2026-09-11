@@ -520,6 +520,33 @@ export function respond(text: string, topic: Topic): Reply {
       text: `Nearest thing worth knowing: ${h.name}. ${h.detail}. I'll call it out well before you get there, sized so you don't have to look down.`,
     };
   }
+  /* SUPPLY & PARTS — anything HERCULES sources, places and pays for. Checked
+     before food delivery so "order me an air dryer" doesn't land on Uber Eats. */
+  if (
+    /(part|parts|alternator|starter|turbo|injector|water pump|air dryer|fan clutch|def pump|doser|brake shoe|casing|retread|strap|chain|tarp|binder|load bar|securement|permit|oversize|toll|prepass|bestpass|scale bypass|glove|vest|flashlight|ppe|wrench|socket|laundry|spn ?\d|part number)/.test(
+      t,
+    )
+  ) {
+    const pick = pickSupply(t);
+    if (!pick) {
+      return {
+        topic: "parts",
+        text: `Tell me the symptom, the part name or the code and I'll name the part and price it. I can also handle tires and road service, fuel and DEF, showers, parking and laundry, straps, chains and tarps, tools and PPE, and permits, scales and tolling. Anything I place and pay for carries the HERCULES service fee, and I read it to you before you approve it.`,
+      };
+    }
+    lastSupplyPick = pick;
+    const codeMatch = /spn ?\d+/.exec(t);
+    const fromCode = codeMatch ? partForFault(codeMatch[0]) : undefined;
+    const fee = serviceFeeFor(pick.listing.price, categoryById(pick.category).fee);
+    return {
+      topic: "parts",
+      text: `${
+        fromCode ? `${codeMatch?.[0].toUpperCase()} points at the ${fromCode.name}. ${fromCode.why} ` : ""
+      }Best I can get you: ${spokenListing(pick.label, pick.listing)} Plus a ${fee.toFixed(
+        2,
+      )} dollar HERCULES service fee, because I place it and pay the supplier — that's what keeps HERCULES running. Say "order it" and I'll read the whole thing back. Nothing is ordered yet.`,
+    };
+  }
   if (
     /(deliver|delivery|uber ?eats|door ?dash|grub ?hub|instacart|gopuff|go ?puff|walmart|walgreens|cvs|amazon|pharmacy|prescription|grocer|order|hungry|starving|dinner|lunch|breakfast|coffee|supplies|snack)/.test(
       t,
