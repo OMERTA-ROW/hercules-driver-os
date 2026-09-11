@@ -14,6 +14,7 @@ import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as EquipmentRouteImport } from './routes/equipment'
@@ -56,6 +57,11 @@ const ComplianceRoute = ComplianceRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DispatchRoute = DispatchRouteImport.update({
+  id: '/dispatch',
+  path: '/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentsRoute = DocumentsRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/breakdown': typeof BreakdownRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/breakdown': typeof BreakdownRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/breakdown': typeof BreakdownRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
   '/driver': typeof DriverRoute
   '/equipment': typeof EquipmentRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/compliance'
     | '/dashboard'
+    | '/dispatch'
     | '/documents'
     | '/driver'
     | '/equipment'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   BreakdownRoute: typeof BreakdownRoute
   ComplianceRoute: typeof ComplianceRoute
   DashboardRoute: typeof DashboardRoute
+  DispatchRoute: typeof DispatchRoute
   DocumentsRoute: typeof DocumentsRoute
   DriverRoute: typeof DriverRoute
   EquipmentRoute: typeof EquipmentRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dispatch': {
+      id: '/dispatch'
+      path: '/dispatch'
+      fullPath: '/dispatch'
+      preLoaderRoute: typeof DispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documents': {
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   BreakdownRoute: BreakdownRoute,
   ComplianceRoute: ComplianceRoute,
   DashboardRoute: DashboardRoute,
+  DispatchRoute: DispatchRoute,
   DocumentsRoute: DocumentsRoute,
   DriverRoute: DriverRoute,
   EquipmentRoute: EquipmentRoute,
