@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Building2, Copy, UserPlus, Truck, ShieldCheck } from "lucide-react";
+import { Building2, Copy, UserPlus, Truck, ShieldCheck, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Panel,
@@ -12,7 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import { doorFor, knownCompanies } from "@/data/accounts";
+import {
+  doorFor,
+  fleetTierSpec,
+  fleetTiers,
+  knownCompanies,
+  tierForTrucks,
+} from "@/data/accounts";
+import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { vehicleCatalog } from "@/data/vehicles";
 
@@ -46,6 +53,9 @@ function ZeusOnboarding() {
   const [trucks, setTrucks] = useState(3);
 
   const door = doorFor("zeusFleet");
+  /* The stated truck count becomes the tier, and the tier decides whether
+     HERCULES asks each driver what they are in or inherits it from the fleet. */
+  const tier = fleetTierSpec(tierForTrucks(trucks));
   const onboarded = account?.kind === "zeusFleet" ? account : null;
 
   return (
@@ -91,6 +101,13 @@ function ZeusOnboarding() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   {onboarded.company.name} · {onboarded.seats} trucks in rotation. A driver enters
                   this code on the HERCULES Company Driver door and they are linked to your fleet.
+                </p>
+                <p className="mt-2 text-xs">
+                  <span className="text-primary">
+                    {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).label} ·{" "}
+                    {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).range}
+                  </span>{" "}
+                  — {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).resolution}
                 </p>
                 <Button size="lg" className="mt-3 w-full gap-2" asChild>
                   <Link to="/fleet">
