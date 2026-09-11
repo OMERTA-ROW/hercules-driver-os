@@ -26,6 +26,9 @@ import { ArrivalBridge } from "@/components/hercules/ArrivalBridge";
 import { ArrivalStack } from "@/components/hercules/ArrivalStack";
 import { BoltProvider } from "@/lib/bolt";
 import { VehicleProvider } from "@/lib/vehicles";
+import { PickupProvider } from "@/lib/pickup";
+import { PickupBridge } from "@/components/hercules/PickupBridge";
+import { PickupStack } from "@/components/hercules/PickupStack";
 import { ComplianceProvider } from "@/lib/compliance";
 import { ComplianceBridge } from "@/components/hercules/ComplianceBridge";
 import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
@@ -152,6 +155,7 @@ function RootComponent() {
                 <PartsProviderRoot>
                 <BoltProvider>
                 <VehicleProvider>
+                <PickupProvider>
                 <ArrivalsProvider>
                 <ComplianceProvider>
                 <VoiceProvider>
@@ -160,12 +164,15 @@ function RootComponent() {
             <TripVehiclePrompt />
             <ArrivalBridge />
             <ComplianceBridge />
+            <PickupBridge />
             <ArrivalStack />
+            <PickupStack />
             <ScreenDim />
             <Toaster />
                 </VoiceProvider>
                 </ComplianceProvider>
                 </ArrivalsProvider>
+                </PickupProvider>
                 </VehicleProvider>
                 </BoltProvider>
                 </PartsProviderRoot>
