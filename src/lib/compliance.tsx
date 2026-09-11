@@ -75,6 +75,7 @@ const RECORDS_KEY = "hercules.compliance.records";
 const APPROVALS_KEY = "hercules.compliance.approvals";
 const REVIEW_KEY = "hercules.compliance.review";
 const SPOKEN_KEY = "hercules.compliance.spoken";
+const VERIFY_KEY = "hercules.compliance.verifications";
 
 export type ReviewItem = Classified & {
   id: string;
