@@ -566,7 +566,7 @@ export function respond(text: string, topic: Topic): Reply {
     const pred = boltPredictions[0]!;
     return {
       topic: "health",
-      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now.`,
+      text: `THE BOLT is reading ${boltFaults.length} active ${boltFaults.length === 1 ? "code" : "codes"} off your engine. ${f.plain} And I'm watching one trend: ${pred.spoken} Nothing is shutting you down right now. Say "source the part" and I'll name it, price it at the counters ahead of you, and show you the fee before anything is ordered.`,
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {
