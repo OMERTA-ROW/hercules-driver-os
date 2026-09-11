@@ -182,7 +182,12 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
   const [approvals, setApprovals] = useState<Record<string, ApprovalOutcome>>(seedApprovals);
   const [spoken, setSpoken] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
+  const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
+  const [authority, setAuthority] = useState<Record<string, FmcsaAuthority>>({});
+  const [safety, setSafety] = useState<Record<string, FmcsaSafety>>({});
+  const [clearinghouse, setClearinghouse] = useState<Record<string, ClearinghouseResult>>({});
   const seq = useRef(3000);
+  const fmcsa = useRef(fmcsaProvider());
 
   useEffect(() => {
     try {
