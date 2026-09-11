@@ -491,6 +491,10 @@ type Ctx = {
   /** The line currently being spoken or the last thing said. */
   lastLine: string;
   pending: Turn | undefined;
+  /** Play a persona's sample line so the driver can hear it before choosing. */
+  preview: (id: VoiceId) => Promise<void>;
+  /** The persona currently previewing, if any. */
+  previewing: VoiceId | null;
 };
 
 
