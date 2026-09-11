@@ -31,7 +31,7 @@ const nav = [
   { to: "/stops", label: "Stops", icon: Fuel, feature: null },
   { to: "/breakdown", label: "Breakdown", icon: LifeBuoy, feature: null },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
-  { to: "/health", label: "Truck Health", icon: Wrench, feature: "health" },
+  { to: "/health", label: "Vehicle Health", icon: Wrench, feature: "health" },
   { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },
   { to: "/alerts", label: "Alerts", icon: ShieldAlert, feature: "alerts" },
   { to: "/driver", label: "Driver", icon: UserCog, feature: "driver" },

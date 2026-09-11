@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-export type PurchaseId = "documents" | "bolt";
+export type PurchaseId = "documents" | "bolt" | "boltObd";
 
 const STORAGE_KEY = "hercules.purchases";
 

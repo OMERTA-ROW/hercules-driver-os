@@ -41,7 +41,7 @@ import {
   type Service,
 } from "@/data/breakdown";
 import { currentLoad } from "@/data/mock";
-import { boltFaults } from "@/data/bolt";
+import { useBolt } from "@/lib/bolt";
 import {
   getBreakdownProvider,
   label as kindLabel,

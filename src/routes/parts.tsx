@@ -45,7 +45,7 @@ import {
   type SupplyCategoryId,
 } from "@/data/parts";
 import { feeConfig } from "@/data/fees";
-import { boltFaults } from "@/data/bolt";
+import { useBolt } from "@/lib/bolt";
 import { services as breakdownServices } from "@/data/breakdown";
 import { rank } from "@/lib/breakdown";
 import { useParts, type Quote } from "@/lib/parts";

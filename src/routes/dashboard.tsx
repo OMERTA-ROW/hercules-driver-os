@@ -215,7 +215,7 @@ function Dashboard() {
               </Pill>
             }
           >
-            Truck Health
+            Vehicle Health
           </PanelTitle>
           <div className="space-y-2">
             {truckHealth.slice(0, 4).map((m) => (
