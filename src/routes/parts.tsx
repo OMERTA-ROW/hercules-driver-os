@@ -2,10 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Check,
+  Clock,
   Loader2,
   MapPin,
   Mic,
+  Navigation2,
   Package,
+  ParkingSquare,
+  Phone,
   Receipt,
   Search,
   Truck,
@@ -45,6 +49,7 @@ import { boltFaults } from "@/data/bolt";
 import { services as breakdownServices } from "@/data/breakdown";
 import { rank } from "@/lib/breakdown";
 import { useParts, type Quote } from "@/lib/parts";
+import { usePickup, pickupStatusLabel } from "@/lib/pickup";
 import { useVoice } from "@/lib/voice";
 
 export const Route = createFileRoute("/parts")({
@@ -593,5 +598,139 @@ function ListingRow({
         </Button>
       </div>
     </div>
+  );
+}
+
+/**
+ * PART PICKUP ROUTING — every run against an order on this screen.
+ * The route is built automatically on confirmation and offered; the driver
+ * dispatches it. Nothing here moves the truck on its own.
+ */
+function PickupRuns() {
+  const { runs, approve, decline, collected, minutesOut } = usePickup();
+  const live = runs.filter((r) => r.status !== "declined");
+  if (!live.length) return null;
+
+  return (
+    <Panel className="mb-3 border-primary/45">
+      <PanelTitle
+        right={
+          <Pill tone="primary">
+            <Navigation2 className="h-3.5 w-3.5" /> Truck-legal route built for you
+          </Pill>
+        }
+      >
+        Part Pickup Routing
+      </PanelTitle>
+      <p className="text-sm text-muted-foreground">
+        Order a part for collection and HERCULES routes you to the counter — legal for your
+        equipment, clearances and hazards accounted for. It offers the route. You dispatch it.
+      </p>
+      <div className="mt-3 grid gap-2 lg:grid-cols-2">
+        {live.map((r) => (
+          <div
+            key={r.id}
+            className={
+              "rounded-lg border p-3 " +
+              (r.status === "routed"
+                ? "border-primary/55 bg-primary/10"
+                : r.status === "held"
+                  ? "border-violet/45 bg-violet/8"
+                  : "border-border bg-card/60")
+            }
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-display text-sm font-semibold uppercase tracking-wide">
+                  {r.label}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {r.vendor} · {r.site.name}
+                </p>
+              </div>
+              <Pill tone={r.status === "routed" ? "go" : r.status === "held" ? "watch" : "primary"}>
+                {pickupStatusLabel(r)}
+              </Pill>
+            </div>
+            <div className="mt-2 grid gap-1 text-xs text-muted-foreground">
+              <p>
+                <MapPin className="mr-1 inline h-3 w-3 text-primary" />
+                {r.site.milesAhead} mi ahead · {r.site.milesOffRoute.toFixed(1)} mi off route ·{" "}
+                {r.status === "routed" ? `${Math.max(0, minutesOut(r))} min out` : `${r.driveMin} min`}
+              </p>
+              <p>
+                <Clock className="mr-1 inline h-3 w-3 text-primary" />
+                {r.site.hours}
+              </p>
+              <p className="text-primary">{r.ready}</p>
+              <p>{r.site.counter}</p>
+              <p>
+                <ParkingSquare className="mr-1 inline h-3 w-3 text-primary" />
+                {r.site.parking}
+              </p>
+              <p>
+                <Phone className="mr-1 inline h-3 w-3 text-primary" />
+                {r.site.phone}
+              </p>
+              {r.status === "routed" && r.route ? (
+                <p className="text-violet">
+                  {r.route.hazards.length
+                    ? `Hazards on the way in: ${r.route.hazards.map((h) => h.name).join(" · ")}`
+                    : "Nothing on the hazard layer between you and it"}
+                </p>
+              ) : null}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {r.status === "offered" ? (
+                <Button
+                  size="lg"
+                  className="h-14 gap-2 text-base"
+                  onClick={() => {
+                    void approve(r.id).then(() =>
+                      toast.success("Route dispatched on your word", {
+                        description: `${r.site.name} — legal the whole way for your unit.`,
+                      }),
+                    );
+                  }}
+                >
+                  <Navigation2 className="h-5 w-5" /> Send it to my map
+                </Button>
+              ) : null}
+              {r.status === "held" ? (
+                <p className="text-xs text-violet">
+                  Route is built and held. HERCULES speaks up the moment the counter has it.
+                </p>
+              ) : null}
+              {r.status === "routed" ? (
+                <>
+                  <Button size="lg" variant="outline" className="h-14 gap-2" asChild>
+                    <Link to="/navigation">
+                      <Navigation2 className="h-5 w-5" /> Open it on the map
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="h-14 gap-2"
+                    onClick={() => collected(r.id)}
+                  >
+                    <Check className="h-5 w-5" /> Got the part
+                  </Button>
+                </>
+              ) : null}
+              {r.status !== "collected" ? (
+                <Button size="lg" variant="ghost" className="h-14" onClick={() => decline(r.id)}>
+                  {r.status === "held" ? "Stop holding it" : "Not now"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+      <DriverApprovedNote>
+        HERCULES builds and offers the pickup route. It is never dispatched, and your navigation is
+        never changed, without your explicit yes.
+      </DriverApprovedNote>
+    </Panel>
   );
 }
