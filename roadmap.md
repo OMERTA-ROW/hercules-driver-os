@@ -18,3 +18,8 @@
 - Provider (src/lib/compliance.tsx): filing, bulk import, review queue, approvals, exports, spoken expiry queue.
 - /compliance: attention strip, my documents, approval queue (approve / reject with reason / request specific doc), folder-drop bulk import with classify + read + match, human review queue, driver/vehicle/fleet export with CSV manifest.
 - ComplianceBridge speaks expiries unprompted; voice intent added for paperwork questions. Imported docs tracked identically to camera uploads.
+
+## Voice personas (done)
+- Named ZEUS/HERCULES cast in src/data/voices.ts: Hercules (principal), Zeus, Ares, Atlas, Apollo, Athena, Medusa, Hera, Artemis.
+- Real premium speech via src/lib/speech.functions.ts (Lovable AI TTS, per-persona delivery direction + speed).
+- Compact scrollable picker with descriptors and per-voice preview: src/components/hercules/VoicePicker.tsx; selection persists in the driver profile.
