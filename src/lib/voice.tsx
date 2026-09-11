@@ -660,8 +660,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     clearTimers();
+    killAudio();
+    setPreviewing(null);
     setMode("idle");
-  }, [clearTimers]);
+  }, [clearTimers, killAudio]);
 
   const settle = useCallback(
     (turnId: string, status: "approved" | "declined", line: string) => {
