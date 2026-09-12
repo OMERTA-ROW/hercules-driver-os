@@ -108,10 +108,12 @@ export function AppShell({
                 <ThemeToggle size="sm" />
                 <div className="hidden text-right sm:block">
                   <div className="font-display text-sm uppercase tracking-[0.12em]">
-                    {account?.name ?? driver.name}
+                    {account?.name ?? "Not signed in"}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {driver.unit} · {driver.callsign}
+                    {rig
+                      ? [rig.unit_number, rig.label].filter(Boolean).join(" · ")
+                      : "No vehicle on file"}
                   </div>
                 </div>
                 {account ? (
