@@ -157,7 +157,7 @@ function StopsScreen() {
               <Clock className="mt-0.5 h-7 w-7 shrink-0 text-warn" />
               <div>
                 <div className="text-lg font-semibold uppercase tracking-wide text-warn">
-                  {hm(hos.driveRemainingMin)} of drive time left — about {rangeMiles} miles
+                  {hm(hours?.driveRemainingMin ?? 0)} of drive time left — about {rangeMiles} miles
                 </div>
                 <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
                   {inRange.length} bookable stops with a shower and reservable parking are inside
