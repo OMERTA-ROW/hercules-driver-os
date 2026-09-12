@@ -465,7 +465,11 @@ function followUp(topic: Topic, text: string): Reply | null {
   if (topic === "clock" && wantsMore) {
     return {
       topic: "clock",
-      text: `On duty ${hm(hos.onDutyRemainingMin)} remaining, and your 30-minute break is due in ${hm(hos.breakInMin)}. Your own pattern says you start fading before the clock does — I'd plan the break early. Your call.`,
+      text: live.hours
+        ? `On duty ${hm(live.hours.onDutyRemainingMin)} remaining, and ${live.hours.cycleRemainingHrs.toFixed(
+            1,
+          )} hours left on your cycle. That's off your own logged time, nothing assumed.`
+        : "You haven't logged any driving yet, so I don't have a clock to read. Start a trip and I'll track it from there.",
     };
   }
   return null;
