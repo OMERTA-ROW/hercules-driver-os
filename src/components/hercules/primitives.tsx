@@ -133,6 +133,30 @@ export function DriverApprovedNote({ children }: { children?: ReactNode }) {
   );
 }
 
+/**
+ * Honest empty state. HERCULES never fills a gap with invented numbers — if a
+ * source isn't connected yet, it says so and says what to do about it.
+ */
+export function EmptyState({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-dashed border-primary/30 bg-card/40 p-5 text-center">
+      <div className="font-display text-base uppercase tracking-[0.12em] text-primary">{title}</div>
+      {children ? (
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{children}</p>
+      ) : null}
+      {action ? <div className="mt-3 flex justify-center">{action}</div> : null}
+    </div>
+  );
+}
+
 export function money(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }

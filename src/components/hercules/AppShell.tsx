@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
-import { driver } from "@/data/mock";
+import { useVehicles } from "@/lib/live";
 import { Pill } from "./primitives";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/lib/auth";
