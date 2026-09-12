@@ -514,7 +514,8 @@ function BreakdownPage() {
             {!logged ? (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Logging the breakdown rebuilds the day — hours, ETA on {currentLoad.destination},
+                  Logging the breakdown rebuilds the day — hours, ETA on{" "}
+                  {liveLoad ? place(liveLoad.dest_city, liveLoad.dest_state) : "your current destination"},
                   load impact, parking, and rest. Nothing changes until you approve the plan.
                 </p>
                 <Button
