@@ -327,7 +327,9 @@ function NavigationScreen() {
         {/* TRIP READOUTS — same numbers as the dashboard */}
         <Panel>
           <PanelTitle right={<Pill tone="primary">Live</Pill>}>
-            {currentLoad.id} · {currentLoad.destination}
+            {liveLoad
+              ? `${liveLoad.reference ?? liveLoad.id.slice(0, 8)} · ${place(liveLoad.dest_city, liveLoad.dest_state)}`
+              : "No load booked"}
           </PanelTitle>
           <div className="grid grid-cols-2 gap-3">
             <div>
