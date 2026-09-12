@@ -345,20 +345,35 @@ function followUp(topic: Topic, text: string): Reply | null {
 
 
   if (topic === "loads" && (wantsMore || wantsNext)) {
-    const l = loads[wantsNext ? 1 : 0]!;
+    const l = live.loads[wantsNext ? 1 : 0];
+    if (!l) {
+      return {
+        topic: "loads",
+        text: "That's everything posted on the board right now. I won't make one up — the moment new freight lands I'll read it to you.",
+      };
+    }
     return {
       topic: "loads",
-      text: `${l.origin} to ${l.destination}, ${l.miles} miles at $${l.rpm.toFixed(2)} a mile, $${l.rate.toLocaleString()} total. Pickup window ${l.pickupWindow}. ${l.shipper.name} — ${l.shipper.hours24 ? "24-hour facility" : `open ${l.shipper.open} to ${l.shipper.close}`}, ${l.shipper.overnightAllowed ? "overnight parking allowed on site" : `nearest safe parking ${l.shipper.nearestSafeParkingMiles} miles out`}. Say "book it" and I'll read the whole thing back before anything is committed.`,
+      text: `${lane(l)}, ${rateLine(l)}.${
+        l.pickup_at ? ` Pickup ${new Date(l.pickup_at).toLocaleString()}.` : ""
+      } Say "book it" and I'll read the whole thing back before anything is committed.`,
     };
   }
   if (topic === "loads" && /(book|take|grab) ?(it|that)?/.test(t)) {
-    const l = loads[0]!;
+    const l = live.loads[0];
+    if (!l) {
+      return {
+        topic: "loads",
+        text: "There's nothing on the board to book right now.",
+      };
+    }
+    const dollars = l.rate_cents ? Math.round(l.rate_cents / 100) : 0;
     return {
       topic: "loads",
-      text: `Here's exactly what I'd commit to: ${l.origin} to ${l.destination}, ${l.miles} miles, $${l.rate.toLocaleString()} at $${l.rpm.toFixed(2)} a mile, pickup ${l.pickupWindow}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
+      text: `Here's exactly what I'd commit to: ${lane(l)}, ${rateLine(l)}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
       proposal: {
-        summary: `Book load ${l.id}: ${l.origin} → ${l.destination}, $${l.rate.toLocaleString()}`,
-        total: `$${l.rate.toLocaleString()} revenue`,
+        summary: `Book load ${l.reference ?? l.id.slice(0, 8)}: ${lane(l)}, $${dollars.toLocaleString()}`,
+        total: `$${dollars.toLocaleString()} revenue`,
       },
     };
   }
