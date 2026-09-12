@@ -49,6 +49,39 @@ import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/
 import { speakLine } from "@/lib/speech.functions";
 import { attachAudioLevel, setVoiceLevel, startSynthLevel } from "@/lib/voice-level";
 
+/**
+ * LIVE SNAPSHOT
+ * The voice brain answers from the driver's own rows. When a table is empty
+ * HERCULES says so out loud instead of reading numbers it does not have.
+ */
+export type VoiceSnapshot = {
+  hours: Hours | null;
+  currentLoad: LoadRow | null;
+  loads: LoadRow[];
+  alerts: AlertRow[];
+};
+
+let live: VoiceSnapshot = { hours: null, currentLoad: null, loads: [], alerts: [] };
+
+export function setVoiceSnapshot(next: VoiceSnapshot) {
+  live = next;
+}
+
+function lane(l: LoadRow) {
+  const from = [l.origin_city, l.origin_state].filter(Boolean).join(", ") || "your origin";
+  const to = [l.dest_city, l.dest_state].filter(Boolean).join(", ") || "your destination";
+  return `${from} to ${to}`;
+}
+
+function rateLine(l: LoadRow) {
+  if (!l.rate_cents) return "no rate posted";
+  const dollars = Math.round(l.rate_cents / 100);
+  if (!l.miles) return `$${dollars.toLocaleString()} total`;
+  return `${l.miles.toLocaleString()} miles, $${dollars.toLocaleString()} total, $${(
+    dollars / l.miles
+  ).toFixed(2)} a mile`;
+}
+
 
 /**
  * HERCULES VOICE LAYER
