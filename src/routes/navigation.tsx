@@ -41,7 +41,7 @@ import {
   useHazardLayers,
 } from "@/lib/hazard-layer";
 import { hazardMeta, type Hazard } from "@/data/hazards";
-import { currentLoad, hos } from "@/data/mock";
+import { useCurrentLoad, useHours, place } from "@/lib/live";
 import { hm } from "@/components/hercules/primitives";
 import { useStops } from "@/lib/stops";
 import { useVehicle } from "@/lib/vehicles";

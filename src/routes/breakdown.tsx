@@ -40,7 +40,7 @@ import {
   type ProblemId,
   type Service,
 } from "@/data/breakdown";
-import { currentLoad } from "@/data/mock";
+import { useCurrentLoad, place } from "@/lib/live";
 import { useBolt } from "@/lib/bolt";
 import {
   getBreakdownProvider,
