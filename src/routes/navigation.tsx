@@ -342,11 +342,11 @@ function NavigationScreen() {
             </div>
             <div>
               <Label>Drive left</Label>
-              <Metric value={hm(hos.driveRemainingMin)} tone="go" />
+              <Metric value={hours ? hm(hours.driveRemainingMin) : "—"} tone="go" />
             </div>
             <div>
               <Label>Break in</Label>
-              <Metric value={hm(hos.breakInMin)} tone="warn" />
+              <Metric value={hours ? hm(hours.onDutyRemainingMin) : "—"} tone="warn" />
             </div>
           </div>
           {spoken ? (
