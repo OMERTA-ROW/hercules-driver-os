@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
+import type { AlertRow, Hours, LoadRow } from "@/lib/live";
 import { hazards } from "@/data/hazards";
 import { rulesFor, specFor, type VehicleSpec } from "@/data/vehicles";
 import { activeAdapter, activeFaults, activePredictions } from "@/lib/bolt";
