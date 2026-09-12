@@ -66,8 +66,17 @@ function toAccount(row: ProfileRow): Account {
     ...(row.company_code
       ? { company: { name: row.company_name ?? "Carrier", code: row.company_code } }
       : {}),
-    ...(row.fleet_tier ? { fleetTier: row.fleet_tier as FleetTier } : {}),
+    ...(row.fleet_tier ? { fleetTier: tierFromNumber(row.fleet_tier) } : {}),
   };
+}
+
+/** The profile row stores the tier as 1/2/3; the app speaks in tier ids. */
+function tierFromNumber(n: number): FleetTier {
+  return n >= 3 ? "tier3" : n === 2 ? "tier2" : "tier1";
+}
+
+function tierToNumber(id: FleetTier): number {
+  return id === "tier3" ? 3 : id === "tier2" ? 2 : 1;
 }
 
 export type SignUpInput = {
