@@ -208,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             trial_ends_at: trialEndsAt,
             company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
-            fleet_tier: kind === "zeusFleet" ? tierForTrucks(seats) : null,
+            fleet_tier: kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null,
           })
           .eq("id", data.user.id);
         setUserId(data.user.id);
@@ -237,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .update({
           plan,
           seats: nextSeats,
-          ...(plan === "fleet" ? { fleet_tier: tierForTrucks(nextSeats) } : {}),
+          ...(plan === "fleet" ? { fleet_tier: tierToNumber(tierForTrucks(nextSeats)) } : {}),
         })
         .eq("id", userId);
       await loadProfile(userId);
