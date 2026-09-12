@@ -67,11 +67,30 @@ function SignUp() {
                 toast.error("Fill in your name, email, and password");
                 return;
               }
-              signUp({ name, email, plan, seats });
-              toast.success(`${TRIAL_DAYS}-day trial started`, {
-                description: `${selected.name} — you can change or cancel any time.`,
-              });
-              void navigate({ to: "/" });
+              void (async () => {
+                const { error, needsConfirmation } = await signUp({
+                  name,
+                  email,
+                  password,
+                  plan,
+                  seats,
+                });
+                if (error) {
+                  toast.error("Could not create your account", { description: error });
+                  return;
+                }
+                if (needsConfirmation) {
+                  toast.success("Check your email to confirm", {
+                    description: "Confirm the link we sent, then sign in.",
+                  });
+                  void navigate({ to: "/sign-in" });
+                  return;
+                }
+                toast.success(`${TRIAL_DAYS}-day trial started`, {
+                  description: `${selected.name} — you can change or cancel any time.`,
+                });
+                void navigate({ to: "/" });
+              })();
             }}
           >
             <div className="space-y-3">
@@ -175,7 +194,7 @@ function SignUp() {
                 See the full comparison
               </Link>
               <DriverApprovedNote>
-                Mock signup for this pass. No card, no charge, nothing committed without you.
+                No card, no charge, nothing committed without you.
               </DriverApprovedNote>
             </div>
           </form>
