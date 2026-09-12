@@ -1,169 +1,190 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Moon, Sunrise, Coffee, Activity, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { UserCog, Truck, Mic } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Metric, Pill, Bar } from "@/components/hercules/primitives";
-import { Button } from "@/components/ui/button";
 import {
-  driver,
-  fatigueModel,
-  alertnessCurve,
-  breakSuggestions,
-  rhythmStats,
-} from "@/data/mock";
+  Panel,
+  PanelTitle,
+  Pill,
+  Label,
+  Metric,
+  EmptyState,
+  DriverApprovedNote,
+  hm,
+} from "@/components/hercules/primitives";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { useHours, useMileage, useVehicles } from "@/lib/live";
+import { voiceCommands } from "@/data/voice-commands";
 
 export const Route = createFileRoute("/driver")({
   head: () => ({
     meta: [
-      { title: "Driver Profile & Learning — HERCULES" },
+      { title: "Driver Profile — HERCULES" },
       {
         name: "description",
         content:
-          "Your personal fatigue and rhythm model. Break guidance built from your own patterns — always a suggestion, never enforcement.",
+          "Your account, your equipment, your logged hours and miles — and everything you can say to HERCULES out loud.",
       },
-      { property: "og:title", content: "Driver Profile & Learning — HERCULES" },
+      { property: "og:title", content: "Driver Profile — HERCULES" },
       {
         property: "og:description",
-        content: "HERCULES learns how you drive and rest, then suggests. You always decide.",
+        content: "Account, equipment, hours, and the full voice phrasebook.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: DriverProfile,
+  component: Driver,
 });
 
-function DriverProfile() {
+function Driver() {
+  const { account, kind, trialDaysLeft } = useAuth();
+  const { data: vehicles } = useVehicles();
+  const { hours } = useHours();
+  const miles = useMileage();
+  const rigs = vehicles ?? [];
+
   return (
-    <AppShell
-      title="Driver Profile & Learning"
-      subtitle={`${driver.name} · ${driver.callsign} · ${fatigueModel.daysObserved} days of your own data`}
-    >
-      <Panel className="border-info/35">
-        <div className="flex flex-wrap items-start gap-3">
-          <Sparkles className="h-7 w-7 shrink-0 text-info" />
-          <p className="min-w-0 flex-1 text-sm text-muted-foreground">
-            This model is built from{" "}
-            <span className="font-semibold text-foreground">your</span> patterns, not a blanket rule
-            book. Every break, stop, and shutdown below is a suggestion you can accept, move, or
-            ignore. You are the captain of this ship.
-          </p>
-        </div>
-      </Panel>
-
-      <div className="mt-3 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
+    <AppShell title="Driver" subtitle={account?.email ?? "Not signed in"}>
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
-          <PanelTitle right={<Pill tone="info">You vs. fleet average</Pill>}>
-            Your Alertness Curve
+          <PanelTitle
+            right={
+              account?.status === "trial" ? (
+                <Pill tone="warn">Trial · {trialDaysLeft} days</Pill>
+              ) : (
+                <Pill tone="go">Active</Pill>
+              )
+            }
+          >
+            Account
           </PanelTitle>
-          <div className="flex h-56 items-end gap-1.5">
-            {alertnessCurve.map((p) => (
-              <div key={p.hour} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex h-full w-full items-end justify-center gap-0.5">
-                  <div
-                    className="w-full rounded-t bg-primary"
-                    style={{ height: `${p.you}%` }}
-                    title={`You: ${p.you}`}
-                  />
-                  <div
-                    className="w-1/3 rounded-t bg-muted-foreground/40"
-                    style={{ height: `${p.fleet}%` }}
-                    title={`Fleet: ${p.fleet}`}
-                  />
-                </div>
-                <span className="label-cap">{p.hour}</span>
+          {!account ? (
+            <EmptyState
+              title="Not signed in"
+              action={
+                <Button asChild size="lg">
+                  <Link to="/sign-in">Sign in</Link>
+                </Button>
+              }
+            >
+              Your hours, equipment, and history live on your own account.
+            </EmptyState>
+          ) : (
+            <dl className="space-y-2 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-muted-foreground">Name</dt>
+                <dd className="font-display uppercase tracking-[0.1em]">{account.name}</dd>
               </div>
-            ))}
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">{fatigueModel.personalNote}</p>
-        </Panel>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Panel>
-            <Label>Your peak window</Label>
-            <div className="metric mt-1 text-2xl font-bold text-go">{fatigueModel.peakHours}</div>
-            <Sunrise className="mt-2 h-6 w-6 text-go" />
-          </Panel>
-          <Panel>
-            <Label>Your afternoon dip</Label>
-            <div className="metric mt-1 text-2xl font-bold text-warn">{fatigueModel.dipHours}</div>
-            <Coffee className="mt-2 h-6 w-6 text-warn" />
-          </Panel>
-          <Panel>
-            <Label>Diminishing returns after</Label>
-            <div className="metric mt-1 text-2xl font-bold text-destructive">
-              {fatigueModel.hardWall}
-            </div>
-            <Moon className="mt-2 h-6 w-6 text-destructive" />
-          </Panel>
-          <Panel>
-            <Label>Average sleep</Label>
-            <div className="metric mt-1 text-2xl font-bold">{fatigueModel.avgSleep}</div>
-            <Activity className="mt-2 h-6 w-6 text-muted-foreground" />
-          </Panel>
-          <Panel className="sm:col-span-2">
-            <Label>Sleep consistency</Label>
-            <div className="mt-1 flex items-center gap-3">
-              <Bar pct={fatigueModel.sleepConsistency} tone="go" />
-              <span className="metric font-bold">{fatigueModel.sleepConsistency}%</span>
-            </div>
-            <Label className="mt-3">Rest quality</Label>
-            <div className="mt-1 flex items-center gap-3">
-              <Bar pct={fatigueModel.restQuality} tone="info" />
-              <span className="metric font-bold">{fatigueModel.restQuality}%</span>
-            </div>
-          </Panel>
-        </div>
-      </div>
-
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <Panel>
-          <PanelTitle right={<Pill tone="info">Suggestions only</Pill>}>
-            Break Guidance For You
-          </PanelTitle>
-          <div className="space-y-2">
-            {breakSuggestions.map((b) => (
-              <div key={b.when} className="rounded-lg border border-info/35 bg-info/8 p-3">
-                <div className="font-display text-lg">{b.when}</div>
-                <p className="mt-1 text-sm">{b.why}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{b.place}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button
-                    size="lg"
-                    onClick={() => toast.success("Break added to your plan on your approval")}
-                  >
-                    Accept suggestion
-                  </Button>
-                  <Button size="lg" variant="outline">
-                    Push it out 45 min
-                  </Button>
-                  <Button size="lg" variant="ghost">
-                    I'm good, skip it
-                  </Button>
-                </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-muted-foreground">Door</dt>
+                <dd className="font-display uppercase tracking-[0.1em]">{kind}</dd>
               </div>
-            ))}
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            HERCULES will never force a break, lock the truck, or report your choices. It offers what
-            your own history says works.
-          </p>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-muted-foreground">Plan</dt>
+                <dd className="font-display uppercase tracking-[0.1em]">{account.plan}</dd>
+              </div>
+              {account.company ? (
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">Carrier</dt>
+                  <dd className="font-display uppercase tracking-[0.1em]">
+                    {account.company.name} · {account.company.code}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          )}
         </Panel>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary">Learned</Pill>}>Your Rhythm</PanelTitle>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {rhythmStats.map((s) => (
-              <div key={s.label} className="rounded-lg border border-border bg-card/60 p-3">
-                <Label>{s.label}</Label>
-                <Metric value={s.value} className="text-2xl" />
+          <PanelTitle right={<Pill tone="primary"><UserCog className="h-3.5 w-3.5" /> Logged</Pill>}>
+            Hours and miles
+          </PanelTitle>
+          {hours ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label>Drive left today</Label>
+                <Metric value={hm(hours.driveRemainingMin)} tone="primary" />
               </div>
+              <div>
+                <Label>On duty left</Label>
+                <Metric value={hm(hours.onDutyRemainingMin)} />
+              </div>
+              <div>
+                <Label>Cycle left</Label>
+                <Metric value={hours.cycleRemainingHrs.toFixed(1)} unit="hrs" />
+              </div>
+              <div>
+                <Label>Miles this week</Label>
+                <Metric value={miles.week.toLocaleString()} unit="mi" />
+              </div>
+            </div>
+          ) : (
+            <EmptyState title="No hours logged">
+              Start a trip and HERCULES tracks drive, on-duty, and cycle time from your own records.
+              It will not show a clock it cannot back up.
+            </EmptyState>
+          )}
+        </Panel>
+
+        <Panel>
+          <PanelTitle right={<Pill tone="neutral">{rigs.length} on file</Pill>}>
+            Your equipment
+          </PanelTitle>
+          {rigs.length === 0 ? (
+            <EmptyState
+              title="No vehicle on file"
+              action={
+                <Button asChild size="lg" className="gap-2">
+                  <Link to="/equipment">
+                    <Truck className="h-4 w-4" /> Add your equipment
+                  </Link>
+                </Button>
+              }
+            >
+              Routing, clearances, and hazard warnings all come from your equipment profile.
+            </EmptyState>
+          ) : (
+            <ul className="space-y-2">
+              {rigs.map((v) => (
+                <li
+                  key={v.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card/50 p-3"
+                >
+                  <div>
+                    <div className="font-display text-sm uppercase tracking-[0.1em]">
+                      {v.label}
+                      {v.unit_number ? ` · ${v.unit_number}` : ""}
+                    </div>
+                    <Label>
+                      {v.equipment_type}
+                      {v.gross_weight_lb ? ` · ${v.gross_weight_lb.toLocaleString()} lbs` : ""}
+                      {v.height_inches ? ` · ${(v.height_inches / 12).toFixed(1)} ft tall` : ""}
+                    </Label>
+                  </div>
+                  {v.active ? <Pill tone="go">Active</Pill> : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel>
+          <PanelTitle right={<Pill tone="primary"><Mic className="h-3.5 w-3.5" /> Voice</Pill>}>
+            What you can say
+          </PanelTitle>
+          <ul className="space-y-2">
+            {voiceCommands.map((c) => (
+              <li key={c.phrase} className="rounded-lg border border-border bg-card/50 p-2.5">
+                <div className="font-display text-sm uppercase tracking-[0.08em] text-primary">
+                  “{c.phrase}”
+                </div>
+                <p className="text-xs text-muted-foreground">{c.desc}</p>
+              </li>
             ))}
-          </div>
-          <div className="mt-3 rounded-lg border border-border bg-card/60 p-3">
-            <Label>Truck & authority</Label>
-            <p className="mt-1 text-sm">{driver.truck}</p>
-            <p className="text-sm text-muted-foreground">
-              {driver.trailer} · {driver.authority}
-            </p>
+          </ul>
+          <div className="mt-3">
+            <DriverApprovedNote />
           </div>
         </Panel>
       </div>
