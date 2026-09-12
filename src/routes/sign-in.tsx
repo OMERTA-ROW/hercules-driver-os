@@ -42,6 +42,7 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const door = doors.find((d) => d.kind === kind)!;
 
