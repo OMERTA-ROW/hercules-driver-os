@@ -41,7 +41,7 @@ import {
   useHazardLayers,
 } from "@/lib/hazard-layer";
 import { hazardMeta, type Hazard } from "@/data/hazards";
-import { currentLoad, hos } from "@/data/mock";
+import { useCurrentLoad, useHours, place } from "@/lib/live";
 import { hm } from "@/components/hercules/primitives";
 import { useStops } from "@/lib/stops";
 import { useVehicle } from "@/lib/vehicles";
@@ -70,6 +70,8 @@ export const Route = createFileRoute("/navigation")({
 });
 
 function NavigationScreen() {
+  const { hours } = useHours();
+  const { load: liveLoad } = useCurrentLoad();
   const [route, setRoute] = useState<TruckRoute>(primaryRoute);
   const [idx, setIdx] = useState(0); // index along the polyline (live GPS sim)
   const [position, setPosition] = useState<LatLng>(primaryRoute.polyline[0]!);
@@ -325,7 +327,9 @@ function NavigationScreen() {
         {/* TRIP READOUTS — same numbers as the dashboard */}
         <Panel>
           <PanelTitle right={<Pill tone="primary">Live</Pill>}>
-            {currentLoad.id} · {currentLoad.destination}
+            {liveLoad
+              ? `${liveLoad.reference ?? liveLoad.id.slice(0, 8)} · ${place(liveLoad.dest_city, liveLoad.dest_state)}`
+              : "No load booked"}
           </PanelTitle>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -338,11 +342,11 @@ function NavigationScreen() {
             </div>
             <div>
               <Label>Drive left</Label>
-              <Metric value={hm(hos.driveRemainingMin)} tone="go" />
+              <Metric value={hours ? hm(hours.driveRemainingMin) : "—"} tone="go" />
             </div>
             <div>
-              <Label>Break in</Label>
-              <Metric value={hm(hos.breakInMin)} tone="warn" />
+              <Label>On duty left</Label>
+              <Metric value={hours ? hm(hours.onDutyRemainingMin) : "—"} tone="warn" />
             </div>
           </div>
           {spoken ? (

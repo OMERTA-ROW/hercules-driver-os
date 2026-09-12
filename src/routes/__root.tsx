@@ -31,6 +31,7 @@ import { PickupBridge } from "@/components/hercules/PickupBridge";
 import { PickupStack } from "@/components/hercules/PickupStack";
 import { ComplianceProvider } from "@/lib/compliance";
 import { ComplianceBridge } from "@/components/hercules/ComplianceBridge";
+import { LiveVoiceBridge } from "@/components/hercules/LiveVoiceBridge";
 import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
 
 function NotFoundComponent() {
@@ -162,6 +163,7 @@ function RootComponent() {
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
             <TripVehiclePrompt />
+            <LiveVoiceBridge />
             <ArrivalBridge />
             <ComplianceBridge />
             <PickupBridge />

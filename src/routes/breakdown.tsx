@@ -40,7 +40,7 @@ import {
   type ProblemId,
   type Service,
 } from "@/data/breakdown";
-import { currentLoad } from "@/data/mock";
+import { useCurrentLoad, place } from "@/lib/live";
 import { useBolt } from "@/lib/bolt";
 import {
   getBreakdownProvider,
@@ -75,6 +75,7 @@ export const Route = createFileRoute("/breakdown")({
 });
 
 function BreakdownPage() {
+  const { load: liveLoad } = useCurrentLoad();
   const { say, announce } = useVoice();
   const boltFaults = useBolt().snapshot.faults;
   const { inbound, expectMechanic, setQuote, markArrived, dismiss, now } = useArrivals();
@@ -513,7 +514,8 @@ function BreakdownPage() {
             {!logged ? (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Logging the breakdown rebuilds the day — hours, ETA on {currentLoad.destination},
+                  Logging the breakdown rebuilds the day — hours, ETA on{" "}
+                  {liveLoad ? place(liveLoad.dest_city, liveLoad.dest_state) : "your current destination"},
                   load impact, parking, and rest. Nothing changes until you approve the plan.
                 </p>
                 <Button
