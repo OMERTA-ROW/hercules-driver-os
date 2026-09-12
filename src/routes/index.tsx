@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LiveOrb } from "@/components/hercules/Orb";
 import { DotMenu } from "@/components/hercules/DotMenu";
-import { Conversation } from "@/components/hercules/Conversation";
 import { useVoice } from "@/lib/voice";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
  * Every other surface in the app is reachable by voice or through that menu.
  */
 function OrbHome() {
-  const { mode, turns, voice, lastLine } = useVoice();
+  const { mode, voice, lastLine } = useVoice();
   const live = mode !== "idle";
 
   return (
@@ -56,13 +56,7 @@ function OrbHome() {
           </p>
         ) : null}
       </div>
-
-      {/* The conversation slides in only once there is one to show. */}
-      {turns.length > 0 ? (
-        <div className="pointer-events-auto relative z-10 mx-auto max-h-[38vh] w-full max-w-2xl overflow-y-auto px-6 pb-8">
-          <Conversation />
-        </div>
-      ) : null}
     </main>
+
   );
 }

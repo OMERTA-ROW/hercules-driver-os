@@ -1,21 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RotateCcw } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Orb } from "@/components/hercules/Orb";
-import { Conversation } from "@/components/hercules/Conversation";
 import { DriverApprovedNote } from "@/components/hercules/primitives";
 import { useVoice } from "@/lib/voice";
 
 export const Route = createFileRoute("/voice")({
   head: () => ({
     meta: [
-      { title: "Conversation — HERCULES" },
+      { title: "Talk — HERCULES" },
       {
         name: "description",
         content:
-          "A continuous conversation with HERCULES: ask, follow up, and have your clock, loads, money, and road read aloud. Nothing commits without your explicit yes.",
+          "Talk to HERCULES: ask, follow up, and have your clock, loads, money, and road read aloud. Nothing commits without your explicit yes.",
       },
-      { property: "og:title", content: "Conversation — HERCULES" },
+      { property: "og:title", content: "Talk — HERCULES" },
       {
         property: "og:description",
         content: "Talk to HERCULES like a partner — hands on the wheel, eyes on the road.",
@@ -26,17 +24,14 @@ export const Route = createFileRoute("/voice")({
 });
 
 function VoicePage() {
-  const { mode, colorway, listen, stop, clear, voice, turns } = useVoice();
+  const { mode, colorway, listen, stop, voice, lastLine } = useVoice();
 
   return (
-    <AppShell
-      title="Conversation"
-      subtitle={`Talking with ${voice.name} — ask, follow up, keep going`}
-    >
-      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="glass flex flex-col items-center justify-center gap-6 p-8">
+    <AppShell title="Talk" subtitle={`Talking with ${voice.name} — ask, follow up, keep going`}>
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
+        <div className="glass flex w-full flex-col items-center justify-center gap-6 p-8">
           <Orb
-            className="w-[min(52vw,300px)]"
+            className="w-[min(60vw,360px)]"
             mode={mode}
             colorway={colorway}
             onActivate={mode === "idle" ? listen : stop}
@@ -49,36 +44,16 @@ function VoicePage() {
                   ? `${voice.name} speaking`
                   : "Tap the orb or say “Hercules”"}
             </p>
-            <p className="mt-2 max-w-[34ch] text-sm font-light text-muted-foreground">
-              It holds the thread — ask a follow-up like “how much?” or “book it” and it knows what
-              you mean.
+            <p className="mt-3 max-w-[42ch] text-[0.98rem] font-light leading-relaxed text-muted-foreground">
+              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask me anything."}
             </p>
           </div>
         </div>
 
-        <div className="glass flex min-h-[52vh] flex-col p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="tech-label">Conversation</span>
-            {turns.length > 0 ? (
-              <button
-                type="button"
-                onClick={clear}
-                className="tech-label flex items-center gap-2 rounded-full hairline px-4 py-2"
-              >
-                <RotateCcw className="h-3.5 w-3.5" /> Start over
-              </button>
-            ) : null}
-          </div>
-          <div className="flex-1 overflow-y-auto pr-1">
-            <Conversation />
-          </div>
-          <div className="mt-4">
-            <DriverApprovedNote>
-              Voice can propose and read anything aloud, but booking, spending, or committing always
-              waits for your explicit yes.
-            </DriverApprovedNote>
-          </div>
-        </div>
+        <DriverApprovedNote>
+          Voice can propose and read anything aloud, but booking, spending, or committing always
+          waits for your explicit yes.
+        </DriverApprovedNote>
       </div>
     </AppShell>
   );
