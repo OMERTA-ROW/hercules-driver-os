@@ -51,6 +51,8 @@ export function AppShell({
   children: ReactNode;
 }) {
   const { account, can, trialDaysLeft } = useAuth();
+  const { data: vehicles } = useVehicles();
+  const rig = vehicles?.find((v) => v.active) ?? vehicles?.[0] ?? null;
 
   const items = nav.filter(
     (n) => !n.feature || !account || can(n.feature as Feature),
