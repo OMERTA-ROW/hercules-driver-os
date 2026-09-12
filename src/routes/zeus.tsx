@@ -50,6 +50,7 @@ function ZeusOnboarding() {
   const navigate = useNavigate();
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [trucks, setTrucks] = useState(3);
 
   const door = doorFor("zeusFleet");
