@@ -75,6 +75,7 @@ export const Route = createFileRoute("/breakdown")({
 });
 
 function BreakdownPage() {
+  const { load: liveLoad } = useCurrentLoad();
   const { say, announce } = useVoice();
   const boltFaults = useBolt().snapshot.faults;
   const { inbound, expectMechanic, setQuote, markArrived, dismiss, now } = useArrivals();

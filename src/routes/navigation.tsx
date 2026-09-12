@@ -70,6 +70,8 @@ export const Route = createFileRoute("/navigation")({
 });
 
 function NavigationScreen() {
+  const { hours } = useHours();
+  const { load: liveLoad } = useCurrentLoad();
   const [route, setRoute] = useState<TruckRoute>(primaryRoute);
   const [idx, setIdx] = useState(0); // index along the polyline (live GPS sim)
   const [position, setPosition] = useState<LatLng>(primaryRoute.polyline[0]!);
