@@ -28,7 +28,7 @@ import {
 } from "@/components/hercules/primitives";
 import { ChainMarker } from "@/components/hercules/ChainMarker";
 import { Button } from "@/components/ui/button";
-import { hos } from "@/data/mock";
+import { useHours } from "@/lib/live";
 import {
   BOOKING_FEE,
   amenityLabels,
@@ -70,10 +70,10 @@ export const Route = createFileRoute("/stops")({
 const distanceChoices = [50, 100, 200, 400] as const;
 const amenityFilters: Amenity[] = ["showers", "parking", "scales", "food"];
 
-/** Rough range left on the current clock, used for the proactive suggestion. */
-const rangeMiles = Math.round((hos.driveRemainingMin / 60) * 55);
-
 function StopsScreen() {
+  const { hours } = useHours();
+  /** Range left on the driver's own logged clock. No clock, no guess. */
+  const rangeMiles = hours ? Math.round((hours.driveRemainingMin / 60) * 55) : null;
   const { stops, accounts, accountFor, linkLoyalty, unlinkLoyalty, reservations, book, cancel, effectiveDiesel, provider } =
     useStops();
 

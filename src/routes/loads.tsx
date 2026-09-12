@@ -1,38 +1,28 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Clock,
-  ParkingSquare,
-  Moon,
-  CalendarX,
-  Check,
-  Building2,
-  Warehouse,
-  Info,
-  FileText,
-  Navigation2,
-} from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Package, Check, X, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { PlanGate } from "@/components/hercules/PlanGate";
 import {
   Panel,
-  Label,
+  PanelTitle,
   Pill,
+  Label,
+  Metric,
+  EmptyState,
   DriverApprovedNote,
-  money,
-  money2,
 } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { loads, type Facility, type Load } from "@/data/mock";
+  money,
+  place,
+  useAvailableLoads,
+  useMyLoads,
+  useRefreshLive,
+  type LoadRow,
+} from "@/lib/live";
 
 export const Route = createFileRoute("/loads")({
   head: () => ({
@@ -41,280 +31,188 @@ export const Route = createFileRoute("/loads")({
       {
         name: "description",
         content:
-          "Available loads with rate per mile, profit estimate, and full facility intelligence: hours, weekend closures, and safe parking — before you commit.",
+          "Real freight posted into the HERCULES network, with rate, miles, and windows. Nothing is booked until you approve it.",
       },
       { property: "og:title", content: "Load Board — HERCULES" },
       {
         property: "og:description",
-        content:
-          "Facility hours and parking intel on every load. Nothing books without your approval.",
+        content: "Rate, miles, and rate per mile on live postings — booked only on your word.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: LoadBoard,
+  component: Loads,
 });
 
-function FacilityCard({ facility, role }: { facility: Facility; role: "Shipper" | "Receiver" }) {
-  return (
-    <div className="rounded-lg border border-border bg-card/60 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <Label>{role}</Label>
-        {facility.hours24 ? (
-          <Pill tone="go">24-hour facility</Pill>
-        ) : (
-          <Pill tone="warn">
-            {facility.open}–{facility.close}
-          </Pill>
-        )}
-      </div>
-      <div className="mt-1 font-display text-base">{facility.name}</div>
-
-      <ul className="mt-2 space-y-1.5 text-sm">
-        <li className="flex items-start gap-2">
-          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-          <span>
-            {facility.hours24
-              ? "Open around the clock"
-              : `Open ${facility.open} – ${facility.close}`}{" "}
-            · {facility.appointment}
-          </span>
-        </li>
-        <li className="flex items-start gap-2">
-          <CalendarX className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-          <span>{facility.weekend}</span>
-        </li>
-        <li className="flex items-start gap-2">
-          <ParkingSquare
-            className={
-              "mt-0.5 h-4 w-4 shrink-0 " + (facility.onSiteParking ? "text-go" : "text-destructive")
-            }
-          />
-          <span>
-            {facility.onSiteParking ? "On-site truck parking" : "No on-site parking"} · nearest safe
-            parking: {facility.nearestSafeParking}
-            {facility.nearestSafeParkingMiles > 0
-              ? ` (${facility.nearestSafeParkingMiles} mi)`
-              : " (on property)"}
-          </span>
-        </li>
-        <li className="flex items-start gap-2">
-          <Moon
-            className={
-              "mt-0.5 h-4 w-4 shrink-0 " +
-              (facility.overnightAllowed ? "text-go" : "text-destructive")
-            }
-          />
-          <span>
-            {facility.overnightAllowed ? "Overnight allowed on site" : "No overnight on site"}
-          </span>
-        </li>
-        <li className="flex items-start gap-2">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-          <span className="text-muted-foreground">{facility.notes}</span>
-        </li>
-      </ul>
-    </div>
-  );
+function rpm(l: LoadRow) {
+  if (!l.rate_cents || !l.miles) return null;
+  return l.rate_cents / 100 / l.miles;
 }
 
-function LoadBoard() {
-  const [confirming, setConfirming] = useState<Load | null>(null);
-  const [booked, setBooked] = useState<string[]>([]);
-  const [expanded, setExpanded] = useState<string | null>(loads[0]!.id);
+function when(iso: string | null) {
+  return iso ? new Date(iso).toLocaleString() : "Window not posted";
+}
+
+function Loads() {
+  const { account, userId } = useAuth();
+  const available = useAvailableLoads();
+  const mine = useMyLoads();
+  const refresh = useRefreshLive();
+  const [pending, setPending] = useState<LoadRow | null>(null);
+
+  async function book(load: LoadRow) {
+    if (!userId) return;
+    const { error } = await supabase
+      .from("loads")
+      .update({ status: "booked", assigned_driver_id: userId })
+      .eq("id", load.id)
+      .eq("status", "available");
+    setPending(null);
+    if (error) {
+      toast.error("Could not book that load", { description: error.message });
+      return;
+    }
+    toast.success("Booked on your approval", {
+      description: `${place(load.origin_city, load.origin_state)} → ${place(load.dest_city, load.dest_state)}`,
+    });
+    refresh();
+  }
+
+  const rows = available.data ?? [];
 
   return (
     <AppShell
       title="Load Board"
-      subtitle="Facility intelligence on every load — hours, closures, and parking — before you commit"
+      subtitle={rows.length > 0 ? `${rows.length} posted on your lanes` : "No freight posted yet"}
     >
-      <PlanGate feature="loads">
-        <div className="space-y-3">
-          {loads.map((load) => {
-            const isOpen = expanded === load.id;
-            const isBooked = booked.includes(load.id);
-            return (
-              <Panel key={load.id}>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-display text-xl uppercase">
-                        {load.origin} → {load.destination}
-                      </span>
-                      <Pill
-                        tone={
-                          load.hosFit === "Fits your clock"
-                            ? "go"
-                            : load.hosFit === "Tight on your clock"
-                              ? "warn"
-                              : "alert"
-                        }
-                      >
-                        {load.hosFit}
-                      </Pill>
-                      {isBooked ? <Pill tone="primary">Booked by you</Pill> : null}
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {load.id} · {load.broker} · broker score {load.brokerScore} · {load.commodity}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div>
-                      <Label>Rate</Label>
-                      <div className="metric text-2xl font-bold">{money(load.rate)}</div>
-                    </div>
-                    <div>
-                      <Label>Miles</Label>
-                      <div className="metric text-2xl font-bold">
-                        {load.miles}
-                        <span className="ml-1 text-xs text-muted-foreground">
-                          +{load.deadhead} DH
-                        </span>
+      <div className="grid gap-4">
+        <Panel>
+          <PanelTitle right={<Pill tone="primary">Live postings</Pill>}>Available freight</PanelTitle>
+
+          {!account ? (
+            <EmptyState title="Sign in to see the board">
+              Freight is posted into your account by brokers and fleets on the network.
+            </EmptyState>
+          ) : available.isLoading ? (
+            <p className="text-sm text-muted-foreground">Reading the board…</p>
+          ) : rows.length === 0 ? (
+            <EmptyState title="No loads available">
+              Nothing is posted on the network right now. When a broker or your fleet posts freight,
+              it lands here and HERCULES reads the best ones aloud.
+            </EmptyState>
+          ) : (
+            <ul className="space-y-3">
+              {rows.map((l) => {
+                const perMile = rpm(l);
+                return (
+                  <li key={l.id} className="rounded-lg border border-border bg-card/50 p-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Pill tone="primary">
+                            <Package className="h-3.5 w-3.5" /> {l.reference ?? l.id.slice(0, 8)}
+                          </Pill>
+                          {l.broker_name ? <Pill tone="neutral">{l.broker_name}</Pill> : null}
+                          {l.equipment_type ? <Pill tone="info">{l.equipment_type}</Pill> : null}
+                        </div>
+                        <div className="mt-2 flex items-center gap-2 font-display text-base uppercase tracking-[0.08em]">
+                          <MapPin className="h-4 w-4 text-primary" />
+                          {place(l.origin_city, l.origin_state)} →{" "}
+                          {place(l.dest_city, l.dest_state)}
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {l.commodity ?? "Commodity not posted"}
+                          {l.weight_lb ? ` · ${l.weight_lb.toLocaleString()} lbs` : ""}
+                        </p>
+                        <Label className="mt-1">
+                          Pickup {when(l.pickup_at)} · Deliver {when(l.deliver_at)}
+                        </Label>
+                      </div>
+                      <div className="text-right">
+                        <Metric value={money(l.rate_cents)} tone="primary" />
+                        <Label>
+                          {l.miles ? `${l.miles.toLocaleString()} mi` : "Miles not posted"}
+                          {perMile ? ` · $${perMile.toFixed(2)}/mi` : ""}
+                        </Label>
+                        <Button
+                          size="lg"
+                          className="mt-2 w-full gap-2"
+                          onClick={() => setPending(l)}
+                        >
+                          <Check className="h-4 w-4" /> Review and book
+                        </Button>
                       </div>
                     </div>
-                    <div>
-                      <Label>Rate / mile</Label>
-                      <div className="metric text-2xl font-bold text-primary">
-                        {money2(load.rpm)}
+
+                    {pending?.id === l.id ? (
+                      <div className="mt-3 rounded-lg border border-primary/40 bg-primary/10 p-3">
+                        <div className="font-display text-sm uppercase tracking-[0.12em] text-primary">
+                          Book this load?
+                        </div>
+                        <p className="mt-1 text-sm">
+                          {place(l.origin_city, l.origin_state)} →{" "}
+                          {place(l.dest_city, l.dest_state)} for {money(l.rate_cents)}. Nothing is
+                          committed until you say yes.
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button size="lg" className="gap-2" onClick={() => void book(l)}>
+                            <Check className="h-4 w-4" /> Yes — book it
+                          </Button>
+                          <Button
+                            size="lg"
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => setPending(null)}
+                          >
+                            <X className="h-4 w-4" /> No
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <Label>Est. profit</Label>
-                      <div className="metric text-2xl font-bold text-go">
-                        {money(load.estProfit)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        after {money(load.estFuel)} fuel · {money(load.estTolls)} tolls
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <div className="mt-3">
+            <DriverApprovedNote />
+          </div>
+        </Panel>
 
-                <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    Pickup window: <span className="font-semibold">{load.pickupWindow}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Warehouse className="h-4 w-4 text-muted-foreground" />
-                    Delivery window: <span className="font-semibold">{load.deliveryWindow}</span>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => setExpanded(isOpen ? null : load.id)}
-                  >
-                    {isOpen ? "Hide" : "Show"} facility intelligence
-                  </Button>
-                  <Button variant="outline" size="lg" className="gap-2" asChild>
-                    <Link
-                      to="/documents"
-                      search={{ load: load.id, type: "bol", capture: false }}
-                    >
-                      <FileText className="h-5 w-5" />
-                      Documents
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" className="gap-2" asChild>
-                    <Link to="/navigation">
-                      <Navigation2 className="h-5 w-5" />
-                      Preview truck-legal route
-                    </Link>
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    className="gap-2 font-display uppercase tracking-wider"
-                    disabled={isBooked}
-                    onClick={() => setConfirming(load)}
-                  >
-                    <Check className="h-5 w-5" />
-                    {isBooked ? "Approved" : "Approve & Book"}
-                  </Button>
-                </div>
-
-                {isOpen ? (
-                  <div className="mt-3 grid gap-2 lg:grid-cols-2">
-                    <FacilityCard facility={load.shipper} role="Shipper" />
-                    <FacilityCard facility={load.receiver} role="Receiver" />
-                  </div>
-                ) : null}
-              </Panel>
-            );
-          })}
-        </div>
-
-        <Dialog open={!!confirming} onOpenChange={(o) => !o && setConfirming(null)}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-2xl uppercase">Confirm before booking</DialogTitle>
-              <DialogDescription>
-                HERCULES does not book anything on its own. Review and approve.
-              </DialogDescription>
-            </DialogHeader>
-            {confirming ? (
-              <div className="space-y-2 text-sm">
-                <div className="rounded-lg border border-border bg-card/70 p-3">
-                  <div className="font-display text-lg">
-                    {confirming.origin} → {confirming.destination}
-                  </div>
-                  <p className="text-muted-foreground">
-                    {confirming.broker} · {confirming.id}
-                  </p>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
+        <Panel>
+          <PanelTitle>Your loads</PanelTitle>
+          {!account ? (
+            <EmptyState title="Sign in to see your runs" />
+          ) : (mine.data ?? []).length === 0 ? (
+            <EmptyState title="Nothing booked">
+              Loads you book show here with their status through pickup, transit, and delivery.
+            </EmptyState>
+          ) : (
+            <ul className="space-y-2">
+              {(mine.data ?? []).map((l) => (
+                <li
+                  key={l.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card/50 p-3"
+                >
                   <div>
-                    <Label>Rate</Label>
-                    <div className="metric font-bold">{money(confirming.rate)}</div>
+                    <div className="font-display text-sm uppercase tracking-[0.1em]">
+                      {place(l.origin_city, l.origin_state)} →{" "}
+                      {place(l.dest_city, l.dest_state)}
+                    </div>
+                    <Label>
+                      {l.reference ?? l.id.slice(0, 8)} · {money(l.rate_cents)}
+                    </Label>
                   </div>
-                  <div>
-                    <Label>Rate / mile</Label>
-                    <div className="metric font-bold text-primary">{money2(confirming.rpm)}</div>
-                  </div>
-                  <div>
-                    <Label>Est. profit</Label>
-                    <div className="metric font-bold text-go">{money(confirming.estProfit)}</div>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">
-                  Receiver:{" "}
-                  {confirming.receiver.hours24
-                    ? "24-hour facility"
-                    : `open ${confirming.receiver.open}–${confirming.receiver.close}`}
-                  .{" "}
-                  {confirming.receiver.overnightAllowed
-                    ? "Overnight allowed."
-                    : "No overnight on site."}{" "}
-                  Nearest safe parking {confirming.receiver.nearestSafeParking}.
-                </p>
-                <DriverApprovedNote />
-              </div>
-            ) : null}
-            <DialogFooter className="gap-2">
-              <Button variant="ghost" size="lg" onClick={() => setConfirming(null)}>
-                Cancel
-              </Button>
-              <Button
-                size="lg"
-                className="gap-2"
-                onClick={() => {
-                  if (confirming) {
-                    setBooked((b) => [...b, confirming.id]);
-                    toast.success(`${confirming.id} booked on your approval`, {
-                      description: "Added to your plan. You can release it any time.",
-                    });
-                  }
-                  setConfirming(null);
-                }}
-              >
-                <Check className="h-5 w-5" /> Yes, book it
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </PlanGate>
+                  <Pill tone={l.status === "delivered" ? "go" : "primary"}>
+                    {l.status.replace(/_/g, " ")}
+                  </Pill>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </div>
     </AppShell>
   );
 }

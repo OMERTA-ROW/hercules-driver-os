@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
-import { driver } from "@/data/mock";
+import { useVehicles } from "@/lib/live";
 import { Pill } from "./primitives";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/lib/auth";
@@ -51,6 +51,8 @@ export function AppShell({
   children: ReactNode;
 }) {
   const { account, can, trialDaysLeft } = useAuth();
+  const { data: vehicles } = useVehicles();
+  const rig = vehicles?.find((v) => v.active) ?? vehicles?.[0] ?? null;
 
   const items = nav.filter(
     (n) => !n.feature || !account || can(n.feature as Feature),
@@ -108,10 +110,12 @@ export function AppShell({
                 <ThemeToggle size="sm" />
                 <div className="hidden text-right sm:block">
                   <div className="font-display text-sm uppercase tracking-[0.12em]">
-                    {account?.name ?? driver.name}
+                    {account?.name ?? "Not signed in"}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {driver.unit} · {driver.callsign}
+                    {rig
+                      ? [rig.unit_number, rig.label].filter(Boolean).join(" · ")
+                      : "No vehicle on file"}
                   </div>
                 </div>
                 {account ? (

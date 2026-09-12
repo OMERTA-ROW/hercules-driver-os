@@ -1,25 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Fuel, Receipt, Timer, Map } from "lucide-react";
+import { DollarSign, Fuel, Receipt } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
-import { PlanGate } from "@/components/hercules/PlanGate";
 import {
   Panel,
   PanelTitle,
+  Pill,
   Label,
   Metric,
-  Pill,
-  money,
-  money2,
+  EmptyState,
+  DriverApprovedNote,
 } from "@/components/hercules/primitives";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { settlements, loadPnL, fuelStops, iftaByState, detention, weeklySeries } from "@/data/mock";
+import { useAuth } from "@/lib/auth";
+import { money, useMileage, useMoneyEntries, useMoneySummary } from "@/lib/live";
 
 export const Route = createFileRoute("/financials")({
   head: () => ({
@@ -28,254 +20,142 @@ export const Route = createFileRoute("/financials")({
       {
         name: "description",
         content:
-          "Profit and loss per load and per mile, settlements, fuel and IFTA tracking, detention time, and running weekly and monthly totals.",
+          "Revenue, fuel, and net from your own logged entries. No estimates, no sample settlements — only what you have recorded.",
       },
       { property: "og:title", content: "Financials — HERCULES" },
       {
         property: "og:description",
-        content: "The back office an owner-operator never had: P&L, settlements, IFTA, detention.",
+        content: "Your money, computed from your own rows.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Financials,
 });
 
 function Financials() {
-  const weekRevenue = weeklySeries.reduce((a, d) => a + d.revenue, 0);
-  const weekCost = weeklySeries.reduce((a, d) => a + d.cost, 0);
-  const weekMiles = loadPnL.reduce((a, l) => a + l.miles, 0);
-  const weekProfit = weekRevenue - weekCost;
-  const maxBar = Math.max(...weeklySeries.map((d) => d.revenue)) || 1;
+  const { account } = useAuth();
+  const entries = useMoneyEntries();
+  const summary = useMoneySummary();
+  const miles = useMileage();
+  const rows = entries.data ?? [];
+
+  const monthMiles = miles.month;
+  const perMile =
+    monthMiles > 0 && summary.month.revenue > 0 ? summary.month.revenue / 100 / monthMiles : null;
 
   return (
-    <AppShell title="Financials" subtitle="Week of Sep 1 · running totals update as you roll">
-      <PlanGate feature="financials">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <AppShell title="Financials" subtitle="Computed from your own entries only">
+      <div className="grid gap-4">
+        {!account ? (
           <Panel>
-            <Label>Revenue this week</Label>
-            <Metric value={money(weekRevenue)} tone="primary" />
-            <p className="mt-1 text-xs text-muted-foreground">Month to date {money(24680)}</p>
+            <EmptyState title="Sign in to see your money">
+              Settlements, fuel, and net are read from your own records.
+            </EmptyState>
           </Panel>
+        ) : !summary.hasData ? (
           <Panel>
-            <Label>Net profit this week</Label>
-            <Metric value={money(weekProfit)} tone="go" />
-            <p className="mt-1 text-xs text-muted-foreground">Month to date {money(16240)}</p>
+            <PanelTitle right={<Pill tone="primary">Nothing logged</Pill>}>Last 30 days</PanelTitle>
+            <EmptyState title="No financial entries yet">
+              Log a settlement, a fuel purchase, or a lumper and HERCULES will keep the running
+              revenue, cost, and profit per mile from there. It will not estimate on your behalf.
+            </EmptyState>
           </Panel>
-          <Panel>
-            <Label>Profit per mile</Label>
-            <Metric value={money2(weekProfit / weekMiles)} unit="/mi" tone="go" />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {weekMiles.toLocaleString()} paid miles
-            </p>
-          </Panel>
-          <Panel>
-            <Label>Cost per mile</Label>
-            <Metric value={money2(weekCost / weekMiles)} unit="/mi" tone="warn" />
-            <p className="mt-1 text-xs text-muted-foreground">Fuel, tolls, lumpers, fixed</p>
-          </Panel>
-        </div>
-
-        <div className="mt-3 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
-          <Panel>
-            <PanelTitle right={<Pill tone="primary">Per load</Pill>}>Profit & Loss</PanelTitle>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Load</TableHead>
-                    <TableHead>Lane</TableHead>
-                    <TableHead className="text-right">Miles</TableHead>
-                    <TableHead className="text-right">Revenue</TableHead>
-                    <TableHead className="text-right">Fuel</TableHead>
-                    <TableHead className="text-right">Tolls</TableHead>
-                    <TableHead className="text-right">Other</TableHead>
-                    <TableHead className="text-right">Profit</TableHead>
-                    <TableHead className="text-right">$ / mi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loadPnL.map((l) => (
-                    <TableRow key={l.id}>
-                      <TableCell className="metric">{l.id}</TableCell>
-                      <TableCell>{l.lane}</TableCell>
-                      <TableCell className="metric text-right">{l.miles}</TableCell>
-                      <TableCell className="metric text-right">{money(l.revenue)}</TableCell>
-                      <TableCell className="metric text-right">{money(l.fuel)}</TableCell>
-                      <TableCell className="metric text-right">{money(l.tolls)}</TableCell>
-                      <TableCell className="metric text-right">{money(l.other)}</TableCell>
-                      <TableCell className="metric text-right font-bold text-go">
-                        {money(l.profit)}
-                      </TableCell>
-                      <TableCell className="metric text-right text-primary">
-                        {money2(l.profit / l.miles)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Panel>
+                <Label>Revenue · 30 days</Label>
+                <Metric value={money(summary.month.revenue)} tone="go" />
+              </Panel>
+              <Panel>
+                <Label>Cost · 30 days</Label>
+                <Metric value={money(summary.month.cost)} tone="warn" />
+              </Panel>
+              <Panel>
+                <Label>Net · 30 days</Label>
+                <Metric value={money(summary.month.net)} tone="primary" />
+              </Panel>
             </div>
-          </Panel>
 
-          <Panel>
-            <PanelTitle right={<Pill tone="info">7 days</Pill>}>Weekly Revenue</PanelTitle>
-            <div className="flex h-52 items-end gap-2">
-              {weeklySeries.map((d) => (
-                <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-                  <div className="flex h-full w-full items-end gap-0.5">
-                    <div
-                      className="w-full rounded-t bg-primary"
-                      style={{ height: `${(d.revenue / maxBar) * 100}%` }}
-                    />
-                    <div
-                      className="w-2/5 rounded-t bg-warn/70"
-                      style={{ height: `${(d.cost / maxBar) * 100}%` }}
-                    />
-                  </div>
-                  <span className="label-cap">{d.day}</span>
-                </div>
-              ))}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Panel>
+                <Label>Miles this month</Label>
+                <Metric
+                  value={monthMiles > 0 ? monthMiles.toLocaleString() : "—"}
+                  unit="mi"
+                />
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {miles.hasData
+                    ? "From your logged trips."
+                    : "No trips logged yet — miles stay blank rather than guessed."}
+                </p>
+              </Panel>
+              <Panel>
+                <Label>Revenue per mile</Label>
+                <Metric
+                  value={perMile ? `$${perMile.toFixed(2)}` : "—"}
+                  tone="primary"
+                />
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {perMile
+                    ? "Revenue divided by your own logged miles."
+                    : "Needs both revenue and logged miles."}
+                </p>
+              </Panel>
             </div>
-            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-3 rounded bg-primary" /> Revenue
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-3 rounded bg-warn/70" /> Cost
-              </span>
-            </div>
-          </Panel>
-        </div>
 
-        <div className="mt-3 grid gap-3 lg:grid-cols-3">
-          <Panel>
-            <PanelTitle
-              right={
-                <Pill tone="neutral">
-                  <Receipt className="h-3.5 w-3.5" /> 3 recent
-                </Pill>
-              }
-            >
-              Settlements
-            </PanelTitle>
-            <div className="space-y-2">
-              {settlements.map((s) => (
-                <div key={s.id} className="rounded-lg border border-border bg-card/60 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-display">{s.period}</span>
-                    <Pill tone={s.status === "Paid" ? "go" : "watch"}>{s.status}</Pill>
-                  </div>
-                  <div className="mt-1 grid grid-cols-3 text-sm">
-                    <div>
-                      <Label>Gross</Label>
-                      <span className="metric">{money(s.gross)}</span>
+            <Panel>
+              <PanelTitle right={<Pill tone="neutral">{rows.length} entries</Pill>}>
+                Entries
+              </PanelTitle>
+              <ul className="space-y-2">
+                {rows.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card/50 p-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 font-display text-sm uppercase tracking-[0.1em]">
+                        {r.category === "fuel" ? (
+                          <Fuel className="h-4 w-4 text-primary" />
+                        ) : r.amount_cents > 0 ? (
+                          <DollarSign className="h-4 w-4 text-go" />
+                        ) : (
+                          <Receipt className="h-4 w-4 text-warn" />
+                        )}
+                        {r.category}
+                      </div>
+                      <Label>
+                        {new Date(r.entry_date).toLocaleDateString()}
+                        {r.description ? ` · ${r.description}` : ""}
+                        {r.gallons ? ` · ${r.gallons} gal` : ""}
+                      </Label>
                     </div>
-                    <div>
-                      <Label>Deductions</Label>
-                      <span className="metric text-warn">-{money(s.deductions)}</span>
-                    </div>
-                    <div>
-                      <Label>Net</Label>
-                      <span className="metric font-bold text-go">{money(s.net)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel>
-            <PanelTitle
-              right={
-                <Pill tone="primary">
-                  <Fuel className="h-3.5 w-3.5" /> {money2(3.58)} avg
-                </Pill>
-              }
-            >
-              Fuel & IFTA
-            </PanelTitle>
-            <div className="space-y-1.5">
-              {fuelStops.map((f) => (
-                <div
-                  key={f.station}
-                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-card/60 px-3 py-2 text-sm"
-                >
-                  <span className="min-w-0 truncate">{f.station}</span>
-                  <span className="metric shrink-0">
-                    {f.gallons} gal · {money2(f.total)}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3">
-              <Label className="mb-1">IFTA by state (quarter)</Label>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>State</TableHead>
-                    <TableHead className="text-right">Miles</TableHead>
-                    <TableHead className="text-right">Gallons</TableHead>
-                    <TableHead className="text-right">Net</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {iftaByState.map((s) => (
-                    <TableRow key={s.state}>
-                      <TableCell className="metric flex items-center gap-1.5">
-                        <Map className="h-3.5 w-3.5 text-muted-foreground" />
-                        {s.state}
-                      </TableCell>
-                      <TableCell className="metric text-right">{s.miles}</TableCell>
-                      <TableCell className="metric text-right">{s.gallons}</TableCell>
-                      <TableCell
-                        className={"metric text-right " + (s.net < 0 ? "text-go" : "text-warn")}
-                      >
-                        {money2(s.net)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </Panel>
-
-          <Panel>
-            <PanelTitle
-              right={
-                <Pill tone="watch">
-                  <Timer className="h-3.5 w-3.5" /> {money(124)} billed
-                </Pill>
-              }
-            >
-              Detention Tracking
-            </PanelTitle>
-            <div className="space-y-2">
-              {detention.map((d) => (
-                <div key={d.load} className="rounded-lg border border-border bg-card/60 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-display">{d.facility}</span>
-                    <Pill
-                      tone={
-                        d.status === "Paid" ? "go" : d.status === "Invoiced" ? "info" : "neutral"
+                    <span
+                      className={
+                        r.amount_cents >= 0
+                          ? "metric font-bold text-go"
+                          : "metric font-bold text-warn"
                       }
                     >
-                      {d.status}
-                    </Pill>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {d.load} · waited {d.waited} · billable {d.billable}
-                  </p>
-                  <div className="metric mt-1 text-lg font-bold text-primary">
-                    {money(d.amount)}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              HERCULES starts a timer when you arrive and asks before it bills anything.
-            </p>
-          </Panel>
-        </div>
-      </PlanGate>
+                      {money(Math.abs(r.amount_cents))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </>
+        )}
+
+        <Panel>
+          <DriverApprovedNote>
+            HERCULES only reports what you have recorded. It never invoices, factors, or pays
+            anything without your explicit approval.
+          </DriverApprovedNote>
+        </Panel>
+      </div>
     </AppShell>
   );
 }

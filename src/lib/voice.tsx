@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { currentLoad, hos, loads, alerts, loadPnL } from "@/data/mock";
+import type { AlertRow, Hours, LoadRow } from "@/lib/live";
 import { hazards } from "@/data/hazards";
 import { rulesFor, specFor, type VehicleSpec } from "@/data/vehicles";
 import { activeAdapter, activeFaults, activePredictions } from "@/lib/bolt";
@@ -48,6 +48,39 @@ import {
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
 import { speakLine } from "@/lib/speech.functions";
 import { attachAudioLevel, setVoiceLevel, startSynthLevel } from "@/lib/voice-level";
+
+/**
+ * LIVE SNAPSHOT
+ * The voice brain answers from the driver's own rows. When a table is empty
+ * HERCULES says so out loud instead of reading numbers it does not have.
+ */
+export type VoiceSnapshot = {
+  hours: Hours | null;
+  currentLoad: LoadRow | null;
+  loads: LoadRow[];
+  alerts: AlertRow[];
+};
+
+let live: VoiceSnapshot = { hours: null, currentLoad: null, loads: [], alerts: [] };
+
+export function setVoiceSnapshot(next: VoiceSnapshot) {
+  live = next;
+}
+
+function lane(l: LoadRow) {
+  const from = [l.origin_city, l.origin_state].filter(Boolean).join(", ") || "your origin";
+  const to = [l.dest_city, l.dest_state].filter(Boolean).join(", ") || "your destination";
+  return `${from} to ${to}`;
+}
+
+function rateLine(l: LoadRow) {
+  if (!l.rate_cents) return "no rate posted";
+  const dollars = Math.round(l.rate_cents / 100);
+  if (!l.miles) return `$${dollars.toLocaleString()} total`;
+  return `${l.miles.toLocaleString()} miles, $${dollars.toLocaleString()} total, $${(
+    dollars / l.miles
+  ).toFixed(2)} a mile`;
+}
 
 
 /**
@@ -312,20 +345,35 @@ function followUp(topic: Topic, text: string): Reply | null {
 
 
   if (topic === "loads" && (wantsMore || wantsNext)) {
-    const l = loads[wantsNext ? 1 : 0]!;
+    const l = live.loads[wantsNext ? 1 : 0];
+    if (!l) {
+      return {
+        topic: "loads",
+        text: "That's everything posted on the board right now. I won't make one up — the moment new freight lands I'll read it to you.",
+      };
+    }
     return {
       topic: "loads",
-      text: `${l.origin} to ${l.destination}, ${l.miles} miles at $${l.rpm.toFixed(2)} a mile, $${l.rate.toLocaleString()} total. Pickup window ${l.pickupWindow}. ${l.shipper.name} — ${l.shipper.hours24 ? "24-hour facility" : `open ${l.shipper.open} to ${l.shipper.close}`}, ${l.shipper.overnightAllowed ? "overnight parking allowed on site" : `nearest safe parking ${l.shipper.nearestSafeParkingMiles} miles out`}. Say "book it" and I'll read the whole thing back before anything is committed.`,
+      text: `${lane(l)}, ${rateLine(l)}.${
+        l.pickup_at ? ` Pickup ${new Date(l.pickup_at).toLocaleString()}.` : ""
+      } Say "book it" and I'll read the whole thing back before anything is committed.`,
     };
   }
   if (topic === "loads" && /(book|take|grab) ?(it|that)?/.test(t)) {
-    const l = loads[0]!;
+    const l = live.loads[0];
+    if (!l) {
+      return {
+        topic: "loads",
+        text: "There's nothing on the board to book right now.",
+      };
+    }
+    const dollars = l.rate_cents ? Math.round(l.rate_cents / 100) : 0;
     return {
       topic: "loads",
-      text: `Here's exactly what I'd commit to: ${l.origin} to ${l.destination}, ${l.miles} miles, $${l.rate.toLocaleString()} at $${l.rpm.toFixed(2)} a mile, pickup ${l.pickupWindow}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
+      text: `Here's exactly what I'd commit to: ${lane(l)}, ${rateLine(l)}. I have not booked it. Say yes to approve, or no and I'll drop it.`,
       proposal: {
-        summary: `Book load ${l.id}: ${l.origin} → ${l.destination}, $${l.rate.toLocaleString()}`,
-        total: `$${l.rate.toLocaleString()} revenue`,
+        summary: `Book load ${l.reference ?? l.id.slice(0, 8)}: ${lane(l)}, $${dollars.toLocaleString()}`,
+        total: `$${dollars.toLocaleString()} revenue`,
       },
     };
   }
@@ -417,7 +465,11 @@ function followUp(topic: Topic, text: string): Reply | null {
   if (topic === "clock" && wantsMore) {
     return {
       topic: "clock",
-      text: `On duty ${hm(hos.onDutyRemainingMin)} remaining, and your 30-minute break is due in ${hm(hos.breakInMin)}. Your own pattern says you start fading before the clock does — I'd plan the break early. Your call.`,
+      text: live.hours
+        ? `On duty ${hm(live.hours.onDutyRemainingMin)} remaining, and ${live.hours.cycleRemainingHrs.toFixed(
+            1,
+          )} hours left on your cycle. That's off your own logged time, nothing assumed.`
+        : "You haven't logged any driving yet, so I don't have a clock to read. Start a trip and I'll track it from there.",
     };
   }
   return null;
@@ -488,29 +540,44 @@ export function respond(text: string, topic: Topic): Reply {
 
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
-
       topic: "clock",
-      text: `You have ${hm(hos.driveRemainingMin)} of drive time left and ${hm(hos.breakInMin)} until your break is due. ${currentLoad.milesRemaining} miles to ${currentLoad.destination}, ETA ${currentLoad.etaLocal} — that leaves you slack in the window.`,
+      text: live.hours
+        ? `You have ${hm(live.hours.driveRemainingMin)} of drive time left and ${hm(
+            live.hours.onDutyRemainingMin,
+          )} on duty. ${live.hours.cycleRemainingHrs.toFixed(1)} hours left on the cycle.`
+        : "I don't have a clock for you yet — no trips logged. Start a trip and I'll keep your drive, on-duty, and cycle time from your own records.",
     };
   }
   if (/(load|freight|board|rate|haul|book)/.test(t)) {
-    const l = loads[0]!;
+    const l = live.loads[0];
     return {
       topic: "loads",
-      text: `Best on the board is ${l.origin} to ${l.destination} — ${l.miles} miles at $${l.rpm.toFixed(2)} a mile. ${l.shipper.name} is ${l.shipper.hours24 ? "a 24-hour facility" : "on set hours"}, ${l.shipper.appointment.toLowerCase()}. Want the details, or should I read back a booking for your approval?`,
+      text: l
+        ? `Best on the board is ${lane(l)} — ${rateLine(l)}. Want the details, or should I read back a booking for your approval?`
+        : "Nothing is posted on the board right now. I'll read new freight to you the moment it lands — I won't invent a load.",
     };
   }
   if (/(money|profit|margin|per mile|settlement|pay|fuel cost|revenue)/.test(t)) {
-    const p = loadPnL[0]!;
+    const l = live.currentLoad;
     return {
       topic: "money",
-      text: `Current run is netting $${p.profit.toLocaleString()} — that's $${(p.profit / p.miles).toFixed(2)} a mile after fuel, tolls, and fixed cost. Above your 30-day average. Ask me for the breakdown and I'll read the line items.`,
+      text:
+        l && l.rate_cents && l.miles
+          ? `This run pays $${Math.round(l.rate_cents / 100).toLocaleString()} over ${l.miles.toLocaleString()} miles — $${(
+              l.rate_cents /
+              100 /
+              l.miles
+            ).toFixed(2)} a mile in revenue. Log your fuel and costs and I'll give you the net.`
+          : "I don't have money to report yet. Log a settlement or a fuel purchase and I'll keep the running revenue, cost, and profit per mile.",
     };
   }
   if (/(turn|route|navigat|reroute|eta|miles|where am i)/.test(t)) {
+    const l = live.currentLoad;
     return {
       topic: "route",
-      text: `${currentLoad.milesRemaining} miles to ${currentLoad.destination}, ETA ${currentLoad.etaLocal}. The whole route is truck-legal for your height, weight, and length. If a scale or a backup shows up I'll offer a legal way around it — I won't change your route on my own.`,
+      text: l
+        ? `You're running ${lane(l)}${l.miles ? `, ${l.miles.toLocaleString()} miles` : ""}. The route is checked against your height, weight, and length. If a scale or a backup shows up I'll offer a legal way around it — I won't change your route on my own.`
+        : "No load is booked, so there's no route to read. Book freight and I'll build a truck-legal route for your equipment.",
     };
   }
   if (/(hazard|bridge|clearance|grade|switchback|ramp|scale|crossing|steep)/.test(t)) {
@@ -570,10 +637,12 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {
-    const a = alerts[0]!;
+    const a = live.alerts.find((x) => !x.acknowledged_at);
     return {
       topic: "alerts",
-      text: `${a.kind} ${a.milesAhead} miles ahead at ${a.location}. ${a.note} ${a.confirmations} drivers confirmed it. Plenty of time to be squared away before you get there.`,
+      text: a
+        ? `${a.kind}: ${a.title}. ${a.body ?? ""} Raised ${new Date(a.created_at).toLocaleTimeString()}.`
+        : "Nothing is flagged on your account right now. If a checkpoint or hazard comes in on your lane I'll say it out loud.",
     };
   }
   if (/(hello|hey|hi|you there|hercules)$/.test(t) || t.length < 4) {
