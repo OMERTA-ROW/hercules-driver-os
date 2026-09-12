@@ -120,21 +120,34 @@ function ZeusOnboarding() {
                 className="mt-3 space-y-3"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!company || !email) {
-                    toast.error("Enter your carrier name and an email");
+                  if (!company || !email || !password) {
+                    toast.error("Enter your carrier name, email, and a password");
                     return;
                   }
-                  signUp({
-                    name: company,
-                    email,
-                    plan: "fleet",
-                    seats: Math.max(3, trucks),
-                    kind: "zeusFleet",
-                    companyName: company,
-                  });
-                  toast.success("Fleet onboarded on ZEUS", {
-                    description: "Your company code is ready to hand to your drivers.",
-                  });
+                  void (async () => {
+                    const { error, needsConfirmation } = await signUp({
+                      name: company,
+                      email,
+                      password,
+                      plan: "fleet",
+                      seats: Math.max(3, trucks),
+                      kind: "zeusFleet",
+                      companyName: company,
+                    });
+                    if (error) {
+                      toast.error("Could not onboard the fleet", { description: error });
+                      return;
+                    }
+                    if (needsConfirmation) {
+                      toast.success("Check your email to confirm", {
+                        description: "Confirm the link we sent, then sign in on the ZEUS door.",
+                      });
+                      return;
+                    }
+                    toast.success("Fleet onboarded on ZEUS", {
+                      description: "Your company code is ready to hand to your drivers.",
+                    });
+                  })();
                 }}
               >
                 <div>
