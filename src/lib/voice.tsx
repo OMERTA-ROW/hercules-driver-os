@@ -540,29 +540,44 @@ export function respond(text: string, topic: Topic): Reply {
 
   if (/(clock|hours|hos|drive time|break|log)/.test(t)) {
     return {
-
       topic: "clock",
-      text: `You have ${hm(hos.driveRemainingMin)} of drive time left and ${hm(hos.breakInMin)} until your break is due. ${currentLoad.milesRemaining} miles to ${currentLoad.destination}, ETA ${currentLoad.etaLocal} — that leaves you slack in the window.`,
+      text: live.hours
+        ? `You have ${hm(live.hours.driveRemainingMin)} of drive time left and ${hm(
+            live.hours.onDutyRemainingMin,
+          )} on duty. ${live.hours.cycleRemainingHrs.toFixed(1)} hours left on the cycle.`
+        : "I don't have a clock for you yet — no trips logged. Start a trip and I'll keep your drive, on-duty, and cycle time from your own records.",
     };
   }
   if (/(load|freight|board|rate|haul|book)/.test(t)) {
-    const l = loads[0]!;
+    const l = live.loads[0];
     return {
       topic: "loads",
-      text: `Best on the board is ${l.origin} to ${l.destination} — ${l.miles} miles at $${l.rpm.toFixed(2)} a mile. ${l.shipper.name} is ${l.shipper.hours24 ? "a 24-hour facility" : "on set hours"}, ${l.shipper.appointment.toLowerCase()}. Want the details, or should I read back a booking for your approval?`,
+      text: l
+        ? `Best on the board is ${lane(l)} — ${rateLine(l)}. Want the details, or should I read back a booking for your approval?`
+        : "Nothing is posted on the board right now. I'll read new freight to you the moment it lands — I won't invent a load.",
     };
   }
   if (/(money|profit|margin|per mile|settlement|pay|fuel cost|revenue)/.test(t)) {
-    const p = loadPnL[0]!;
+    const l = live.currentLoad;
     return {
       topic: "money",
-      text: `Current run is netting $${p.profit.toLocaleString()} — that's $${(p.profit / p.miles).toFixed(2)} a mile after fuel, tolls, and fixed cost. Above your 30-day average. Ask me for the breakdown and I'll read the line items.`,
+      text:
+        l && l.rate_cents && l.miles
+          ? `This run pays $${Math.round(l.rate_cents / 100).toLocaleString()} over ${l.miles.toLocaleString()} miles — $${(
+              l.rate_cents /
+              100 /
+              l.miles
+            ).toFixed(2)} a mile in revenue. Log your fuel and costs and I'll give you the net.`
+          : "I don't have money to report yet. Log a settlement or a fuel purchase and I'll keep the running revenue, cost, and profit per mile.",
     };
   }
   if (/(turn|route|navigat|reroute|eta|miles|where am i)/.test(t)) {
+    const l = live.currentLoad;
     return {
       topic: "route",
-      text: `${currentLoad.milesRemaining} miles to ${currentLoad.destination}, ETA ${currentLoad.etaLocal}. The whole route is truck-legal for your height, weight, and length. If a scale or a backup shows up I'll offer a legal way around it — I won't change your route on my own.`,
+      text: l
+        ? `You're running ${lane(l)}${l.miles ? `, ${l.miles.toLocaleString()} miles` : ""}. The route is checked against your height, weight, and length. If a scale or a backup shows up I'll offer a legal way around it — I won't change your route on my own.`
+        : "No load is booked, so there's no route to read. Book freight and I'll build a truck-legal route for your equipment.",
     };
   }
   if (/(hazard|bridge|clearance|grade|switchback|ramp|scale|crossing|steep)/.test(t)) {
