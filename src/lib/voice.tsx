@@ -47,7 +47,13 @@ import {
 } from "@/lib/breakdown";
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
 import { speakLine } from "@/lib/speech.functions";
-import { attachAudioLevel, setVoiceLevel, startSynthLevel } from "@/lib/voice-level";
+import {
+  attachAudioLevel,
+  attachMicLevel,
+  setVoiceLevel,
+  startSynthLevel,
+} from "@/lib/voice-level";
+
 
 /**
  * LIVE SNAPSHOT
@@ -931,12 +937,21 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => killAudio, [killAudio]);
 
-  /* While the driver holds the floor there's no audio stream to meter yet, so
-     the surface rides a wandering envelope of the same shape. */
+  /* While the driver holds the floor the surface rides their real microphone
+     level. If the mic is unavailable it falls back to a wandering envelope of
+     the same shape so the liquid still moves. */
   useEffect(() => {
     if (mode !== "listening") return;
-    return startSynthLevel(0.5);
+    let fallback: (() => void) | null = null;
+    const detach = attachMicLevel(() => {
+      fallback = startSynthLevel(0.5);
+    });
+    return () => {
+      detach();
+      fallback?.();
+    };
   }, [mode]);
+
 
   useEffect(() => {
     if (mode === "idle") setVoiceLevel(0);
