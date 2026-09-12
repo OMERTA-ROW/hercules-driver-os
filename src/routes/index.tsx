@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LiveOrb } from "@/components/hercules/Orb";
 import { DotMenu } from "@/components/hercules/DotMenu";
 import { useVoice } from "@/lib/voice";
-import { useVoice } from "@/lib/voice";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
