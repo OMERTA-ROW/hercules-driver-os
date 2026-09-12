@@ -114,29 +114,17 @@ function SignIn() {
                   toast.error("Enter your email and password");
                   return;
                 }
-                if (kind === "companyDriver" && code.trim()) {
-                  const company = companyByCode(code);
-                  if (!company) {
-                    toast.error("That company code isn't recognised", {
-                      description: "Check it with your carrier, or sign in without it.",
-                    });
+                setBusy(true);
+                void (async () => {
+                  const { error } = await signIn(email, password);
+                  setBusy(false);
+                  if (error) {
+                    toast.error("Could not sign you in", { description: error });
                     return;
                   }
-                  signUp({
-                    name: email.split("@")[0] ?? "Driver",
-                    email,
-                    plan: "company",
-                    kind: "companyDriver",
-                    companyCode: code,
-                  });
-                  toast.success(`Linked to ${company.name}`, {
-                    description: "You're flagged as a company driver on the shared model.",
-                  });
-                } else {
-                  signIn(email, kind);
                   toast.success(`Signed in — ${door.name}`);
-                }
-                void navigate({ to: kind === "zeusFleet" ? "/zeus" : "/" });
+                  void navigate({ to: kind === "zeusFleet" ? "/zeus" : "/" });
+                })();
               }}
             >
               <div>
