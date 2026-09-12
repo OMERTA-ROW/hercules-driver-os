@@ -168,8 +168,8 @@ function SignIn() {
                   </p>
                 </div>
               ) : null}
-              <Button type="submit" size="lg" className="w-full gap-2">
-                <LogIn className="h-4 w-4" /> Sign in to {door.name}
+              <Button type="submit" size="lg" className="w-full gap-2" disabled={busy}>
+                <LogIn className="h-4 w-4" /> {busy ? "Signing in…" : `Sign in to ${door.name}`}
               </Button>
               {kind === "zeusFleet" ? (
                 <p className="text-sm text-muted-foreground">
@@ -193,7 +193,8 @@ function SignIn() {
                 </p>
               )}
               <DriverApprovedNote>
-                Demo sign-in. Nothing is charged and nothing is committed without your approval.
+                Your own account, your own data. Nothing is charged and nothing is committed
+                without your approval.
               </DriverApprovedNote>
             </form>
           </div>
