@@ -110,7 +110,7 @@ export function LoadResetButton({ className }: { className?: string }) {
           <div className="space-y-3">
             <Pill tone="warn">Proposed plan · {reason}</Pill>
             <div className="space-y-2">
-              {resetPlan.map((p) => (
+              {plan.map((p) => (
                 <div key={p.label} className="rounded-lg border border-border bg-card/70 px-3 py-2">
                   <Label>{p.label}</Label>
                   <p className="text-sm">{p.detail}</p>
