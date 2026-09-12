@@ -104,9 +104,9 @@ function StopsScreen() {
   const selected = visible.find((s) => s.id === selectedId) ?? visible[0] ?? null;
 
   /** Clock-aware suggestion: bookable stops the driver can still legally reach. */
-  const clockTight = hos.driveRemainingMin <= 300;
+  const clockTight = hours !== null && hours.driveRemainingMin <= 300;
   const inRange = stops.filter(
-    (s) => s.milesAhead <= rangeMiles && s.parkingReservable && s.showersOpen > 0,
+    (s) => rangeMiles !== null && s.milesAhead <= rangeMiles && s.parkingReservable && s.showersOpen > 0,
   );
 
   const toggle = <T,>(list: T[], v: T, set: (n: T[]) => void) =>
