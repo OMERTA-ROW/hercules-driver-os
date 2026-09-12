@@ -21,6 +21,33 @@ export function LoadResetButton({ className }: { className?: string }) {
   const [reason, setReason] = useState<string | null>(null);
 
   const reasons = ["Load fell through", "Breakdown", "Stuck in detention", "Weather / road closure"];
+  const { hours } = useHours();
+  const { load } = useCurrentLoad();
+
+  /* The plan is built from what is actually known. Anything HERCULES cannot
+     back up is stated as unknown rather than filled in. */
+  const plan = [
+    {
+      label: "Hours",
+      detail: hours
+        ? `${Math.floor(hours.driveRemainingMin / 60)}h ${hours.driveRemainingMin % 60}m drive left, ${hours.cycleRemainingHrs.toFixed(1)}h on the cycle`
+        : "No logged hours yet — start a trip and the clock rebuilds from your own records",
+    },
+    {
+      label: "Route",
+      detail: load
+        ? `${place(load.origin_city, load.origin_state)} → ${place(load.dest_city, load.dest_state)}${load.miles ? ` · ${load.miles.toLocaleString()} mi` : ""}`
+        : "No load booked — nothing to reroute yet",
+    },
+    {
+      label: "Parking and rest",
+      detail: "Stops are proposed from the map once your location is live. Nothing is reserved.",
+    },
+    {
+      label: "Replacement loads",
+      detail: "Pulled from what brokers have actually posted on the board.",
+    },
+  ];
 
   function pick(r: string) {
     setReason(r);
