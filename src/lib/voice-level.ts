@@ -83,3 +83,68 @@ export function startSynthLevel(strength = 0.55): () => void {
     setVoiceLevel(0);
   };
 }
+
+/**
+ * Meter the driver's microphone so the liquid surface reacts to real speech.
+ * Returns a teardown; if permission is refused the caller falls back to the
+ * synthetic envelope.
+ */
+export function attachMicLevel(
+  onFail: () => void = () => {},
+): () => void {
+  const Ctor =
+    typeof window !== "undefined"
+      ? window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      : undefined;
+  if (!Ctor || !navigator?.mediaDevices?.getUserMedia) {
+    onFail();
+    return () => setVoiceLevel(0);
+  }
+
+  let raf = 0;
+  let ctx: AudioContext | null = null;
+  let stream: MediaStream | null = null;
+  let dead = false;
+
+  void navigator.mediaDevices
+    .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+    .then((s) => {
+      if (dead) {
+        s.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      stream = s;
+      ctx = new Ctor!();
+      void ctx.resume().catch(() => {});
+      const src = ctx.createMediaStreamSource(s);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.fftSize);
+      let smooth = 0;
+      const tick = () => {
+        analyser.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+          const d = (data[i]! - 128) / 128;
+          sum += d * d;
+        }
+        const rms = Math.sqrt(sum / data.length);
+        const lvl = Math.min(1, Math.max(0, (rms - 0.012) * 7));
+        smooth = smooth * 0.7 + lvl * 0.3;
+        setVoiceLevel(smooth);
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    })
+    .catch(() => onFail());
+
+  return () => {
+    dead = true;
+    cancelAnimationFrame(raf);
+    setVoiceLevel(0);
+    stream?.getTracks().forEach((t) => t.stop());
+    void ctx?.close().catch(() => {});
+  };
+}
