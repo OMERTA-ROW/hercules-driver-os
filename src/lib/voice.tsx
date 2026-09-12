@@ -637,10 +637,12 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
   if (/(dot|inspection|alert|cop|bear|weigh|closed)/.test(t)) {
-    const a = alerts[0]!;
+    const a = live.alerts.find((x) => !x.acknowledged_at);
     return {
       topic: "alerts",
-      text: `${a.kind} ${a.milesAhead} miles ahead at ${a.location}. ${a.note} ${a.confirmations} drivers confirmed it. Plenty of time to be squared away before you get there.`,
+      text: a
+        ? `${a.kind}: ${a.title}. ${a.body ?? ""} Raised ${new Date(a.created_at).toLocaleTimeString()}.`
+        : "Nothing is flagged on your account right now. If a checkpoint or hazard comes in on your lane I'll say it out loud.",
     };
   }
   if (/(hello|hey|hi|you there|hercules)$/.test(t) || t.length < 4) {
