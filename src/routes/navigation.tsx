@@ -345,7 +345,7 @@ function NavigationScreen() {
               <Metric value={hours ? hm(hours.driveRemainingMin) : "—"} tone="go" />
             </div>
             <div>
-              <Label>Break in</Label>
+              <Label>On duty left</Label>
               <Metric value={hours ? hm(hours.onDutyRemainingMin) : "—"} tone="warn" />
             </div>
           </div>
