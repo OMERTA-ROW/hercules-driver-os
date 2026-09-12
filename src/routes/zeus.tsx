@@ -173,6 +173,18 @@ function ZeusOnboarding() {
                   />
                 </div>
                 <div>
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    aria-label="Password"
+                    placeholder="••••••••"
+                    className="mt-1 h-12 text-base"
+                  />
+                </div>
+                <div>
                   <Label>How many trucks do you run?</Label>
                   <div className="mt-1 grid gap-2 sm:grid-cols-3">
                     {fleetTiers.map((t) => (

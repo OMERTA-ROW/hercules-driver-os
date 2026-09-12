@@ -99,7 +99,7 @@ function SignUp() {
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Vinson Bass"
+                  placeholder="Your name"
                   aria-label="Name"
                   className="mt-1 h-12 text-base"
                 />
