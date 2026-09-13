@@ -87,7 +87,10 @@ function EquipmentScreen() {
 
   /** One card per equipment family — 18-wheeler expands into its sub-options. */
   const families = [
+    { kind: "car" as VehicleKind, label: "Car / pickup" },
+    { kind: "passengerVan" as VehicleKind, label: "Passenger van / minivan" },
     { kind: "cargoVan" as VehicleKind, label: "Cargo van / Sprinter" },
+    { kind: "boxTruck" as VehicleKind, label: "Box truck" },
     { kind: "flatbed" as VehicleKind, label: "Flatbed" },
     { kind: "eighteen" as VehicleKind, label: "18-wheeler" },
     { kind: "carHaul" as VehicleKind, label: "Car haul" },

@@ -181,6 +181,9 @@ function complianceAttention() {
 /** Match a spoken equipment name to a saved-profile spec. */
 function spokenVehicle(t: string): VehicleSpec | null {
   if (/(sprinter|cargo van)/.test(t)) return specFor("cargoVan");
+  if (/(box truck|straight truck|twenty ?six)/.test(t)) return specFor("boxTruck");
+  if (/(minivan|passenger van|crew van)/.test(t)) return specFor("passengerVan");
+  if (/(\bcar\b|pickup|pick ?up truck)/.test(t)) return specFor("car");
   if (/(heavy haul)/.test(t)) return specFor("heavyHaul");
   if (/(car haul)/.test(t)) return specFor("carHaul");
   if (/(intermodal)/.test(t)) return specFor("eighteen", "intermodal");

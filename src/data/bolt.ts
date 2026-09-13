@@ -606,7 +606,8 @@ export function autoAlertsFor(kind: AdapterKind) {
  * on the nine-pin J1939 bus; everything lighter is OBD-II.
  */
 export function adapterForSpec(spec: Pick<VehicleSpec, "kind" | "pullsTrailer">): AdapterKind {
-  if (spec.kind === "cargoVan") return "obd2";
+  if (spec.kind === "car" || spec.kind === "passengerVan" || spec.kind === "cargoVan") return "obd2";
+  if (spec.kind === "boxTruck") return "obd2";
   return spec.pullsTrailer ? "j1939" : "obd2";
 }
 
