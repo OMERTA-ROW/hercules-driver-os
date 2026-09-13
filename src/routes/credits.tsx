@@ -95,6 +95,7 @@ function CreditsPage() {
 
   const signedOut = !account;
   const w = state.data?.wallet;
+  const allowance = state.data?.allowance ?? null;
   /** Availability comes from the public check when signed out. */
   const purchasing = state.data?.purchasing ?? availability.data;
   const readError = state.data?.error ?? null;
