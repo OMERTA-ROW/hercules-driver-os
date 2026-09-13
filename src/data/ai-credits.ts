@@ -55,7 +55,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "assist",
     name: "Assist",
-    credits: 400,
+    credits: 300,
     price: 9,
     blurb: "Everyday spoken answers and read-backs.",
     priceEnv: "STRIPE_PRICE_AI_ASSIST",
@@ -63,7 +63,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "pro",
     name: "Pro",
-    credits: 1600,
+    credits: 1000,
     price: 29,
     blurb: "Heavy all-day use, long conversations, premium voices.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
@@ -71,7 +71,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "max",
     name: "Max",
-    credits: 4000,
+    credits: 3500,
     price: 100,
     blurb: "Team seats and constant assistance on long hauls.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
@@ -81,28 +81,28 @@ export const aiPlans: AiPlan[] = [
 /** Buy-once packs. These credits carry over and never expire. */
 export const aiPacks: AiPack[] = [
   {
-    id: "pack300",
-    name: "300 credits",
-    credits: 300,
+    id: "pack200",
+    name: "200 credits",
+    credits: 200,
     price: 10,
     blurb: "Top up for a busy week.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_300",
+    priceEnv: "STRIPE_PRICE_AI_PACK_200",
   },
   {
-    id: "pack800",
-    name: "800 credits",
-    credits: 800,
+    id: "pack550",
+    name: "550 credits",
+    credits: 550,
     price: 25,
     blurb: "Best value top-up.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_800",
+    priceEnv: "STRIPE_PRICE_AI_PACK_550",
   },
   {
-    id: "pack1800",
-    name: "1,800 credits",
-    credits: 1800,
+    id: "pack1200",
+    name: "1,200 credits",
+    credits: 1200,
     price: 50,
     blurb: "Stock up once, use it all year.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_1800",
+    priceEnv: "STRIPE_PRICE_AI_PACK_1200",
   },
 ];
 
