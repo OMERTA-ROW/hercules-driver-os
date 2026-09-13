@@ -29,7 +29,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack300" | "pack800" | "pack1800";
+export type AiPackId = "pack200" | "pack550" | "pack1200";
 
 export type AiPlan = {
   id: AiPlanId;
