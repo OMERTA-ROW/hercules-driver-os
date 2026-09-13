@@ -46,6 +46,7 @@ import {
   spokenService,
 } from "@/lib/breakdown";
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
+import { deviceDelivery, pickDeviceVoice } from "@/lib/device-voice";
 import { speakLine } from "@/lib/speech.functions";
 import {
   attachAudioLevel,
