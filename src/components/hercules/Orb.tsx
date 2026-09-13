@@ -297,13 +297,28 @@ export function Orb({
         mode === "idle" && "orb-state-idle",
       )}
     >
-      {/* Ambient bloom — cold metal light, warmed slightly when live */}
+      {/* WARM GOLD BACKLIGHT — sits behind the silver body in every colourway.
+          The body itself stays mercury; only this halo is gold. */}
+      <span
+        aria-hidden
+        className="absolute -inset-[26%] rounded-full"
+        style={{
+          background: `radial-gradient(circle, ${GOLD_CORE} 0%, color-mix(in oklab, ${GOLD} ${
+            speaking ? 30 : listening ? 24 : 18
+          }%, transparent) 34%, color-mix(in oklab, ${GOLD_DEEP} ${
+            speaking ? 14 : 10
+          }%, transparent) 58%, transparent 76%)`,
+          filter: "blur(6px)",
+        }}
+      />
+
+      {/* Cold specular bloom on top of the gold, so the metal still reads silver */}
       <span
         aria-hidden
         ref={bloomRef}
         className="absolute -inset-[14%] rounded-full"
         style={{
-          background: `radial-gradient(circle, color-mix(in oklab, ${m.hi} ${speaking ? 16 : listening ? 12 : 7}%, transparent) 0%, color-mix(in oklab, ${m.tint} 7%, transparent) 46%, transparent 70%)`,
+          background: `radial-gradient(circle, color-mix(in oklab, ${m.hi} ${speaking ? 14 : listening ? 11 : 6}%, transparent) 0%, transparent 62%)`,
         }}
       />
 
