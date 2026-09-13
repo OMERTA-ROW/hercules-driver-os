@@ -99,9 +99,12 @@ function SignUp() {
                 }
                 if (needsConfirmation) {
                   toast.success("Check your email to confirm", {
-                    description: "Confirm the link we sent, then sign in.",
+                    description: "The link brings you straight back into setup.",
                   });
-                  void navigate({ to: "/sign-in" });
+                  void navigate({
+                    to: "/confirm-email",
+                    search: { email: email.trim() },
+                  });
                   return;
                 }
                 toast.success(`${TRIAL_DAYS}-day trial started`, {

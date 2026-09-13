@@ -119,6 +119,21 @@ function SignIn() {
                   const { error } = await signIn(email, password, { kind });
                   setBusy(false);
                   if (error) {
+                    // Confirmation is required on purpose; say what to do next.
+                    if (/confirm/i.test(error)) {
+                      toast.error("Confirm your email first", {
+                        description: "Open the link we sent you — we can send it again.",
+                        action: {
+                          label: "Resend",
+                          onClick: () =>
+                            void navigate({
+                              to: "/confirm-email",
+                              search: { email: email.trim() },
+                            }),
+                        },
+                      });
+                      return;
+                    }
                     toast.error("Could not sign you in", { description: error });
                     return;
                   }
