@@ -154,7 +154,7 @@ function HealthPage() {
     <AppShell
       title="Vehicle Health"
       subtitle={`${active.label} · ${active.unit} · ${
-        connected ? `${adapter.name} live stream` : "last sync"
+        connected ? `${adapter.name} live stream` : "no reader connected"
       }`}
     >
       {autoAlerts.length ? (
@@ -201,6 +201,11 @@ function HealthPage() {
           <p className="mb-2 text-xs text-muted-foreground">
             {adapter.tagline} · only what this vehicle can actually report is shown.
           </p>
+          {values.length === 0 ? (
+            <div className="rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+              {BOLT_UNAVAILABLE}
+            </div>
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {values.map((m) => (
               <div key={m.key} className="rounded-lg border border-border bg-card/60 p-3">
