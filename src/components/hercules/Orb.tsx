@@ -54,6 +54,8 @@ const CY = 200;
 const R = 150;
 /** Silhouette resolution — enough for smooth folds, cheap enough for a tablet. */
 const SEGMENTS = 72;
+/** Static circle used for SSR and reduced-motion first paint. */
+const CIRCLE = `M ${CX - R} ${CY} a ${R} ${R} 0 1 0 ${R * 2} 0 a ${R} ${R} 0 1 0 ${-R * 2} 0`;
 
 type Dent = {
   /** Angle on the surface the contact landed nearest. */
@@ -386,12 +388,12 @@ export function Orb({
           </radialGradient>
 
           <clipPath id={`${uid}-clip`}>
-            <path ref={clipRef} d={`M ${CX - R} ${CY} a ${R} ${R} 0 1 0 ${R * 2} 0 a ${R} ${R} 0 1 0 ${-R * 2} 0`} />
+            <path ref={clipRef} d={CIRCLE} />
           </clipPath>
         </defs>
 
         {/* The mass */}
-        <path ref={bodyRef} d="" fill={`url(#${uid}-chrome)`} />
+        <path ref={bodyRef} d={CIRCLE} fill={`url(#${uid}-chrome)`} />
 
         <g clipPath={`url(#${uid}-clip)`}>
           <g filter={`url(#${uid}-fold)`}>
@@ -443,7 +445,7 @@ export function Orb({
         {/* Meniscus */}
         <path
           ref={rimRef}
-          d=""
+          d={CIRCLE}
           fill="none"
           stroke={m.rim}
           strokeOpacity="0.55"
