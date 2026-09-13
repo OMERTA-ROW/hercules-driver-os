@@ -203,6 +203,28 @@ function CreditsPage() {
           </Panel>
         )}
 
+        {/* TOP-UP PAID WHILE LAPSED */}
+        {allowance && allowance.pendingPurchased > 0 ? (
+          <Panel>
+            <Label>Top-up held for you</Label>
+            <p className="mt-2 text-sm">
+              You paid for {allowance.pendingPurchased} credits while no monthly plan was running, so
+              they are being held on your account rather than lost. They land in your balance the
+              moment a monthly plan is paid, and they are refundable in the meantime.
+            </p>
+          </Panel>
+        ) : null}
+
+        {allowance?.subscribed && allowance.configMissing ? (
+          <Panel>
+            <Label>Allowance not set up</Label>
+            <p className="mt-2 text-sm">
+              This plan has no day or week allowance set, so the real voice is held back rather than
+              run with no limit. Nothing is being charged. The account owner sets the allowance.
+            </p>
+          </Panel>
+        ) : null}
+
         {/* DAILY / WEEKLY ALLOWANCE */}
         {signedOut ? null : (
           <Panel>

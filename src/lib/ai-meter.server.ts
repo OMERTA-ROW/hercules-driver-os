@@ -215,6 +215,7 @@ export type MeteredResult<T> =
         | "pending"
         | "already_served"
         | "no_subscription"
+        | "no_allowance_config"
         | "daily_limit"
         | "weekly_limit";
       resetsAt?: string | null;
@@ -231,6 +232,7 @@ type ClaimOutcome = {
     | "insufficient"
     | "error"
     | "no_subscription"
+    | "no_allowance_config"
     | "daily_limit"
     | "weekly_limit";
   reservation?: string;
@@ -335,6 +337,14 @@ export async function runMetered<T>(opts: {
           "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
       };
     }
+    if (claim.outcome === "no_allowance_config") {
+      return {
+        ok: false as const,
+        reason: "no_allowance_config" as const,
+        message:
+          "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Your device's own voice is speaking, free.",
+      };
+    }
     if (claim.outcome === "daily_limit" || claim.outcome === "weekly_limit") {
       const scope = claim.outcome === "daily_limit" ? "daily" : "weekly";
       return {
@@ -413,6 +423,12 @@ export type Allowance = {
   weeklyUsed: number;
   dailyResetsAt: string | null;
   weeklyResetsAt: string | null;
+  /** End of the period actually paid for; drives the subscribed decision. */
+  paidThrough: string | null;
+  /** True when the plan has no configured caps — paid voice is refused. */
+  configMissing: boolean;
+  /** Top-up credits paid for while lapsed, kept and released on the next paid month. */
+  pendingPurchased: number;
 };
 
 /** Read straight from the database routine that the paid path enforces, so the
@@ -435,5 +451,8 @@ export async function allowanceStatus(userId: string): Promise<Allowance | null>
     weeklyUsed: Number(r["weekly_used"] ?? 0),
     dailyResetsAt: (r["daily_resets_at"] as string | null) ?? null,
     weeklyResetsAt: (r["weekly_resets_at"] as string | null) ?? null,
+    paidThrough: (r["paid_through"] as string | null) ?? null,
+    configMissing: r["config_missing"] === true,
+    pendingPurchased: Number(r["pending_purchased"] ?? 0),
   };
 }

@@ -744,6 +744,8 @@ function fallbackNote(reason: string | undefined, message?: string): string {
       return "Sign in to hear the real voice — your device spoke this line free.";
     case "rate_limited":
       return "Too many spoken lines just now, so your device spoke this one free.";
+    case "no_allowance_config":
+      return "Paid voice is held back on this plan until its allowance is set up. Your device spoke this line free.";
     case "no_subscription":
       return "The real AI voice needs a monthly AI plan. Your device spoke this line free.";
     case "daily_limit":
