@@ -49,6 +49,19 @@ export class MapsUnconfiguredError extends Error {
 }
 
 let pending: Promise<MapsApi> | null = null;
+let authFailed = false;
+const authSubs = new Set<() => void>();
+
+/** True once Google rejected the key (bad referrer, no billing, API disabled). */
+export function mapsAuthFailed() {
+  return authFailed;
+}
+
+/** Subscribe to Google's gm_authFailure callback. */
+export function onMapsAuthFailure(cb: () => void) {
+  authSubs.add(cb);
+  return () => authSubs.delete(cb);
+}
 
 /** Resolves with `google.maps` once the API is ready. Shared across all callers. */
 export function loadMaps(): Promise<MapsApi> {
@@ -61,6 +74,13 @@ export function loadMaps(): Promise<MapsApi> {
   if (!pending) {
     pending = (async () => {
       const { setOptions, importLibrary } = await import("@googlemaps/js-api-loader");
+      // Google calls this when the key itself is rejected — the script loads
+      // fine but every tile is refused, so we must surface it, not show a
+      // silently broken map.
+      (window as unknown as { gm_authFailure?: () => void }).gm_authFailure = () => {
+        authFailed = true;
+        authSubs.forEach((cb) => cb());
+      };
       setOptions({
         key: MAPS_KEY,
         v: "weekly",

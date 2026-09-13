@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { isMapsConfigured, loadMaps, MAPS_MAP_ID, type MapsApi } from "@/lib/google-maps";
+import {
+  isMapsConfigured,
+  loadMaps,
+  MAPS_MAP_ID,
+  mapsAuthFailed,
+  onMapsAuthFailure,
+  type MapsApi,
+} from "@/lib/google-maps";
 import { cn } from "@/lib/utils";
 
 /**
@@ -74,6 +81,13 @@ export function RealMap(props: RealMapProps) {
     cbs.current.onStatus?.(status);
   }, [status]);
 
+  // A rejected key (referrer restriction, disabled API, billing off) never
+  // rejects the load — Google reports it through gm_authFailure.
+  useEffect(() => {
+    if (mapsAuthFailed()) setStatus("error");
+    return onMapsAuthFailure(() => setStatus("error"));
+  }, []);
+
   // Mount exactly one map per component instance. StrictMode's second pass
   // tears the first one down through the cleanup below.
   useEffect(() => {
@@ -116,7 +130,7 @@ export function RealMap(props: RealMapProps) {
           trafficRef.current.setMap(map);
         }
         listeners.push(map.addListener("dragstart", () => cbs.current.onUserPan?.()));
-        setStatus("ready");
+        setStatus(mapsAuthFailed() ? "error" : "ready");
         cbs.current.onReady?.(map, maps);
       })
       .catch(() => {
