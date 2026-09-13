@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+/// <reference types="google.maps" />
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
 import type { TruckStop } from "@/data/stops";
 import { chainMarkerSvg } from "./ChainMarker";
+import { RealMap, type RealMapStatus } from "./RealMap";
+import type { MapsApi } from "@/lib/google-maps";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -10,52 +13,16 @@ import { cn } from "@/lib/utils";
 /**
  * Base map layer.
  *
- * Google Maps JS API renders the street-level base map when a browser key is
- * available (VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY, injected by the
- * Google Maps connector). Only truck-legal geometry returned by the truck
- * routing adapter is ever drawn on top — Google Maps itself is never asked for
- * the route, because it has no commercial-vehicle attributes.
+ * The real Google Maps basemap (RealMap) renders streets, satellite and hybrid
+ * imagery plus the live traffic layer and Street View. Only truck-legal
+ * geometry returned by the truck routing adapter is ever drawn on top — Google
+ * Maps itself is never asked for the route, because it has no commercial-
+ * vehicle attributes, so nothing here makes the basemap truck-restriction
+ * aware.
  *
- * With no key linked yet, we fall back to a schematic street rendering so the
- * whole navigation package is usable with mock data.
+ * Without a browser key the map reports itself unavailable rather than drawing
+ * an invented basemap.
  */
-
-const MAPS_KEY = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] as
-  | string
-  | undefined;
-const MAPS_CHANNEL = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID"] as
-  | string
-  | undefined;
-
-declare global {
-  interface Window {
-    google?: any;
-    __hercMapsReady?: boolean;
-    __hercInitMaps?: () => void;
-  }
-}
-
-function loadGoogleMaps(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (!MAPS_KEY) return reject(new Error("no-key"));
-    if (window.__hercMapsReady && window.google?.maps) return resolve(window.google);
-    const existing = document.getElementById("herc-gmaps");
-    const done = () => (window.google?.maps ? resolve(window.google) : reject(new Error("failed")));
-    window.__hercInitMaps = () => {
-      window.__hercMapsReady = true;
-      done();
-    };
-    if (existing) return;
-    const s = document.createElement("script");
-    s.id = "herc-gmaps";
-    s.async = true;
-    s.src =
-      `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&loading=async&callback=__hercInitMaps` +
-      (MAPS_CHANNEL ? `&channel=${MAPS_CHANNEL}` : "");
-    s.onerror = () => reject(new Error("script-error"));
-    document.head.appendChild(s);
-  });
-}
 
 /**
  * REAL US HIGHWAY SHIELDS
@@ -255,73 +222,41 @@ type Props = {
 
 export function RouteMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
   const { theme } = useTheme();
-  const holder = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<"loading" | "google" | "fallback">(
-    MAPS_KEY ? "loading" : "fallback",
-  );
   const [view, setView] = useState<BaseView>("map");
   const [camera, setCamera] = useState<CameraMode>("nav3d");
   const [headingUp, setHeadingUp] = useState(true);
   const [followTruck, setFollowTruck] = useState(true);
+  const [traffic, setTraffic] = useState(true);
+  const [status, setStatus] = useState<RealMapStatus>("loading");
+  const [zoom, setZoom] = useState(8);
+  const [ready, setReady] = useState(0);
   const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
-    map?: any;
-    line?: any;
-    casing?: any;
-    truck?: any;
-    shields: any[];
-    hazards: any[];
-    stops: any[];
+    map?: google.maps.Map | undefined;
+    maps?: MapsApi | undefined;
+    line?: google.maps.Polyline | undefined;
+    casing?: google.maps.Polyline | undefined;
+    truck?: google.maps.Marker | undefined;
+    shields: google.maps.Marker[];
+    hazards: google.maps.Marker[];
+    stops: google.maps.Marker[];
   }>({ shields: [], hazards: [], stops: [] });
 
-
-  useEffect(() => {
-    if (!MAPS_KEY) return;
-    let dead = false;
-    loadGoogleMaps()
-      .then((google) => {
-        if (dead || !holder.current) return;
-        const map = new google.maps.Map(holder.current, {
-          center: position,
-          zoom: 8,
-          disableDefaultUI: true,
-          zoomControl: true,
-          scaleControl: true,
-          clickableIcons: false,
-          gestureHandling: "greedy",
-          tilt: 0,
-          backgroundColor: "#0b0f14",
-          mapTypeId: "roadmap",
-          styles: theme === "day" ? [] : darkMapStyle,
-        });
-        refs.current.map = map;
-        setMode("google");
-      })
-      .catch(() => !dead && setMode("fallback"));
-    return () => {
-      dead = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleReady = useCallback((map: google.maps.Map, maps: MapsApi) => {
+    refs.current.map = map;
+    refs.current.maps = maps;
+    setReady((n) => n + 1);
   }, []);
 
-  // Base imagery choice. Custom styling only applies to the road map; satellite
-  // and hybrid imagery are dimmed with CSS instead.
+  // Draw only truck-legal geometry + shields on top of the real base layer.
   useEffect(() => {
+    const maps = refs.current.maps;
     const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    map.setMapTypeId(view === "map" ? "roadmap" : view === "satellite" ? "satellite" : "hybrid");
-    map.setOptions({ styles: view === "map" && theme !== "day" ? darkMapStyle : [] });
-  }, [mode, view, theme]);
-
-  // Draw only truck-legal geometry + shields on top of the Google base layer.
-  useEffect(() => {
-    const google = window.google;
-    const map = refs.current.map;
-    if (mode !== "google" || !google || !map) return;
+    if (!maps || !map) return;
     // Route line: a dark casing under a bright core, so the path stays the
     // brightest thing on screen over street detail or satellite imagery.
     refs.current.casing?.setMap(null);
-    refs.current.casing = new google.maps.Polyline({
+    refs.current.casing = new maps.Polyline({
       path: polyline,
       strokeColor: "#04121a",
       strokeOpacity: 0.9,
@@ -330,7 +265,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       map,
     });
     refs.current.line?.setMap(null);
-    refs.current.line = new google.maps.Polyline({
+    refs.current.line = new maps.Polyline({
       path: polyline,
       strokeColor: offRoute ? "#fbbf24" : "#39e6ff",
       strokeOpacity: 1,
@@ -341,7 +276,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.shields.forEach((m) => m.setMap(null));
     refs.current.shields = segments.map(
       (s) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: s.shieldAt,
           map,
           title: `${s.road} — ${s.note}`,
@@ -349,7 +284,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
             url:
               "data:image/svg+xml;charset=UTF-8," +
               encodeURIComponent(shieldSvg(s.road.replace(/\s*\(county\)/i, ""), s.class)),
-            anchor: new google.maps.Point(33, 70),
+            anchor: new maps.Point(33, 70),
           },
           zIndex: 600,
         }),
@@ -358,14 +293,14 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.hazards.forEach((m) => m.setMap(null));
     refs.current.hazards = hazards.map(
       ({ hazard, severity }) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: hazard.at,
           map,
           title: `${hazard.name} — ${hazard.detail}`,
           icon: {
             url:
               "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(hazardIconSvg(hazard, severity)),
-            anchor: new google.maps.Point(30, 42),
+            anchor: new maps.Point(30, 42),
           },
           zIndex: severity === "critical" ? 900 : 500,
         }),
@@ -374,24 +309,24 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.stops.forEach((m) => m.setMap(null));
     refs.current.stops = stops.map(
       (stop) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: stop.at,
           map,
           title: `${stop.name} — $${stop.dieselPrice.toFixed(3)}/gal · ${stop.parkingOpen}/${stop.parkingTotal} spaces · ${stop.showersOpen} showers open`,
           icon: {
             url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(chainMarkerSvg(stop.chain, 46)),
-            anchor: new google.maps.Point(26, 56),
+            anchor: new maps.Point(26, 56),
           },
           zIndex: 400,
         }),
     );
     refs.current.truck?.setMap(null);
-    refs.current.truck = new google.maps.Marker({
+    refs.current.truck = new maps.Marker({
       position,
       map,
       title: "Your truck",
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
+        path: maps.SymbolPath.CIRCLE,
         scale: 10,
         fillColor: "#39e6ff",
         fillOpacity: 1,
@@ -400,112 +335,80 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       },
       zIndex: 999,
     });
-    if (followTruck) map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops, followTruck]);
+  }, [ready, polyline, position, segments, offRoute, hazards, stops]);
 
-  // Camera mode + orientation. 3D navigation tilts low and locks the view to
-  // the truck's heading; 2D is flat overhead. North-up overrides the heading
-  // lock in either mode.
-  useEffect(() => {
-    const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    const headingLocked = camera === "nav3d" && headingUp;
-    map.setOptions({
-      tilt: camera === "nav3d" ? 55 : 0,
-      heading: headingLocked ? heading : 0,
-    });
-    if (camera === "nav3d" && map.getZoom() < 12) map.setZoom(14);
-  }, [mode, camera, headingUp, heading]);
+  // Overlays we own are detached when the map screen goes away.
+  useEffect(
+    () => () => {
+      const r = refs.current;
+      r.casing?.setMap(null);
+      r.line?.setMap(null);
+      r.truck?.setMap(null);
+      [...r.shields, ...r.hazards, ...r.stops].forEach((m) => m.setMap(null));
+      r.shields = [];
+      r.hazards = [];
+      r.stops = [];
+      r.map = undefined;
+      r.maps = undefined;
+    },
+    [],
+  );
 
   const recenter = () => {
     setFollowTruck(true);
-    const map = refs.current.map;
-    if (map) {
-      map.panTo(position);
-      if (camera === "nav3d") map.setZoom(14);
-    }
+    if (camera === "nav3d") setZoom(14);
+    refs.current.map?.panTo(position);
   };
 
   const showWholeRoute = () => {
     setFollowTruck(false);
     setCamera("top2d");
-    const google = window.google;
+    const maps = refs.current.maps;
     const map = refs.current.map;
-    if (mode === "google" && google && map) {
-      const bounds = new google.maps.LatLngBounds();
+    if (maps && map && polyline.length) {
+      const bounds = new maps.LatLngBounds();
       polyline.forEach((p) => bounds.extend(p));
       map.fitBounds(bounds, 64);
     }
   };
 
-  const onUserPan = () => setFollowTruck(false);
-  useEffect(() => {
-    const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    const l = map.addListener("dragstart", onUserPan);
-    return () => window.google?.maps?.event?.removeListener(l);
-  }, [mode]);
-
-
-  if (mode === "google" || mode === "loading") {
-    return (
-      <div className="relative h-full w-full">
-        <div
-          ref={holder}
-          className={cn(
-            "h-full w-full",
-            view === "map" ? "map-dim" : "map-dim-imagery",
-          )}
-        />
-        <BaseViewSwitch view={view} onChange={setView} />
-        <MapViewControls
-          camera={camera}
-          onCamera={setCamera}
-          headingUp={headingUp}
-          onHeadingUp={setHeadingUp}
-          following={followTruck}
-          onRecenter={recenter}
-          onWholeRoute={showWholeRoute}
-        />
-        {mode === "loading" ? (
-          <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
-            Loading street map…
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+  // 3D navigation tilts low and locks the view to the truck's heading; 2D is
+  // flat overhead. North-up overrides the heading lock. Tilt only renders where
+  // Google supports it — elsewhere the map simply stays flat.
+  const headingLocked = camera === "nav3d" && headingUp;
 
   return (
     <div className="relative h-full w-full">
-      <SchematicMap
-        polyline={polyline}
-        position={position}
-        segments={segments}
-        offRoute={offRoute}
-        hazards={hazards}
-        stops={stops}
-        zoom={followTruck ? 2.6 : 1}
-        rotate={camera === "nav3d" && headingUp ? -heading : 0}
+      <RealMap
+        center={position}
+        zoom={zoom}
+        showTraffic={traffic}
+        mapTypeId={view === "map" ? "roadmap" : view}
+        {...(view === "map" && theme !== "day" ? { styles: darkMapStyle } : {})}
+        tilt={camera === "nav3d" ? 55 : 0}
+        heading={headingLocked ? heading : 0}
+        followCenter={followTruck}
+        onReady={handleReady}
+        onUserPan={() => setFollowTruck(false)}
+        onStatus={setStatus}
+        className={cn("rounded-none", view === "map" ? "map-dim" : "map-dim-imagery")}
       />
-      <MapViewControls
-        camera={camera}
-        onCamera={setCamera}
-        headingUp={headingUp}
-        onHeadingUp={setHeadingUp}
-        following={followTruck}
-        onRecenter={() => setFollowTruck(true)}
-        onWholeRoute={() => {
-          setFollowTruck(false);
-          setCamera("top2d");
-        }}
-      />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
-        <p className="glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
-          Schematic view. Add a Google Maps browser key to see the real roads, buildings and lot
-          layouts under the route, with satellite and hybrid for the last mile.
-        </p>
-      </div>
+      {status === "ready" ? (
+        <>
+          <BaseViewSwitch view={view} onChange={setView} />
+          <MapViewControls
+            camera={camera}
+            onCamera={setCamera}
+            headingUp={headingUp}
+            onHeadingUp={setHeadingUp}
+            following={followTruck}
+            onRecenter={recenter}
+            onWholeRoute={showWholeRoute}
+            traffic={traffic}
+            onTraffic={setTraffic}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
@@ -558,6 +461,8 @@ function MapViewControls({
   following,
   onRecenter,
   onWholeRoute,
+  traffic,
+  onTraffic,
 }: {
   camera: CameraMode;
   onCamera: (c: CameraMode) => void;
@@ -566,6 +471,8 @@ function MapViewControls({
   following: boolean;
   onRecenter: () => void;
   onWholeRoute: () => void;
+  traffic: boolean;
+  onTraffic: (v: boolean) => void;
 }) {
   const pill =
     "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
@@ -639,107 +546,22 @@ function MapViewControls({
           <path d="M9 15.5c2-1.5 4-3 6-6.5" strokeDasharray="2.5 2.5" />
         </svg>
       </button>
+      {/* live traffic layer — on by default */}
+      <button
+        type="button"
+        onClick={() => onTraffic(!traffic)}
+        aria-pressed={traffic}
+        title={traffic ? "Live traffic on — tap to hide" : "Live traffic off — tap to show"}
+        className={cn(pill, traffic && active)}
+      >
+        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <rect x="8" y="2.5" width="8" height="19" rx="3" />
+          <circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="17" r="1.5" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
     </div>
-  );
-}
-
-/** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [], zoom = 1, rotate = 0 }: Props & { zoom?: number; rotate?: number }) {
-  const box = useMemo(() => {
-    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at), ...stops.map((s) => s.at)];
-    const lats = pts.map((p) => p.lat);
-    const lngs = pts.map((p) => p.lng);
-    return {
-      minLat: Math.min(...lats) - 0.25,
-      maxLat: Math.max(...lats) + 0.25,
-      minLng: Math.min(...lngs) - 0.35,
-      maxLng: Math.max(...lngs) + 0.35,
-    };
-  }, [polyline, position, hazards, stops]);
-
-  const W = 1000;
-  const H = 620;
-  const px = (p: LatLng) => ({
-    x: ((p.lng - box.minLng) / (box.maxLng - box.minLng)) * W,
-    y: H - ((p.lat - box.minLat) / (box.maxLat - box.minLat)) * H,
-  });
-  const path = polyline.map(px).map((p, i) => `${i ? "L" : "M"} ${p.x} ${p.y}`).join(" ");
-  const truck = px(position);
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img" aria-label="Truck-legal route map">
-      <g transform={`translate(${W / 2} ${H / 2}) scale(${zoom}) rotate(${rotate}) translate(${-truck.x} ${-truck.y})`}>
-      <rect x={-W} y={-H} width={W * 3} height={H * 3} fill="var(--map-bg, #0a0d11)" />
-      {/* street grid — stands in for Google's street-level detail */}
-      {Array.from({ length: 22 }).map((_, i) => (
-        <line key={`v${i}`} x1={i * 48} y1={0} x2={i * 48} y2={H} stroke="#ffffff" strokeOpacity={0.05} />
-      ))}
-      {Array.from({ length: 14 }).map((_, i) => (
-        <line key={`h${i}`} x1={0} y1={i * 48} x2={W} y2={i * 48} stroke="#ffffff" strokeOpacity={0.05} />
-      ))}
-      <path d={path} fill="none" stroke="#000" strokeOpacity={0.6} strokeWidth={16} strokeLinecap="round" />
-      <path
-        d={path}
-        fill="none"
-        stroke={offRoute ? "#f59e0b" : "#22d3ee"}
-        strokeWidth={9}
-        strokeLinecap="round"
-      />
-      {segments.map((s) => {
-        const p = px(s.shieldAt);
-        const label = s.road.replace(/\s*\(county\)/i, "");
-        const w = Math.max(58, 24 + label.length * 14);
-        const c = shieldColors(s.class);
-        return (
-          <g key={s.id} transform={`translate(${p.x - w / 2} ${p.y - 54})`}>
-            <path
-              d={`M4 6 Q${w / 2} -3 ${w - 4} 6 L${w - 4} 30 Q${w / 2} 48 4 30 Z`}
-              fill={c.fill}
-              stroke={c.stroke}
-              strokeWidth={3}
-            />
-            <text
-              x={w / 2}
-              y={26}
-              textAnchor="middle"
-              fontSize={18}
-              fontWeight={900}
-              fill={c.text}
-              fontFamily="Arial Black, Arial, sans-serif"
-            >
-              {label}
-            </text>
-          </g>
-        );
-      })}
-      {/* HAZARD LAYER badges */}
-      {hazards.map(({ hazard, severity }) => {
-        const p = px(hazard.at);
-        return (
-          <g
-            key={hazard.id}
-            transform={`translate(${p.x - 34} ${p.y + 8})`}
-            dangerouslySetInnerHTML={{ __html: hazardIconSvg(hazard, severity) }}
-          />
-        );
-      })}
-
-
-      {/* TRUCK STOP LAYER badges */}
-      {stops.map((stop) => {
-        const p = px(stop.at);
-        return (
-          <g
-            key={stop.id}
-            transform={`translate(${p.x - 26} ${p.y - 62})`}
-            dangerouslySetInnerHTML={{ __html: chainMarkerSvg(stop.chain, 46) }}
-          />
-        );
-      })}
-      <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
-      <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
-      </g>
-    </svg>
   );
 }
 
