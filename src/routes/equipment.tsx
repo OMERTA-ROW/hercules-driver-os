@@ -23,6 +23,7 @@ import {
 } from "@/data/vehicles";
 import { hazardMeta } from "@/data/hazards";
 import { useVehicle } from "@/lib/vehicles";
+import { useAuth } from "@/lib/auth";
 import { fleetTierSpec } from "@/data/accounts";
 import { spokenAssignment } from "@/data/fleet-assignments";
 import { cn } from "@/lib/utils";
@@ -50,8 +51,20 @@ export const Route = createFileRoute("/equipment")({
 });
 
 function EquipmentScreen() {
-  const { profiles, active, chooseForTrip, addProfile, removeProfile, resolution, assignment, fleetTier } =
-    useVehicle();
+  const {
+    profiles,
+    active,
+    chooseForTrip,
+    addProfile,
+    removeProfile,
+    resolution,
+    assignment,
+    fleetTier,
+    loadError,
+    saving,
+    ready,
+  } = useVehicle();
+  const { account } = useAuth();
   const tier = fleetTier ? fleetTierSpec(fleetTier) : null;
   const [kind, setKind] = useState<VehicleKind>("eighteen");
   const [sub, setSub] = useState<EighteenSub>("dryVan");
@@ -59,6 +72,18 @@ function EquipmentScreen() {
 
   const pickedSpec = specFor(kind, kind === "eighteen" ? sub : undefined);
   const pickedRules = rulesFor(pickedSpec);
+
+  async function save() {
+    const res = await addProfile(kind, kind === "eighteen" ? sub : undefined, unit);
+    if (!res.ok) {
+      toast.error("Not saved", { description: res.message });
+      return;
+    }
+    setUnit("");
+    toast.success(res.message, {
+      description: "I will ask what you are in at the start of every trip.",
+    });
+  }
 
   /** One card per equipment family — 18-wheeler expands into its sub-options. */
   const families = [
@@ -80,6 +105,24 @@ function EquipmentScreen() {
           <PanelTitle right={<Pill tone="primary">{profiles.length} saved</Pill>}>
             What you run
           </PanelTitle>
+          {!account ? (
+            <div className="mb-3 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+              You're not signed in, so nothing can be saved to an account.{" "}
+              <Link to="/sign-in" className="text-primary underline">
+                Sign in
+              </Link>{" "}
+              and your equipment stays with you.
+            </div>
+          ) : loadError ? (
+            <div className="mb-3 rounded-lg border border-stop/40 bg-stop/10 p-3 text-sm">
+              {loadError}
+            </div>
+          ) : ready && profiles.length === 0 ? (
+            <div className="mb-3 rounded-lg border border-info/35 bg-info/10 p-3 text-sm">
+              Nothing saved yet. Add the truck and trailer you actually run — routing, clearances and
+              hazard warnings all read from it.
+            </div>
+          ) : null}
           <div className="space-y-2">
             {profiles.map((p) => {
               const rules = rulesFor(p);
@@ -131,9 +174,13 @@ function EquipmentScreen() {
                         <Button
                           size="lg"
                           variant="outline"
+                          disabled={saving}
                           onClick={() => {
-                            removeProfile(p.id);
-                            toast.success("Removed from your profile");
+                            void removeProfile(p.id).then((r) =>
+                              r.ok
+                                ? toast.success(r.message)
+                                : toast.error("Not removed", { description: r.message }),
+                            );
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -251,15 +298,10 @@ function EquipmentScreen() {
           <Button
             size="lg"
             className="mt-3 w-full gap-2"
-            onClick={() => {
-              addProfile(kind, kind === "eighteen" ? sub : undefined, unit);
-              setUnit("");
-              toast.success(`${pickedSpec.label} saved`, {
-                description: "I will ask what you are in at the start of every trip.",
-              });
-            }}
+            disabled={saving}
+            onClick={() => void save()}
           >
-            <Plus className="h-4 w-4" /> Save this equipment
+            <Plus className="h-4 w-4" /> {saving ? "Saving…" : "Save this equipment"}
           </Button>
 
           <Button variant="outline" size="lg" className="mt-2 w-full gap-2" asChild>

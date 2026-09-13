@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CreditCard, Monitor, LogOut, Check, TriangleAlert, Volume2, Circle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/settings")({
 function Settings() {
   const { account, trialDaysLeft, changePlan, signOut } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const current = account ? planById(account.plan) : null;
 
   return (
@@ -138,9 +140,15 @@ function Settings() {
                   size="lg"
                   className="gap-2"
                   onClick={() => {
-                    signOut();
-                    toast("Signed out");
-                    void navigate({ to: "/sign-in" });
+                    void (async () => {
+                      // Stop protected queries before the session goes, drop
+                      // their cached data, then leave without a back-stack entry.
+                      await qc.cancelQueries();
+                      qc.clear();
+                      await signOut();
+                      toast("Signed out");
+                      void navigate({ to: "/sign-in", replace: true });
+                    })();
                   }}
                 >
                   <LogOut className="h-4 w-4" /> Sign out

@@ -99,6 +99,8 @@ type Ctx = {
   account: Account | null;
   userId: string | null;
   ready: boolean;
+  /** Set when the profile row could not be read. Never means "no account". */
+  profileError: string | null;
   signIn: (email: string, password: string, opts?: SignInOptions) => Promise<Result>;
   signUp: (input: SignUpInput) => Promise<Result>;
   signOut: () => Promise<void>;
@@ -115,6 +117,7 @@ const AuthContext = createContext<Ctx>({
   account: null,
   userId: null,
   ready: false,
+  profileError: null,
   signIn: async () => ({ error: "Auth not ready" }),
   signUp: async () => ({ error: "Auth not ready" }),
   signOut: async () => {},
@@ -130,15 +133,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const loadProfile = useCallback(async (id: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select(
         "id, full_name, email, account_kind, plan, seats, trial_ends_at, status, company_name, company_code, fleet_tier",
       )
       .eq("id", id)
       .maybeSingle();
+    if (error) {
+      // A profile that cannot be read is not a missing account — say so.
+      console.error(`[auth] profile read failed: ${error.message}`);
+      setProfileError("Your account could not be read just now. Check your connection and retry.");
+      return;
+    }
+    setProfileError(null);
     setAccount(data ? toAccount(data as ProfileRow) : null);
   }, []);
 
@@ -261,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUserId(null);
     setAccount(null);
+    setProfileError(null);
   }, []);
 
   const changePlan = useCallback(
@@ -318,6 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         account,
         userId,
         ready,
+        profileError,
         signIn,
         signUp,
         signOut,

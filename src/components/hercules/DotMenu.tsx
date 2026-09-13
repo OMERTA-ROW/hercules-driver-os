@@ -21,6 +21,7 @@ import {
   Landmark,
   ShieldCheck,
   Coins,
+  Sparkles,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
  */
 
 const sections = [
+  { to: "/welcome", label: "Get Set Up", icon: Sparkles, feature: null },
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
   { to: "/health", label: "Vehicle Health", icon: Wrench, feature: "health" },

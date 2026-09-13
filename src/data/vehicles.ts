@@ -263,6 +263,6 @@ export function makeProfile(
 export const defaultProfile: VehicleProfile = {
   ...specFor("eighteen", "dryVan"),
   id: "VEH-default",
-  unit: "Unit 4471",
+  unit: "No unit saved yet",
   hazmat: "None",
 };
