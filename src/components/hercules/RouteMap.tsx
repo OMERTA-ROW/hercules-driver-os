@@ -460,6 +460,8 @@ function MapViewControls({
   following,
   onRecenter,
   onWholeRoute,
+  traffic,
+  onTraffic,
 }: {
   camera: CameraMode;
   onCamera: (c: CameraMode) => void;
@@ -468,6 +470,8 @@ function MapViewControls({
   following: boolean;
   onRecenter: () => void;
   onWholeRoute: () => void;
+  traffic: boolean;
+  onTraffic: (v: boolean) => void;
 }) {
   const pill =
     "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
