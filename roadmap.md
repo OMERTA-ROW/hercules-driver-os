@@ -110,3 +110,23 @@
   company/booking routines are callable by signed-in users on purpose because
   each one checks who is calling. No credit-granting routine is reachable by a
   signed-in user.
+
+## Release report — company access pass (bb79f81 follow-up)
+
+Verified by authenticated rollback-only fixture (throwaway owner/driver/outsider accounts,
+all rolled back; residue re-checked as zero):
+- Pending application survives: `company_my_memberships()` returns the pending row with the
+  carrier's name, so the summary does not vanish on reload.
+- Roster identity: owner sees the applicant's confirmed email; pending driver, active ordinary
+  driver and outsider are all refused server-side (`not_permitted`).
+- Spoof writes refused: driver cannot tag a vehicle to a company it does not belong to, cannot
+  post a company load, owner cannot post into a foreign company or assign a non-member driver.
+- Valid fleet flow succeeds: owner posts a company load, member books it with its own vehicle,
+  outsider booking is refused.
+- Refund accounting: a held (lapsed-plan) top-up is debited on refund before any release, and a
+  later paid month does not release refunded value.
+
+Not connected (no integration, shown as unavailable, never simulated):
+- Payments/Stripe (no credentials) — no live billing.
+- Commercial truck routing/restriction data — Google Maps base map only; posted signs govern.
+- OBD-II / THE BOLT telemetry, parts suppliers, delivery partners, load boards.
