@@ -992,8 +992,38 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }
 
+/**
+ * Inert stand-in used when a surface renders before/outside the provider
+ * (stale module copies, isolated previews). It never speaks and never
+ * commits anything — the screen stays up instead of going blank.
+ */
+const inertVoice: Ctx = {
+  mode: "idle",
+  turns: [],
+  colorway: "black",
+  setColorway: () => {},
+  voice: voiceOptions[0]!,
+  setVoice: () => {},
+  listen: () => {},
+  stop: () => {},
+  say: () => {},
+  approve: () => {},
+  decline: () => {},
+  clear: () => {},
+  announce: () => {},
+  lastLine: "",
+  pending: undefined,
+  preview: async () => {},
+  previewing: null,
+};
+
 export function useVoice() {
   const ctx = useContext(VoiceContext);
-  if (!ctx) throw new Error("useVoice must be used inside VoiceProvider");
+  if (!ctx) {
+    if (import.meta.env.DEV) {
+      console.warn("useVoice used outside VoiceProvider — falling back to an inert voice.");
+    }
+    return inertVoice;
+  }
   return ctx;
 }
