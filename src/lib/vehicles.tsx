@@ -38,7 +38,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
 import {
   defaultProfile,
-  makeProfile,
   rulesFor,
   specFor,
   specKey,
