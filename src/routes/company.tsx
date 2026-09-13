@@ -80,10 +80,7 @@ function CompanyPage() {
     return (
       <AppShell title="Company & dispatch" subtitle="Sign in to connect to a carrier">
         <Panel>
-          <EmptyState
-            title="Sign in first"
-            body="Your company link belongs to your account, so you need to be signed in to join a carrier or start a fleet."
-          />
+          <EmptyState title="Sign in first">{"Your company link belongs to your account, so you need to be signed in to join a carrier or start a fleet."}</EmptyState>
           <div className="mt-3 flex gap-2">
             <Button asChild size="lg">
               <Link to="/sign-in">Sign in</Link>
@@ -124,8 +121,8 @@ function CompanyPage() {
   async function submitCreate() {
     const res = await actions.createCompany.mutateAsync({
       name: fleetName,
-      dot: dot || undefined,
-      mc: mc || undefined,
+      ...(dot.trim() ? { dot: dot.trim() } : {}),
+      ...(mc.trim() ? { mc: mc.trim() } : {}),
     });
     if (!res.ok) {
       toast.error("Fleet not created", { description: res.message });
@@ -401,10 +398,7 @@ function CompanyPage() {
 
               <div className="mt-3 space-y-2">
                 {(invites.data ?? []).length === 0 ? (
-                  <EmptyState
-                    title="No invites yet"
-                    body="Create one above and hand the code to your driver. It expires on its own."
-                  />
+                  <EmptyState title="No invites yet">{"Create one above and hand the code to your driver. It expires on its own."}</EmptyState>
                 ) : null}
                 {(invites.data ?? []).map((iv) => {
                   const expired = new Date(iv.expiresAt).getTime() <= Date.now();
@@ -464,7 +458,7 @@ function CompanyPage() {
               <PanelTitle right={<Pill tone="primary">Roster</Pill>}>Your people</PanelTitle>
               <div className="space-y-2">
                 {(roster.data ?? []).length === 0 ? (
-                  <EmptyState title="Nobody yet" body="Invited drivers show up here to approve." />
+                  <EmptyState title="Nobody yet">{"Invited drivers show up here to approve."}</EmptyState>
                 ) : null}
                 {(roster.data ?? []).map((m) => (
                   <div

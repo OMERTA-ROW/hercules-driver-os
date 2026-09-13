@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as BrokerRouteImport } from './routes/broker'
+import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -56,6 +57,11 @@ const BreakdownRoute = BreakdownRouteImport.update({
 const BrokerRoute = BrokerRouteImport.update({
   id: '/broker',
   path: '/broker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComplianceRoute = ComplianceRouteImport.update({
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
+  '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
+  '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
+  '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/breakdown'
     | '/broker'
+    | '/company'
     | '/compliance'
     | '/credits'
     | '/dashboard'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/breakdown'
     | '/broker'
+    | '/company'
     | '/compliance'
     | '/credits'
     | '/dashboard'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/breakdown'
     | '/broker'
+    | '/company'
     | '/compliance'
     | '/credits'
     | '/dashboard'
@@ -368,6 +380,7 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   BreakdownRoute: typeof BreakdownRoute
   BrokerRoute: typeof BrokerRoute
+  CompanyRoute: typeof CompanyRoute
   ComplianceRoute: typeof ComplianceRoute
   CreditsRoute: typeof CreditsRoute
   DashboardRoute: typeof DashboardRoute
@@ -422,6 +435,13 @@ declare module '@tanstack/react-router' {
       path: '/broker'
       fullPath: '/broker'
       preLoaderRoute: typeof BrokerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compliance': {
@@ -600,6 +620,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   BreakdownRoute: BreakdownRoute,
   BrokerRoute: BrokerRoute,
+  CompanyRoute: CompanyRoute,
   ComplianceRoute: ComplianceRoute,
   CreditsRoute: CreditsRoute,
   DashboardRoute: DashboardRoute,
