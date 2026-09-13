@@ -14,6 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_credit_ledger: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          monthly_delta: number
+          purchased_delta: number
+          reason: string
+          ref: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          monthly_delta?: number
+          purchased_delta?: number
+          reason: string
+          ref?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          monthly_delta?: number
+          purchased_delta?: number
+          reason?: string
+          ref?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_credit_reservations: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string
+          id: string
+          monthly_amount: number
+          purchased_amount: number
+          settled_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string
+          id?: string
+          monthly_amount?: number
+          purchased_amount?: number
+          settled_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          monthly_amount?: number
+          purchased_amount?: number
+          settled_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_credit_wallets: {
+        Row: {
+          ai_plan_id: string | null
+          ai_plan_renews_at: string | null
+          created_at: string
+          monthly_balance: number
+          monthly_expires_at: string | null
+          purchased_balance: number
+          quality_pref: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_plan_id?: string | null
+          ai_plan_renews_at?: string | null
+          created_at?: string
+          monthly_balance?: number
+          monthly_expires_at?: string | null
+          purchased_balance?: number
+          quality_pref?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_plan_id?: string | null
+          ai_plan_renews_at?: string | null
+          created_at?: string
+          monthly_balance?: number
+          monthly_expires_at?: string | null
+          purchased_balance?: number
+          quality_pref?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage_events: {
+        Row: {
+          action: string
+          cost_basis: string
+          created_at: string
+          credits_charged: number
+          credits_saved: number
+          id: string
+          model: string | null
+          provider_cost_usd: number | null
+          served_from_cache: boolean
+          user_id: string
+        }
+        Insert: {
+          action: string
+          cost_basis?: string
+          created_at?: string
+          credits_charged?: number
+          credits_saved?: number
+          id?: string
+          model?: string | null
+          provider_cost_usd?: number | null
+          served_from_cache?: boolean
+          user_id: string
+        }
+        Update: {
+          action?: string
+          cost_basis?: string
+          created_at?: string
+          credits_charged?: number
+          credits_saved?: number
+          id?: string
+          model?: string | null
+          provider_cost_usd?: number | null
+          served_from_cache?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       alerts: {
         Row: {
           acknowledged_at: string | null
@@ -67,6 +211,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      billing_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          provider: string
+          received_at: string
+          user_id: string | null
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider: string
+          received_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider?: string
+          received_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       documents: {
         Row: {
@@ -516,7 +693,86 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ai_credits_commit: {
+        Args: {
+          _cached?: boolean
+          _charge: number
+          _cost_basis?: string
+          _model?: string
+          _provider_cost?: number
+          _reservation: string
+          _saved?: number
+        }
+        Returns: number
+      }
+      ai_credits_grant: {
+        Args: {
+          _amount: number
+          _bucket: string
+          _expires?: string
+          _plan_id?: string
+          _reason: string
+          _ref: string
+          _renews_at?: string
+          _user: string
+        }
+        Returns: boolean
+      }
+      ai_credits_refund: {
+        Args: { _reason: string; _reservation: string }
+        Returns: boolean
+      }
+      ai_credits_reserve: {
+        Args: { _action: string; _amount: number }
+        Returns: {
+          action: string
+          amount: number
+          created_at: string
+          id: string
+          monthly_amount: number
+          purchased_amount: number
+          settled_at: string | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_credit_reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      ai_credits_revoke: {
+        Args: {
+          _amount: number
+          _bucket: string
+          _reason: string
+          _ref: string
+          _user: string
+        }
+        Returns: boolean
+      }
+      ai_credits_touch: {
+        Args: { _user: string }
+        Returns: {
+          ai_plan_id: string | null
+          ai_plan_renews_at: string | null
+          created_at: string
+          monthly_balance: number
+          monthly_expires_at: string | null
+          purchased_balance: number
+          quality_pref: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_credit_wallets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      ai_set_quality_pref: { Args: { _pref: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
