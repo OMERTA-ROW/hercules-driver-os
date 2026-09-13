@@ -504,7 +504,10 @@ function MapViewControls({
     "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
   const active = "border-primary/40 bg-primary/15 text-primary";
   return (
-    <div className="absolute right-3 top-24 flex flex-col items-end gap-2">
+    // Horizontal wrapping row on the left, below the imagery switch. The
+    // right edge of the map stays clear for Google's own controls (Pegman,
+    // zoom), so a tall custom stack can never cover them at tablet heights.
+    <div className="absolute left-3 right-20 top-44 flex flex-wrap items-center gap-2">
       {/* camera: tilted 3D navigation view vs flat 2D overhead */}
       <div className="flex gap-1 rounded-xl border border-foreground/12 bg-background/60 p-1 backdrop-blur-xl">
         {(
