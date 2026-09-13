@@ -449,7 +449,9 @@ function BaseViewSwitch({
   onChange: (v: BaseView) => void;
 }) {
   return (
-    <div className="absolute left-3 top-3 flex gap-1 rounded-xl border border-foreground/12 bg-background/70 p-1 backdrop-blur-xl">
+    // Top-left corner is reserved for the navigation page's next-turn card, so
+    // the imagery switch sits just below it instead of being covered.
+    <div className="absolute left-3 top-28 flex gap-1 rounded-xl border border-foreground/12 bg-background/70 p-1 backdrop-blur-xl">
       {baseViews.map((b) => (
         <button
           key={b.id}
@@ -502,7 +504,7 @@ function MapViewControls({
     "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
   const active = "border-primary/40 bg-primary/15 text-primary";
   return (
-    <div className="absolute right-3 top-3 flex flex-col items-end gap-2">
+    <div className="absolute right-3 top-24 flex flex-col items-end gap-2">
       {/* camera: tilted 3D navigation view vs flat 2D overhead */}
       <div className="flex gap-1 rounded-xl border border-foreground/12 bg-background/60 p-1 backdrop-blur-xl">
         {(
