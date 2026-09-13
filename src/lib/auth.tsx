@@ -99,7 +99,7 @@ type Ctx = {
   account: Account | null;
   userId: string | null;
   ready: boolean;
-  signIn: (email: string, password: string) => Promise<Result>;
+  signIn: (email: string, password: string, opts?: SignInOptions) => Promise<Result>;
   signUp: (input: SignUpInput) => Promise<Result>;
   signOut: () => Promise<void>;
   changePlan: (plan: PlanId, seats?: number) => Promise<void>;
