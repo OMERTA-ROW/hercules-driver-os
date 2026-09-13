@@ -271,3 +271,77 @@ export const openBillingPortal = createServerFn({ method: "POST" })
       };
     }
   });
+
+/* ------------------------------------------------------------------ */
+/* Enterprise quote request — real record, no invented email          */
+/* ------------------------------------------------------------------ */
+
+const enterpriseInput = z.object({
+  company: z.string().trim().min(2).max(120),
+  contactName: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().max(200),
+  phone: z.string().trim().max(40).optional().or(z.literal("")),
+  fleetSize: z.coerce.number().int().min(1).max(100000),
+  expectedUsage: z.string().trim().min(10).max(2000),
+  notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  /** Honeypot — real drivers never fill this. */
+  website: z.string().max(0).optional().or(z.literal("")),
+});
+
+export const submitEnterpriseInquiry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => enterpriseInput.parse(d))
+  .handler(async ({ data, context }) => {
+    if (data.website) {
+      // Honeypot tripped: refuse, and say nothing that helps a bot.
+      return { ok: false as const, message: "That request could not be sent." };
+    }
+
+    const db = context.supabase as never as {
+      from: (t: string) => {
+        select: (c: string, o?: { count: "exact"; head: true }) => {
+          gte: (c: string, v: string) => Promise<{ count: number | null; error: unknown }>;
+        };
+        insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+      };
+    };
+
+    // Spam / abuse control: at most 3 requests per account per 24 hours.
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const recent = await db
+      .from("enterprise_inquiries")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", since);
+    if ((recent.count ?? 0) >= 3) {
+      return {
+        ok: false as const,
+        message:
+          "You have already sent several requests today. We have them — we will come back to you before you need to send another.",
+      };
+    }
+
+    const { error } = await db.from("enterprise_inquiries").insert({
+      user_id: context.userId,
+      company: data.company,
+      contact_name: data.contactName,
+      email: data.email,
+      phone: data.phone || null,
+      fleet_size: data.fleetSize,
+      expected_usage: data.expectedUsage,
+      notes: data.notes || null,
+    });
+
+    if (error) {
+      console.error(`[enterprise] insert failed: ${error.message}`);
+      return {
+        ok: false as const,
+        message: "Your request was not saved. Nothing was sent — please try again.",
+      };
+    }
+
+    return {
+      ok: true as const,
+      message:
+        "Request saved. It is on our list for review — we will reply to the email you gave. Nothing is charged and no plan has changed.",
+    };
+  });
