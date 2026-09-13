@@ -196,7 +196,8 @@ function CreditsPage() {
               charged and no credits can be added. The tiers below are the catalogue that will go live.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Still needed: {purchasing.missing.join(", ")}
+              Nothing is required from you. The account owner finishes the billing setup — until then
+              this screen is a price list only.
             </p>
           </Panel>
         ) : null}

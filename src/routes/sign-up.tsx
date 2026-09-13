@@ -57,8 +57,13 @@ function SignUp() {
         <Panel>
           <Label>Create account</Label>
           <h1 className="mt-1 text-2xl font-bold uppercase">
-            {TRIAL_DAYS} days free, then ${monthly}/month
+            {TRIAL_DAYS} days free — no card needed
           </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Nothing is charged now and there is no automatic charge later. Billing is not switched on
+            in this app yet; the {selected.name} price of ${monthly}/month applies only once it is,
+            and only after you say yes.
+          </p>
 
           <form
             className="mt-4 grid gap-4 lg:grid-cols-2"
@@ -196,7 +201,7 @@ function SignUp() {
                     <ul className="mt-2 space-y-1">
                       {p.features.slice(-3).map((f) => (
                         <li key={f} className="flex items-center gap-1.5 text-xs">
-                          <Check className="h-3.5 w-3.5 text-go" /> {f}
+                          <Check className="h-3.5 w-3.5 text-go" /> {featureLabels[f]}
                         </li>
                       ))}
                     </ul>

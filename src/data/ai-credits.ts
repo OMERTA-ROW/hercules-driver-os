@@ -209,7 +209,7 @@ export function costPreview(action: AiAction, chars: number): string {
 
 /** Things that never cost a credit, stated plainly to the driver. */
 export const freeForever = [
-  "Navigation, the map, hazards and truck-legal routing",
+  "Navigation, the map and hazard warnings",
   "Clock, loads, money and health screens",
   "Every safety and breakdown action, including calling for help",
   "Fixed commands the app answers itself (\"where am I\", \"how many hours\")",
