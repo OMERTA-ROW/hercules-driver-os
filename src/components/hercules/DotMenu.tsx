@@ -20,6 +20,7 @@ import {
   Radar,
   Landmark,
   ShieldCheck,
+  Coins,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -47,6 +48,7 @@ const sections = [
   { to: "/supply", label: "Food Delivery", icon: ShoppingBasket, feature: null },
   { to: "/parts", label: "Supply & Parts", icon: Package, feature: null },
   { to: "/store", label: "Store", icon: ShoppingBag, feature: null },
+  { to: "/credits", label: "AI Credits", icon: Coins, feature: null },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
   { to: "/zeus", label: "ZEUS Fleet Side", icon: Building2, feature: null },
   { to: "/dispatch", label: "Dispatch Watch", icon: Radar, feature: null },

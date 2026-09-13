@@ -1,0 +1,90 @@
+# AI assistance credits
+
+AI assistance is paid for with credits, separately from the HERCULES app plan
+(`src/data/plans.ts`, unchanged: Company $5/mo, Owner-Operator $29/mo,
+Fleet $19 per truck/mo, min 3).
+
+## Draft catalogue (edit in `src/data/ai-credits.ts`)
+
+### Monthly — replenishes once per paid period, expires at period end
+
+| Tier   | Credits / month | Price      |
+| ------ | --------------- | ---------- |
+| Assist | 500             | $9 / mo    |
+| Pro    | 2,000           | $29 / mo   |
+| Max    | 5,000           | $59 / mo   |
+
+### Buy once — never expires, carries over
+
+| Pack  | Credits | Price        |
+| ----- | ------- | ------------ |
+| Small | 250     | $6 one time  |
+| Best  | 1,000   | $20 one time |
+| Bulk  | 3,000   | $49 one time |
+
+Monthly credits are always consumed before bought-once credits, so nothing
+expires that could have been spent.
+
+### Action costs (server-owned, shown before use)
+
+| Action                          | Cost                                        |
+| ------------------------------- | ------------------------------------------- |
+| Spoken line (standard voice)    | 1 + 1 per 240 chars, max 6                  |
+| Spoken line (premium persona)   | 2 + 1 per 200 chars, max 10                 |
+| AI assistant answer (reserved)  | 2 + 1 per 400 chars, max 15                 |
+
+Repeating a line the same account just heard is free (private per-account cache,
+15 min). Eco quality uses the device's own voice at zero credits.
+
+## Where credits can be added
+
+Only `src/routes/api/public/stripe-webhook.ts`, after verifying the raw-body
+`Stripe-Signature` HMAC and a 5-minute timestamp tolerance. Every event is first
+claimed in `billing_events (provider, event_id)`; a duplicate, delayed or
+out-of-order delivery loses that insert and returns without granting. Amounts
+come from the server catalogue, never from the payload. The success URL grants
+nothing; there is no client-side grant path and the grant/revoke routines are
+executable only by `service_role`.
+
+Handled events: `checkout.session.completed`, `invoice.paid` (renewal),
+`invoice.payment_failed`, `customer.subscription.deleted`, `charge.refunded`,
+`charge.dispute.created`.
+
+## Spend protection on paid provider calls
+
+`src/lib/speech.functions.ts` (previously unauthenticated) now requires a signed
+in account, then in order: per-account rate limit → private cache lookup →
+atomic credit reservation → provider call (20 s abort) → commit or full refund.
+`src/lib/ai-meter.server.ts` holds the limiter, cache and in-flight dedupe.
+Input is capped at `aiLimits.maxSpeechChars`.
+
+## Margin reporting
+
+`ai_usage_events` records `credits_charged`, `credits_saved`,
+`provider_cost_usd` and `cost_basis`. The Lovable AI gateway does not return a
+per-call price, so speech cost is `cost_basis = 'estimated'`, derived from
+`providerCostAssumptions` — it is an assumption, not an invoice, and is labelled
+that way in the app. No margin is guaranteed anywhere in the UI.
+
+## Remaining setup before purchases can go live
+
+Add these as project secrets; until all are present the credits screen shows an
+honest "purchases not switched on" state and no checkout can be started:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
+- `STRIPE_PRICE_AI_PACK_250`, `STRIPE_PRICE_AI_PACK_1000`, `STRIPE_PRICE_AI_PACK_3000`
+
+Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
+
+Automatic tax is deliberately NOT enabled — that requires verified tax
+registration first.
+
+## Known limits
+
+- The rate limiter is per server instance, in memory: it bounds runaway loops
+  but is not a distributed limit.
+- Credit accounting was verified by unit tests and by reading the SQL routines;
+  the end-to-end database exercise needs at least one real account, and this
+  project currently has none.

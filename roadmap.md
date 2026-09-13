@@ -54,3 +54,12 @@
 - `/health`: renamed Vehicle Health; adapter recommendation + reason + pairing card; capability-filtered metric grid; TPMS only on J1939; emissions readiness only on OBD-II.
 - `/store`: both adapter cards with the profile-matched one flagged, plus a "which adapter your truck needs" panel; one-time purchases (`bolt`, `boltObd`) confirmed explicitly, separate from the subscription.
 - Breakdown Assist and `/parts` read faults from the live adapter; menu/dashboard labels renamed.
+
+## AI assistance credits — done
+- `src/data/ai-credits.ts`: single editable catalogue — monthly tiers (Assist 500/$9, Pro 2,000/$29, Max 5,000/$59), buy-once packs (250/$6, 1,000/$20, 3,000/$49), per-action credit costs, hard input caps, rate limits, provider cost assumptions, always-free list.
+- Database: `ai_credit_wallets`, `ai_credit_ledger`, `ai_credit_reservations`, `ai_usage_events`, `billing_events` with RLS (own rows readable only) and server-only grant/revoke routines; monthly credits expire at period end and are consumed before bought-once credits.
+- `src/lib/credits.functions.ts`: authenticated wallet/ledger/usage read, quality preference, hosted Checkout (subscription vs payment) with server-side allowlisted price env mapping, customer portal. Honest unavailable state while payment secrets are absent.
+- `src/routes/api/public/stripe-webhook.ts`: raw-body signed webhook, 5-minute tolerance, idempotent event claim, renewal replenishment, payment failure / cancellation / refund clawback. The only path that adds credits.
+- `src/lib/speech.functions.ts`: was an unauthenticated paid TTS endpoint — now auth-required, rate limited, cached per account, credit-reserved before the provider call, refunded in full on failure, input capped, 20 s abort, in-flight dedupe. Device voice fallback at zero credits.
+- `/credits` screen (menu, pricing, settings): balance split monthly vs bought, renewal/expiry dates, low-credit state, per-action costs before use, Eco/Balanced quality, usage and credit history.
+- Remaining setup + known limits: `docs/ai-credits.md`.

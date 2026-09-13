@@ -14,6 +14,7 @@ import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as BrokerRouteImport } from './routes/broker'
 import { Route as ComplianceRouteImport } from './routes/compliance'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocumentsRouteImport } from './routes/documents'
@@ -34,6 +35,7 @@ import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,11 @@ const BrokerRoute = BrokerRouteImport.update({
 const ComplianceRoute = ComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -160,6 +167,11 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -167,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
+  '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
@@ -187,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/zeus': typeof ZeusRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,6 +208,7 @@ export interface FileRoutesByTo {
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
+  '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
@@ -214,6 +229,7 @@ export interface FileRoutesByTo {
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/zeus': typeof ZeusRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,6 +238,7 @@ export interface FileRoutesById {
   '/breakdown': typeof BreakdownRoute
   '/broker': typeof BrokerRoute
   '/compliance': typeof ComplianceRoute
+  '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
   '/documents': typeof DocumentsRoute
@@ -242,6 +259,7 @@ export interface FileRoutesById {
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/zeus': typeof ZeusRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +269,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/broker'
     | '/compliance'
+    | '/credits'
     | '/dashboard'
     | '/dispatch'
     | '/documents'
@@ -271,6 +290,7 @@ export interface FileRouteTypes {
     | '/supply'
     | '/voice'
     | '/zeus'
+    | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -278,6 +298,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/broker'
     | '/compliance'
+    | '/credits'
     | '/dashboard'
     | '/dispatch'
     | '/documents'
@@ -298,6 +319,7 @@ export interface FileRouteTypes {
     | '/supply'
     | '/voice'
     | '/zeus'
+    | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
@@ -305,6 +327,7 @@ export interface FileRouteTypes {
     | '/breakdown'
     | '/broker'
     | '/compliance'
+    | '/credits'
     | '/dashboard'
     | '/dispatch'
     | '/documents'
@@ -325,6 +348,7 @@ export interface FileRouteTypes {
     | '/supply'
     | '/voice'
     | '/zeus'
+    | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -333,6 +357,7 @@ export interface RootRouteChildren {
   BreakdownRoute: typeof BreakdownRoute
   BrokerRoute: typeof BrokerRoute
   ComplianceRoute: typeof ComplianceRoute
+  CreditsRoute: typeof CreditsRoute
   DashboardRoute: typeof DashboardRoute
   DispatchRoute: typeof DispatchRoute
   DocumentsRoute: typeof DocumentsRoute
@@ -353,6 +378,7 @@ export interface RootRouteChildren {
   SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
   ZeusRoute: typeof ZeusRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -390,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/compliance'
       fullPath: '/compliance'
       preLoaderRoute: typeof ComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -532,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -541,6 +581,7 @@ const rootRouteChildren: RootRouteChildren = {
   BreakdownRoute: BreakdownRoute,
   BrokerRoute: BrokerRoute,
   ComplianceRoute: ComplianceRoute,
+  CreditsRoute: CreditsRoute,
   DashboardRoute: DashboardRoute,
   DispatchRoute: DispatchRoute,
   DocumentsRoute: DocumentsRoute,
@@ -561,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
   ZeusRoute: ZeusRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
