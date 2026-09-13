@@ -7,8 +7,11 @@
  * hotshot pickup reads the sixteen-pin OBD-II bus. The snapshot only ever
  * carries what that bus can actually report, so screens never show empty fields.
  *
- * The feed is a mock ticker today; a real adapter implements the same
- * `BoltAdapter` seam over Web Bluetooth and nothing above this file changes.
+ * THERE IS NO ENGINE FEED YET. No adapter hardware is talking to this app, so
+ * this layer reports nothing rather than inventing readings: `state` stays
+ * "unavailable", every list is empty, and screens say plainly that engine
+ * diagnostics are not connected. A real Web Bluetooth reader implements the same
+ * `BoltAdapter` seam and nothing above this file changes.
  */
 import {
   createContext,
@@ -39,7 +42,7 @@ import {
 } from "@/data/bolt";
 import { useVehicle } from "./vehicles";
 
-export type BoltState = "not-detected" | "pairing" | "paired" | "connected";
+export type BoltState = "unavailable" | "not-detected" | "pairing" | "paired" | "connected";
 
 export type BoltSnapshot = {
   kind: AdapterKind;
@@ -59,36 +62,18 @@ export type BoltAdapter = {
   read: (kind: AdapterKind) => BoltSnapshot;
 };
 
-function jitter(v: LiveValue, tick: number): LiveValue {
-  if (v.key === "rpm") {
-    const base = Number(v.value.replace(/,/g, "")) || 1400;
-    return { ...v, value: (base + Math.round(Math.sin(tick / 3) * 60)).toLocaleString() };
-  }
-  if (v.key === "coolant") {
-    const t = Number(v.value) + (tick % 5) - 2;
-    return { ...v, value: String(t) };
-  }
-  if (v.key === "mpg") {
-    return { ...v, value: (Number(v.value) + ((tick % 5) * 0.1 - 0.2)).toFixed(1) };
-  }
-  if (v.key === "volts") {
-    return { ...v, value: (13.8 + ((tick % 3) * 0.1)).toFixed(1) };
-  }
-  return v;
-}
-
-/** Mock adapter — replace with the Bluetooth J1939 / OBD-II implementation. */
-export const mockBoltAdapter: BoltAdapter = {
-  pair: () => new Promise((res) => setTimeout(() => res(true), 1600)),
-  read: (kind) => ({
-    kind,
-    values: baselineFor(kind),
-    faults: faultsFor(kind),
-    tires: adapters[kind].hasTires ? boltTires : [],
-    predictions: predictionsFor(kind),
-    readiness: adapters[kind].hasReadiness ? obdReadiness : [],
-  }),
+/**
+ * No hardware adapter exists in this build, so nothing can be read. Every
+ * reader below returns an empty frame set — never a fabricated value.
+ */
+export const noHardwareAdapter: BoltAdapter = {
+  pair: () => Promise.resolve(false),
+  read: (kind) => ({ kind, values: [], faults: [], tires: [], predictions: [], readiness: [] }),
 };
+
+/** Shown wherever engine data would appear. */
+export const BOLT_UNAVAILABLE =
+  "Engine diagnostics are not connected. No reader is paired to this app yet, so nothing is being measured — anything shown here would be made up.";
 
 const KIND_KEY = "hercules.bolt.kind";
 const pairedKey = (kind: AdapterKind) => `hercules.bolt.paired.${kind}`;
@@ -106,16 +91,16 @@ export function activeAdapterKind(): AdapterKind {
 
 /** Non-React snapshot for the voice engine and Breakdown Assist. */
 export function boltSnapshot(kind: AdapterKind = activeAdapterKind()): BoltSnapshot {
-  return mockBoltAdapter.read(kind);
+  return noHardwareAdapter.read(kind);
 }
 
 /** Fault frames off whichever diagnostics source is active. */
 export function activeFaults(): FaultFrame[] {
-  return faultsFor(activeAdapterKind());
+  return [];
 }
 
 export function activePredictions(): Prediction[] {
-  return predictionsFor(activeAdapterKind());
+  return [];
 }
 
 export function activeAdapter(): AdapterProduct {
@@ -124,11 +109,7 @@ export function activeAdapter(): AdapterProduct {
 
 export function boltSpokenSummary(kind: AdapterKind = activeAdapterKind()): string {
   const product = adapters[kind];
-  const faults = faultsFor(kind);
-  if (!faults.length) return `${product.name} isn't reporting a single fault. You're clean.`;
-  return `${product.name} has ${faults.length} active ${
-    faults.length === 1 ? "code" : "codes"
-  }. ${faults.map((f) => f.plain).join(" ")}`;
+  return `I can't read your engine. No ${product.name} is talking to this app, so I have no codes and no readings — I will not guess at them.`;
 }
 
 type Ctx = {
@@ -154,10 +135,8 @@ export function BoltProvider({ children }: { children: ReactNode }) {
   const kind = adapterForSpec(active);
   const adapter = adapters[kind];
 
-  const [state, setState] = useState<BoltState>("not-detected");
-  const [tick, setTick] = useState(0);
+  const [state, setState] = useState<BoltState>("unavailable");
   const [dismissed, setDismissed] = useState<string[]>([]);
-  const started = useRef(0);
 
   /* The active bus follows the equipment profile — remembered for the voice
      engine and other non-React readers. */
@@ -169,61 +148,32 @@ export function BoltProvider({ children }: { children: ReactNode }) {
     }
   }, [kind]);
 
+  // Any previously remembered "paired" flag is cleared: nothing can be paired
+  // while no reader hardware is supported.
   useEffect(() => {
-    try {
-      if (localStorage.getItem(pairedKey(kind)) === "1") {
-        setState("connected");
-        started.current = Date.now();
-      } else setState("not-detected");
-    } catch {
-      /* ignore */
-    }
-    setTick(0);
-    setDismissed([]);
-  }, [kind]);
-
-  useEffect(() => {
-    if (state !== "connected") return;
-    const id = setInterval(() => setTick((t) => t + 1), 1200);
-    return () => clearInterval(id);
-  }, [state]);
-
-  const startPairing = useCallback(async () => {
-    setState("pairing");
-    const ok = await mockBoltAdapter.pair(kind);
-    if (ok) {
-      try {
-        localStorage.setItem(pairedKey(kind), "1");
-      } catch {
-        /* ignore */
-      }
-      started.current = Date.now();
-      setState("connected");
-    } else setState("not-detected");
-  }, [kind]);
-
-  const disconnect = useCallback(() => {
     try {
       localStorage.removeItem(pairedKey(kind));
     } catch {
       /* ignore */
     }
-    setState("not-detected");
+    setState("unavailable");
+    setDismissed([]);
   }, [kind]);
 
-  const snapshot = useMemo<BoltSnapshot>(() => {
-    const base = mockBoltAdapter.read(kind);
-    if (state !== "connected") return base;
-    return { ...base, values: base.values.map((v) => jitter(v, tick)) };
-  }, [kind, state, tick]);
+  const startPairing = useCallback(async () => {
+    setState("pairing");
+    const ok = await noHardwareAdapter.pair(kind);
+    setState(ok ? "connected" : "unavailable");
+  }, [kind]);
 
-  const elapsed = state === "connected" ? tick * 1.2 : 0;
-  const autoAlerts = useMemo(
-    () =>
-      autoAlertsFor(kind)
-        .filter((a) => elapsed >= a.atSecond && !dismissed.includes(a.id))
-        .map((a) => ({ id: a.id, severity: a.severity, spoken: a.spoken })),
-    [kind, elapsed, dismissed],
+  const disconnect = useCallback(() => setState("unavailable"), []);
+
+  const snapshot = useMemo<BoltSnapshot>(() => noHardwareAdapter.read(kind), [kind]);
+
+  // No stream, so no automatic alerts. Nothing is raised from nothing.
+  const autoAlerts = useMemo<{ id: string; severity: "watch" | "alert"; spoken: string }[]>(
+    () => [],
+    [dismissed],
   );
 
   const dismissAlert = useCallback(
@@ -231,7 +181,7 @@ export function BoltProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const signal = state === "connected" ? 3 + (tick % 2) : 0;
+  const signal = 0;
 
   const reason =
     kind === "j1939"
