@@ -758,3 +758,129 @@
 [data-theme="day"] .map-dim-imagery .gm-style canvas {
   filter: saturate(0.42) brightness(0.72) contrast(1.06);
 }
+
+/* ================================================================ FUTURISM PASS
+ * One shared visual language across every screen: black cockpit ground with a
+ * fine technical grid, layered dark surfaces, crisp gold edges. Everything here
+ * is a token or utility so screens stay consistent and easy to retune.
+ */
+:root {
+  --grid-line: color-mix(in oklab, var(--primary) 9%, transparent);
+  --grid-size: 76px;
+  --edge-gold: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--primary) 62%, transparent) 22%,
+    color-mix(in oklab, var(--primary) 90%, transparent) 50%,
+    color-mix(in oklab, var(--primary) 62%, transparent) 78%,
+    transparent 100%
+  );
+  --surface-1: color-mix(in oklab, var(--primary) 4%, var(--background));
+  --surface-2: color-mix(in oklab, var(--primary) 7%, var(--background));
+}
+
+[data-theme="day"] {
+  /* Direct sun: the grid stays faint so text contrast always wins. */
+  --grid-line: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+/* The cockpit ground. Sits behind everything, costs nothing to paint. */
+@layer base {
+  body {
+    background-image:
+      radial-gradient(
+        120% 80% at 50% -10%,
+        color-mix(in oklab, var(--primary) 8%, transparent) 0%,
+        transparent 62%
+      ),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size);
+    background-attachment: fixed;
+  }
+
+  /* Keyboard focus is always visible, on every control. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* A crisp gold hairline used as the top edge of panels, headers and rails. */
+@utility edge-gold {
+  background-image: var(--edge-gold);
+}
+
+/* Layered surfaces for nesting inside a panel without another border. */
+@utility surface-1 {
+  background-color: var(--surface-1);
+}
+
+@utility surface-2 {
+  background-color: var(--surface-2);
+}
+
+/* Fine technical grid for the inside of a panel or an empty state. */
+@utility inner-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Corner ticks — a cockpit instrument detail, no extra weight. */
+@utility corner-ticks {
+  position: relative;
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: color-mix(in oklab, var(--primary) 65%, transparent);
+    pointer-events: none;
+  }
+  &::before {
+    top: 6px;
+    left: 6px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  &::after {
+    right: 6px;
+    bottom: 6px;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+}
+
+/* One quiet entrance. No flashing, no movement once settled. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility rise-in {
+  animation: rise-in 0.34s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* A driver asked for calm gets calm: every decorative animation stops. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
