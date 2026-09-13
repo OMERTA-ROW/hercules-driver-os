@@ -14,11 +14,17 @@ import { aiLimits } from "@/data/ai-credits";
  * wallet row, so two simultaneous requests can never spend the same credit.
  */
 
-/** Any Supabase client able to call the credit routines (typed loosely so the
- *  generated Database types do not need to know about these functions). */
-type Client = {
+/** Service-role client. The credit routines are EXECUTE-revoked from anon and
+ *  authenticated, so ONLY this client can move credits — a signed-in browser
+ *  cannot reserve, settle or refund anything, not even on its own account. */
+type AdminClient = {
   rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
+
+async function admin(): Promise<AdminClient> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin as never as AdminClient;
+}
 
 /* ---- rate limiting -------------------------------------------------------
    Per server instance, in memory. It bounds runaway loops from one account;
@@ -80,18 +86,24 @@ export function dedupe<T>(key: string, run: () => Promise<T>): Promise<T> {
   return p;
 }
 
-/* ---- credit reservations ------------------------------------------------ */
+/* ---- credit reservations ------------------------------------------------
+   Every call names the account explicitly (_user), resolved on the server from
+   a verified session — never from client input. */
 
 export type Reservation = { id: string; amount: number };
 
 export async function reserve(
-  supabase: Client,
+  userId: string,
   action: string,
   amount: number,
+  idemKey?: string,
 ): Promise<{ ok: true; reservation: Reservation } | { ok: false; reason: "insufficient" | "error"; message: string }> {
-  const { data, error } = await supabase.rpc("ai_credits_reserve", {
+  const db = await admin();
+  const { data, error } = await db.rpc("ai_credits_reserve", {
+    _user: userId,
     _action: action,
     _amount: amount,
+    _idem: idemKey ?? null,
   });
   if (error) {
     const insufficient = error.message.includes("insufficient_credits");
@@ -110,7 +122,7 @@ export async function reserve(
 }
 
 export async function commit(
-  supabase: Client,
+  userId: string,
   reservationId: string,
   opts: {
     charge: number;
@@ -121,7 +133,9 @@ export async function commit(
     saved?: number;
   },
 ) {
-  const { error } = await supabase.rpc("ai_credits_commit", {
+  const db = await admin();
+  const { error } = await db.rpc("ai_credits_commit", {
+    _user: userId,
     _reservation: reservationId,
     _charge: opts.charge,
     _model: opts.model ?? null,
@@ -133,8 +147,10 @@ export async function commit(
   if (error) console.error(`[credits] commit failed: ${error.message}`);
 }
 
-export async function refund(supabase: Client, reservationId: string, reason: string) {
-  const { error } = await supabase.rpc("ai_credits_refund", {
+export async function refund(userId: string, reservationId: string, reason: string) {
+  const db = await admin();
+  const { error } = await db.rpc("ai_credits_refund", {
+    _user: userId,
     _reservation: reservationId,
     _reason: reason,
   });

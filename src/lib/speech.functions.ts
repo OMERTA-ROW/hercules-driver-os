@@ -56,15 +56,14 @@ export const speakLine = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "rate_limited" as const, message: limited.message };
     }
 
-    const db = context.supabase as never;
     const ck = cacheKey(context.userId, [model, data.voiceId, text]);
 
     // Repeat of a line this same account just heard — free, and recorded as saved.
     const cached = cacheGet(ck);
     if (cached) {
-      const held = await reserve(db, `${action}_cached`, 0);
+      const held = await reserve(context.userId, `${action}_cached`, 0);
       if (held.ok) {
-        await commit(db, held.reservation.id, {
+        await commit(context.userId, held.reservation.id, {
           charge: 0,
           model,
           providerCostUsd: 0,
@@ -76,7 +75,7 @@ export const speakLine = createServerFn({ method: "POST" })
       return { ok: true as const, audio: cached, charged: 0, cached: true };
     }
 
-    const held = await reserve(db, action, cost);
+    const held = await reserve(context.userId, action, cost, `${ck}::${Date.now() - (Date.now() % (aiLimits.cacheTtlSeconds * 1000))}`);
     if (!held.ok) {
       return {
         ok: false as const,
@@ -122,7 +121,7 @@ export const speakLine = createServerFn({ method: "POST" })
       });
 
       cacheSet(ck, audio);
-      await commit(db, held.reservation.id, {
+      await commit(context.userId, held.reservation.id, {
         charge: cost,
         model,
         // The gateway does not return a per-call price, so this is our own
@@ -132,7 +131,7 @@ export const speakLine = createServerFn({ method: "POST" })
       });
       return { ok: true as const, audio, charged: cost, cached: false };
     } catch (e) {
-      await refund(db, held.reservation.id, "Speech provider failed — credits returned");
+      await refund(context.userId, held.reservation.id, "Speech provider failed — credits returned");
       const status = (e as { status?: number }).status ?? 0;
       const message =
         status === 402
