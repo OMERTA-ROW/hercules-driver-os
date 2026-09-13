@@ -77,15 +77,20 @@ export type DeliveryProviderApi = {
   cancel: (id: string) => Promise<void>;
 };
 
-export const mockDeliveryProvider: DeliveryProviderApi = {
-  name: "mock-delivery-aggregator",
-  async checkCoverage(loc) {
-    return loc.coverage;
+/**
+ * NO DELIVERY PARTNER IS CONNECTED. Nothing below reaches a real platform, so it
+ * offers nothing rather than fabricating menus, prices or arrival times.
+ */
+export const DELIVERY_UNAVAILABLE =
+  "No delivery or supply partner is connected yet, so nothing can be ordered from here and no prices or arrival times are shown.";
+
+export const unavailableDeliveryProvider: DeliveryProviderApi = {
+  name: "not connected",
+  async checkCoverage() {
+    return [];
   },
-  async quote(category) {
-    return category === "all"
-      ? orderOptions
-      : orderOptions.filter((o) => serviceOf(o.service).category === category);
+  async quote() {
+    return [];
   },
   async handOff({ option, dropLabel, meetNote }) {
     return {
@@ -140,7 +145,7 @@ const DeliveryContext = createContext<Ctx | null>(null);
 
 export function DeliveryProvider({
   children,
-  provider = mockDeliveryProvider,
+  provider = unavailableDeliveryProvider,
 }: {
   children: ReactNode;
   provider?: DeliveryProviderApi;
@@ -235,7 +240,7 @@ export function DeliveryProvider({
       noFoodHere,
       nearestCoveredAhead: nearestCovered("food"),
       options,
-      favorites: mockFavorites,
+      favorites: [],
       meetNote,
       setMeetNote,
       orders,
