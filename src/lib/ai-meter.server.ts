@@ -193,14 +193,94 @@ export async function requestIdentity(userId: string, parts: (string | number)[]
 
 export type MeteredResult<T> =
   | { ok: true; value: T; charged: number }
-  | { ok: false; reason: "insufficient" | "error" | "provider"; message: string; needed?: number; status?: number };
+  | {
+      ok: false;
+      reason: "insufficient" | "error" | "provider" | "pending" | "already_served";
+      message: string;
+      needed?: number;
+      status?: number;
+    };
+
+type ClaimOutcome = {
+  outcome: "owner" | "pending" | "done" | "insufficient" | "error";
+  reservation?: string;
+  amount?: number;
+  charged?: number;
+};
+
+async function claimExecution(
+  userId: string,
+  idem: string,
+  action: string,
+  amount: number,
+): Promise<ClaimOutcome> {
+  const db = await admin();
+  const { data, error } = await db.rpc("ai_exec_claim", {
+    _user: userId,
+    _idem: idem,
+    _action: action,
+    _amount: amount,
+    _lease_seconds: 60,
+  });
+  if (error) {
+    if (error.message.includes("insufficient_credits")) return { outcome: "insufficient" };
+    console.error(`[credits] claim failed: ${error.message}`);
+    return { outcome: "error" };
+  }
+  return (data as ClaimOutcome | null) ?? { outcome: "error" };
+}
+
+async function finishExecution(
+  userId: string,
+  idem: string,
+  ok: boolean,
+  opts: {
+    charge?: number;
+    model?: string;
+    providerCostUsd?: number | null;
+    costBasis?: "actual" | "estimated" | "none";
+    error?: string;
+  },
+): Promise<{ status: "settled" | "unsettled" | "failed"; charged: number }> {
+  const db = await admin();
+  const { data, error } = await db.rpc("ai_exec_finish", {
+    _user: userId,
+    _idem: idem,
+    _ok: ok,
+    _charge: opts.charge ?? null,
+    _model: opts.model ?? null,
+    _provider_cost: opts.providerCostUsd ?? null,
+    _cost_basis: opts.costBasis ?? "estimated",
+    _error: opts.error ?? null,
+  });
+  if (error) {
+    // Settlement itself failed: say so, never report an unverified charge.
+    console.error(`[credits] settle failed: ${error.message}`);
+    return { status: "unsettled", charged: 0 };
+  }
+  const row = data as { status?: string; charged?: number } | null;
+  const status =
+    row?.status === "settled" || row?.status === "failed" ? row.status : "unsettled";
+  return { status, charged: Number(row?.charged ?? 0) };
+}
 
 /**
- * Wraps a WHOLE paid operation: de-duplication, reservation, the provider call
- * and settlement all live inside one shared promise. Concurrent identical
- * callers therefore share one provider call AND one debit — they do not each
- * commit the full cost. A retry on another instance reuses the same reservation
- * through the durable identity key, so it cannot double spend either.
+ * Wraps a WHOLE paid operation with a DATABASE-OWNED execution claim, so the
+ * guarantee holds across independent server instances, not just in one process:
+ *
+ *  - The claim's owner is the only caller that may touch the provider.
+ *  - A duplicate arriving while the owner is still running gets `pending` — it
+ *    waits briefly, then falls back; it never calls the provider itself.
+ *  - A duplicate for an already-settled claim gets `already_served` with no new
+ *    provider call and no new charge.
+ *  - A retry whose hold was refunded must obtain a NEW valid hold before it may
+ *    run again, so a refunded hold can never fund a second paid call.
+ *  - Settlement results and errors are checked. If the hold was settled
+ *    elsewhere mid-flight, the call is recorded as unsettled (charged 0) rather
+ *    than reported as paid.
+ *
+ * Honest limit: if the network fails after the provider accepted a request, we
+ * cannot know whether it ran. That case is recorded, not claimed as exactly-once.
  */
 export async function runMetered<T>(opts: {
   userId: string;
@@ -213,32 +293,57 @@ export async function runMetered<T>(opts: {
   run: () => Promise<T>;
 }): Promise<MeteredResult<T>> {
   return dedupe(`metered:${opts.identity}`, async () => {
-    const held = await reserve(opts.userId, opts.action, opts.cost, opts.identity);
-    if (!held.ok) {
+    const claim = await claimExecution(opts.userId, opts.identity, opts.action, opts.cost);
+
+    if (claim.outcome === "insufficient") {
       return {
         ok: false as const,
-        reason: held.reason,
-        message: held.message,
+        reason: "insufficient" as const,
+        message: `Not enough AI credits — this needs ${opts.cost}.`,
         needed: opts.cost,
       };
     }
+    if (claim.outcome === "error") {
+      return { ok: false as const, reason: "error" as const, message: "Could not reserve AI credits." };
+    }
+    if (claim.outcome === "pending") {
+      return {
+        ok: false as const,
+        reason: "pending" as const,
+        message: "The same request is already being handled — nothing extra was charged.",
+      };
+    }
+    if (claim.outcome === "done") {
+      return {
+        ok: false as const,
+        reason: "already_served" as const,
+        message: "This request was already served and paid for — no new charge.",
+      };
+    }
+
+    // We own the claim: we are the only caller allowed to spend at the provider.
+    let value: T;
     try {
-      const value = await opts.run();
-      await commit(opts.userId, held.reservation.id, {
-        charge: opts.cost,
-        ...(opts.model ? { model: opts.model } : {}),
-        providerCostUsd: opts.providerCostUsd?.(value) ?? null,
-        costBasis: opts.costBasis ?? "estimated",
-      });
-      return { ok: true as const, value, charged: opts.cost };
+      value = await opts.run();
     } catch (e) {
-      await refund(opts.userId, held.reservation.id, "Provider call failed — credits returned");
+      const message = e instanceof Error ? e.message : "Provider call failed.";
+      await finishExecution(opts.userId, opts.identity, false, { error: message.slice(0, 300) });
       return {
         ok: false as const,
         reason: "provider" as const,
-        message: e instanceof Error ? e.message : "Provider call failed.",
+        message,
         status: (e as { status?: number }).status ?? 0,
       };
     }
+
+    const settled = await finishExecution(opts.userId, opts.identity, true, {
+      charge: opts.cost,
+      ...(opts.model ? { model: opts.model } : {}),
+      providerCostUsd: opts.providerCostUsd?.(value) ?? null,
+      costBasis: opts.costBasis ?? "estimated",
+    });
+
+    // Report the charge that actually happened — never the intended one.
+    return { ok: true as const, value, charged: settled.charged };
   });
 }

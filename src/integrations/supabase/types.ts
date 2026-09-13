@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_checkout_intents: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          item_id: string
+          kind: string
+          price_id: string | null
+          session_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          item_id: string
+          kind: string
+          price_id?: string | null
+          session_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          item_id?: string
+          kind?: string
+          price_id?: string | null
+          session_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_credit_ledger: {
         Row: {
           created_at: string
@@ -155,10 +191,83 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_exec_claims: {
+        Row: {
+          action: string
+          attempts: number
+          charged: number
+          created_at: string
+          idem_key: string
+          last_error: string | null
+          lease_expires_at: string
+          reservation_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          attempts?: number
+          charged?: number
+          created_at?: string
+          idem_key: string
+          last_error?: string | null
+          lease_expires_at?: string
+          reservation_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          attempts?: number
+          charged?: number
+          created_at?: string
+          idem_key?: string
+          last_error?: string | null
+          lease_expires_at?: string
+          reservation_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_pending_reversals: {
+        Row: {
+          created_at: string
+          id: string
+          payment_ref: string
+          provider: string
+          reason: string | null
+          refunded_cents: number
+          resolved: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_ref: string
+          provider?: string
+          reason?: string | null
+          refunded_cents?: number
+          resolved?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_ref?: string
+          provider?: string
+          reason?: string | null
+          refunded_cents?: number
+          resolved?: boolean
+        }
+        Relationships: []
+      }
       ai_purchases: {
         Row: {
           amount_paid_cents: number | null
           bucket: string
+          charge_id: string | null
           created_at: string
           credits: number
           credits_owed: number
@@ -168,6 +277,7 @@ export type Database = {
           invoice_id: string | null
           item_id: string
           kind: string
+          payment_intent_id: string | null
           payment_ref: string
           period_end: string | null
           period_start: string | null
@@ -179,6 +289,7 @@ export type Database = {
         Insert: {
           amount_paid_cents?: number | null
           bucket: string
+          charge_id?: string | null
           created_at?: string
           credits: number
           credits_owed?: number
@@ -188,6 +299,7 @@ export type Database = {
           invoice_id?: string | null
           item_id: string
           kind: string
+          payment_intent_id?: string | null
           payment_ref: string
           period_end?: string | null
           period_start?: string | null
@@ -199,6 +311,7 @@ export type Database = {
         Update: {
           amount_paid_cents?: number | null
           bucket?: string
+          charge_id?: string | null
           created_at?: string
           credits?: number
           credits_owed?: number
@@ -208,6 +321,7 @@ export type Database = {
           invoice_id?: string | null
           item_id?: string
           kind?: string
+          payment_intent_id?: string | null
           payment_ref?: string
           period_end?: string | null
           period_start?: string | null
@@ -867,23 +981,43 @@ export type Database = {
         }
         Returns: boolean
       }
-      ai_billing_fulfill: {
-        Args: {
-          _amount_cents?: number
-          _bucket: string
-          _credits: number
-          _currency?: string
-          _invoice?: string
-          _item_id: string
-          _kind: string
-          _payment_ref: string
-          _period_end?: string
-          _period_start?: string
-          _subscription?: string
-          _user: string
-        }
-        Returns: string
-      }
+      ai_billing_fulfill:
+        | {
+            Args: {
+              _amount_cents?: number
+              _bucket: string
+              _credits: number
+              _currency?: string
+              _invoice?: string
+              _item_id: string
+              _kind: string
+              _payment_ref: string
+              _period_end?: string
+              _period_start?: string
+              _subscription?: string
+              _user: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _amount_cents?: number
+              _bucket: string
+              _charge?: string
+              _credits: number
+              _currency?: string
+              _invoice?: string
+              _item_id: string
+              _kind: string
+              _payment_intent?: string
+              _payment_ref: string
+              _period_end?: string
+              _period_start?: string
+              _subscription?: string
+              _user: string
+            }
+            Returns: string
+          }
       ai_billing_link_customer: {
         Args: {
           _customer: string
@@ -893,6 +1027,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      ai_billing_map_payment: {
+        Args: { _charge: string; _payment_intent: string; _payment_ref: string }
+        Returns: boolean
+      }
       ai_billing_owner_of_customer: {
         Args: { _customer: string }
         Returns: string
@@ -900,6 +1038,32 @@ export type Database = {
       ai_billing_reverse: {
         Args: { _payment_ref: string; _reason: string; _refunded_cents: number }
         Returns: string
+      }
+      ai_billing_stop_monthly: {
+        Args: {
+          _period_end: string
+          _reason: string
+          _ref: string
+          _user: string
+        }
+        Returns: string
+      }
+      ai_checkout_attach: {
+        Args: { _intent: string; _session: string }
+        Returns: boolean
+      }
+      ai_checkout_begin: {
+        Args: {
+          _item_id: string
+          _kind: string
+          _price_id: string
+          _user: string
+        }
+        Returns: Json
+      }
+      ai_checkout_settle: {
+        Args: { _session: string; _status: string; _user: string }
+        Returns: boolean
       }
       ai_credits_commit: {
         Args: {
@@ -987,6 +1151,29 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      ai_exec_claim: {
+        Args: {
+          _action: string
+          _amount: number
+          _idem: string
+          _lease_seconds?: number
+          _user: string
+        }
+        Returns: Json
+      }
+      ai_exec_finish: {
+        Args: {
+          _charge?: number
+          _cost_basis?: string
+          _error?: string
+          _idem: string
+          _model?: string
+          _ok: boolean
+          _provider_cost?: number
+          _user: string
+        }
+        Returns: Json
       }
       ai_set_quality_pref: { Args: { _pref: string }; Returns: string }
     }

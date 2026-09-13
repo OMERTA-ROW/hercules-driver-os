@@ -252,14 +252,105 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "unconfigured" as const, message: "Payment setup is incomplete.", missing };
     }
 
+    // Verify the real Stripe price matches what the catalogue shows the driver,
+    // so a mis-set price id can never charge a different amount or interval.
+    const catalogue = data.kind === "plan" ? aiPlanById(data.id) : aiPackById(data.id);
+    try {
+      const live = await client.prices.retrieve(price);
+      const cents = live.unit_amount ?? 0;
+      const expected = Math.round((catalogue?.price ?? 0) * 100);
+      const currencyOk = (live.currency ?? "usd").toLowerCase() === "usd";
+      const intervalOk =
+        data.kind === "plan"
+          ? live.recurring?.interval === "month" && (live.recurring?.interval_count ?? 1) === 1
+          : !live.recurring;
+      if (!live.active || cents !== expected || !currencyOk || !intervalOk) {
+        console.error(
+          `[credits] price mismatch for ${data.id}: ${cents}${live.currency} ${live.recurring?.interval ?? "one-time"}`,
+        );
+        return {
+          ok: false as const,
+          reason: "price_mismatch" as const,
+          message:
+            "This item's set-up price does not match the price shown here, so checkout was stopped. Nothing was charged.",
+        };
+      }
+    } catch (e) {
+      console.error(`[credits] price check failed: ${e instanceof Error ? e.message : String(e)}`);
+      return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+    }
+
     const existing = await customerFor(context.userId);
 
-    // One live AI subscription per account — no stacking two monthly plans.
-    if (data.kind === "plan" && existing.subscriptionId && existing.status === "active") {
+    // One live AI subscription per account — no stacking two monthly plans. The
+    // live status is read from Stripe, so past_due or cancelled never blocks a
+    // legitimate future purchase.
+    if (data.kind === "plan" && existing.subscriptionId) {
+      let liveStatus = existing.status;
+      try {
+        const sub = await client.subscriptions.retrieve(existing.subscriptionId);
+        liveStatus = sub.status;
+      } catch {
+        liveStatus = null;
+      }
+      if (liveStatus === "active" || liveStatus === "trialing") {
+        return {
+          ok: false as const,
+          reason: "already_subscribed" as const,
+          message: "This account already has a monthly AI plan. Change it in billing settings instead.",
+        };
+      }
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const adminDb = supabaseAdmin as never as {
+      rpc: (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+    };
+
+    // One authoritative customer, created and linked BEFORE checkout, so an
+    // invoice that arrives before the completion event still finds its account.
+    let customerId = existing.customerId;
+    if (!customerId) {
+      try {
+        const created = await client.customers.create(
+          { metadata: { user_id: context.userId } },
+          { idempotencyKey: `hercules-customer-${context.userId}` },
+        );
+        customerId = created.id;
+      } catch (e) {
+        console.error(`[credits] customer create failed: ${e instanceof Error ? e.message : String(e)}`);
+        return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+      }
+      const linked = await adminDb.rpc("ai_billing_link_customer", {
+        _user: context.userId,
+        _customer: customerId,
+        _subscription: null,
+        _status: null,
+      });
+      if (linked.error) {
+        console.error(`[credits] customer link failed: ${linked.error.message}`);
+        return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+      }
+    }
+
+    // Record the attempt: two tabs cannot open two monthly subscriptions.
+    const begun = await adminDb.rpc("ai_checkout_begin", {
+      _user: context.userId,
+      _kind: data.kind,
+      _item_id: data.id,
+      _price_id: price,
+    });
+    if (begun.error) {
+      console.error(`[credits] checkout begin failed: ${begun.error.message}`);
+      return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+    }
+    const intent = begun.data as { outcome?: string; intent?: string } | null;
+    if (intent?.outcome === "pending") {
       return {
         ok: false as const,
-        reason: "already_subscribed" as const,
-        message: "This account already has a monthly AI plan. Change it in billing settings instead.",
+        reason: "checkout_in_progress" as const,
+        message:
+          "A monthly plan checkout is already open for this account. Finish or close it before starting another.",
       };
     }
 
@@ -267,10 +358,7 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       const session = await client.checkout.sessions.create({
         mode: data.kind === "plan" ? "subscription" : "payment",
         line_items: [{ price, quantity: 1 }],
-        // Reuse the one customer this account already owns.
-        ...(existing.customerId
-          ? { customer: existing.customerId }
-          : { client_reference_id: context.userId }),
+        customer: customerId,
         client_reference_id: context.userId,
         metadata: { user_id: context.userId, kind: data.kind, item_id: data.id },
         ...(data.kind === "plan"
@@ -280,9 +368,17 @@ export const startAiCheckout = createServerFn({ method: "POST" })
         cancel_url: `${origin}/credits?checkout=cancelled`,
         // Credits are granted only by the signed webhook, never by this URL.
       });
+      if (intent?.intent) {
+        await adminDb.rpc("ai_checkout_attach", { _intent: intent.intent, _session: session.id });
+      }
       return { ok: true as const, url: session.url ?? "" };
     } catch (e) {
       console.error(`[credits] checkout failed: ${e instanceof Error ? e.message : String(e)}`);
+      await adminDb.rpc("ai_checkout_settle", {
+        _user: context.userId,
+        _session: null,
+        _status: "abandoned",
+      });
       return {
         ok: false as const,
         reason: "error" as const,
