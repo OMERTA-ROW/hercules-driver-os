@@ -162,7 +162,8 @@ describe("metered operations", () => {
     const results = await Promise.all([run(), run(), run()]);
 
     expect(providerCalls).toBe(1);
-    expect(results.filter((r) => r.ok)).toHaveLength(1);
+    // Same instance: all three share the one operation, so one charge only.
+    expect(results.every((r) => r.ok)).toBe(true);
     expect(rpcCalls.filter((c) => c.fn === "ai_exec_claim")).toHaveLength(1);
     expect(rpcCalls.filter((c) => c.fn === "ai_exec_finish")).toHaveLength(1);
     expect(balance).toBe(996);
