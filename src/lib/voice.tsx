@@ -48,6 +48,7 @@ import {
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
 import { deviceDelivery, pickDeviceVoice } from "@/lib/device-voice";
 import { speakLine } from "@/lib/speech.functions";
+import { supabase } from "@/integrations/supabase/client";
 import {
   attachAudioLevel,
   attachMicLevel,
@@ -883,6 +884,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         setSpeechNote(note);
         return spoke ? "device" : "unavailable";
       };
+
+      // Premium speech is an account feature. Signed out, never call it: the
+      // server would refuse and that refusal surfaces as an app error.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (stale()) return null;
+      if (!sessionData.session) {
+        return fallback("Sign in to hear the premium voice — your device spoke this line free.");
+      }
 
       try {
         const res = await speakLine({ data: { voiceId: id, text } });
