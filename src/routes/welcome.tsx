@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Circle, Mic, Truck, UserCog } from "lucide-react";
+import { Building2, Check, Circle, Mic, Truck, UserCog } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
   Panel,
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useVehicle } from "@/lib/vehicles";
 import { useVoice } from "@/lib/voice";
+import { useMemberships } from "@/lib/company";
 import { TRIAL_DAYS } from "@/data/plans";
 
 export const Route = createFileRoute("/welcome")({
@@ -87,9 +88,12 @@ function Welcome() {
   const { account, trialDaysLeft, profileError } = useAuth();
   const { profiles, ready } = useVehicle();
   const { voice } = useVoice();
+  const { active, pending } = useMemberships();
 
   const signedIn = !!account;
   const hasEquipment = ready && profiles.length > 0;
+  const linked = active[0] ?? null;
+  const awaiting = pending[0] ?? null;
 
   return (
     <AppShell
@@ -151,6 +155,30 @@ function Welcome() {
 
             <Step
               n={3}
+              title="Your company, if you run for one"
+              done={!!linked}
+              icon={Building2}
+              action={
+                <Button asChild size="lg" variant={linked ? "outline" : "default"}>
+                  <Link to="/company">{linked ? "Company & dispatch" : "Connect or start a fleet"}</Link>
+                </Button>
+              }
+            >
+              {linked ? (
+                <>Connected to {linked.company.name}. You see the loads and trucks that company shares with its members, and nothing from anyone else.</>
+              ) : awaiting ? (
+                <>You asked to join {awaiting.company.name}. Their dispatch appears once someone there approves you.</>
+              ) : (
+                <>
+                  Company drivers and leased owner-operators join their carrier with the invite code
+                  the carrier issues — codes expire and the carrier approves each person. Running your
+                  own trucks? Create your fleet and invite your drivers. Skip this if you run alone.
+                </>
+              )}
+            </Step>
+
+            <Step
+              n={4}
               title="Pick the voice that rides with you"
               done={true}
               icon={Mic}
