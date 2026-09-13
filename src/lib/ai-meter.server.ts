@@ -156,3 +156,89 @@ export async function refund(userId: string, reservationId: string, reason: stri
   });
   if (error) console.error(`[credits] refund failed: ${error.message}`);
 }
+
+/* ---- wallet preference (server-side enforcement) ------------------------ */
+
+/** Eco means "never touch the paid provider" — enforced here, on the server,
+ *  not just in the browser. */
+export async function walletQuality(userId: string): Promise<"eco" | "balanced"> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const db = supabaseAdmin as never as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { quality_pref?: string } | null }> };
+      };
+    };
+  };
+  const { data } = await db.from("ai_credit_wallets").select("quality_pref").eq("user_id", userId).maybeSingle();
+  return data?.quality_pref === "eco" ? "eco" : "balanced";
+}
+
+/* ---- durable request identity ------------------------------------------- */
+
+/** Stable across server instances and process restarts: the same request in the
+ *  same cache window always produces the same key, so a retry reuses the same
+ *  reservation instead of spending twice. */
+export async function requestIdentity(userId: string, parts: (string | number)[]): Promise<string> {
+  const window = Math.floor(Date.now() / (aiLimits.cacheTtlSeconds * 1000));
+  const material = `${userId}|${window}|${parts.join("|")}`;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(material));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 48);
+}
+
+/* ---- one metered operation --------------------------------------------- */
+
+export type MeteredResult<T> =
+  | { ok: true; value: T; charged: number }
+  | { ok: false; reason: "insufficient" | "error" | "provider"; message: string; needed?: number; status?: number };
+
+/**
+ * Wraps a WHOLE paid operation: de-duplication, reservation, the provider call
+ * and settlement all live inside one shared promise. Concurrent identical
+ * callers therefore share one provider call AND one debit — they do not each
+ * commit the full cost. A retry on another instance reuses the same reservation
+ * through the durable identity key, so it cannot double spend either.
+ */
+export async function runMetered<T>(opts: {
+  userId: string;
+  action: string;
+  cost: number;
+  identity: string;
+  model?: string;
+  providerCostUsd?: (value: T) => number | null;
+  costBasis?: "actual" | "estimated" | "none";
+  run: () => Promise<T>;
+}): Promise<MeteredResult<T>> {
+  return dedupe(`metered:${opts.identity}`, async () => {
+    const held = await reserve(opts.userId, opts.action, opts.cost, opts.identity);
+    if (!held.ok) {
+      return {
+        ok: false as const,
+        reason: held.reason,
+        message: held.message,
+        needed: opts.cost,
+      };
+    }
+    try {
+      const value = await opts.run();
+      await commit(opts.userId, held.reservation.id, {
+        charge: opts.cost,
+        model: opts.model,
+        providerCostUsd: opts.providerCostUsd?.(value) ?? null,
+        costBasis: opts.costBasis ?? "estimated",
+      });
+      return { ok: true as const, value, charged: opts.cost };
+    } catch (e) {
+      await refund(opts.userId, held.reservation.id, "Provider call failed — credits returned");
+      return {
+        ok: false as const,
+        reason: "provider" as const,
+        message: e instanceof Error ? e.message : "Provider call failed.",
+        status: (e as { status?: number }).status ?? 0,
+      };
+    }
+  });
+}
