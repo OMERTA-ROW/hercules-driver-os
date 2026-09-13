@@ -1383,6 +1383,8 @@ export type Database = {
         Returns: Json
       }
       company_member_remove: { Args: { _member: string }; Returns: Json }
+      company_my_memberships: { Args: never; Returns: Json }
+      company_roster: { Args: { _company: string }; Returns: Json }
       load_book: { Args: { _load: string; _vehicle?: string }; Returns: Json }
     }
     Enums: {
