@@ -226,7 +226,7 @@ export async function runMetered<T>(opts: {
       const value = await opts.run();
       await commit(opts.userId, held.reservation.id, {
         charge: opts.cost,
-        model: opts.model,
+        ...(opts.model ? { model: opts.model } : {}),
         providerCostUsd: opts.providerCostUsd?.(value) ?? null,
         costBasis: opts.costBasis ?? "estimated",
       });
