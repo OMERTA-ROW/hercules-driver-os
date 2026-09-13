@@ -228,7 +228,9 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
   const [followTruck, setFollowTruck] = useState(true);
   const [traffic, setTraffic] = useState(true);
   const [status, setStatus] = useState<RealMapStatus>("loading");
-  const [zoom, setZoom] = useState(8);
+  // Navigation starts at street level (zoom 14) — the camera opens in the
+  // tilted nav3d driving view, not a wide overview.
+  const [zoom, setZoom] = useState(14);
   const [ready, setReady] = useState(0);
   const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
@@ -354,11 +356,33 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     [],
   );
 
+  // Restore street-level zoom on the real map, not just in state. The driver
+  // may have pinched out or fit the whole route since the prop last changed,
+  // so a same-value setZoom(14) alone would be a no-op — set it imperatively.
+  const applyNavZoom = useCallback(() => {
+    setZoom(14);
+    refs.current.map?.setZoom(14);
+  }, []);
+
   const recenter = () => {
     setFollowTruck(true);
-    if (camera === "nav3d") setZoom(14);
+    if (camera === "nav3d") applyNavZoom();
     refs.current.map?.panTo(position);
   };
+
+  // Switching back into the tilted navigation view from a wide overview
+  // (whole-route fit, or a manual pinch out) returns to street level; from a
+  // close-in view the driver's own zoom is left alone.
+  const changeCamera = useCallback(
+    (mode: CameraMode) => {
+      setCamera(mode);
+      if (mode === "nav3d") {
+        const actual = refs.current.map?.getZoom() ?? zoom;
+        if (actual < 12) applyNavZoom();
+      }
+    },
+    [zoom, applyNavZoom],
+  );
 
   const showWholeRoute = () => {
     setFollowTruck(false);
@@ -398,7 +422,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           <BaseViewSwitch view={view} onChange={setView} />
           <MapViewControls
             camera={camera}
-            onCamera={setCamera}
+            onCamera={changeCamera}
             headingUp={headingUp}
             onHeadingUp={setHeadingUp}
             following={followTruck}
