@@ -53,7 +53,9 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          idem_key: string | null
           monthly_amount: number
+          period_expires_at: string | null
           purchased_amount: number
           settled_at: string | null
           status: string
@@ -64,7 +66,9 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          idem_key?: string | null
           monthly_amount?: number
+          period_expires_at?: string | null
           purchased_amount?: number
           settled_at?: string | null
           status?: string
@@ -75,7 +79,9 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          idem_key?: string | null
           monthly_amount?: number
+          period_expires_at?: string | null
           purchased_amount?: number
           settled_at?: string | null
           status?: string
@@ -750,6 +756,7 @@ export type Database = {
           _provider_cost?: number
           _reservation: string
           _saved?: number
+          _user: string
         }
         Returns: number
       }
@@ -767,17 +774,24 @@ export type Database = {
         Returns: boolean
       }
       ai_credits_refund: {
-        Args: { _reason: string; _reservation: string }
+        Args: { _reason: string; _reservation: string; _user: string }
         Returns: boolean
       }
       ai_credits_reserve: {
-        Args: { _action: string; _amount: number }
+        Args: {
+          _action: string
+          _amount: number
+          _idem?: string
+          _user: string
+        }
         Returns: {
           action: string
           amount: number
           created_at: string
           id: string
+          idem_key: string | null
           monthly_amount: number
+          period_expires_at: string | null
           purchased_amount: number
           settled_at: string | null
           status: string
