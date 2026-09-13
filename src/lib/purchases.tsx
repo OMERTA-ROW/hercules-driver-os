@@ -1,73 +1,53 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 export type PurchaseId = "documents" | "bolt" | "boltObd";
 
-const STORAGE_KEY = "hercules.purchases";
+export type PurchaseAttempt = { ok: boolean; message: string };
+
+/**
+ * ONE-TIME PURCHASES — entitlements only, never granted locally.
+ *
+ * This app has no payment credentials configured, so there is no way to take a
+ * real payment for the Document Upload unlock or for THE BOLT hardware. Nothing
+ * here may pretend otherwise: ownership is not stored in the browser, and
+ * tapping "buy" cannot unlock anything. When payment is switched on, `owns`
+ * reads verified entitlements from the server and `purchase` opens the real
+ * hosted checkout — the browser still never grants anything.
+ */
+export const PAYMENT_UNAVAILABLE =
+  "Purchases are not switched on for this app yet — no card can be charged, so nothing can be unlocked. Your prices are unchanged and nothing was billed.";
 
 type Ctx = {
   ready: boolean;
+  /** True only for an entitlement confirmed by a real payment. */
   owns: (id: PurchaseId) => boolean;
-  purchase: (id: PurchaseId) => void;
-  /** Mock-only: lets the driver undo a mock purchase while testing. */
-  reset: (id: PurchaseId) => void;
+  /** Attempts a purchase. Returns the honest outcome; never grants access. */
+  purchase: (id: PurchaseId) => PurchaseAttempt;
+  /** Can a payment be taken at all right now? */
+  paymentAvailable: boolean;
+  unavailableMessage: string;
 };
 
 const PurchaseContext = createContext<Ctx>({
-  ready: false,
+  ready: true,
   owns: () => false,
-  purchase: () => {},
-  reset: () => {},
+  purchase: () => ({ ok: false, message: PAYMENT_UNAVAILABLE }),
+  paymentAvailable: false,
+  unavailableMessage: PAYMENT_UNAVAILABLE,
 });
 
 export function PurchaseProvider({ children }: { children: ReactNode }) {
-  const [owned, setOwned] = useState<PurchaseId[]>([]);
-  const [ready, setReady] = useState(false);
+  // No verified entitlement source exists yet, so nothing is owned and no
+  // purchase can complete. There is deliberately no local state to forge.
+  const value: Ctx = {
+    ready: true,
+    owns: () => false,
+    purchase: () => ({ ok: false, message: PAYMENT_UNAVAILABLE }),
+    paymentAvailable: false,
+    unavailableMessage: PAYMENT_UNAVAILABLE,
+  };
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setOwned(JSON.parse(raw) as PurchaseId[]);
-    } catch {
-      /* ignore malformed local state */
-    }
-    setReady(true);
-  }, []);
-
-  const persist = useCallback((next: PurchaseId[]) => {
-    setOwned(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  }, []);
-
-  const purchase = useCallback(
-    (id: PurchaseId) => {
-      setOwned((prev) => {
-        const next = prev.includes(id) ? prev : [...prev, id];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        return next;
-      });
-    },
-    [],
-  );
-
-  const reset = useCallback(
-    (id: PurchaseId) => persist(owned.filter((o) => o !== id)),
-    [owned, persist],
-  );
-
-  const owns = useCallback((id: PurchaseId) => owned.includes(id), [owned]);
-
-  return (
-    <PurchaseContext.Provider value={{ ready, owns, purchase, reset }}>
-      {children}
-    </PurchaseContext.Provider>
-  );
+  return <PurchaseContext.Provider value={value}>{children}</PurchaseContext.Provider>;
 }
 
 export function usePurchases() {
