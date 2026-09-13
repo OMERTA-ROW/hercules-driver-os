@@ -29,7 +29,6 @@ import {
 } from "react";
 import {
   asksVehiclePerTrip,
-  knownCompanies,
   tierForTrucks,
   type FleetTier,
 } from "@/data/accounts";
@@ -325,8 +324,9 @@ export function useVehicle(): Ctx {
  * How many trucks the carrier a company driver is linked to runs. A driver on
  * an outside company inherits that company's tier behaviour.
  */
-function companyTrucks(account: { kind?: string; company?: { code: string } } | null) {
-  if (!account?.company?.code) return 1;
-  const known = knownCompanies.find((c) => c.code === account.company!.code);
-  return known?.trucks ?? 1;
+function companyTrucks(account: { kind?: string; seats?: number } | null) {
+  // Taken from the account's own record. There is no carrier directory to look
+  // a truck count up in, so a linked driver counts as one until the carrier's
+  // own record says otherwise.
+  return Math.max(1, account?.seats ?? 1);
 }

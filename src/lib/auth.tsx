@@ -10,10 +10,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { TRIAL_DAYS, planHas, type Feature, type PlanId } from "@/data/plans";
 import {
-  companyByCode,
   doorFor,
   hasScope,
-  makeCompanyCode,
   tierForTrucks,
   type AccountKind,
   type FleetTier,
@@ -186,17 +184,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) return { error: error.message };
       if (data.user) {
         setUserId(data.user.id);
-        const code = opts?.companyCode?.trim().toUpperCase();
-        if (code) {
-          const known = companyByCode(code);
+        // Company membership is NOT set here. A code typed on a sign-in screen
+        // proves nothing; joining a carrier goes through the invite flow in
+        // src/lib/company.tsx, which the database checks and an owner approves.
+        if (opts?.kind) {
           await supabase
             .from("profiles")
-            .update({
-              company_code: code,
-              ...(known ? { company_name: known.name } : {}),
-              ...(opts?.kind ? { account_kind: opts.kind } : {}),
-              ...(known ? { fleet_tier: tierToNumber(tierForTrucks(known.trucks)) } : {}),
-            })
+            .update({ account_kind: opts.kind })
             .eq("id", data.user.id);
         }
         await loadProfile(data.user.id);
@@ -211,10 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const kind: AccountKind = input.kind ?? "solo";
       const seats = input.plan === "fleet" ? Math.max(3, input.seats ?? 3) : 1;
       const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 86_400_000).toISOString();
-      const companyCode =
-        kind === "zeusFleet"
-          ? makeCompanyCode(input.companyName || input.email)
-          : input.companyCode?.trim().toUpperCase() || null;
+      // No company code is minted or accepted here: a fleet is created, and a
+      // driver joins one, through the checked company routines after sign-in.
       const fleetTier = kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null;
 
       // The chosen plan, seats and trial ride along as sign-up metadata so the
@@ -230,7 +222,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             plan: input.plan,
             seats,
             trial_ends_at: trialEndsAt,
-            ...(companyCode ? { company_code: companyCode } : {}),
             ...(kind === "zeusFleet" && input.companyName
               ? { company_name: input.companyName }
               : {}),
@@ -252,7 +243,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             account_kind: kind,
             plan: input.plan,
             seats,
-            company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
             fleet_tier: fleetTier,
           })

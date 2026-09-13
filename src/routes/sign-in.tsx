@@ -6,7 +6,7 @@ import { Panel, Label, DriverApprovedNote, Pill } from "@/components/hercules/pr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import { doors, companyByCode, type AccountKind } from "@/data/accounts";
+import { doors, type AccountKind } from "@/data/accounts";
 import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +41,6 @@ function SignIn() {
   const [kind, setKind] = useState<AccountKind>("solo");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
   const door = doors.find((d) => d.kind === kind)!;
@@ -115,26 +114,16 @@ function SignIn() {
                   toast.error("Enter your email and password");
                   return;
                 }
-                const entered = code.trim().toUpperCase();
-                if (kind === "companyDriver" && entered && !companyByCode(entered)) {
-                  toast.error("That company code isn't recognized", {
-                    description: "Check it with your carrier, or leave it blank for now.",
-                  });
-                  return;
-                }
                 setBusy(true);
                 void (async () => {
-                  const { error } = await signIn(email, password, {
-                    kind,
-                    ...(kind === "companyDriver" && entered ? { companyCode: entered } : {}),
-                  });
+                  const { error } = await signIn(email, password, { kind });
                   setBusy(false);
                   if (error) {
                     toast.error("Could not sign you in", { description: error });
                     return;
                   }
                   toast.success(`Signed in — ${door.name}`);
-                  void navigate({ to: kind === "zeusFleet" ? "/zeus" : "/" });
+                  void navigate({ to: kind === "solo" ? "/" : "/company" });
                 })();
               }}
             >
@@ -162,21 +151,11 @@ function SignIn() {
                   className="mt-1 h-12 text-base"
                 />
               </div>
-              {kind === "companyDriver" ? (
-                <div>
-                  <Label>Company code (optional)</Label>
-                  <Input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    aria-label="Company code"
-                    placeholder="SOON-4412"
-                    className="mt-1 h-12 text-base"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Your carrier's code links you into their rotation on ZEUS. Without it you still
-                    get the full driver experience on your own.
-                  </p>
-                </div>
+              {kind !== "solo" ? (
+                <p className="rounded-lg border border-border bg-card/40 p-3 text-xs text-muted-foreground">
+                  You link to a carrier after signing in, using the invite code they issue you. Codes
+                  expire and the carrier approves you — nothing here can link you on its own.
+                </p>
               ) : null}
               <Button type="submit" size="lg" className="w-full gap-2" disabled={busy}>
                 <LogIn className="h-4 w-4" /> {busy ? "Signing in…" : `Sign in to ${door.name}`}
