@@ -224,15 +224,11 @@ function UnlockScreen() {
               className="gap-2"
               disabled={working}
               onClick={() => {
-                setWorking(true);
-                setTimeout(() => {
-                  purchase("documents");
-                  setWorking(false);
-                  setConfirming(false);
-                  toast.success("Document Upload unlocked", {
-                    description: "Yours for good. No further charges.",
-                  });
-                }, 900);
+                const outcome = purchase("documents");
+                setConfirming(false);
+                if (!outcome.ok) {
+                  toast.error("Nothing was charged", { description: outcome.message });
+                }
               }}
             >
               <Check className="h-5 w-5" />

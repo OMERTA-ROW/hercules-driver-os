@@ -363,12 +363,10 @@ function AddonsPanel() {
                   variant={on ? "outline" : "default"}
                   className="min-h-[56px]"
                   onClick={() => {
-                    toggle(a.id);
-                    toast.success(on ? `${a.name} switched off` : `${a.name} added`, {
-                      description: on
-                        ? "Removed from your monthly total on your word."
-                        : `$${a.price.toFixed(2)} a month added on your word.`,
-                    });
+                    const outcome = toggle(a.id);
+                    if (!outcome.ok) {
+                      toast.error("Not added", { description: outcome.message });
+                    }
                   }}
                 >
                   {on ? "Switch it off" : `Add it — $${a.price.toFixed(2)} / month`}
