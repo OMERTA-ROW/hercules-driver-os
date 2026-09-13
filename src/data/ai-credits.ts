@@ -46,17 +46,56 @@ export type AiPlan = {
   price: number;
   blurb: string;
   /**
-   * PROPOSED daily and weekly spending allowance, in credits. The monthly
-   * amounts above are the owner's confirmed figures; these two are a proposal
-   * awaiting sign-off. They are enforced as limits only — they never cause a
-   * charge. The live values used by the server are in the database table
-   * `ai_plan_allowances`; keep the two in step when you change either.
+   * Daily and weekly spending allowance, in credits. NEVER hand-written: both
+   * are derived from the plan's monthly total by `derivedAllowance`, so when the
+   * owner supplies the reduced monthly amounts the limits follow automatically.
+   * They are limits only — going over never causes a charge. The live values the
+   * server enforces are rows in `ai_plan_allowances`; `allowanceRows()` below is
+   * the single source both sides are synced from.
    */
   dailyCredits: number;
   weeklyCredits: number;
+  /** True while the monthly total is still awaiting the owner's figure. */
+  monthlyPendingApproval: boolean;
   /** Server-side env var holding the payment provider's price id. */
   priceEnv: string;
 };
+
+/* ------------------------------------------------------------------------ *
+ * MONTHLY TOTALS — AWAITING THE OWNER'S REDUCED AMOUNTS
+ *
+ * The owner has decided the monthly included totals will be REDUCED and will
+ * state the three amounts. Until then the numbers below are the last-known
+ * placeholders and are NOT an approved catalogue: `MONTHLY_CREDITS_PENDING`
+ * stays true, the screen says so plainly, and no purchase can happen anyway
+ * (payment credentials are not configured).
+ *
+ * To apply the approved amounts later: change the three numbers here, then run
+ * the one statement in docs/ai-credits.md to sync `ai_plan_allowances`.
+ * ------------------------------------------------------------------------ */
+
+export const MONTHLY_CREDITS_PENDING = true;
+
+/** Last-known placeholders, pending the owner's reduced figures. */
+export const monthlyCreditPlaceholders: Record<AiPlanId, number> = {
+  assist: 300,
+  pro: 1000,
+  max: 3500,
+};
+
+/**
+ * How much of a monthly total may be spent in one day and in one week.
+ * Editable in one place; every plan's limits are computed from it, so reduced
+ * monthly totals reduce the daily and weekly limits in the same proportion.
+ */
+export const ALLOWANCE_SHARE = { daily: 1 / 15, weekly: 1 / 3 };
+
+export function derivedAllowance(monthlyCredits: number) {
+  return {
+    daily: Math.max(1, Math.ceil(monthlyCredits * ALLOWANCE_SHARE.daily)),
+    weekly: Math.max(2, Math.ceil(monthlyCredits * ALLOWANCE_SHARE.weekly)),
+  };
+}
 
 export type AiPack = {
   id: AiPackId;
@@ -68,38 +107,50 @@ export type AiPack = {
 };
 
 /** Monthly subscriptions. Credits expire at the end of each paid period. */
-export const aiPlans: AiPlan[] = [
+const planBase: { id: AiPlanId; name: string; price: number; blurb: string; priceEnv: string }[] = [
   {
     id: "assist",
     name: "Assist",
-    credits: 300,
     price: 9,
-    dailyCredits: 20,
-    weeklyCredits: 100,
     blurb: "Everyday spoken answers and read-backs.",
     priceEnv: "STRIPE_PRICE_AI_ASSIST",
   },
   {
     id: "pro",
     name: "Pro",
-    credits: 1000,
     price: 29,
-    dailyCredits: 60,
-    weeklyCredits: 320,
     blurb: "Heavy all-day use, long conversations, premium voices.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
   },
   {
     id: "max",
     name: "Max",
-    credits: 3500,
     price: 100,
-    dailyCredits: 200,
-    weeklyCredits: 1100,
     blurb: "The largest monthly allowance, for drivers who talk to HERCULES all day.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
 ];
+
+export const aiPlans: AiPlan[] = planBase.map((p) => {
+  const credits = monthlyCreditPlaceholders[p.id];
+  const a = derivedAllowance(credits);
+  return {
+    ...p,
+    credits,
+    dailyCredits: a.daily,
+    weeklyCredits: a.weekly,
+    monthlyPendingApproval: MONTHLY_CREDITS_PENDING,
+  };
+});
+
+/** The rows the database's `ai_plan_allowances` table must hold. */
+export function allowanceRows() {
+  return aiPlans.map((p) => ({
+    planId: p.id,
+    dailyCredits: p.dailyCredits,
+    weeklyCredits: p.weeklyCredits,
+  }));
+}
 
 /**
  * SUBSCRIBER TOP-UPS — buy once, carried over, never expire.
