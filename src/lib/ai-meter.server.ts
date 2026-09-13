@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { aiLimits } from "@/data/ai-credits";
 
 /**
@@ -15,7 +14,11 @@ import { aiLimits } from "@/data/ai-credits";
  * wallet row, so two simultaneous requests can never spend the same credit.
  */
 
-type Client = SupabaseClient<never, never, never>;
+/** Any Supabase client able to call the credit routines (typed loosely so the
+ *  generated Database types do not need to know about these functions). */
+type Client = {
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
 
 /* ---- rate limiting -------------------------------------------------------
    Per server instance, in memory. It bounds runaway loops from one account;
