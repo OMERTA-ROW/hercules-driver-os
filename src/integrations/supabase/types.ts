@@ -893,6 +893,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      ai_billing_owner_of_customer: {
+        Args: { _customer: string }
+        Returns: string
+      }
       ai_billing_reverse: {
         Args: { _payment_ref: string; _reason: string; _refunded_cents: number }
         Returns: string
