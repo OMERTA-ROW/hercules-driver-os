@@ -241,7 +241,9 @@ const VAN_HAZARDS: HazardKind[] = ["clearance", "emergencyExit", "railroad"];
 export function rulesFor(spec: VehicleSpec): RoutingRules {
   if (!spec.pullsTrailer) {
     // A straight truck pulls nothing but still stands tall and heavy enough that
-    // posted clearances and weight limits matter, so it is not routed like a car.
+    // posted clearances and weight limits matter, so it is not treated like a car.
+    // NOTE: no commercial truck-routing provider is connected, so this profile sets
+    // preferences and warnings — it is not a verified legal route.
     const tall = spec.minClearanceFt >= 11 || spec.grossWeightLbs >= 16000;
     if (tall) {
       return {
@@ -250,7 +252,7 @@ export function rulesFor(spec: VehicleSpec): RoutingRules {
         hazardKinds: ["clearance", "grade", "emergencyExit", "railroad", "scale"],
         weightRestrictionChecks: true,
         gradeAndSwitchbackChecks: false,
-        spoken: `${spec.label}. No trailer, but I keep you off anything posted lower than your ${spec.minClearanceFt} feet and check posted weight limits on the way.`,
+        spoken: `${spec.label}. No trailer, but I am watching for anything posted lower than your ${spec.minClearanceFt} feet and for posted weight limits, and I will call them out. Read the posted signs yourself — this is guidance, not a cleared route.`,
       };
     }
     return {
@@ -259,7 +261,7 @@ export function rulesFor(spec: VehicleSpec): RoutingRules {
       hazardKinds: VAN_HAZARDS,
       weightRestrictionChecks: false,
       gradeAndSwitchbackChecks: false,
-      spoken: `${spec.label}. County roads and back roads are open to you, so I will take the short line when it saves time.`,
+      spoken: `${spec.label}. County roads and back roads are fine for this vehicle, so I will take the short line when it saves time. Posted signs still rule.`,
     };
   }
 
@@ -272,8 +274,8 @@ export function rulesFor(spec: VehicleSpec): RoutingRules {
     weightRestrictionChecks: heavy,
     gradeAndSwitchbackChecks: heavy,
     spoken: heavy
-      ? "Heavy haul. Interstate and legal county highway only, and I am checking every posted weight limit, grade and switchback on top of bridge clearances."
-      : `${spec.label}. Interstate and legal county highway only — no road that is not legal for the equipment. Low bridge clearances are checked the whole way.`,
+      ? "Heavy haul. I keep you on interstate and county highway and call out posted weight limits, grades, switchbacks and low clearances as I see them. Permits and posted signs are yours to read — I am not a permit or legal-route service."
+      : `${spec.label}. I keep you on interstate and county highway and speak up on low clearances and restrictions along the way. Read the posted signs — this is guidance, not a verified legal route.`,
   };
 }
 

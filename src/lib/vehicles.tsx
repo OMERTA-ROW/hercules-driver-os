@@ -80,12 +80,22 @@ type Ctx = {
     kind: VehicleKind,
     sub: EighteenSub | undefined,
     unit: string,
+    /** Driver-checked real dimensions; the type's starting values are only a draft. */
+    dims?: VehicleDims,
   ) => Promise<SaveResult>;
   removeProfile: (id: string) => Promise<SaveResult>;
   /** Set when the saved equipment could not be read — never shown as "none". */
   loadError: string | null;
   saving: boolean;
   ready: boolean;
+};
+
+/** What the driver actually measured or read off the door sticker. */
+export type VehicleDims = {
+  heightFt: number;
+  lengthFt: number;
+  grossWeightLbs: number;
+  axles: number;
 };
 
 const VehicleContext = createContext<Ctx | null>(null);
@@ -95,14 +105,26 @@ type VehicleRow = {
   label: string | null;
   unit_number: string | null;
   equipment_type: string | null;
+  height_inches?: number | null;
+  length_inches?: number | null;
+  gross_weight_lb?: number | null;
+  axles?: number | null;
 };
 
 /** A saved row back into the routing profile the rest of the app reads. */
 function rowToProfile(row: VehicleRow): VehicleProfile {
   const [kind, sub] = (row.equipment_type ?? "eighteen:dryVan").split(":");
   const spec = specFor((kind || "eighteen") as VehicleKind, sub as EighteenSub | undefined);
+  // The driver's own numbers win over the type's starting values.
+  const heightFt = row.height_inches ? row.height_inches / 12 : spec.heightFt;
   return {
     ...spec,
+    heightFt: Number(heightFt.toFixed(1)),
+    // Clearance to watch for stays a foot above the real height of the vehicle.
+    minClearanceFt: Number(Math.max(heightFt + 1, spec.minClearanceFt).toFixed(1)),
+    lengthFt: row.length_inches ? Number((row.length_inches / 12).toFixed(1)) : spec.lengthFt,
+    grossWeightLbs: row.gross_weight_lb ?? spec.grossWeightLbs,
+    axles: row.axles ?? spec.axles,
     id: row.id,
     unit: row.unit_number?.trim() || row.label?.trim() || spec.label,
     hazmat: "None",
@@ -121,7 +143,9 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async (uid: string) => {
     const { data, error } = await supabase
       .from("vehicles")
-      .select("id, label, unit_number, equipment_type")
+      .select(
+        "id, label, unit_number, equipment_type, height_inches, length_inches, gross_weight_lb, axles",
+      )
       .eq("owner_id", uid)
       .order("created_at", { ascending: true });
     if (error) {
@@ -190,7 +214,12 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   const resolution: ProfileResolution = inherited ? "inherited" : "asked";
 
   const addProfile = useCallback(
-    async (kind: VehicleKind, sub: EighteenSub | undefined, unit: string): Promise<SaveResult> => {
+    async (
+      kind: VehicleKind,
+      sub: EighteenSub | undefined,
+      unit: string,
+      dims?: VehicleDims,
+    ): Promise<SaveResult> => {
       if (!userId)
         return { ok: false, message: "Sign in first — equipment saves to your account." };
       const name = unit.trim();
@@ -199,16 +228,31 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       }
       if (name.length > 40) return { ok: false, message: "Keep the name under 40 characters." };
       const spec = specFor(kind, sub);
+      const d: VehicleDims = dims ?? {
+        heightFt: spec.heightFt,
+        lengthFt: spec.lengthFt,
+        grossWeightLbs: spec.grossWeightLbs,
+        axles: spec.axles,
+      };
+      // Reject nonsense before it can shape a route or a warning.
+      if (!(d.heightFt >= 3 && d.heightFt <= 20))
+        return { ok: false, message: "Height should be between 3 and 20 feet." };
+      if (!(d.lengthFt >= 6 && d.lengthFt <= 120))
+        return { ok: false, message: "Length should be between 6 and 120 feet." };
+      if (!(d.grossWeightLbs >= 1000 && d.grossWeightLbs <= 250000))
+        return { ok: false, message: "Weight should be between 1,000 and 250,000 pounds." };
+      if (!(Number.isInteger(d.axles) && d.axles >= 2 && d.axles <= 13))
+        return { ok: false, message: "Axles should be a whole number between 2 and 13." };
       setSaving(true);
       const { error } = await supabase.from("vehicles").insert({
         owner_id: userId,
         label: spec.label,
         unit_number: name,
         equipment_type: specKey(kind, sub),
-        height_inches: Math.round(spec.heightFt * 12),
-        length_inches: Math.round(spec.lengthFt * 12),
-        gross_weight_lb: spec.grossWeightLbs,
-        axles: spec.axles,
+        height_inches: Math.round(d.heightFt * 12),
+        length_inches: Math.round(d.lengthFt * 12),
+        gross_weight_lb: d.grossWeightLbs,
+        axles: d.axles,
         ...(account?.company?.code ? { company_code: account.company.code } : {}),
       });
       setSaving(false);

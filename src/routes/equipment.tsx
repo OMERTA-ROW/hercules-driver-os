@@ -31,17 +31,17 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/equipment")({
   head: () => ({
     meta: [
-      { title: "Equipment Profile — HERCULES Vehicle-Aware Routing" },
+      { title: "Equipment Profile — HERCULES Vehicle-Aware Guidance" },
       {
         name: "description",
         content:
-          "Save every piece of equipment you run — cargo van, flatbed, 18-wheeler, car haul, heavy haul — and HERCULES routes to what is legal for it, asking what you are in at the start of every trip.",
+          "Save every piece of equipment you run — car, van, box truck, flatbed, 18-wheeler, car haul, heavy haul — and HERCULES sets its route preferences and warnings to match, asking what you are in at the start of every trip.",
       },
       { property: "og:title", content: "Equipment Profile — HERCULES" },
       {
         property: "og:description",
         content:
-          "The profile drives the route, so you never get sent where your equipment cannot legally or physically go.",
+          "Your equipment profile shapes the route it prefers and the warnings it speaks up about. Posted signs are always the final word.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -69,17 +69,30 @@ function EquipmentScreen() {
   const [kind, setKind] = useState<VehicleKind>("eighteen");
   const [sub, setSub] = useState<EighteenSub>("dryVan");
   const [unit, setUnit] = useState("");
+  // The type's numbers are only a starting draft — the driver confirms or corrects them.
+  const [dims, setDims] = useState({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+  const [checked, setChecked] = useState(false);
 
   const pickedSpec = specFor(kind, kind === "eighteen" ? sub : undefined);
   const pickedRules = rulesFor(pickedSpec);
 
+  /** Whatever is typed in, falling back to the type's starting value. */
+  const enteredDims = {
+    heightFt: Number(dims.heightFt) || pickedSpec.heightFt,
+    lengthFt: Number(dims.lengthFt) || pickedSpec.lengthFt,
+    grossWeightLbs: Number(dims.grossWeightLbs) || pickedSpec.grossWeightLbs,
+    axles: Number(dims.axles) || pickedSpec.axles,
+  };
+
   async function save() {
-    const res = await addProfile(kind, kind === "eighteen" ? sub : undefined, unit);
+    const res = await addProfile(kind, kind === "eighteen" ? sub : undefined, unit, enteredDims);
     if (!res.ok) {
       toast.error("Not saved", { description: res.message });
       return;
     }
     setUnit("");
+    setDims({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+    setChecked(false);
     toast.success(res.message, {
       description: "I will ask what you are in at the start of every trip.",
     });
@@ -98,7 +111,10 @@ function EquipmentScreen() {
   ];
 
   return (
-    <AppShell title="Equipment" subtitle="The profile drives the route — not the other way around">
+    <AppShell
+      title="Equipment"
+      subtitle="Your own numbers shape the route it prefers and the warnings it speaks"
+    >
       <div className="grid gap-3 xl:grid-cols-2">
         {/* SAVED EQUIPMENT */}
         <Panel>
@@ -119,8 +135,8 @@ function EquipmentScreen() {
             </div>
           ) : ready && profiles.length === 0 ? (
             <div className="mb-3 rounded-lg border border-info/35 bg-info/10 p-3 text-sm">
-              Nothing saved yet. Add the truck and trailer you actually run — routing, clearances
-              and hazard warnings all read from it.
+              Nothing saved yet. Add the vehicle you actually run and put in its real height, length
+              and weight — the route it prefers and the warnings it speaks read from those numbers.
             </div>
           ) : null}
           <div className="space-y-2">
@@ -148,12 +164,12 @@ function EquipmentScreen() {
                       <p className="mt-1 text-xs">
                         {rules.backRoadsAllowed ? (
                           <span className="text-go">
-                            County roads and back roads permitted — shortest legal line
+                            County roads and back roads are fine — takes the short line
                           </span>
                         ) : (
                           <span className="text-warn">
-                            Interstate and legal county highway only — nothing illegal for the
-                            equipment
+                            Prefers interstate and county highway, and calls out low clearances and
+                            restrictions — posted signs decide
                           </span>
                         )}
                       </p>
@@ -275,13 +291,74 @@ function EquipmentScreen() {
             className="mt-1 h-12 text-base"
           />
 
+          {/*
+            The numbers that come with each vehicle type are common starting values, NOT this
+            driver's vehicle. Nothing is saved until they have looked at them, so no route or
+            clearance warning is ever built on a guess we made for them.
+          */}
+          <div className="mt-3 rounded-lg border border-warn/40 bg-warn/10 p-3">
+            <Label>Check these against your own vehicle</Label>
+            <p className="mt-1 text-xs">
+              These are common starting numbers for a {pickedSpec.label.toLowerCase()}, not your
+              vehicle. Read your height off the door sticker, cab card or registration and correct
+              anything that is off before you save — clearance and weight warnings are only as good
+              as what is here.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  {
+                    k: "heightFt" as const,
+                    label: "Height (feet)",
+                    ph: String(pickedSpec.heightFt),
+                  },
+                  {
+                    k: "lengthFt" as const,
+                    label: "Length (feet)",
+                    ph: String(pickedSpec.lengthFt),
+                  },
+                  {
+                    k: "grossWeightLbs" as const,
+                    label: "Gross weight (lb)",
+                    ph: String(pickedSpec.grossWeightLbs),
+                  },
+                  { k: "axles" as const, label: "Axles", ph: String(pickedSpec.axles) },
+                ] as const
+              ).map((f) => (
+                <div key={f.k}>
+                  <Label>{f.label}</Label>
+                  <Input
+                    value={dims[f.k]}
+                    inputMode="decimal"
+                    aria-label={f.label}
+                    placeholder={f.ph}
+                    onChange={(e) => setDims((d) => ({ ...d, [f.k]: e.target.value }))}
+                    className="mt-1 h-12 text-base"
+                  />
+                </div>
+              ))}
+            </div>
+            <label className="mt-3 flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
+              />
+              <span>
+                I have checked these numbers against my actual vehicle and they are right.
+              </span>
+            </label>
+          </div>
+
           {/* What this pick means for routing — stated before it is saved */}
           <div className="mt-3 rounded-lg border border-primary/25 bg-primary/8 p-3">
             <Label>How I route for it</Label>
             <p className="mt-1 text-sm">{pickedRules.spoken}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {pickedSpec.heightFt}' tall · needs {pickedSpec.minClearanceFt}' posted clearance ·{" "}
-              {pickedSpec.lengthFt}' long · {pickedSpec.grossWeightLbs.toLocaleString()} lb
+              Watching for anything posted under {(enteredDims.heightFt + 1).toFixed(1)}' of
+              clearance · {enteredDims.lengthFt}' long ·{" "}
+              {enteredDims.grossWeightLbs.toLocaleString()} lb · {enteredDims.axles} axles
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {pickedRules.hazardKinds.map((k) => (
@@ -298,15 +375,20 @@ function EquipmentScreen() {
           <Button
             size="lg"
             className="mt-3 w-full gap-2"
-            disabled={saving}
+            disabled={saving || !checked}
             onClick={() => void save()}
           >
-            <Plus className="h-4 w-4" /> {saving ? "Saving…" : "Save this equipment"}
+            <Plus className="h-4 w-4" />{" "}
+            {saving
+              ? "Saving…"
+              : checked
+                ? "Save this equipment"
+                : "Confirm the numbers above to save"}
           </Button>
 
           <Button variant="outline" size="lg" className="mt-2 w-full gap-2" asChild>
             <Link to="/navigation">
-              <ShieldCheck className="h-4 w-4" /> See the route it produces
+              <ShieldCheck className="h-4 w-4" /> See the route it prefers
             </Link>
           </Button>
         </Panel>
@@ -314,8 +396,8 @@ function EquipmentScreen() {
 
       {/* THE FULL RULE SET — plain language, per equipment type */}
       <Panel className="mt-3">
-        <PanelTitle right={<Pill tone="go">Legal by equipment</Pill>}>
-          What each profile is allowed on
+        <PanelTitle right={<Pill tone="info">Preferences, not clearance</Pill>}>
+          What each profile prefers, and what it watches for
         </PanelTitle>
         <div className="grid gap-2 lg:grid-cols-2">
           {vehicleCatalog.map((spec) => {

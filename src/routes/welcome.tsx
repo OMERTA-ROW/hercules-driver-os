@@ -22,12 +22,12 @@ export const Route = createFileRoute("/welcome")({
       {
         name: "description",
         content:
-          "Three steps to start running with HERCULES: confirm your account, save the equipment you drive, and pick the voice that rides with you.",
+          "Four steps to start running with HERCULES: confirm your account, save the equipment you drive, connect your company if you run for one, and pick the voice that rides with you.",
       },
       { property: "og:title", content: "Get Set Up — HERCULES" },
       {
         property: "og:description",
-        content: "Account, equipment, voice — then talk to the orb.",
+        content: "Account, equipment, company, voice — then talk to the orb.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -101,7 +101,7 @@ function Welcome() {
       subtitle={
         signedIn
           ? `${account.name} · ${account.status === "trial" ? `${trialDaysLeft} of ${TRIAL_DAYS} trial days left` : "Active"}`
-          : "Three short steps before your first run"
+          : "Four short steps before your first run"
       }
     >
       <div className="mx-auto grid max-w-3xl gap-3">
@@ -150,9 +150,11 @@ function Welcome() {
                 </Button>
               }
             >
-              Height, length, weight and axles decide which roads are legal for you and which
-              clearance and hazard warnings you get. Save each unit you actually run — if you have
-              more than one, I ask which you're in at the start of every trip.
+              Height, length, weight and axles decide which roads I prefer for you and which
+              clearance and hazard warnings I speak up about. The numbers I fill in for each vehicle
+              type are common starting values, not your truck — check them against your own
+              paperwork or the door sticker and correct them before you save. If you run more than
+              one unit, I ask which you're in at the start of every trip.
             </Step>
 
             <Step
