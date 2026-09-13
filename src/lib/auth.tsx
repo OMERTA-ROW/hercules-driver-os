@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { TRIAL_DAYS, planHas, type Feature, type PlanId } from "@/data/plans";
 import {
+  companyByCode,
   doorFor,
   hasScope,
   makeCompanyCode,
@@ -90,13 +91,15 @@ export type SignUpInput = {
   companyName?: string;
 };
 
+export type SignInOptions = { companyCode?: string; kind?: AccountKind };
+
 type Result = { error: string | null; needsConfirmation?: boolean };
 
 type Ctx = {
   account: Account | null;
   userId: string | null;
   ready: boolean;
-  signIn: (email: string, password: string) => Promise<Result>;
+  signIn: (email: string, password: string, opts?: SignInOptions) => Promise<Result>;
   signUp: (input: SignUpInput) => Promise<Result>;
   signOut: () => Promise<void>;
   changePlan: (plan: PlanId, seats?: number) => Promise<void>;
@@ -165,35 +168,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loadProfile]);
 
-  const signIn = useCallback(async (email: string, password: string): Promise<Result> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    if (data.user) {
-      setUserId(data.user.id);
-      await loadProfile(data.user.id);
-    }
-    return { error: null };
-  }, [loadProfile]);
+  const signIn = useCallback(
+    async (email: string, password: string, opts?: SignInOptions): Promise<Result> => {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { error: error.message };
+      if (data.user) {
+        setUserId(data.user.id);
+        const code = opts?.companyCode?.trim().toUpperCase();
+        if (code) {
+          const known = companyByCode(code);
+          await supabase
+            .from("profiles")
+            .update({
+              company_code: code,
+              ...(known ? { company_name: known.name } : {}),
+              ...(opts?.kind ? { account_kind: opts.kind } : {}),
+              ...(known ? { fleet_tier: tierToNumber(tierForTrucks(known.trucks)) } : {}),
+            })
+            .eq("id", data.user.id);
+        }
+        await loadProfile(data.user.id);
+      }
+      return { error: null };
+    },
+    [loadProfile],
+  );
 
   const signUp = useCallback(
     async (input: SignUpInput): Promise<Result> => {
       const kind: AccountKind = input.kind ?? "solo";
       const seats = input.plan === "fleet" ? Math.max(3, input.seats ?? 3) : 1;
-      const { data, error } = await supabase.auth.signUp({
-        email: input.email,
-        password: input.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { full_name: input.name, account_kind: kind },
-        },
-      });
-      if (error) return { error: error.message };
-
       const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 86_400_000).toISOString();
       const companyCode =
         kind === "zeusFleet"
           ? makeCompanyCode(input.companyName || input.email)
           : input.companyCode?.trim().toUpperCase() || null;
+      const fleetTier = kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null;
+
+      // The chosen plan, seats and trial ride along as sign-up metadata so the
+      // account keeps them even when the driver has to confirm by email first.
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            full_name: input.name,
+            account_kind: kind,
+            plan: input.plan,
+            seats,
+            trial_ends_at: trialEndsAt,
+            ...(companyCode ? { company_code: companyCode } : {}),
+            ...(kind === "zeusFleet" && input.companyName
+              ? { company_name: input.companyName }
+              : {}),
+            ...(fleetTier ? { fleet_tier: fleetTier } : {}),
+          },
+        },
+      });
+      if (error) return { error: error.message };
+
 
       if (data.session && data.user) {
         await supabase
@@ -208,7 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             trial_ends_at: trialEndsAt,
             company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
-            fleet_tier: kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null,
+            fleet_tier: fleetTier,
           })
           .eq("id", data.user.id);
         setUserId(data.user.id);

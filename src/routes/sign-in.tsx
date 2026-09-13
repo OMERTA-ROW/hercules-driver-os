@@ -115,9 +115,19 @@ function SignIn() {
                   toast.error("Enter your email and password");
                   return;
                 }
+                const entered = code.trim().toUpperCase();
+                if (kind === "companyDriver" && entered && !companyByCode(entered)) {
+                  toast.error("That company code isn't recognized", {
+                    description: "Check it with your carrier, or leave it blank for now.",
+                  });
+                  return;
+                }
                 setBusy(true);
                 void (async () => {
-                  const { error } = await signIn(email, password);
+                  const { error } = await signIn(email, password, {
+                    kind,
+                    ...(kind === "companyDriver" && entered ? { companyCode: entered } : {}),
+                  });
                   setBusy(false);
                   if (error) {
                     toast.error("Could not sign you in", { description: error });
