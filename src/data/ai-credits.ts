@@ -10,12 +10,15 @@
  * This is SEPARATE from the platform plans in `src/data/plans.ts`. A driver's
  * app subscription is not affected by AI credits and vice versa.
  *
- * PROVENANCE (checked 2026-09-13): the repository, its history and every data
- * file were searched for a pre-existing numeric AI credit allowance and none
- * exists — the only earlier "credits" in this project are truck-stop shower
- * credits and supplier loyalty credits, which are unrelated. So the amounts
- * below are SUGGESTED FALLBACKS awaiting the owner's own guideline. They are
- * the single place to change them; nothing else hardcodes an amount.
+ * PROVENANCE (owner direction, 2026-09-13): the repository, its history and
+ * every data file were searched for a pre-existing numeric AI credit
+ * allowance and none exists — the only earlier "credits" in this project are
+ * truck-stop shower credits and supplier loyalty credits, which are
+ * unrelated. The owner then set the current amounts directly: "lower the
+ * credits a lil so we can keep users spending and making money" — the
+ * original provisional allowances reduced by 20%, prices unchanged. These
+ * amounts are now the owner's guideline; change them here only. Nothing else
+ * hardcodes an amount.
  *
  * Core app prices are authoritative and are NOT defined here:
  *   - platform plans .......... src/data/plans.ts  ($5 / $29 / $19 per truck)
@@ -25,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack250" | "pack1000" | "pack3000";
+export type AiPackId = "pack200" | "pack800" | "pack2400";
 
 export type AiPlan = {
   id: AiPlanId;
@@ -51,7 +54,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "assist",
     name: "Assist",
-    credits: 500,
+    credits: 400,
     price: 9,
     blurb: "Everyday spoken answers and read-backs.",
     priceEnv: "STRIPE_PRICE_AI_ASSIST",
@@ -59,7 +62,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "pro",
     name: "Pro",
-    credits: 2000,
+    credits: 1600,
     price: 29,
     blurb: "Heavy all-day use, long conversations, premium voices.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
@@ -67,7 +70,7 @@ export const aiPlans: AiPlan[] = [
   {
     id: "max",
     name: "Max",
-    credits: 5000,
+    credits: 4000,
     price: 59,
     blurb: "Team seats and constant assistance on long hauls.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
@@ -77,28 +80,28 @@ export const aiPlans: AiPlan[] = [
 /** Buy-once packs. These credits carry over and never expire. */
 export const aiPacks: AiPack[] = [
   {
-    id: "pack250",
-    name: "250 credits",
-    credits: 250,
+    id: "pack200",
+    name: "200 credits",
+    credits: 200,
     price: 6,
     blurb: "Top up for a busy week.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_250",
+    priceEnv: "STRIPE_PRICE_AI_PACK_200",
   },
   {
-    id: "pack1000",
-    name: "1,000 credits",
-    credits: 1000,
+    id: "pack800",
+    name: "800 credits",
+    credits: 800,
     price: 20,
     blurb: "Best value top-up.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_1000",
+    priceEnv: "STRIPE_PRICE_AI_PACK_800",
   },
   {
-    id: "pack3000",
-    name: "3,000 credits",
-    credits: 3000,
+    id: "pack2400",
+    name: "2,400 credits",
+    credits: 2400,
     price: 49,
     blurb: "Stock up once, use it all year.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_3000",
+    priceEnv: "STRIPE_PRICE_AI_PACK_2400",
   },
 ];
 
