@@ -409,6 +409,17 @@ function AddonsPanel() {
         ))}
       </div>
 
+      <div className="mt-4 rounded-lg border border-border bg-card/50 p-3">
+        <Label>AI assistance credits</Label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Billed separately from this subscription. Monthly credits expire at the end of each paid period;
+          bought-once credits never do.
+        </p>
+        <Button size="lg" variant="outline" className="mt-3 min-h-[56px]" asChild>
+          <Link to="/credits">Balance & credit packs</Link>
+        </Button>
+      </div>
+
       <div className="mt-4 rounded-lg border border-primary/40 bg-primary/8 p-3">
         <Label>What you pay every month</Label>
         <div className="mt-2 space-y-1 text-sm">
