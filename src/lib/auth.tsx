@@ -198,21 +198,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (input: SignUpInput): Promise<Result> => {
       const kind: AccountKind = input.kind ?? "solo";
       const seats = input.plan === "fleet" ? Math.max(3, input.seats ?? 3) : 1;
-      const { data, error } = await supabase.auth.signUp({
-        email: input.email,
-        password: input.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { full_name: input.name, account_kind: kind },
-        },
-      });
-      if (error) return { error: error.message };
-
       const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 86_400_000).toISOString();
       const companyCode =
         kind === "zeusFleet"
           ? makeCompanyCode(input.companyName || input.email)
           : input.companyCode?.trim().toUpperCase() || null;
+      const fleetTier = kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null;
+
+      // The chosen plan, seats and trial ride along as sign-up metadata so the
+      // account keeps them even when the driver has to confirm by email first.
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            full_name: input.name,
+            account_kind: kind,
+            plan: input.plan,
+            seats,
+            trial_ends_at: trialEndsAt,
+            ...(companyCode ? { company_code: companyCode } : {}),
+            ...(kind === "zeusFleet" && input.companyName
+              ? { company_name: input.companyName }
+              : {}),
+            ...(fleetTier ? { fleet_tier: fleetTier } : {}),
+          },
+        },
+      });
+      if (error) return { error: error.message };
+
 
       if (data.session && data.user) {
         await supabase
