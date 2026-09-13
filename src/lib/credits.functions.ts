@@ -238,36 +238,47 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "unknown_item" as const, message: "Unknown item." };
     }
 
-    const origin = originOf();
-    if (!origin) {
-      return { ok: false as const, reason: "error" as const, message: "Could not build a return address." };
+    const origin = trustedOrigin();
+    const client = stripe();
+    if (!client) {
+      return { ok: false as const, reason: "unconfigured" as const, message: "Payment setup is incomplete.", missing };
+    }
+
+    const existing = await customerFor(context.userId);
+
+    // One live AI subscription per account — no stacking two monthly plans.
+    if (data.kind === "plan" && existing.subscriptionId && existing.status === "active") {
+      return {
+        ok: false as const,
+        reason: "already_subscribed" as const,
+        message: "This account already has a monthly AI plan. Change it in billing settings instead.",
+      };
     }
 
     try {
-      const session = await stripe("/checkout/sessions", {
+      const session = await client.checkout.sessions.create({
         mode: data.kind === "plan" ? "subscription" : "payment",
-        "line_items[0][price]": price,
-        "line_items[0][quantity]": "1",
+        line_items: [{ price, quantity: 1 }],
+        // Reuse the one customer this account already owns.
+        ...(existing.customerId
+          ? { customer: existing.customerId }
+          : { client_reference_id: context.userId }),
         client_reference_id: context.userId,
-        "metadata[user_id]": context.userId,
-        "metadata[kind]": data.kind,
-        "metadata[item_id]": data.id,
+        metadata: { user_id: context.userId, kind: data.kind, item_id: data.id },
         ...(data.kind === "plan"
-          ? {
-              "subscription_data[metadata][user_id]": context.userId,
-              "subscription_data[metadata][item_id]": data.id,
-            }
-          : {}),
+          ? { subscription_data: { metadata: { user_id: context.userId, item_id: data.id } } }
+          : { payment_intent_data: { metadata: { user_id: context.userId, item_id: data.id } } }),
         success_url: `${origin}/credits?checkout=complete`,
         cancel_url: `${origin}/credits?checkout=cancelled`,
         // Credits are granted only by the signed webhook, never by this URL.
       });
-      return { ok: true as const, url: String(session["url"] ?? "") };
+      return { ok: true as const, url: session.url ?? "" };
     } catch (e) {
+      console.error(`[credits] checkout failed: ${e instanceof Error ? e.message : String(e)}`);
       return {
         ok: false as const,
         reason: "error" as const,
-        message: e instanceof Error ? e.message : "Checkout could not be opened.",
+        message: "Checkout could not be opened.",
       };
     }
   });
@@ -276,39 +287,38 @@ export const startAiCheckout = createServerFn({ method: "POST" })
 export const openBillingPortal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    if (!stripeKey()) {
+    const client = stripe();
+    if (!stripeKey() || !client) {
       return {
         ok: false as const,
         reason: "unconfigured" as const,
         message: "Billing management is not switched on yet.",
       };
     }
-    const db = context.supabase as never as {
-      from: (t: string) => {
-        select: (c: string) => { maybeSingle: () => Promise<{ data: Record<string, unknown> | null }> };
-      };
-    };
-    const prof = await db.from("profiles").select("stripe_customer_id").maybeSingle();
-    const customer = prof.data?.["stripe_customer_id"] as string | undefined;
-    if (!customer) {
+
+    // Ownership comes from the service-only mapping, not from any row the
+    // browser can write, so nobody can open another account's portal.
+    const { customerId } = await customerFor(context.userId);
+    if (!customerId) {
       return {
         ok: false as const,
         reason: "no_customer" as const,
         message: "No AI subscription on this account yet.",
       };
     }
+
     try {
-      const origin = originOf();
-      const portal = await stripe("/billing_portal/sessions", {
-        customer,
-        return_url: `${origin}/credits`,
+      const portal = await client.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${trustedOrigin()}/credits`,
       });
-      return { ok: true as const, url: String(portal["url"] ?? "") };
+      return { ok: true as const, url: portal.url };
     } catch (e) {
+      console.error(`[credits] portal failed: ${e instanceof Error ? e.message : String(e)}`);
       return {
         ok: false as const,
         reason: "error" as const,
-        message: e instanceof Error ? e.message : "Billing portal unavailable.",
+        message: "Billing portal unavailable.",
       };
     }
   });
