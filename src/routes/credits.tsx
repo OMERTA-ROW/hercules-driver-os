@@ -7,7 +7,16 @@ import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, Label, DriverApprovedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { aiActionCosts, aiEnterprise, aiLimits, aiPacks, aiPlans, freeForever } from "@/data/ai-credits";
+import {
+  ALLOWANCE_WEEK_RESET_DAY,
+  TOPUP_USD_PER_CREDIT,
+  aiActionCosts,
+  aiEnterprise,
+  aiLimits,
+  aiPacks,
+  aiPlans,
+  freeForever,
+} from "@/data/ai-credits";
 import {
   getCreditState,
   getPurchaseAvailability,
@@ -187,6 +196,58 @@ function CreditsPage() {
         </Panel>
         )}
 
+        {/* DAILY / WEEKLY ALLOWANCE */}
+        {signedOut ? null : (
+          <Panel>
+            <Label>Today and this week</Label>
+            {allowance?.subscribed ? (
+              <>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border border-primary/25 p-3">
+                    <p className="tech-label">Today</p>
+                    <p className="mt-1 text-2xl font-light">
+                      {Math.max(0, (allowance.dailyLimit ?? 0) - allowance.dailyUsed)}{" "}
+                      <span className="text-sm text-muted-foreground">
+                        of {allowance.dailyLimit} left
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Resets{" "}
+                      {allowance.dailyResetsAt
+                        ? new Date(allowance.dailyResetsAt).toLocaleString()
+                        : "at midnight"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-primary/25 p-3">
+                    <p className="tech-label">This week</p>
+                    <p className="mt-1 text-2xl font-light">
+                      {Math.max(0, (allowance.weeklyLimit ?? 0) - allowance.weeklyUsed)}{" "}
+                      <span className="text-sm text-muted-foreground">
+                        of {allowance.weeklyLimit} left
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Resets {ALLOWANCE_WEEK_RESET_DAY}
+                      {allowance.weeklyResetsAt
+                        ? `, ${new Date(allowance.weeklyResetsAt).toLocaleString()}`
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  When either runs out, the real AI voice pauses and your device's own voice takes
+                  over free until the reset. Nothing extra is ever charged for going over.
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                A monthly AI plan sets a daily and weekly voice allowance. Without a plan the real AI
+                voice is off on this account and your device's own voice is used, free.
+              </p>
+            )}
+          </Panel>
+        )}
+
         {/* HONEST UNAVAILABLE STATE */}
         {purchasing && !purchasing.available ? (
           <Panel>
@@ -216,6 +277,10 @@ function CreditsPage() {
                 <p className="tech-label">credits / month</p>
                 <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
                 <p className="mt-2 text-lg">{money(p.price)} / month</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Up to {p.dailyCredits} a day and {p.weeklyCredits} a week (week resets{" "}
+                  {ALLOWANCE_WEEK_RESET_DAY})
+                </p>
                 <BuyButton
                   label={w?.planId === p.id ? "Current plan" : `Subscribe — ${money(p.price)}/mo`}
                   onBuy={() => buy.mutate({ kind: "plan", id: p.id })}
@@ -227,9 +292,10 @@ function CreditsPage() {
 
         {/* PACKS */}
         <Panel>
-          <Label>Buy once — carries over</Label>
+          <Label>Top-ups — subscribers only</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            One payment, no subscription. These credits never expire and are used after your monthly ones.
+            {money(TOPUP_USD_PER_CREDIT)} per credit, one payment. Top-up credits never expire and are
+            used after your monthly ones. They are only available on an account with a monthly AI plan.
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             {aiPacks.map((p) => (
@@ -239,7 +305,11 @@ function CreditsPage() {
                 <p className="mt-2 text-lg">{money(p.price)} one time</p>
                 <BuyButton
                   variant="outline"
-                  label={`Buy ${p.credits.toLocaleString()} credits`}
+                  label={
+                    allowance?.subscribed
+                      ? `Buy ${p.credits.toLocaleString()} credits`
+                      : "Needs a monthly plan"
+                  }
                   onBuy={() => buy.mutate({ kind: "pack", id: p.id })}
                 />
               </div>
