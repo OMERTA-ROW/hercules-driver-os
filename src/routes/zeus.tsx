@@ -16,7 +16,6 @@ import {
   doorFor,
   fleetTierSpec,
   fleetTiers,
-  knownCompanies,
   tierForTrucks,
 } from "@/data/accounts";
 import { cn } from "@/lib/utils";
@@ -260,25 +259,17 @@ function ZeusOnboarding() {
 
             <Panel>
               <PanelTitle right={<Pill tone="info">Open platform</Pill>}>
-                Carriers already on ZEUS
+                Your fleet, your roster
               </PanelTitle>
-              <div className="space-y-2">
-                {knownCompanies.map((c) => (
-                  <div
-                    key={c.code}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card/60 p-2.5"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold">{c.name}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {c.trucks} trucks · {c.drivers} drivers
-                      </span>
-                    </span>
-                    <span className="metric shrink-0 text-sm text-primary">{c.code}</span>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" size="lg" className="mt-3 w-full" asChild>
+              <p className="text-sm text-muted-foreground">
+                Carriers are not listed publicly here. Create your company, then invite your drivers
+                and leased operators with expiring codes and approve each one yourself. Nobody sees
+                another company's people, trucks or loads.
+              </p>
+              <Button size="lg" className="mt-3 w-full" asChild>
+                <Link to="/company">Company &amp; dispatch</Link>
+              </Button>
+              <Button variant="outline" size="lg" className="mt-2 w-full" asChild>
                 <Link to="/sign-in">Driver sign-in instead</Link>
               </Button>
             </Panel>

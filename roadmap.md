@@ -78,3 +78,8 @@
 - Equipment is saved per account in the vehicles table with honest load/save errors and empty states.
 - Launch decision outstanding: email confirmation is required on sign-up, so a new driver cannot sign in until the emailed link is clicked. Enable auto-confirm for same-day onboarding, or verify auth email delivery.
 - Still unavailable and labelled as such on /welcome: payments/purchases, commercial truck-legal routing provider, engine telemetry adapter, partner ordering.
+
+## Company onboarding (done)
+- Real companies/memberships/invites in the database; three paths: company driver, leased operator, fleet owner.
+- /company route + setup step; mock carrier directory removed from src/data/accounts.ts.
+- Open: payments not live (no card credentials); email confirmation on sign-up still required (awaiting decision); no outside load-board/dispatch integration.

@@ -470,6 +470,148 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          dot_number: string | null
+          home_base: string | null
+          id: string
+          load_board_connected: boolean
+          load_board_provider: string | null
+          mc_number: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          dot_number?: string | null
+          home_base?: string | null
+          id?: string
+          load_board_connected?: boolean
+          load_board_provider?: string | null
+          mc_number?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          dot_number?: string | null
+          home_base?: string | null
+          id?: string
+          load_board_connected?: boolean
+          load_board_provider?: string | null
+          mc_number?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_invites: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string
+          email: string | null
+          expires_at: string
+          id: string
+          max_uses: number
+          requires_approval: boolean
+          revoked: boolean
+          role: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          email?: string | null
+          expires_at: string
+          id?: string
+          max_uses?: number
+          requires_approval?: boolean
+          revoked?: boolean
+          role: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          max_uses?: number
+          requires_approval?: boolean
+          revoked?: boolean
+          role?: string
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          invite_id: string | null
+          invited_by: string | null
+          joined_at: string | null
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          role: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string
@@ -1179,6 +1321,34 @@ export type Database = {
         Returns: Json
       }
       ai_set_quality_pref: { Args: { _pref: string }; Returns: string }
+      company_code_gen: { Args: { _len?: number }; Returns: string }
+      company_create: {
+        Args: {
+          _dot?: string
+          _home_base?: string
+          _mc?: string
+          _name: string
+        }
+        Returns: Json
+      }
+      company_invite_create: {
+        Args: {
+          _company: string
+          _email?: string
+          _expires_hours?: number
+          _max_uses?: number
+          _requires_approval?: boolean
+          _role: string
+        }
+        Returns: Json
+      }
+      company_invite_revoke: { Args: { _invite: string }; Returns: Json }
+      company_join: { Args: { _code: string }; Returns: Json }
+      company_member_decide: {
+        Args: { _approve: boolean; _member: string }
+        Returns: Json
+      }
+      company_member_remove: { Args: { _member: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

@@ -92,23 +92,12 @@ export function hasScope(kind: AccountKind, scope: Scope) {
   return doorFor(kind).scopes.includes(scope);
 }
 
-/** Company code a ZEUS fleet hands its drivers to link them into rotation. */
-export function makeCompanyCode(company: string) {
-  const stem = company.replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase() || "ZEUS";
-  return `${stem}-${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
-/** Mock directory of carriers already onboarded on ZEUS. */
-export const knownCompanies = [
-  { code: "SOON-4412", name: "Sooner Freight Systems", trucks: 38, drivers: 41 },
-  { code: "REDR-8890", name: "Red River Carriers", trucks: 12, drivers: 14 },
-  { code: "BASS-1027", name: "Bass Transport LLC", trucks: 3, drivers: 3 },
-] as const;
-
-export function companyByCode(code: string) {
-  const c = code.trim().toUpperCase();
-  return knownCompanies.find((k) => k.code === c) ?? null;
-}
+/*
+ * There is deliberately no carrier directory and no client-side code minting
+ * here. Companies, their codes and every membership live in the database, and
+ * joining one requires an expiring invite the carrier issued — see
+ * src/lib/company.tsx and the company_* database routines.
+ */
 
 /* ------------------------------------------------------------------ *
  * FLEET SIZE TIERS
