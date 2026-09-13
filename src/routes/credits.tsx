@@ -181,7 +181,7 @@ function CreditsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             One payment, no subscription. These credits never expire and are used after your monthly ones.
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
             {aiPacks.map((p) => (
               <div key={p.id} className="rounded-lg border border-primary/25 p-4">
                 <p className="font-display text-xl uppercase tracking-[0.12em]">{p.name}</p>

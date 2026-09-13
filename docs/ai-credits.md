@@ -31,7 +31,7 @@ is entirely separate from the prices above.
 Set by owner direction: monthly tiers reduced 20% from the provisional
 allowances ("lower the credits a lil so we can keep users spending and making
 money"); buy-once packs re-priced "$10 to $50" and then extended with a
-$100 Max pack plus a quote-only Enterprise tier.
+quote-only Enterprise tier. Max is a $100 monthly subscription, not a pack.
 
 ### Monthly — replenishes once per paid period, expires at period end
 
@@ -39,7 +39,7 @@ $100 Max pack plus a quote-only Enterprise tier.
 | ------ | --------------- | ---------- |
 | Assist | 400             | $9 / mo    |
 | Pro    | 1,600           | $29 / mo   |
-| Max    | 4,000           | $59 / mo   |
+| Max    | 4,000           | $100 / mo  |
 
 ### Buy once — never expires, carries over
 
@@ -48,7 +48,6 @@ $100 Max pack plus a quote-only Enterprise tier.
 | Small  | 300     | $10 one time  |
 | Medium | 800     | $25 one time  |
 | Large  | 1,800   | $50 one time  |
-| Max    | 4,000   | $100 one time |
 
 ### Enterprise — contact for pricing
 
@@ -119,7 +118,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`, `STRIPE_PRICE_AI_PACK_4000`
+- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
