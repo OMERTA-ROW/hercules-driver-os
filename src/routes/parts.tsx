@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
   DriverApprovedNote,
+  NotConnectedNote,
   Label,
   Panel,
   PanelTitle,
@@ -468,6 +469,7 @@ function PartsPage() {
                 ))}
               </div>
             )}
+            <NotConnectedNote what="parts availability, pricing and pickup times" />
             <DriverApprovedNote>
               HERCULES sources and prices. You approve. Nothing is ordered, dispatched or charged
               without your explicit yes.

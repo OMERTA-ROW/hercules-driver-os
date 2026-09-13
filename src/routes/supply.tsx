@@ -25,6 +25,7 @@ import {
   Label,
   Pill,
   DriverApprovedNote,
+  NotConnectedNote,
   money2,
 } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,7 @@ function SupplyScreen() {
             not HERCULES. Switch it off any time in Settings.
           </p>
           <div className="mt-3">
+            <NotConnectedNote what="supplier stock, coverage and delivery quotes" />
             <DriverApprovedNote>
               Nothing is added to your bill until you tap it, and your running monthly total updates
               in front of you in Settings.
