@@ -17,7 +17,7 @@
  * unrelated. The owner then set the current amounts directly: monthly tiers
  * reduced 20% from the provisional allowances ("lower the credits a lil so we
  * can keep users spending and making money"), and buy-once packs re-priced
- * "$10 to $50". These amounts are now the owner's guideline; change them here
+ * "$10 to $50", and Max was moved to a $100 monthly subscription. These amounts are now the owner's guideline; change them here
  * only. Nothing else hardcodes an amount.
  *
  * Core app prices are authoritative and are NOT defined here:
@@ -28,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack300" | "pack800" | "pack1800" | "pack4000";
+export type AiPackId = "pack300" | "pack800" | "pack1800";
 
 export type AiPlan = {
   id: AiPlanId;
@@ -71,7 +71,7 @@ export const aiPlans: AiPlan[] = [
     id: "max",
     name: "Max",
     credits: 4000,
-    price: 59,
+    price: 100,
     blurb: "Team seats and constant assistance on long hauls.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
@@ -102,14 +102,6 @@ export const aiPacks: AiPack[] = [
     price: 50,
     blurb: "Stock up once, use it all year.",
     priceEnv: "STRIPE_PRICE_AI_PACK_1800",
-  },
-  {
-    id: "pack4000",
-    name: "4,000 credits",
-    credits: 4000,
-    price: 100,
-    blurb: "Largest one-time pack — for constant assistance.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_4000",
   },
 ];
 

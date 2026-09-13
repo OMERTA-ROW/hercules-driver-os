@@ -72,7 +72,6 @@ describe("owner catalogue", () => {
       [300, 10],
       [800, 25],
       [1800, 50],
-      [4000, 100],
     ]);
   });
 
@@ -81,7 +80,7 @@ describe("owner catalogue", () => {
     expect(aiPlans.map((p) => [p.credits, p.price])).toEqual([
       [400, 9],
       [1600, 29],
-      [4000, 59],
+      [4000, 100],
     ]);
   });
 
