@@ -69,17 +69,30 @@ function EquipmentScreen() {
   const [kind, setKind] = useState<VehicleKind>("eighteen");
   const [sub, setSub] = useState<EighteenSub>("dryVan");
   const [unit, setUnit] = useState("");
+  // The type's numbers are only a starting draft — the driver confirms or corrects them.
+  const [dims, setDims] = useState({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+  const [checked, setChecked] = useState(false);
 
   const pickedSpec = specFor(kind, kind === "eighteen" ? sub : undefined);
   const pickedRules = rulesFor(pickedSpec);
 
+  /** Whatever is typed in, falling back to the type's starting value. */
+  const enteredDims = {
+    heightFt: Number(dims.heightFt) || pickedSpec.heightFt,
+    lengthFt: Number(dims.lengthFt) || pickedSpec.lengthFt,
+    grossWeightLbs: Number(dims.grossWeightLbs) || pickedSpec.grossWeightLbs,
+    axles: Number(dims.axles) || pickedSpec.axles,
+  };
+
   async function save() {
-    const res = await addProfile(kind, kind === "eighteen" ? sub : undefined, unit);
+    const res = await addProfile(kind, kind === "eighteen" ? sub : undefined, unit, enteredDims);
     if (!res.ok) {
       toast.error("Not saved", { description: res.message });
       return;
     }
     setUnit("");
+    setDims({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+    setChecked(false);
     toast.success(res.message, {
       description: "I will ask what you are in at the start of every trip.",
     });
@@ -98,7 +111,10 @@ function EquipmentScreen() {
   ];
 
   return (
-    <AppShell title="Equipment" subtitle="The profile drives the route — not the other way around">
+    <AppShell
+      title="Equipment"
+      subtitle="Your own numbers shape the route it prefers and the warnings it speaks"
+    >
       <div className="grid gap-3 xl:grid-cols-2">
         {/* SAVED EQUIPMENT */}
         <Panel>
@@ -119,8 +135,9 @@ function EquipmentScreen() {
             </div>
           ) : ready && profiles.length === 0 ? (
             <div className="mb-3 rounded-lg border border-info/35 bg-info/10 p-3 text-sm">
-              Nothing saved yet. Add the truck and trailer you actually run — routing, clearances
-              and hazard warnings all read from it.
+              Nothing saved yet. Add the vehicle you actually run and put in its real height,
+              length and weight — the route it prefers and the warnings it speaks read from those
+              numbers.
             </div>
           ) : null}
           <div className="space-y-2">
@@ -148,12 +165,12 @@ function EquipmentScreen() {
                       <p className="mt-1 text-xs">
                         {rules.backRoadsAllowed ? (
                           <span className="text-go">
-                            County roads and back roads permitted — shortest legal line
+                            County roads and back roads are fine — takes the short line
                           </span>
                         ) : (
                           <span className="text-warn">
-                            Interstate and legal county highway only — nothing illegal for the
-                            equipment
+                            Prefers interstate and county highway, and calls out low clearances and
+                            restrictions — posted signs decide
                           </span>
                         )}
                       </p>
@@ -280,8 +297,9 @@ function EquipmentScreen() {
             <Label>How I route for it</Label>
             <p className="mt-1 text-sm">{pickedRules.spoken}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {pickedSpec.heightFt}' tall · needs {pickedSpec.minClearanceFt}' posted clearance ·{" "}
-              {pickedSpec.lengthFt}' long · {pickedSpec.grossWeightLbs.toLocaleString()} lb
+              Watching for anything posted under{" "}
+              {(enteredDims.heightFt + 1).toFixed(1)}' of clearance · {enteredDims.lengthFt}' long ·{" "}
+              {enteredDims.grossWeightLbs.toLocaleString()} lb · {enteredDims.axles} axles
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {pickedRules.hazardKinds.map((k) => (
