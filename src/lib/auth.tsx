@@ -242,7 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             trial_ends_at: trialEndsAt,
             company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
-            fleet_tier: kind === "zeusFleet" ? tierToNumber(tierForTrucks(seats)) : null,
+            fleet_tier: fleetTier,
           })
           .eq("id", data.user.id);
         setUserId(data.user.id);
