@@ -102,6 +102,39 @@ atomic credit reservation → provider call (20 s abort) → commit or full refu
 `src/lib/ai-meter.server.ts` holds the limiter, cache and in-flight dedupe.
 Input is capped at `aiLimits.maxSpeechChars`.
 
+## Accounting is server-owned, not user-owned
+
+`ai_credits_reserve`, `ai_credits_commit`, `ai_credits_refund`,
+`ai_credits_grant`, `ai_credits_revoke` and `ai_credits_touch` have `EXECUTE`
+revoked from `PUBLIC`, `anon` and `authenticated` and granted only to
+`service_role`, and all run `SET search_path = public, pg_temp`. An `auth.uid()`
+check is not enough on its own: a client could otherwise list its own
+reservations and commit a live hold at 0 credits (or refund it) while a paid
+provider call was still in flight, making that call free. The routines therefore
+take an explicit `_user` that server code resolves from a verified session, and
+metering runs through the admin client inside `ai-meter.server.ts`. The wallet,
+ledger, reservation and usage tables stay readable by their owner (RLS,
+`auth.uid()`) with no client write path; `ai_set_quality_pref` remains
+`authenticated` because it only sets a preference and derives the user itself.
+`src/lib/credits.security.test.ts` asserts all of this against the live
+database with the public browser key.
+
+### Billing-period safety and idempotency
+
+- Every reservation snapshots the wallet's `monthly_expires_at` in
+  `period_expires_at`. A partial settlement or refund restores monthly credits
+  only when the wallet is still in that same period; otherwise the unused
+  monthly portion lapses and a ledger line records why. Bought-once credits
+  always return.
+- `ai_credits_grant` for the monthly bucket ignores an invoice whose period ends
+  at or before the current `monthly_expires_at`, so a delayed or out-of-order
+  older payment can never reset a newer period's balance. The ledger row is kept
+  and marked superseded.
+- `ai_credit_reservations.idem_key` is uniquely indexed and checked while the
+  wallet row is locked, so a retried or duplicated hold with the same key
+  returns the existing reservation instead of spending twice — across server
+  instances, since the guarantee lives in the database.
+
 ## Margin reporting
 
 `ai_usage_events` records `credits_charged`, `credits_saved`,
