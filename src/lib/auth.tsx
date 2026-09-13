@@ -165,15 +165,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loadProfile]);
 
-  const signIn = useCallback(async (email: string, password: string): Promise<Result> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    if (data.user) {
-      setUserId(data.user.id);
-      await loadProfile(data.user.id);
-    }
-    return { error: null };
-  }, [loadProfile]);
+  const signIn = useCallback(
+    async (email: string, password: string, opts?: SignInOptions): Promise<Result> => {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { error: error.message };
+      if (data.user) {
+        setUserId(data.user.id);
+        const code = opts?.companyCode?.trim().toUpperCase();
+        if (code) {
+          const known = companyByCode(code);
+          await supabase
+            .from("profiles")
+            .update({
+              company_code: code,
+              ...(known ? { company_name: known.name } : {}),
+              ...(opts?.kind ? { account_kind: opts.kind } : {}),
+              ...(known ? { fleet_tier: tierToNumber(tierForTrucks(known.trucks)) } : {}),
+            })
+            .eq("id", data.user.id);
+        }
+        await loadProfile(data.user.id);
+      }
+      return { error: null };
+    },
+    [loadProfile],
+  );
 
   const signUp = useCallback(
     async (input: SignUpInput): Promise<Result> => {
