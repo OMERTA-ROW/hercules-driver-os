@@ -432,6 +432,7 @@ export type Database = {
           event_type: string
           id: string
           last_error: string | null
+          lease_expires_at: string | null
           payload: Json | null
           processed_at: string | null
           provider: string
@@ -445,6 +446,7 @@ export type Database = {
           event_type: string
           id?: string
           last_error?: string | null
+          lease_expires_at?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider: string
@@ -458,6 +460,7 @@ export type Database = {
           event_type?: string
           id?: string
           last_error?: string | null
+          lease_expires_at?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider?: string
@@ -974,12 +977,12 @@ export type Database = {
       }
       ai_billing_finish_event: {
         Args: {
-          _error?: string
+          _error: string
           _event_id: string
           _ok: boolean
           _provider: string
         }
-        Returns: boolean
+        Returns: undefined
       }
       ai_billing_fulfill:
         | {
