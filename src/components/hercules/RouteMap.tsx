@@ -422,7 +422,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           <BaseViewSwitch view={view} onChange={setView} />
           <MapViewControls
             camera={camera}
-            onCamera={setCamera}
+            onCamera={changeCamera}
             headingUp={headingUp}
             onHeadingUp={setHeadingUp}
             following={followTruck}
