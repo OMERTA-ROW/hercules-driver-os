@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/equipment")({
   head: () => ({
     meta: [
-      { title: "Equipment Profile — HERCULES Vehicle-Aware Routing" },
+      { title: "Equipment Profile — HERCULES Vehicle-Aware Guidance" },
       {
         name: "description",
         content:

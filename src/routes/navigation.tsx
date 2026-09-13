@@ -52,13 +52,13 @@ import { usePickup } from "@/lib/pickup";
 export const Route = createFileRoute("/navigation")({
   head: () => ({
     meta: [
-      { title: "Navigation — HERCULES Truck-Legal Routing" },
+      { title: "Navigation — HERCULES Live Route Cockpit" },
       {
         name: "description",
         content:
           "Live GPS tracking on a street-level map from Google Maps, route shields, and automatic reroute with voice announcement. Truck restriction data is not connected yet, so posted signs are the final word.",
       },
-      { property: "og:title", content: "Navigation — HERCULES Truck-Legal Routing" },
+      { property: "og:title", content: "Navigation — HERCULES Live Route Cockpit" },
       {
         property: "og:description",
         content:
