@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type Context,
   type ReactNode,
 } from "react";
 import { announceAt, pickCourier, pickTech } from "@/data/arrivals";
@@ -116,7 +117,14 @@ type Ctx = {
   takeAnnouncement: () => Announcement | null;
 };
 
-const ArrivalsContext = createContext<Ctx | null>(null);
+/**
+ * Keep one context identity across dev hot-reloads. This module mixes a
+ * provider with helpers, so Fast Refresh sometimes re-evaluates it and would
+ * otherwise mint a second context — the provider above would then be invisible
+ * to consumers below it ("must be used inside ArrivalsProvider").
+ */
+const g = globalThis as { __herculesArrivalsCtx?: Context<Ctx | null> };
+const ArrivalsContext = (g.__herculesArrivalsCtx ??= createContext<Ctx | null>(null));
 
 let seq = 0;
 const nextId = () => `arr${++seq}-${Date.now()}`;
