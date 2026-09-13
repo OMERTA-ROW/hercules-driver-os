@@ -69,12 +69,17 @@ const polyline = [
 const position = polyline[0]!;
 const segments = [
   {
+    id: "seg-1",
     road: "I-35",
     class: "interstate" as const,
     from: polyline[0]!,
     to: polyline[2]!,
     shieldAt: polyline[1]!,
     note: "test",
+    miles: 190,
+    truckLegal: true,
+    clearanceFt: null,
+    weightLimitLbs: null,
   },
 ];
 
