@@ -26,12 +26,6 @@ import {
 import {
   adapterForSpec,
   adapters,
-  autoAlertsFor,
-  baselineFor,
-  boltTires,
-  faultsFor,
-  obdReadiness,
-  predictionsFor,
   type AdapterKind,
   type AdapterProduct,
   type FaultFrame,
