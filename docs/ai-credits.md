@@ -4,7 +4,29 @@ AI assistance is paid for with credits, separately from the HERCULES app plan
 (`src/data/plans.ts`, unchanged: Company $5/mo, Owner-Operator $29/mo,
 Fleet $19 per truck/mo, min 3).
 
-## Draft catalogue (edit in `src/data/ai-credits.ts`)
+## Where the numbers come from
+
+Searched before finalising: the whole repository, its git history and every
+data file. **No pre-existing numeric AI credit allowance exists in this
+project.** The only earlier "credits" are truck-stop shower credits
+(`src/data/stops.ts`) and supplier loyalty credits (`src/data/parts.ts`), which
+are unrelated. So the table below is a *suggested fallback* awaiting the
+owner's own guideline.
+
+Authoritative, already-implemented and untouched:
+
+| Item                     | Price                     | Source                |
+| ------------------------ | ------------------------- | --------------------- |
+| Company Driver plan      | $5 / month                | `src/data/plans.ts`   |
+| Owner-Operator plan      | $29 / month               | `src/data/plans.ts`   |
+| Fleet / Carrier plan     | $19 per truck / month     | `src/data/plans.ts`   |
+| Voice Hand-Off Ordering  | $5.00 / month add-on      | `src/data/addons.ts`  |
+| Document Upload          | $5.00 one time            | `src/data/addons.ts`  |
+
+Every AI credit amount is editable in one file, `src/data/ai-credits.ts`, and
+is entirely separate from the prices above.
+
+## Suggested fallback catalogue (edit in `src/data/ai-credits.ts`)
 
 ### Monthly — replenishes once per paid period, expires at period end
 
