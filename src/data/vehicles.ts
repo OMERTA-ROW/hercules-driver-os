@@ -14,7 +14,15 @@
 import type { RoadClass } from "./routing";
 import type { HazardKind } from "./hazards";
 
-export type VehicleKind = "cargoVan" | "flatbed" | "eighteen" | "carHaul" | "heavyHaul";
+export type VehicleKind =
+  | "car"
+  | "passengerVan"
+  | "cargoVan"
+  | "boxTruck"
+  | "flatbed"
+  | "eighteen"
+  | "carHaul"
+  | "heavyHaul";
 
 /** 18-wheeler sub-options — same tractor, different operation and trailer. */
 export type EighteenSub = "dryVan" | "lineHaul" | "intermodal" | "flatbed";
