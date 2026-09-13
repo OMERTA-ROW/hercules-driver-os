@@ -173,13 +173,10 @@ export function BoltProvider({ children }: { children: ReactNode }) {
   // No stream, so no automatic alerts. Nothing is raised from nothing.
   const autoAlerts = useMemo<{ id: string; severity: "watch" | "alert"; spoken: string }[]>(
     () => [],
-    [dismissed],
-  );
-
-  const dismissAlert = useCallback(
-    (id: string) => setDismissed((prev) => [...prev, id]),
     [],
   );
+
+  const dismissAlert = useCallback((id: string) => setDismissed((prev) => [...prev, id]), []);
 
   const signal = 0;
 

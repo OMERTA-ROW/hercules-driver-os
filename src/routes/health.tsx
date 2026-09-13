@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote, NotConnectedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
-import { useBolt } from "@/lib/bolt";
+import { BOLT_UNAVAILABLE, useBolt } from "@/lib/bolt";
 import { usePurchases } from "@/lib/purchases";
 import { useVehicle } from "@/lib/vehicles";
 
@@ -56,7 +56,7 @@ function BoltStatus() {
         right={
           <Pill tone={connected ? "go" : state === "pairing" ? "watch" : "alert"}>
             {connected ? <Zap className="h-3.5 w-3.5" /> : <ZapOff className="h-3.5 w-3.5" />}
-            {connected ? "Connected" : state === "pairing" ? "Pairing" : "Not detected"}
+            {connected ? "Connected" : state === "pairing" ? "Pairing" : "Not connected"}
           </Pill>
         }
       >
@@ -85,6 +85,13 @@ function BoltStatus() {
           </p>
         </div>
       </div>
+
+      {state === "unavailable" ? (
+        <p className="mt-3 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+          {BOLT_UNAVAILABLE} When a reader is supported, this screen will fill in from your own
+          engine and nowhere else.
+        </p>
+      ) : null}
 
       <p className="mt-3 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs leading-relaxed text-muted-foreground">
         <Cable className="mt-0.5 h-4 w-4 shrink-0 text-primary/80" />
