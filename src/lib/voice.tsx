@@ -706,7 +706,18 @@ type Ctx = {
   preview: (id: VoiceId) => Promise<void>;
   /** The persona currently previewing, if any. */
   previewing: VoiceId | null;
+  /**
+   * How the last line was actually spoken. "premium" is the real neural
+   * persona; "device" is the free voice built into this device, which sounds
+   * nothing like the persona; "unavailable" means nothing could be spoken.
+   * Never claim a neural voice was heard when this says "device".
+   */
+  speechSource: SpeechSource;
+  /** Why premium speech was not used, in plain language, when known. */
+  speechNote: string | null;
 };
+
+export type SpeechSource = "premium" | "sample" | "device" | "unavailable" | null;
 
 
 const VoiceContext = createContext<Ctx | null>(null);
@@ -716,6 +727,27 @@ const VOICE_KEY = "hercules.voice";
 
 let seq = 0;
 const nextId = () => `t${++seq}-${Date.now()}`;
+
+/** Plain-language reason the free device voice spoke instead of the persona. */
+function fallbackNote(reason: string | undefined, message?: string): string {
+  switch (reason) {
+    case "unconfigured":
+      return "The neural voices aren't switched on for this app yet, so your device spoke the line free.";
+    case "eco":
+      return "Eco quality is on, so your device speaks every line free. Switch to Balanced to hear the real voice.";
+    case "no_credits":
+    case "insufficient":
+      return "You have no AI credits, so your device spoke the line free. The real voice costs credits.";
+    case "not_signed_in":
+      return "Sign in to hear the real voice — your device spoke this line free.";
+    case "rate_limited":
+      return "Too many spoken lines just now, so your device spoke this one free.";
+    case "provider":
+      return "The voice service didn't answer, so your device spoke the line free. You weren't charged.";
+    default:
+      return message || "Your device spoke the line free instead of the neural voice.";
+  }
+}
 
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<VoiceMode>("idle");
@@ -759,11 +791,22 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const voiceRef = useRef<VoiceId>(voiceId);
   voiceRef.current = voiceId;
   const [previewing, setPreviewing] = useState<VoiceId | null>(null);
+  const [speechSource, setSpeechSource] = useState<SpeechSource>(null);
+  const [speechNote, setSpeechNote] = useState<string | null>(null);
+  /**
+   * Generation token. Every Stop and every newer speech request bumps it, so a
+   * provider reply that arrives late is discarded instead of playing over the
+   * top of whatever is current — the classic "voice from two requests ago".
+   */
+  const speechGen = useRef(0);
 
   const killAudio = useCallback(() => {
+    // Anything still in flight is now stale and must not be heard.
+    speechGen.current += 1;
     detachLevel.current?.();
     detachLevel.current = null;
     if (audio.current) {
+      audio.current.onended = null;
       audio.current.pause();
       audio.current.src = "";
       audio.current = null;
@@ -781,6 +824,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
      premium speech is unavailable — not signed in, no credits, Eco quality,
      provider down — so the driver always hears the line, never charged. */
   const speakOnDevice = useCallback((text: string, persona?: VoiceOption) => {
+    // Stop any premium clip first: the two backends must never overlap.
+    detachLevel.current?.();
+    detachLevel.current = null;
+    if (audio.current) {
+      audio.current.onended = null;
+      audio.current.pause();
+      audio.current.src = "";
+      audio.current = null;
+    }
     try {
       const synth = window.speechSynthesis;
       if (!synth) return;
@@ -797,30 +849,58 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         u.lang = match.lang;
       }
       synth.speak(u);
+      return true;
     } catch {
       /* screen text still carries the line */
+      return false;
     }
   }, []);
 
   const playAs = useCallback(
-    async (id: VoiceId, text: string) => {
+    async (id: VoiceId, text: string): Promise<SpeechSource> => {
       const persona = voiceById(id);
+      // Silence whatever is playing and claim this generation. A Stop or a newer
+      // line bumps the token again, which invalidates everything below.
+      killAudio();
+      const gen = speechGen.current;
+      const stale = () => gen !== speechGen.current;
+
+      const fallback = (note: string): SpeechSource => {
+        if (stale()) return null;
+        const spoke = speakOnDevice(text, persona);
+        if (stale()) return null;
+        setSpeechSource(spoke ? "device" : "unavailable");
+        setSpeechNote(note);
+        return spoke ? "device" : "unavailable";
+      };
+
       try {
         const res = await speakLine({ data: { voiceId: id, text } });
+        // Cancelled or superseded while the provider was working: drop it.
+        if (stale()) return null;
         if (!res.ok) {
-          speakOnDevice(text, persona);
-          return;
+          return fallback(fallbackNote(res.reason, res.message));
         }
-        killAudio();
         const el = new Audio(res.audio);
         el.crossOrigin = "anonymous";
         audio.current = el;
         // The orb's ripples ride the real loudness of the line.
         detachLevel.current = attachAudioLevel(el);
         await el.play().catch(() => {});
+        // Stopped during the play() handshake: make sure nothing keeps sounding.
+        if (stale()) {
+          el.onended = null;
+          el.pause();
+          el.src = "";
+          if (audio.current === el) audio.current = null;
+          return null;
+        }
+        setSpeechSource("premium");
+        setSpeechNote(null);
+        return "premium";
       } catch {
         // Unauthenticated or unreachable premium speech — device voice, free.
-        speakOnDevice(text, persona);
+        return fallback("Premium speech couldn't be reached, so your device spoke the line free.");
       }
     },
     [killAudio, speakOnDevice],
@@ -831,9 +911,47 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     async (id: VoiceId) => {
       const persona = voiceById(id);
       setPreviewing(id);
-      await playAs(id, persona.sample);
+
+      /* Previews play a static clip of the real neural voice that ships with the
+         app — identical for every driver, no account data in it, no paid call,
+         no credits spent. So a brand-new account hears the actual character. */
+      killAudio();
+      const sampleGen = speechGen.current;
+      const clip = new Audio(`/voice-samples/${id}.mp3`);
+      const heard = await new Promise<boolean>((resolve) => {
+        let settled = false;
+        const done = (ok: boolean) => {
+          if (settled) return;
+          settled = true;
+          resolve(ok);
+        };
+        clip.onerror = () => done(false);
+        clip.oncanplay = () => done(true);
+        void clip.play().then(
+          () => done(true),
+          () => done(false),
+        );
+        setTimeout(() => done(false), 4000);
+      });
+      if (sampleGen !== speechGen.current) return; // stopped or superseded
+      if (heard) {
+        audio.current = clip;
+        detachLevel.current = attachAudioLevel(clip);
+        setSpeechSource("sample");
+        setSpeechNote("Sample clip of the real voice — no credits used.");
+        clip.onended = () => setPreviewing(null);
+        return;
+      }
+      clip.pause();
+      clip.src = "";
+
+      // No clip available in this build: fall back to the live paid path.
+      const gen = speechGen.current + 1; // playAs claims this generation
+      const source = await playAs(id, persona.sample);
+      // A newer preview or a Stop owns the UI now — leave its state alone.
+      if (gen !== speechGen.current) return;
       const el = audio.current;
-      if (el) el.onended = () => setPreviewing(null);
+      if ((source === "premium" || source === "sample") && el) el.onended = () => setPreviewing(null);
       else setPreviewing(null);
     },
     [playAs],
@@ -1015,6 +1133,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setVoice,
     preview,
     previewing,
+    speechSource,
+    speechNote,
     listen,
     stop,
     say,
@@ -1053,6 +1173,8 @@ const inertVoice: Ctx = {
   pending: undefined,
   preview: async () => {},
   previewing: null,
+  speechSource: null,
+  speechNote: null,
 };
 
 export function useVoice() {

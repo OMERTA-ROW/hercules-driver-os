@@ -193,3 +193,30 @@ registration first.
 
 `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and one price id per catalogue
 entry (see `priceEnv` in `src/data/ai-credits.ts`). Optional: `APP_BASE_URL`.
+
+## Paid usage gating — what is actually metered today (final check)
+
+- **Only one paid provider call exists:** speaking a line aloud in a neural
+  persona (`src/lib/speech.functions.ts`, `openai/gpt-4o-mini-tts` through the
+  Lovable AI Gateway). It requires a signed-in account, an authenticated server
+  function, a rate limit, a per-account cache, in-flight de-duplication and a
+  credit hold that is settled or refunded as one operation.
+- **Voice previews are free.** `public/voice-samples/*.mp3` are static clips of
+  the nine personas rendered once with `bun scripts/build-voice-samples.ts`.
+  They are identical for every account, contain no user data, and are served as
+  app assets — no gateway call, no credits. Re-run the script only when a
+  persona's sample line, voice or direction changes.
+- **Free fallback:** when premium speech is unavailable (not signed in, no
+  credits, Eco quality, rate limited, provider failure) the device's own
+  `speechSynthesis` voice reads the line and the UI states plainly that it is
+  not the neural persona.
+- **Stale-response cancellation:** playback carries a generation token. Stop, or
+  any newer line, invalidates an in-flight request; a late provider reply is
+  discarded and never played, and the device fallback stops any premium clip
+  before it speaks. Covered by `src/lib/voice-cancel.test.tsx`.
+- **Command handling is rule-based**, not a general AI assistant: intents are
+  matched in `src/data/voice-commands.ts` / `src/lib/voice.tsx` at zero cost.
+  There is no metered chat/assistant endpoint, and the UI must not claim one.
+- **Purchases are not live:** no payment credentials are configured, so no
+  monthly plan or credit pack can be bought or granted. Every credit balance is
+  therefore zero until the setup in this document is completed.

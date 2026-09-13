@@ -189,8 +189,10 @@ function Welcome() {
               }
             >
               You're set to {voice.name} right now. There are nine characters — five male, four
-              female — and each one has a Listen button so you hear it before you choose. Your pick
-              is remembered. If premium speech isn't available, your device speaks the line free
+              female — and each has a Play button with a short recorded clip of that real voice, free
+              and with no credits used. Your pick is remembered. What the voice understands is a set
+              of spoken commands, not open-ended conversation; speaking lines aloud in the real voice
+              during a drive uses AI credits, and without credits your device reads them free
               instead.
             </Step>
           </div>

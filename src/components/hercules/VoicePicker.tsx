@@ -10,7 +10,7 @@ import { useVoice, femaleVoices, maleVoices, type VoiceOption } from "@/lib/voic
  * choosing it. Compact and scrollable — cab-sized rows, no full-page takeover.
  */
 function VoiceRow({ v }: { v: VoiceOption }) {
-  const { voice, setVoice, preview, previewing, stop } = useVoice();
+  const { voice, setVoice, preview, previewing, stop, speechSource, speechNote } = useVoice();
   const active = voice.id === v.id;
   const playing = previewing === v.id;
 
@@ -63,13 +63,23 @@ function VoiceRow({ v }: { v: VoiceOption }) {
           ) : null}
         </span>
         <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{v.hint}</span>
+        {playing && speechSource === "device" ? (
+          <span className="mt-1 block text-xs leading-relaxed text-warn">
+            You're hearing your device's own voice, not {v.name}. {speechNote}
+          </span>
+        ) : null}
+        {playing && speechSource === "unavailable" ? (
+          <span className="mt-1 block text-xs leading-relaxed text-warn">
+            Nothing could be played on this device. The line is on screen instead.
+          </span>
+        ) : null}
       </button>
     </div>
   );
 }
 
 export function VoicePicker() {
-  const { voice, previewing } = useVoice();
+  const { voice, previewing, speechSource } = useVoice();
 
   return (
     <>
@@ -104,11 +114,24 @@ export function VoicePicker() {
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">
-        Every voice holds a full conversation the same way — a partner you talk with, not a command
-        menu. Whichever one you pick still asks before it books, spends, or commits anything. Your
-        choice stays on your profile.
-      </p>
+      <div className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+        <p>
+          <span className="text-foreground">About the previews:</span> each Play button plays a
+          short recorded clip of that real neural voice that ships with the app — free, no credits
+          used, the same clip for everyone. Speaking your own lines aloud in that voice during a
+          drive is the part that costs AI credits; without credits your device's own built-in voice
+          reads them instead, and you'll see that said plainly on the row.
+        </p>
+        <p>
+          What the voice understands today is a fixed set of spoken commands — loads, money, the
+          map, hours, breakdowns, documents — not open-ended conversation. Whichever character you
+          pick still asks before it books, spends or commits anything, and your choice stays on your
+          profile.
+        </p>
+        {speechSource === "premium" || speechSource === "sample" ? (
+          <p className="text-primary">You just heard the real neural voice.</p>
+        ) : null}
+      </div>
     </>
   );
 }
