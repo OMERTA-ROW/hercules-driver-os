@@ -21,6 +21,11 @@ import { cn } from "@/lib/utils";
  * offscreen or hidden, and holds still under prefers-reduced-motion.
  */
 
+/** The warm gold light that sits BEHIND the orb in every colourway. */
+const GOLD_CORE = "oklch(0.86 0.15 84 / 0.5)";
+const GOLD = "oklch(0.8 0.15 84)";
+const GOLD_DEEP = "oklch(0.62 0.13 78)";
+
 /** Metallic tint per colourway — all of them are mercury, only the light changes. */
 const metals: Record<
   OrbColorway,
