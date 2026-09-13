@@ -102,6 +102,8 @@ type Ctx = {
   signIn: (email: string, password: string, opts?: SignInOptions) => Promise<Result>;
   signUp: (input: SignUpInput) => Promise<Result>;
   signOut: () => Promise<void>;
+  /** Sends the confirmation email again. Never reveals whether an account exists. */
+  resendConfirmation: (email: string) => Promise<{ ok: boolean; message: string }>;
   /** Records the driver's chosen plan. Never marks a subscription paid. */
   changePlan: (plan: PlanId, seats?: number) => Promise<{ ok: boolean; message: string }>;
   refresh: () => Promise<void>;
@@ -119,6 +121,7 @@ const AuthContext = createContext<Ctx>({
   signIn: async () => ({ error: "Auth not ready" }),
   signUp: async () => ({ error: "Auth not ready" }),
   signOut: async () => {},
+  resendConfirmation: async () => ({ ok: false, message: "Accounts are not ready yet." }),
   changePlan: async () => ({ ok: false, message: "Accounts are not ready yet." }),
   refresh: async () => {},
   trialDaysLeft: 0,
@@ -215,7 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: input.email,
         password: input.password,
         options: {
-          emailRedirectTo: window.location.origin,
+          // The confirmation link brings the driver straight back into setup.
+          emailRedirectTo: `${window.location.origin}/welcome`,
           data: {
             full_name: input.name,
             account_kind: kind,
@@ -294,6 +298,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (userId) await loadProfile(userId);
   }, [loadProfile, userId]);
 
+  const resendConfirmation = useCallback(async (email: string) => {
+    const address = email.trim();
+    if (!address) return { ok: false, message: "Enter your email address first." };
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: address,
+      options: { emailRedirectTo: `${window.location.origin}/welcome` },
+    });
+    if (error) {
+      const wait = /rate|seconds|too many/i.test(error.message);
+      return {
+        ok: false,
+        message: wait
+          ? "One was just sent — wait a minute before asking for another."
+          : "That didn't send. Check the address and try again.",
+      };
+    }
+    return { ok: true, message: "Sent. It can take a minute to arrive." };
+  }, []);
+
   const trialDaysLeft = useMemo(
     () =>
       account
@@ -324,6 +348,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         signOut,
+        resendConfirmation,
         changePlan,
         refresh,
         trialDaysLeft,
