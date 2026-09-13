@@ -1,65 +1,110 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { useVoice, type OrbColorway, type VoiceMode } from "@/lib/voice";
 import { getVoiceLevel } from "@/lib/voice-level";
 import { cn } from "@/lib/utils";
 
 /**
- * THE ORB — a body of liquid mercury. No ring, no cord, nothing orbiting it.
+ * THE ORB — a body of liquid mercury.
  *
- * Everything moves on one animation frame loop, so the surface reacts within a
- * frame of whatever is happening:
+ * The silhouette is a real closed path rebuilt every frame from a handful of
+ * radial harmonics, so surface tension pulls it round while the mass keeps
+ * folding. Chrome is done with hard light/dark banding rolling across the
+ * body (that contrast is what makes metal read as metal), a sliding specular
+ * hot spot, and a bright meniscus rim.
  *
  *   base      — slow heavy churn; mercury shifting under its own weight.
- *   voice     — the live loudness drives displacement, undulation and the
- *               specular highlight, so speech visibly throws the surface.
- *   touch     — contact deforms the liquid where the finger lands and sends a
- *               swell outward that overlaps others and settles back.
+ *   voice     — live loudness drives the harmonics, the bands and the highlight.
+ *   touch     — contact dents the liquid where the finger lands, and the dent
+ *               travels outward and settles.
+ *
+ * One requestAnimationFrame loop, zero React re-renders per frame. Pauses when
+ * offscreen or hidden, and holds still under prefers-reduced-motion.
  */
 
-const shells: Record<
+/** Metallic tint per colourway — all of them are mercury, only the light changes. */
+const metals: Record<
   OrbColorway,
-  { top: string; mid: string; deep: string; rim: string; sheen: string }
+  { hi: string; lo: string; deep: string; rim: string; tint: string }
 > = {
   black: {
-    top: "oklch(0.34 0.012 250)",
-    mid: "oklch(0.14 0.008 250)",
-    deep: "oklch(0.04 0.004 250)",
-    rim: "oklch(0.48 0.02 250)",
-    sheen: "oklch(0.78 0.02 250)",
+    hi: "oklch(0.93 0.008 250)",
+    lo: "oklch(0.38 0.01 250)",
+    deep: "oklch(0.11 0.008 250)",
+    rim: "oklch(0.97 0.006 250)",
+    tint: "oklch(0.8 0.09 84)",
   },
   grey: {
-    top: "oklch(0.7 0.008 250)",
-    mid: "oklch(0.4 0.008 250)",
-    deep: "oklch(0.17 0.006 250)",
-    rim: "oklch(0.8 0.008 250)",
-    sheen: "oklch(0.94 0.006 250)",
+    hi: "oklch(0.97 0.005 250)",
+    lo: "oklch(0.55 0.008 250)",
+    deep: "oklch(0.24 0.006 250)",
+    rim: "oklch(0.99 0.003 250)",
+    tint: "oklch(0.84 0.06 84)",
   },
   white: {
-    top: "oklch(0.99 0.004 90)",
-    mid: "oklch(0.87 0.008 90)",
-    deep: "oklch(0.56 0.014 90)",
+    hi: "oklch(1 0 0)",
+    lo: "oklch(0.72 0.006 250)",
+    deep: "oklch(0.42 0.008 250)",
     rim: "oklch(1 0 0)",
-    sheen: "oklch(1 0 0)",
+    tint: "oklch(0.88 0.05 84)",
   },
 };
 
-const GOLD = "oklch(0.8 0.13 84)";
-const GOLD_DEEP = "oklch(0.58 0.11 74)";
-const VIOLET = "oklch(0.58 0.19 300)";
-const SVG_NS = "http://www.w3.org/2000/svg";
+const CX = 200;
+const CY = 200;
+const R = 150;
+/** Silhouette resolution — enough for smooth folds, cheap enough for a tablet. */
+const SEGMENTS = 72;
 
-type Ripple = {
-  cx: number;
-  cy: number;
-  /** 0 to 1 — how hard the surface was hit. */
+type Dent = {
+  /** Angle on the surface the contact landed nearest. */
+  angle: number;
   strength: number;
-  /** Seconds for the swell to cross the surface and die out. */
   dur: number;
-  /** Seconds elapsed. */
   age: number;
-  gold: SVGCircleElement;
-  violet: SVGCircleElement;
 };
+
+function buildPath(
+  t: number,
+  loud: number,
+  dents: Dent[],
+  out: number[],
+): string {
+  const amp = 0.028 + loud * 0.075;
+  let d = "";
+  for (let i = 0; i < SEGMENTS; i++) {
+    const a = (i / SEGMENTS) * Math.PI * 2;
+    /* Surface-tension harmonics: low orders dominate so it always reads round. */
+    let k =
+      Math.sin(a * 2 + t * 0.55) * 0.55 +
+      Math.sin(a * 3 - t * 0.41) * 0.3 +
+      Math.sin(a * 5 + t * 0.72) * 0.14 +
+      Math.sin(a * 7 - t * 0.95) * 0.07;
+    /* Travelling dents from contact and from speech. */
+    for (const dn of dents) {
+      const p = dn.age / dn.dur;
+      if (p >= 1) continue;
+      let diff = Math.abs(((a - dn.angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+      diff = Math.PI - diff;
+      const front = p * 2.2;
+      const band = Math.exp(-Math.pow((diff - front) * 2.4, 2));
+      const decay = Math.pow(1 - p, 1.8);
+      k -= dn.strength * band * decay * 2.6;
+    }
+    const r = R * (1 + k * amp);
+    out[i * 2] = CX + Math.cos(a) * r;
+    out[i * 2 + 1] = CY + Math.sin(a) * r;
+  }
+  /* Closed Catmull-Rom-ish smoothing through the points (quadratic midpoints). */
+  const px = (i: number) => out[((i + SEGMENTS) % SEGMENTS) * 2]!;
+  const py = (i: number) => out[((i + SEGMENTS) % SEGMENTS) * 2 + 1]!;
+  d = `M ${((px(0) + px(-1)) / 2).toFixed(2)} ${((py(0) + py(-1)) / 2).toFixed(2)}`;
+  for (let i = 0; i < SEGMENTS; i++) {
+    const mx = (px(i) + px(i + 1)) / 2;
+    const my = (py(i) + py(i + 1)) / 2;
+    d += ` Q ${px(i).toFixed(2)} ${py(i).toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
+  }
+  return `${d} Z`;
+}
 
 export function Orb({
   className,
@@ -72,159 +117,176 @@ export function Orb({
   colorway: OrbColorway;
   onActivate?: () => void;
 }) {
-  const s = shells[colorway];
+  const m = metals[colorway];
   const listening = mode === "listening";
   const speaking = mode === "speaking";
-  const uid = `orb-${colorway}`;
+  const uid = `orb-${useId().replace(/[^a-zA-Z0-9-]/g, "")}`;
 
   const modeRef = useRef<VoiceMode>(mode);
   modeRef.current = mode;
 
-  const turb = useRef<SVGFETurbulenceElement | null>(null);
-  const disp = useRef<SVGFEDisplacementMapElement | null>(null);
-  const mass = useRef<SVGGElement | null>(null);
-  const spec = useRef<SVGEllipseElement | null>(null);
-  const rippleLayer = useRef<SVGGElement | null>(null);
-  const bloom = useRef<HTMLSpanElement | null>(null);
-  const ripples = useRef<Ripple[]>([]);
+  const hostRef = useRef<HTMLSpanElement | null>(null);
+  const bodyRef = useRef<SVGPathElement | null>(null);
+  const clipRef = useRef<SVGPathElement | null>(null);
+  const rimRef = useRef<SVGPathElement | null>(null);
+  const bandsRef = useRef<SVGGElement | null>(null);
+  const bands2Ref = useRef<SVGGElement | null>(null);
+  const specRef = useRef<SVGEllipseElement | null>(null);
+  const spec2Ref = useRef<SVGEllipseElement | null>(null);
+  const turbRef = useRef<SVGFETurbulenceElement | null>(null);
+  const bloomRef = useRef<HTMLSpanElement | null>(null);
+  const dents = useRef<Dent[]>([]);
 
-  /** One disturbance of the surface, from contact or from a spoken word. */
-  const ripple = useCallback((cx: number, cy: number, strength: number) => {
-    const layer = rippleLayer.current;
-    if (!layer || ripples.current.length > 9) return;
-    const st = Math.max(0.08, Math.min(1, strength));
-    const mk = (stroke: string, w: number) => {
-      const c = document.createElementNS(SVG_NS, "circle");
-      c.setAttribute("cx", String(cx));
-      c.setAttribute("cy", String(cy));
-      c.setAttribute("r", "6");
-      c.setAttribute("fill", "none");
-      c.setAttribute("stroke", stroke);
-      c.setAttribute("stroke-width", String(w));
-      c.setAttribute("stroke-opacity", "0");
-      layer.appendChild(c);
-      return c;
-    };
-    const width = 6 + st * 22;
-    ripples.current.push({
-      cx,
-      cy,
-      strength: st,
-      dur: 2.6 - st * 1.2,
+  /** One disturbance of the surface — from contact or from a spoken word. */
+  const strike = useCallback((angle: number, strength: number) => {
+    if (dents.current.length > 7) dents.current.shift();
+    dents.current.push({
+      angle,
+      strength: Math.max(0.05, Math.min(1, strength)),
+      dur: 1.5 + strength * 0.9,
       age: 0,
-      gold: mk(GOLD, width),
-      violet: mk(VIOLET, width * 0.7),
     });
   }, []);
 
-  /* THE LOOP. Churn, undulation, specular light, voice reaction and every
-     travelling swell are all advanced here, once per frame. */
   useEffect(() => {
+    const host = hostRef.current;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+    const pts = new Array<number>(SEGMENTS * 2).fill(0);
     let raf = 0;
-    let last = performance.now();
+    let last = 0;
     let t = 0;
     let smooth = 0;
-    let sinceVoiceRipple = 0;
+    let sinceVoice = 0;
+    let visible = true;
 
-    const tick = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
+    const paint = (dt: number) => {
       t += dt;
-
       const live = modeRef.current !== "idle";
       const level = live ? getVoiceLevel() : 0;
-      smooth = smooth * 0.82 + level * 0.18;
+      smooth = smooth * 0.84 + level * 0.16;
 
-      /* Heavy, slow base motion with the voice layered on top. */
-      const wobble = Math.sin(t * 0.32) * 0.0012 + Math.sin(t * 0.11) * 0.0009;
-      const freq = 0.0052 + wobble + smooth * 0.006;
-      const scale = 20 + Math.sin(t * 0.24) * 6 + smooth * 52;
-      turb.current?.setAttribute("baseFrequency", freq.toFixed(5));
-      disp.current?.setAttribute("scale", scale.toFixed(2));
+      /* Silhouette. */
+      const d = buildPath(t, smooth, dents.current, pts);
+      bodyRef.current?.setAttribute("d", d);
+      clipRef.current?.setAttribute("d", d);
+      rimRef.current?.setAttribute("d", d);
 
-      /* The whole mass undulates — heavier when it is being spoken to. */
-      const breathe = 1 + Math.sin(t * 0.5) * 0.012 + smooth * 0.05;
-      const squash = 1 + Math.sin(t * 0.37 + 1.1) * 0.014 - smooth * 0.035;
-      mass.current?.setAttribute(
+      /* Reflections roll across the body at different rates — that shear is
+         what sells heavy liquid metal rather than a shaded ball. */
+      const roll = ((t * 26 + smooth * 90) % 520) - 260;
+      const roll2 = 260 - (((t * 15 + smooth * 40) % 520));
+      bandsRef.current?.setAttribute(
         "transform",
-        `translate(200 200) scale(${breathe.toFixed(4)} ${squash.toFixed(4)}) translate(-200 -200)`,
+        `translate(0 ${roll.toFixed(1)}) rotate(${(-14 + Math.sin(t * 0.3) * 6).toFixed(2)} 200 200)`,
+      );
+      bands2Ref.current?.setAttribute(
+        "transform",
+        `translate(${(roll2 * 0.7).toFixed(1)} 0) rotate(${(72 + Math.cos(t * 0.22) * 8).toFixed(2)} 200 200)`,
       );
 
-      /* Light catching the surface: the highlight slides and tightens as the
-         liquid moves under it. */
-      if (spec.current) {
-        const hx = 158 + Math.sin(t * 0.43) * 12 + smooth * 10;
-        const hy = 138 + Math.cos(t * 0.31) * 10 - smooth * 12;
-        spec.current.setAttribute("cx", hx.toFixed(1));
-        spec.current.setAttribute("cy", hy.toFixed(1));
-        spec.current.setAttribute("rx", (52 + smooth * 22).toFixed(1));
-        spec.current.setAttribute("ry", (30 - smooth * 8).toFixed(1));
-        spec.current.setAttribute("opacity", (0.5 + smooth * 0.45).toFixed(3));
+      /* Surface fold noise breathes so folds keep re-forming. */
+      turbRef.current?.setAttribute(
+        "baseFrequency",
+        (0.006 + Math.sin(t * 0.23) * 0.0018 + smooth * 0.004).toFixed(5),
+      );
+
+      /* Light on the surface. */
+      if (specRef.current) {
+        const s = specRef.current;
+        s.setAttribute("cx", (156 + Math.sin(t * 0.44) * 14 + smooth * 12).toFixed(1));
+        s.setAttribute("cy", (134 + Math.cos(t * 0.33) * 11 - smooth * 14).toFixed(1));
+        s.setAttribute("rx", (46 + smooth * 20).toFixed(1));
+        s.setAttribute("ry", (26 - smooth * 7).toFixed(1));
+        s.setAttribute("opacity", (0.72 + smooth * 0.28).toFixed(3));
+      }
+      if (spec2Ref.current) {
+        const s = spec2Ref.current;
+        s.setAttribute("cx", (246 + Math.cos(t * 0.29) * 16).toFixed(1));
+        s.setAttribute("cy", (262 + Math.sin(t * 0.38) * 13).toFixed(1));
+        s.setAttribute("opacity", (0.24 + smooth * 0.3).toFixed(3));
+      }
+      if (bloomRef.current) {
+        bloomRef.current.style.opacity = (0.4 + smooth * 0.5).toFixed(3);
       }
 
-      if (bloom.current) {
-        bloom.current.style.opacity = String(0.45 + smooth * 0.55);
+      /* Speech throws swells out of the liquid. */
+      sinceVoice += dt;
+      if (live && level > 0.06 && sinceVoice > 0.24 - level * 0.12) {
+        sinceVoice = 0;
+        strike(Math.random() * Math.PI * 2, 0.22 + level * 0.6);
       }
 
-      /* Speech throws swells out of the middle of the liquid. */
-      sinceVoiceRipple += dt;
-      if (live && level > 0.06 && sinceVoiceRipple > 0.22 - level * 0.12) {
-        sinceVoiceRipple = 0;
-        ripple(200, 200, (modeRef.current === "speaking" ? 0.3 : 0.2) + level * 0.75);
-      }
-
-      /* Advance every travelling swell and retire the spent ones. */
-      ripples.current = ripples.current.filter((r) => {
-        r.age += dt;
-        const p = r.age / r.dur;
-        if (p >= 1) {
-          r.gold.remove();
-          r.violet.remove();
-          return false;
-        }
-        const ease = 1 - Math.pow(1 - p, 2.4);
-        const reach = 150 + r.strength * 90;
-        const peak = 0.16 + r.strength * 0.46;
-        const fade = p < 0.18 ? p / 0.18 : 1 - (p - 0.18) / 0.82;
-        const w = (6 + r.strength * 22) * (1 - p * 0.7);
-        r.gold.setAttribute("r", (6 + ease * reach).toFixed(1));
-        r.gold.setAttribute("stroke-width", Math.max(1.5, w).toFixed(2));
-        r.gold.setAttribute("stroke-opacity", (peak * fade).toFixed(3));
-        r.violet.setAttribute("r", (4 + ease * reach * 0.84).toFixed(1));
-        r.violet.setAttribute("stroke-width", Math.max(1, w * 0.7).toFixed(2));
-        r.violet.setAttribute("stroke-opacity", (peak * 0.5 * fade).toFixed(3));
-        return true;
+      dents.current = dents.current.filter((dn) => {
+        dn.age += dt;
+        return dn.age < dn.dur;
       });
+    };
 
+    if (reduce) {
+      paint(0);
+      return;
+    }
+
+    const tick = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      paint(dt);
       raf = requestAnimationFrame(tick);
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(raf);
-      ripples.current.forEach((r) => {
-        r.gold.remove();
-        r.violet.remove();
-      });
-      ripples.current = [];
+    const start = () => {
+      if (raf) return;
+      last = 0;
+      raf = requestAnimationFrame(tick);
     };
-  }, [ripple]);
+    const stop = () => {
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    const onVis = () => (document.hidden || !visible ? stop() : start());
+    document.addEventListener("visibilitychange", onVis);
+
+    let io: IntersectionObserver | undefined;
+    if (host && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          visible = entries.some((e) => e.isIntersecting);
+          onVis();
+        },
+        { threshold: 0.01 },
+      );
+      io.observe(host);
+    }
+
+    start();
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVis);
+      io?.disconnect();
+      dents.current = [];
+    };
+  }, [strike]);
 
   /* Contact deforms the liquid exactly where the finger or cursor lands. */
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLSpanElement>) => {
       const box = e.currentTarget.getBoundingClientRect();
       if (!box.width) return;
-      const x = ((e.clientX - box.left) / box.width) * 400;
-      const y = ((e.clientY - box.top) / box.height) * 400;
-      ripple(x, y, 0.95);
-      ripple(x, y, 0.45);
+      const x = ((e.clientX - box.left) / box.width) * 400 - CX;
+      const y = ((e.clientY - box.top) / box.height) * 400 - CY;
+      strike(Math.atan2(y, x), 0.95);
     },
-    [ripple],
+    [strike],
   );
 
   const body = (
     <span
+      ref={hostRef}
       onPointerDown={onPointerDown}
       className={cn(
         "relative block aspect-square w-full touch-none",
@@ -233,19 +295,19 @@ export function Orb({
         mode === "idle" && "orb-state-idle",
       )}
     >
-      {/* Ambient bloom behind the liquid — gold core, violet outside */}
+      {/* Ambient bloom — cold metal light, warmed slightly when live */}
       <span
         aria-hidden
-        ref={bloom}
-        className="orb-bloom absolute -inset-[16%] rounded-full"
+        ref={bloomRef}
+        className="absolute -inset-[14%] rounded-full"
         style={{
-          background: `radial-gradient(circle, color-mix(in oklab, ${GOLD} ${speaking ? 20 : listening ? 15 : 8}%, transparent) 0%, color-mix(in oklab, ${VIOLET} 10%, transparent) 44%, transparent 68%)`,
+          background: `radial-gradient(circle, color-mix(in oklab, ${m.hi} ${speaking ? 16 : listening ? 12 : 7}%, transparent) 0%, color-mix(in oklab, ${m.tint} 7%, transparent) 46%, transparent 70%)`,
         }}
       />
 
       <svg
         viewBox="0 0 400 400"
-        className="orb-body absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full"
         role="img"
         aria-label={
           listening
@@ -256,37 +318,10 @@ export function Orb({
         }
       >
         <defs>
-          {/* Liquid displacement — the whole reason this reads as fluid. */}
+          {/* Folds: noise displacement on the reflections only, so the
+              silhouette stays clean while the surface creases. */}
           <filter
-            id={`${uid}-liquid`}
-            x="-20%"
-            y="-20%"
-            width="140%"
-            height="140%"
-            colorInterpolationFilters="sRGB"
-          >
-            <feTurbulence
-              ref={turb}
-              type="fractalNoise"
-              baseFrequency="0.0052"
-              numOctaves={3}
-              seed={11}
-              result="noise"
-            />
-            <feDisplacementMap
-              ref={disp}
-              in="SourceGraphic"
-              in2="noise"
-              scale="22"
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
-            <feGaussianBlur stdDeviation="1.6" />
-          </filter>
-
-          {/* Softener so each swell reads as liquid, never as a drawn ring. */}
-          <filter
-            id={`${uid}-soft`}
+            id={`${uid}-fold`}
             x="-25%"
             y="-25%"
             width="150%"
@@ -294,134 +329,126 @@ export function Orb({
             colorInterpolationFilters="sRGB"
           >
             <feTurbulence
+              ref={turbRef}
               type="fractalNoise"
-              baseFrequency="0.013"
-              numOctaves={2}
-              seed={5}
-              result="n2"
+              baseFrequency="0.006"
+              numOctaves={3}
+              seed={17}
+              result="n"
             />
             <feDisplacementMap
               in="SourceGraphic"
-              in2="n2"
-              scale="22"
+              in2="n"
+              scale="34"
               xChannelSelector="R"
               yChannelSelector="G"
             />
-            <feGaussianBlur stdDeviation="6" />
+            <feGaussianBlur stdDeviation="2.2" />
           </filter>
 
-          <radialGradient id={`${uid}-shell`} cx="38%" cy="30%" r="80%">
-            <stop offset="0%" stopColor={s.top} />
-            <stop offset="52%" stopColor={s.mid} />
-            <stop offset="100%" stopColor={s.deep} />
-          </radialGradient>
-          <linearGradient id={`${uid}-rim`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={s.rim} stopOpacity="0.85" />
-            <stop offset="58%" stopColor={s.rim} stopOpacity="0.05" />
-            <stop offset="100%" stopColor={GOLD} stopOpacity="0.45" />
+          {/* Base chrome: bright sky above, dark ground below — the classic
+              metal signature, before any reflection rolls over it. */}
+          <linearGradient id={`${uid}-chrome`} x1="0" y1="0" x2="0.25" y2="1">
+            <stop offset="0%" stopColor={m.hi} />
+            <stop offset="26%" stopColor={m.lo} />
+            <stop offset="44%" stopColor={m.deep} />
+            <stop offset="62%" stopColor={m.lo} />
+            <stop offset="80%" stopColor={m.hi} stopOpacity="0.9" />
+            <stop offset="100%" stopColor={m.deep} />
           </linearGradient>
 
-          {/* Molten gold current */}
-          <radialGradient id={`${uid}-molten`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={GOLD} stopOpacity="0.85" />
-            <stop offset="55%" stopColor={GOLD_DEEP} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={GOLD_DEEP} stopOpacity="0" />
-          </radialGradient>
-          {/* Violet current running under the gold */}
-          <radialGradient id={`${uid}-violet`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={VIOLET} stopOpacity="0.5" />
-            <stop offset="60%" stopColor={VIOLET} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={VIOLET} stopOpacity="0" />
-          </radialGradient>
-          {/* Cool sheen current — wet light rolling over heavy metal */}
-          <radialGradient id={`${uid}-sheen`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={s.sheen} stopOpacity="0.55" />
-            <stop offset="60%" stopColor={s.sheen} stopOpacity="0.15" />
-            <stop offset="100%" stopColor={s.sheen} stopOpacity="0" />
-          </radialGradient>
-          {/* Caustic streak — a thin bright band of refracted light */}
-          <linearGradient id={`${uid}-caustic`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={GOLD} stopOpacity="0" />
-            <stop offset="45%" stopColor={GOLD} stopOpacity="0.7" />
-            <stop offset="55%" stopColor={s.sheen} stopOpacity="0.6" />
-            <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
+          <linearGradient id={`${uid}-band`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={m.hi} stopOpacity="0" />
+            <stop offset="38%" stopColor={m.hi} stopOpacity="0.85" />
+            <stop offset="52%" stopColor="oklch(1 0 0)" stopOpacity="0.95" />
+            <stop offset="66%" stopColor={m.hi} stopOpacity="0.7" />
+            <stop offset="100%" stopColor={m.hi} stopOpacity="0" />
           </linearGradient>
-          {/* Specular hot spot — the light source on the mercury */}
+          <linearGradient id={`${uid}-dark`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={m.deep} stopOpacity="0" />
+            <stop offset="50%" stopColor={m.deep} stopOpacity="0.92" />
+            <stop offset="100%" stopColor={m.deep} stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id={`${uid}-tint`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={m.tint} stopOpacity="0" />
+            <stop offset="50%" stopColor={m.tint} stopOpacity="0.5" />
+            <stop offset="100%" stopColor={m.tint} stopOpacity="0" />
+          </linearGradient>
+
           <radialGradient id={`${uid}-spec`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="oklch(1 0 0)" stopOpacity="0.9" />
-            <stop offset="45%" stopColor="oklch(1 0 0)" stopOpacity="0.28" />
+            <stop offset="0%" stopColor="oklch(1 0 0)" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="oklch(1 0 0)" stopOpacity="0.3" />
             <stop offset="100%" stopColor="oklch(1 0 0)" stopOpacity="0" />
           </radialGradient>
-          <radialGradient id={`${uid}-gloss`} cx="33%" cy="22%" r="42%">
-            <stop offset="0%" stopColor="oklch(1 0 0)" stopOpacity="0.34" />
-            <stop offset="100%" stopColor="oklch(1 0 0)" stopOpacity="0" />
+          <radialGradient id={`${uid}-occl`} cx="50%" cy="50%" r="50%">
+            <stop offset="62%" stopColor={m.deep} stopOpacity="0" />
+            <stop offset="100%" stopColor={m.deep} stopOpacity="0.75" />
           </radialGradient>
 
-          <clipPath id={`${uid}-sphere`}>
-            <circle cx="200" cy="200" r="150" />
+          <clipPath id={`${uid}-clip`}>
+            <path ref={clipRef} d={`M ${CX - R} ${CY} a ${R} ${R} 0 1 0 ${R * 2} 0 a ${R} ${R} 0 1 0 ${-R * 2} 0`} />
           </clipPath>
         </defs>
 
-        {/* The mass of liquid, undulating as one body */}
-        <g ref={mass}>
-          <circle cx="200" cy="200" r="150" fill={`url(#${uid}-shell)`} />
+        {/* The mass */}
+        <path ref={bodyRef} d="" fill={`url(#${uid}-chrome)`} />
 
-          <g clipPath={`url(#${uid}-sphere)`}>
-            <g filter={`url(#${uid}-liquid)`}>
-              <g className="orb-flow-a">
-                <ellipse cx="150" cy="170" rx="118" ry="96" fill={`url(#${uid}-molten)`} />
-              </g>
-              <g className="orb-flow-b">
-                <ellipse cx="258" cy="248" rx="104" ry="118" fill={`url(#${uid}-molten)`} />
-              </g>
-              <g className="orb-flow-c">
-                <ellipse cx="196" cy="146" rx="132" ry="86" fill={`url(#${uid}-sheen)`} />
-              </g>
-              <g className="orb-flow-d">
-                <ellipse cx="188" cy="270" rx="96" ry="72" fill={`url(#${uid}-violet)`} />
-              </g>
-              <g className="orb-caustic">
-                <rect x="20" y="150" width="360" height="34" rx="17" fill={`url(#${uid}-caustic)`} />
-              </g>
-              <g className="orb-caustic-slow">
-                <rect
-                  x="20"
-                  y="236"
-                  width="360"
-                  height="22"
-                  rx="11"
-                  fill={`url(#${uid}-caustic)`}
-                  opacity="0.7"
-                />
-              </g>
+        <g clipPath={`url(#${uid}-clip)`}>
+          <g filter={`url(#${uid}-fold)`}>
+            {/* Horizontal reflection bands rolling down the body */}
+            <g ref={bandsRef}>
+              <rect x="-140" y="60" width="680" height="120" fill={`url(#${uid}-band)`} />
+              <rect x="-140" y="216" width="680" height="86" fill={`url(#${uid}-dark)`} />
+              <rect
+                x="-140"
+                y="326"
+                width="680"
+                height="70"
+                fill={`url(#${uid}-band)`}
+                opacity="0.7"
+              />
             </g>
-
-            {/* Reactive swells — touch and speech, each decaying on its own. */}
-            <g ref={rippleLayer} filter={`url(#${uid}-soft)`} />
-
-            {/* Light catching the moving surface */}
-            <ellipse
-              ref={spec}
-              cx="158"
-              cy="138"
-              rx="52"
-              ry="30"
-              fill={`url(#${uid}-spec)`}
-              transform="rotate(-22 158 138)"
-            />
-            <circle cx="200" cy="200" r="150" fill={`url(#${uid}-gloss)`} className="orb-gloss" />
+            {/* A second set crossing it, so reflections shear against each other */}
+            <g ref={bands2Ref} opacity="0.55">
+              <rect x="-140" y="120" width="680" height="64" fill={`url(#${uid}-dark)`} />
+              <rect x="-140" y="240" width="680" height="52" fill={`url(#${uid}-tint)`} />
+            </g>
           </g>
 
-          {/* Meniscus edge */}
-          <circle
-            cx="200"
-            cy="200"
-            r="150"
-            fill="none"
-            stroke={`url(#${uid}-rim)`}
-            strokeWidth="2"
+          {/* Specular light on the moving surface */}
+          <ellipse
+            ref={specRef}
+            cx="156"
+            cy="134"
+            rx="46"
+            ry="26"
+            fill={`url(#${uid}-spec)`}
+            transform="rotate(-20 156 134)"
           />
+          <ellipse
+            ref={spec2Ref}
+            cx="246"
+            cy="262"
+            rx="60"
+            ry="26"
+            fill={`url(#${uid}-spec)`}
+            opacity="0.25"
+            transform="rotate(24 246 262)"
+          />
+
+          {/* Edge occlusion keeps the mass volumetric */}
+          <circle cx={CX} cy={CY} r={R * 1.02} fill={`url(#${uid}-occl)`} />
         </g>
+
+        {/* Meniscus */}
+        <path
+          ref={rimRef}
+          d=""
+          fill="none"
+          stroke={m.rim}
+          strokeOpacity="0.55"
+          strokeWidth="1.6"
+        />
       </svg>
     </span>
   );
