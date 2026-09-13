@@ -28,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack300" | "pack800" | "pack1800";
+export type AiPackId = "pack300" | "pack800" | "pack1800" | "pack4000";
 
 export type AiPlan = {
   id: AiPlanId;
@@ -103,7 +103,30 @@ export const aiPacks: AiPack[] = [
     blurb: "Stock up once, use it all year.",
     priceEnv: "STRIPE_PRICE_AI_PACK_1800",
   },
+  {
+    id: "pack4000",
+    name: "4,000 credits",
+    credits: 4000,
+    price: 100,
+    blurb: "Largest one-time pack — for constant assistance.",
+    priceEnv: "STRIPE_PRICE_AI_PACK_4000",
+  },
 ];
+
+/**
+ * Enterprise / fleet AI assistance is quoted, never priced here. No credit
+ * allowance is invented for it: the owner sets both after talking to the
+ * customer. Requests arrive through the in-app form on /credits.
+ */
+export const aiEnterprise = {
+  name: "Enterprise",
+  price: null as null,
+  priceLabel: "Contact for pricing",
+  blurb:
+    "Large fleets, many trucks, custom credit allowance and invoicing. We quote it with you — no set price or credit amount.",
+  fleetSizeMin: 1,
+  fleetSizeMax: 100000,
+};
 
 export function aiPlanById(id: string): AiPlan | undefined {
   return aiPlans.find((p) => p.id === id);
