@@ -15,6 +15,7 @@ import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as BrokerRouteImport } from './routes/broker'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ComplianceRouteImport } from './routes/compliance'
+import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DispatchRouteImport } from './routes/dispatch'
@@ -67,6 +68,11 @@ const CompanyRoute = CompanyRouteImport.update({
 const ComplianceRoute = ComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreditsRoute = CreditsRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/dashboard': typeof DashboardRoute
   '/dispatch': typeof DispatchRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/broker'
     | '/company'
     | '/compliance'
+    | '/confirm-email'
     | '/credits'
     | '/dashboard'
     | '/dispatch'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/broker'
     | '/company'
     | '/compliance'
+    | '/confirm-email'
     | '/credits'
     | '/dashboard'
     | '/dispatch'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/broker'
     | '/company'
     | '/compliance'
+    | '/confirm-email'
     | '/credits'
     | '/dashboard'
     | '/dispatch'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   BrokerRoute: typeof BrokerRoute
   CompanyRoute: typeof CompanyRoute
   ComplianceRoute: typeof ComplianceRoute
+  ConfirmEmailRoute: typeof ConfirmEmailRoute
   CreditsRoute: typeof CreditsRoute
   DashboardRoute: typeof DashboardRoute
   DispatchRoute: typeof DispatchRoute
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       path: '/compliance'
       fullPath: '/compliance'
       preLoaderRoute: typeof ComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm-email': {
+      id: '/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof ConfirmEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/credits': {
@@ -622,6 +642,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrokerRoute: BrokerRoute,
   CompanyRoute: CompanyRoute,
   ComplianceRoute: ComplianceRoute,
+  ConfirmEmailRoute: ConfirmEmailRoute,
   CreditsRoute: CreditsRoute,
   DashboardRoute: DashboardRoute,
   DispatchRoute: DispatchRoute,
