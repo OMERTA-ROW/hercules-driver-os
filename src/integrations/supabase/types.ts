@@ -301,6 +301,51 @@ export type Database = {
           },
         ]
       }
+      enterprise_inquiries: {
+        Row: {
+          company: string
+          contact_name: string
+          created_at: string
+          email: string
+          expected_usage: string
+          fleet_size: number
+          id: string
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company: string
+          contact_name: string
+          created_at?: string
+          email: string
+          expected_usage: string
+          fleet_size: number
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          expected_usage?: string
+          fleet_size?: number
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       financial_entries: {
         Row: {
           amount_cents: number

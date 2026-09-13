@@ -64,3 +64,37 @@ describe("rate limiting", () => {
     expect(rateLimit(b).ok).toBe(true);
   });
 });
+
+describe("owner catalogue", () => {
+  it("has the exact one-time packs the owner set", async () => {
+    const { aiPacks } = await import("@/data/ai-credits");
+    expect(aiPacks.map((p) => [p.credits, p.price])).toEqual([
+      [300, 10],
+      [800, 25],
+      [1800, 50],
+      [4000, 100],
+    ]);
+  });
+
+  it("has the exact monthly tiers the owner set", async () => {
+    const { aiPlans } = await import("@/data/ai-credits");
+    expect(aiPlans.map((p) => [p.credits, p.price])).toEqual([
+      [400, 9],
+      [1600, 29],
+      [4000, 59],
+    ]);
+  });
+
+  it("never invents an enterprise price or credit allowance", async () => {
+    const { aiEnterprise } = await import("@/data/ai-credits");
+    expect(aiEnterprise.price).toBeNull();
+    expect(aiEnterprise.priceLabel).toBe("Contact for pricing");
+    expect("credits" in aiEnterprise).toBe(false);
+  });
+
+  it("maps every purchasable item to its own server-side price env var", async () => {
+    const { aiPacks, aiPlans } = await import("@/data/ai-credits");
+    const envs = [...aiPlans, ...aiPacks].map((i) => i.priceEnv);
+    expect(new Set(envs).size).toBe(envs.length);
+  });
+});

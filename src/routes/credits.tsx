@@ -7,8 +7,16 @@ import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, Label, DriverApprovedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { aiLimits, aiPacks, aiPlans, freeForever } from "@/data/ai-credits";
-import { getCreditState, setAiQuality, startAiCheckout } from "@/lib/credits.functions";
+import { aiEnterprise, aiLimits, aiPacks, aiPlans, freeForever } from "@/data/ai-credits";
+import {
+  getCreditState,
+  setAiQuality,
+  startAiCheckout,
+  submitEnterpriseInquiry,
+} from "@/lib/credits.functions";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/credits")({
   head: () => ({
@@ -173,7 +181,7 @@ function CreditsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             One payment, no subscription. These credits never expire and are used after your monthly ones.
           </p>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {aiPacks.map((p) => (
               <div key={p.id} className="rounded-lg border border-primary/25 p-4">
                 <p className="font-display text-xl uppercase tracking-[0.12em]">{p.name}</p>
@@ -192,6 +200,10 @@ function CreditsPage() {
             ))}
           </div>
         </Panel>
+
+        {/* ENTERPRISE */}
+        <EnterpriseQuote />
+
 
         {/* COSTS BEFORE USE */}
         <Panel>
@@ -301,5 +313,135 @@ function CreditsPage() {
         </DriverApprovedNote>
       </div>
     </AppShell>
+  );
+}
+
+/**
+ * Enterprise is quoted, not priced. This form saves a real request on the
+ * account; there is no email address to send to, so we never claim we sent one.
+ */
+function EnterpriseQuote() {
+  const send = useServerFn(submitEnterpriseInquiry);
+  const [sent, setSent] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    company: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    fleetSize: "",
+    expectedUsage: "",
+    notes: "",
+    website: "",
+  });
+
+  const submit = useMutation({
+    mutationFn: () =>
+      send({
+        data: {
+          company: form.company,
+          contactName: form.contactName,
+          email: form.email,
+          phone: form.phone,
+          fleetSize: Number(form.fleetSize || 0),
+          expectedUsage: form.expectedUsage,
+          notes: form.notes,
+          website: form.website,
+        },
+      }),
+    onSuccess: (res) => {
+      if (res.ok) {
+        setSent(res.message);
+        toast.success("Request saved.");
+      } else {
+        toast.error(res.message);
+      }
+    },
+    onError: () =>
+      toast.error("Your request was not saved — nothing was sent. Please try again."),
+  });
+
+  const valid =
+    form.company.trim().length >= 2 &&
+    form.contactName.trim().length >= 2 &&
+    /.+@.+\..+/.test(form.email.trim()) &&
+    Number(form.fleetSize) >= 1 &&
+    form.expectedUsage.trim().length >= 10;
+
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  return (
+    <Panel>
+      <Label>{aiEnterprise.name} — {aiEnterprise.priceLabel}</Label>
+      <p className="mt-1 text-sm text-muted-foreground">{aiEnterprise.blurb}</p>
+
+      {sent ? (
+        <p className="mt-4 text-sm text-primary">{sent}</p>
+      ) : (
+        <form
+          className="mt-4 grid gap-3 md:grid-cols-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (valid && !submit.isPending) submit.mutate();
+          }}
+        >
+          <div className="grid gap-1">
+            <label htmlFor="ent-company" className="tech-label">Company</label>
+            <Input id="ent-company" value={form.company} onChange={set("company")} required />
+          </div>
+          <div className="grid gap-1">
+            <label htmlFor="ent-name" className="tech-label">Your name</label>
+            <Input id="ent-name" value={form.contactName} onChange={set("contactName")} required />
+          </div>
+          <div className="grid gap-1">
+            <label htmlFor="ent-email" className="tech-label">Email</label>
+            <Input id="ent-email" type="email" value={form.email} onChange={set("email")} required />
+          </div>
+          <div className="grid gap-1">
+            <label htmlFor="ent-phone" className="tech-label">Phone (optional)</label>
+            <Input id="ent-phone" value={form.phone} onChange={set("phone")} />
+          </div>
+          <div className="grid gap-1">
+            <label htmlFor="ent-fleet" className="tech-label">How many trucks</label>
+            <Input
+              id="ent-fleet"
+              type="number"
+              min={1}
+              value={form.fleetSize}
+              onChange={set("fleetSize")}
+              required
+            />
+          </div>
+          <div className="grid gap-1 md:col-span-2">
+            <label htmlFor="ent-usage" className="tech-label">
+              Expected AI use (drivers, hours a day, what for)
+            </label>
+            <Textarea id="ent-usage" rows={3} value={form.expectedUsage} onChange={set("expectedUsage")} required />
+          </div>
+          <div className="grid gap-1 md:col-span-2">
+            <label htmlFor="ent-notes" className="tech-label">Anything else (optional)</label>
+            <Textarea id="ent-notes" rows={2} value={form.notes} onChange={set("notes")} />
+          </div>
+          {/* Honeypot — hidden from drivers, filled only by bots. */}
+          <input
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
+            value={form.website}
+            onChange={set("website")}
+          />
+          <div className="md:col-span-2">
+            <Button size="lg" type="submit" disabled={!valid || submit.isPending}>
+              {submit.isPending ? "Saving…" : "Request a quote"}
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">
+              This saves your request on your account for our review. No price is set, nothing is charged, and
+              no plan changes.
+            </p>
+          </div>
+        </form>
+      )}
+    </Panel>
   );
 }
