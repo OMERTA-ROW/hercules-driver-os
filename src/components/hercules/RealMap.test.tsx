@@ -54,6 +54,8 @@ function makeMaps() {
 vi.mock("@/lib/google-maps", () => ({
   MAPS_MAP_ID: "",
   isMapsConfigured: () => true,
+  mapsAuthFailed: () => false,
+  onMapsAuthFailure: () => () => {},
   loadMaps: () => {
     loadCalls += 1;
     return new Promise((resolve, reject) => {

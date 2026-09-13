@@ -60,7 +60,9 @@ export function mapsAuthFailed() {
 /** Subscribe to Google's gm_authFailure callback. */
 export function onMapsAuthFailure(cb: () => void) {
   authSubs.add(cb);
-  return () => authSubs.delete(cb);
+  return () => {
+    authSubs.delete(cb);
+  };
 }
 
 /** Resolves with `google.maps` once the API is ready. Shared across all callers. */
