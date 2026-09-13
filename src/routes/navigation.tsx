@@ -127,7 +127,7 @@ function NavigationScreen() {
     setSpoken(warning.hazard.speech);
   }, [warning]);
 
-  // Live GPS tracking — the truck advances along the truck-legal polyline.
+  // Live GPS tracking — the truck advances along the planned line.
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => i + 1), 2600);
     return () => clearInterval(t);
@@ -144,7 +144,7 @@ function NavigationScreen() {
   /**
    * AUTOMATIC REROUTE.
    * No button, no selection: when the GPS fix leaves the corridor, the truck
-   * routing provider is asked for a new truck-legal path immediately and it is
+   * routing provider would be asked for a new path immediately and it is
    * applied. The driver can dismiss or keep the old path (DRIVER APPROVED) —
    * but they are never left without a path.
    */
@@ -582,8 +582,9 @@ function NavigationScreen() {
       </div>
 
       <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <Clock className="h-4 w-4" /> Base map and street detail: Google Maps. Truck-legal
-        attributes: commercial routing layer (mocked in this pass, provider-pluggable).
+        <Clock className="h-4 w-4" /> Base map and street detail come from Google Maps. Commercial
+        truck restriction data — bridge heights, weight limits, truck bans — is not connected yet,
+        so read the posted signs.
       </p>
     </AppShell>
   );
