@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { Check, X, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
@@ -41,15 +42,26 @@ const allFeatures: Feature[] = [
 function Pricing() {
   const { account, changePlan } = useAuth();
   const navigate = useNavigate();
+  const [saving, setSaving] = useState<string | null>(null);
 
-  function choose(planId: (typeof plans)[number]["id"], name: string) {
+  async function choose(planId: (typeof plans)[number]["id"], name: string) {
     if (!account) {
       void navigate({ to: "/sign-up" });
       return;
     }
-    changePlan(planId);
+    if (saving) return; // no double submit
+    setSaving(planId);
+    const result = await changePlan(planId);
+    setSaving(null);
+    if (!result.ok) {
+      toast.error("Plan not changed", {
+        description: result.message,
+      });
+      return;
+    }
     toast.success(`Plan set to ${name}`, {
-      description: "You approved this change. Nothing else was altered.",
+      description:
+        "You approved this change. Billing is not switched on for this app yet, so nothing was charged.",
     });
   }
 
@@ -98,10 +110,14 @@ function Pricing() {
                 size="lg"
                 variant={p.id === "owner" ? "default" : "outline"}
                 className="mt-4 w-full"
-                onClick={() => choose(p.id, p.name)}
-                disabled={current}
+                onClick={() => void choose(p.id, p.name)}
+                disabled={current || saving !== null}
               >
-                {current ? "Current plan" : `Start ${TRIAL_DAYS}-day free trial`}
+                {current
+                  ? "Current plan"
+                  : saving === p.id
+                    ? "Saving…"
+                    : `Start ${TRIAL_DAYS}-day free trial`}
               </Button>
               <p className="mt-2 text-xs text-muted-foreground">
                 Card required after the trial. Cancel any time before it ends and you pay nothing.

@@ -176,7 +176,10 @@ function SupplyScreen() {
           </ul>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
-              onClick={() => enable("voiceHandoff")}
+              onClick={() => {
+                const outcome = enable("voiceHandoff");
+                if (!outcome.ok) toast.error("Not added", { description: outcome.message });
+              }}
               className="min-h-[60px] gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Check className="h-5 w-5" />
