@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 /**
  * ONE Maps JavaScript API loader for the whole app.
  *

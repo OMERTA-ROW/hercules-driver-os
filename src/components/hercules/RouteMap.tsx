@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
@@ -561,106 +562,6 @@ function MapViewControls({
         </svg>
       </button>
     </div>
-  );
-}
-
-/** Schematic street-level stand-in used until a Google Maps key is linked. */
-function SchematicMap({ polyline, position, segments, offRoute, hazards = [], stops = [], zoom = 1, rotate = 0 }: Props & { zoom?: number; rotate?: number }) {
-  const box = useMemo(() => {
-    const pts = [...polyline, position, ...hazards.map((h) => h.hazard.at), ...stops.map((s) => s.at)];
-    const lats = pts.map((p) => p.lat);
-    const lngs = pts.map((p) => p.lng);
-    return {
-      minLat: Math.min(...lats) - 0.25,
-      maxLat: Math.max(...lats) + 0.25,
-      minLng: Math.min(...lngs) - 0.35,
-      maxLng: Math.max(...lngs) + 0.35,
-    };
-  }, [polyline, position, hazards, stops]);
-
-  const W = 1000;
-  const H = 620;
-  const px = (p: LatLng) => ({
-    x: ((p.lng - box.minLng) / (box.maxLng - box.minLng)) * W,
-    y: H - ((p.lat - box.minLat) / (box.maxLat - box.minLat)) * H,
-  });
-  const path = polyline.map(px).map((p, i) => `${i ? "L" : "M"} ${p.x} ${p.y}`).join(" ");
-  const truck = px(position);
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img" aria-label="Truck-legal route map">
-      <g transform={`translate(${W / 2} ${H / 2}) scale(${zoom}) rotate(${rotate}) translate(${-truck.x} ${-truck.y})`}>
-      <rect x={-W} y={-H} width={W * 3} height={H * 3} fill="var(--map-bg, #0a0d11)" />
-      {/* street grid — stands in for Google's street-level detail */}
-      {Array.from({ length: 22 }).map((_, i) => (
-        <line key={`v${i}`} x1={i * 48} y1={0} x2={i * 48} y2={H} stroke="#ffffff" strokeOpacity={0.05} />
-      ))}
-      {Array.from({ length: 14 }).map((_, i) => (
-        <line key={`h${i}`} x1={0} y1={i * 48} x2={W} y2={i * 48} stroke="#ffffff" strokeOpacity={0.05} />
-      ))}
-      <path d={path} fill="none" stroke="#000" strokeOpacity={0.6} strokeWidth={16} strokeLinecap="round" />
-      <path
-        d={path}
-        fill="none"
-        stroke={offRoute ? "#f59e0b" : "#22d3ee"}
-        strokeWidth={9}
-        strokeLinecap="round"
-      />
-      {segments.map((s) => {
-        const p = px(s.shieldAt);
-        const label = s.road.replace(/\s*\(county\)/i, "");
-        const w = Math.max(58, 24 + label.length * 14);
-        const c = shieldColors(s.class);
-        return (
-          <g key={s.id} transform={`translate(${p.x - w / 2} ${p.y - 54})`}>
-            <path
-              d={`M4 6 Q${w / 2} -3 ${w - 4} 6 L${w - 4} 30 Q${w / 2} 48 4 30 Z`}
-              fill={c.fill}
-              stroke={c.stroke}
-              strokeWidth={3}
-            />
-            <text
-              x={w / 2}
-              y={26}
-              textAnchor="middle"
-              fontSize={18}
-              fontWeight={900}
-              fill={c.text}
-              fontFamily="Arial Black, Arial, sans-serif"
-            >
-              {label}
-            </text>
-          </g>
-        );
-      })}
-      {/* HAZARD LAYER badges */}
-      {hazards.map(({ hazard, severity }) => {
-        const p = px(hazard.at);
-        return (
-          <g
-            key={hazard.id}
-            transform={`translate(${p.x - 34} ${p.y + 8})`}
-            dangerouslySetInnerHTML={{ __html: hazardIconSvg(hazard, severity) }}
-          />
-        );
-      })}
-
-
-      {/* TRUCK STOP LAYER badges */}
-      {stops.map((stop) => {
-        const p = px(stop.at);
-        return (
-          <g
-            key={stop.id}
-            transform={`translate(${p.x - 26} ${p.y - 62})`}
-            dangerouslySetInnerHTML={{ __html: chainMarkerSvg(stop.chain, 46) }}
-          />
-        );
-      })}
-      <circle cx={truck.x} cy={truck.y} r={22} fill="#22d3ee" fillOpacity={0.18} />
-      <circle cx={truck.x} cy={truck.y} r={11} fill="#22d3ee" stroke="#04141a" strokeWidth={4} />
-      </g>
-    </svg>
   );
 }
 
