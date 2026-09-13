@@ -1,8 +1,12 @@
 /**
  * ACTIVE EQUIPMENT FOR THIS TRIP.
  *
- * The saved profiles live on the driver's account. How the ACTIVE profile gets
- * resolved depends on the size of the operation:
+ * Saved equipment lives on the driver's own account IN THE DATABASE, one row
+ * per unit, readable only by that account (or its carrier). Nothing is kept in
+ * the browser except which unit the driver said they were in today, so a new
+ * account starts genuinely empty and two accounts never see each other's rigs.
+ *
+ * How the ACTIVE profile gets resolved depends on the size of the operation:
  *
  *  ASKED     — owner-operators and small carriers (roughly ten trucks and
  *              under). Equipment swaps constantly, so HERCULES asks out loud at
@@ -30,21 +34,23 @@ import {
   type FleetTier,
 } from "@/data/accounts";
 import { assignmentFor, profileFromAssignment, type FleetAssignment } from "@/data/fleet-assignments";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
 import {
   defaultProfile,
   makeProfile,
   rulesFor,
+  specFor,
+  specKey,
   type EighteenSub,
   type RoutingRules,
   type VehicleKind,
   type VehicleProfile,
 } from "@/data/vehicles";
 
-const PROFILE_KEY = "hercules.vehicles";
-const ACTIVE_KEY = "hercules.vehicle.active";
-/** Trip stamp — a new trip means the question gets asked again. */
-const TRIP_KEY = "hercules.vehicle.trip";
+/** Which unit the driver answered with, per account. Local by design. */
+const activeKey = (uid: string) => `hercules.vehicle.active.${uid}`;
+const tripKey = (uid: string) => `hercules.vehicle.trip.${uid}`;
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10);
@@ -53,10 +59,15 @@ function todayStamp() {
 /** Where the active profile came from for this trip. */
 export type ProfileResolution = "asked" | "inherited";
 
+export type SaveResult = { ok: boolean; message: string };
+
 type Ctx = {
   profiles: VehicleProfile[];
+  /** The unit routing is currently being calculated for. */
   active: VehicleProfile;
   rules: RoutingRules;
+  /** True when nothing is saved yet, so `active` is only a generic template. */
+  noneSaved: boolean;
   /** "asked" for small operations, "inherited" for Tier 2 / Tier 3 fleets. */
   resolution: ProfileResolution;
   /** The fleet's truck/trailer assignment, when the profile is inherited. */
@@ -67,42 +78,85 @@ type Ctx = {
   askForTrip: boolean;
   chooseForTrip: (id: string) => void;
   dismissTripPrompt: () => void;
-  addProfile: (kind: VehicleKind, sub: EighteenSub | undefined, unit: string) => void;
-  removeProfile: (id: string) => void;
+  addProfile: (kind: VehicleKind, sub: EighteenSub | undefined, unit: string) => Promise<SaveResult>;
+  removeProfile: (id: string) => Promise<SaveResult>;
+  /** Set when the saved equipment could not be read — never shown as "none". */
+  loadError: string | null;
+  saving: boolean;
   ready: boolean;
 };
 
 const VehicleContext = createContext<Ctx | null>(null);
 
+type VehicleRow = {
+  id: string;
+  label: string | null;
+  unit_number: string | null;
+  equipment_type: string | null;
+};
+
+/** A saved row back into the routing profile the rest of the app reads. */
+function rowToProfile(row: VehicleRow): VehicleProfile {
+  const [kind, sub] = (row.equipment_type ?? "eighteen:dryVan").split(":");
+  const spec = specFor((kind || "eighteen") as VehicleKind, sub as EighteenSub | undefined);
+  return {
+    ...spec,
+    id: row.id,
+    unit: row.unit_number?.trim() || row.label?.trim() || spec.label,
+    hazmat: "None",
+  };
+}
+
 export function VehicleProvider({ children }: { children: ReactNode }) {
-  const { account } = useAuth();
-  const [profiles, setProfiles] = useState<VehicleProfile[]>([defaultProfile]);
-  const [activeId, setActiveId] = useState<string>(defaultProfile.id);
-  const [answeredTrip, setAnsweredTrip] = useState<string | null>(todayStamp());
+  const { account, userId } = useAuth();
+  const [profiles, setProfiles] = useState<VehicleProfile[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [answeredTrip, setAnsweredTrip] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PROFILE_KEY);
-      const saved = raw ? (JSON.parse(raw) as VehicleProfile[]) : null;
-      if (saved && saved.length) setProfiles(saved);
-      const a = localStorage.getItem(ACTIVE_KEY);
-      if (a) setActiveId(a);
-      setAnsweredTrip(localStorage.getItem(TRIP_KEY));
-    } catch {
-      /* ignore malformed local state */
+  const load = useCallback(async (uid: string) => {
+    const { data, error } = await supabase
+      .from("vehicles")
+      .select("id, label, unit_number, equipment_type")
+      .eq("owner_id", uid)
+      .order("created_at", { ascending: true });
+    if (error) {
+      // Honest failure: an unreadable list is NOT an empty list.
+      setLoadError("Your equipment could not be read just now. Check your connection and retry.");
+      setProfiles([]);
+      return;
     }
-    setReady(true);
+    setLoadError(null);
+    setProfiles((data ?? []).map((r) => rowToProfile(r as VehicleRow)));
   }, []);
 
-  const persist = useCallback((next: VehicleProfile[]) => {
-    setProfiles(next);
-    try {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  useEffect(() => {
+    let alive = true;
+    setReady(false);
+    void (async () => {
+      if (!userId) {
+        setProfiles([]);
+        setActiveId(null);
+        setAnsweredTrip(null);
+        setLoadError(null);
+        setReady(true);
+        return;
+      }
+      try {
+        setActiveId(localStorage.getItem(activeKey(userId)));
+        setAnsweredTrip(localStorage.getItem(tripKey(userId)));
+      } catch {
+        /* ignore unreadable local state */
+      }
+      await load(userId);
+      if (alive) setReady(true);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [userId, load]);
 
   /**
    * Fleet size decides everything about how the profile is resolved. Truck count
@@ -125,70 +179,122 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   );
 
   const chosen = useMemo(
-    () => profiles.find((p) => p.id === activeId) ?? profiles[0] ?? defaultProfile,
+    () => profiles.find((p) => p.id === activeId) ?? profiles[0] ?? null,
     [profiles, activeId],
   );
-  const active = inherited ?? chosen;
+  // With nothing saved the app still needs dimensions to reason with, so it
+  // falls back to a plainly-labelled generic tractor-trailer template.
+  const active = inherited ?? chosen ?? defaultProfile;
   const resolution: ProfileResolution = inherited ? "inherited" : "asked";
+
+  const addProfile = useCallback(
+    async (kind: VehicleKind, sub: EighteenSub | undefined, unit: string): Promise<SaveResult> => {
+      if (!userId) return { ok: false, message: "Sign in first — equipment saves to your account." };
+      const name = unit.trim();
+      if (name.length < 2) {
+        return { ok: false, message: "Give it a name you'll recognise, at least 2 characters." };
+      }
+      if (name.length > 40) return { ok: false, message: "Keep the name under 40 characters." };
+      const spec = specFor(kind, sub);
+      setSaving(true);
+      const { error } = await supabase.from("vehicles").insert({
+        owner_id: userId,
+        label: spec.label,
+        unit_number: name,
+        equipment_type: specKey(kind, sub),
+        height_inches: Math.round(spec.heightFt * 12),
+        length_inches: Math.round(spec.lengthFt * 12),
+        gross_weight_lb: spec.grossWeightLbs,
+        axles: spec.axles,
+        ...(account?.company?.code ? { company_code: account.company.code } : {}),
+      });
+      setSaving(false);
+      if (error) {
+        console.error(`[vehicles] save failed: ${error.message}`);
+        return { ok: false, message: "That did not save. Nothing was changed — try again." };
+      }
+      await load(userId);
+      // A second unit on the account means the trip question starts firing.
+      try {
+        localStorage.removeItem(tripKey(userId));
+      } catch {
+        /* ignore */
+      }
+      setAnsweredTrip(null);
+      return { ok: true, message: `${spec.label} saved to your account.` };
+    },
+    [account?.company?.code, load, userId],
+  );
+
+  const removeProfile = useCallback(
+    async (id: string): Promise<SaveResult> => {
+      if (!userId) return { ok: false, message: "Sign in first." };
+      setSaving(true);
+      const { error } = await supabase.from("vehicles").delete().eq("id", id).eq("owner_id", userId);
+      setSaving(false);
+      if (error) {
+        console.error(`[vehicles] remove failed: ${error.message}`);
+        return { ok: false, message: "That could not be removed. Nothing was changed." };
+      }
+      await load(userId);
+      if (id === activeId) setActiveId(null);
+      return { ok: true, message: "Removed from your account." };
+    },
+    [activeId, load, userId],
+  );
 
   const value = useMemo<Ctx>(() => {
     return {
       profiles: inherited ? [inherited, ...profiles.filter((p) => p.id !== inherited.id)] : profiles,
       active,
       rules: rulesFor(active),
+      noneSaved: !inherited && profiles.length === 0,
       resolution,
       assignment,
       fleetTier,
       ready,
+      loadError,
+      saving,
       /* Larger fleets are never asked — the company record already answered. */
       askForTrip:
         ready && resolution === "asked" && profiles.length > 1 && answeredTrip !== todayStamp(),
       chooseForTrip: (id) => {
         setActiveId(id);
         setAnsweredTrip(todayStamp());
+        if (!userId) return;
         try {
-          localStorage.setItem(ACTIVE_KEY, id);
-          localStorage.setItem(TRIP_KEY, todayStamp());
+          localStorage.setItem(activeKey(userId), id);
+          localStorage.setItem(tripKey(userId), todayStamp());
         } catch {
           /* ignore */
         }
       },
       dismissTripPrompt: () => {
         setAnsweredTrip(todayStamp());
+        if (!userId) return;
         try {
-          localStorage.setItem(TRIP_KEY, todayStamp());
+          localStorage.setItem(tripKey(userId), todayStamp());
         } catch {
           /* ignore */
         }
       },
-      addProfile: (kind, sub, unit) => {
-        const next = [...profiles, makeProfile(kind, sub, unit)];
-        persist(next);
-        try {
-          // A second unit on the account means the trip question starts firing.
-          localStorage.removeItem(TRIP_KEY);
-        } catch {
-          /* ignore */
-        }
-        setAnsweredTrip(null);
-      },
-      removeProfile: (id) => {
-        const next = profiles.filter((p) => p.id !== id);
-        persist(next.length ? next : [defaultProfile]);
-        if (id === activeId) setActiveId((next[0] ?? defaultProfile).id);
-      },
+      addProfile,
+      removeProfile,
     };
   }, [
     profiles,
     active,
-    activeId,
     answeredTrip,
     ready,
-    persist,
     resolution,
     assignment,
     fleetTier,
     inherited,
+    loadError,
+    saving,
+    addProfile,
+    removeProfile,
+    userId,
   ]);
 
   return <VehicleContext.Provider value={value}>{children}</VehicleContext.Provider>;
@@ -196,19 +302,22 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
 export function useVehicle(): Ctx {
   const ctx = useContext(VehicleContext);
-  if (ctx)  return ctx;
+  if (ctx) return ctx;
   return {
-    profiles: [defaultProfile],
+    profiles: [],
     active: defaultProfile,
     rules: rulesFor(defaultProfile),
+    noneSaved: true,
     resolution: "asked",
     assignment: null,
     fleetTier: null,
     askForTrip: false,
     chooseForTrip: () => {},
     dismissTripPrompt: () => {},
-    addProfile: () => {},
-    removeProfile: () => {},
+    addProfile: async () => ({ ok: false, message: "Equipment is not ready yet." }),
+    removeProfile: async () => ({ ok: false, message: "Equipment is not ready yet." }),
+    loadError: null,
+    saving: false,
     ready: false,
   };
 }
