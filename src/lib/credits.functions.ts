@@ -94,20 +94,30 @@ function missingConfig(): string[] {
 export const getCreditState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    type Row = Record<string, string | number | boolean | null>;
+
+    // Settle an elapsed month BEFORE reading, so a lapsed allowance is never
+    // shown as spendable balance.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const adminDb = supabaseAdmin as never as {
+      rpc: (f: string, a: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    };
+    const touched = await adminDb.rpc("ai_credits_touch", { _user: context.userId });
+    if (touched.error) console.error(`[credits] touch failed: ${touched.error.message}`);
+
     const db = context.supabase as never as {
-      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }>;
       from: (t: string) => {
         select: (c: string) => {
-          maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+          maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>;
           order: (
             c: string,
             o: { ascending: boolean },
-          ) => { limit: (n: number) => Promise<{ data: Record<string, string | number | boolean | null>[] | null }> };
+          ) => {
+            limit: (n: number) => Promise<{ data: Row[] | null; error: { message: string } | null }>;
+          };
         };
       };
     };
-
-    type Row = Record<string, string | number | boolean | null>;
 
     const wallet = await db
       .from("ai_credit_wallets")
@@ -130,6 +140,22 @@ export const getCreditState = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(25);
 
+    // A failed read is reported, never rendered as a zero or stale balance.
+    const readError =
+      wallet.error?.message ?? ledger.error?.message ?? usage.error?.message ?? null;
+    if (readError) {
+      console.error(`[credits] read failed: ${readError}`);
+      return {
+        error: "Your credit balance could not be read just now. This is not a zero balance.",
+        wallet: null,
+        ledger: [] as Row[],
+        usage: [] as Row[],
+        costs: aiActionCosts,
+        assumptions: providerCostAssumptions,
+        purchasing: { available: false, missing: missingConfig() },
+      };
+    }
+
     const w = wallet.data ?? {
       monthly_balance: 0,
       monthly_expires_at: null,
@@ -139,15 +165,19 @@ export const getCreditState = createServerFn({ method: "GET" })
       quality_pref: "balanced",
     };
 
-    const monthly = Number(w["monthly_balance"] ?? 0);
+    // Belt and braces: if the period has elapsed, treat monthly as spent.
+    const expiresAt = (w["monthly_expires_at"] as string | null) ?? null;
+    const elapsed = Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
+    const monthly = elapsed ? 0 : Number(w["monthly_balance"] ?? 0);
     const purchased = Number(w["purchased_balance"] ?? 0);
 
     return {
+      error: null as string | null,
       wallet: {
         monthly,
         purchased,
         total: monthly + purchased,
-        monthlyExpiresAt: (w["monthly_expires_at"] as string | null) ?? null,
+        monthlyExpiresAt: elapsed ? null : expiresAt,
         planId: (w["ai_plan_id"] as string | null) ?? null,
         renewsAt: (w["ai_plan_renews_at"] as string | null) ?? null,
         quality: (w["quality_pref"] as string) ?? "balanced",
