@@ -255,9 +255,9 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         axles: d.axles,
       };
       const code = account?.company?.code ?? null;
-      let { error } = await supabase
-        .from("vehicles")
-        .insert(code ? { ...base, company_code: code } : base);
+      let { error } = code
+        ? await supabase.from("vehicles").insert({ ...base, company_code: code })
+        : await supabase.from("vehicles").insert(base);
       // A carrier code typed onto a profile proves nothing: the database only
       // accepts a company tag from a real member. If it refuses the tag, the
       // vehicle is still saved to the driver's own account, untagged.
