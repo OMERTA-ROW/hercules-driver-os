@@ -20,6 +20,7 @@ import {
   Radar,
   Landmark,
   ShieldCheck,
+  Coins,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
