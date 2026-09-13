@@ -28,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack200" | "pack800" | "pack2400";
+export type AiPackId = "pack300" | "pack800" | "pack1800";
 
 export type AiPlan = {
   id: AiPlanId;
@@ -80,28 +80,28 @@ export const aiPlans: AiPlan[] = [
 /** Buy-once packs. These credits carry over and never expire. */
 export const aiPacks: AiPack[] = [
   {
-    id: "pack200",
-    name: "200 credits",
-    credits: 200,
-    price: 6,
+    id: "pack300",
+    name: "300 credits",
+    credits: 300,
+    price: 10,
     blurb: "Top up for a busy week.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_200",
+    priceEnv: "STRIPE_PRICE_AI_PACK_300",
   },
   {
     id: "pack800",
     name: "800 credits",
     credits: 800,
-    price: 20,
+    price: 25,
     blurb: "Best value top-up.",
     priceEnv: "STRIPE_PRICE_AI_PACK_800",
   },
   {
-    id: "pack2400",
-    name: "2,400 credits",
-    credits: 2400,
-    price: 49,
+    id: "pack1800",
+    name: "1,800 credits",
+    credits: 1800,
+    price: 50,
     blurb: "Stock up once, use it all year.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_2400",
+    priceEnv: "STRIPE_PRICE_AI_PACK_1800",
   },
 ];
 
