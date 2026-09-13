@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Hazard } from "@/data/hazards";
 import type { LatLng, RoadClass, RouteSegment } from "@/data/routing";
 import type { TruckStop } from "@/data/stops";
 import { chainMarkerSvg } from "./ChainMarker";
+import { RealMap, type RealMapStatus } from "./RealMap";
+import type { MapsApi } from "@/lib/google-maps";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -10,52 +12,16 @@ import { cn } from "@/lib/utils";
 /**
  * Base map layer.
  *
- * Google Maps JS API renders the street-level base map when a browser key is
- * available (VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY, injected by the
- * Google Maps connector). Only truck-legal geometry returned by the truck
- * routing adapter is ever drawn on top — Google Maps itself is never asked for
- * the route, because it has no commercial-vehicle attributes.
+ * The real Google Maps basemap (RealMap) renders streets, satellite and hybrid
+ * imagery plus the live traffic layer and Street View. Only truck-legal
+ * geometry returned by the truck routing adapter is ever drawn on top — Google
+ * Maps itself is never asked for the route, because it has no commercial-
+ * vehicle attributes, so nothing here makes the basemap truck-restriction
+ * aware.
  *
- * With no key linked yet, we fall back to a schematic street rendering so the
- * whole navigation package is usable with mock data.
+ * Without a browser key the map reports itself unavailable rather than drawing
+ * an invented basemap.
  */
-
-const MAPS_KEY = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] as
-  | string
-  | undefined;
-const MAPS_CHANNEL = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID"] as
-  | string
-  | undefined;
-
-declare global {
-  interface Window {
-    google?: any;
-    __hercMapsReady?: boolean;
-    __hercInitMaps?: () => void;
-  }
-}
-
-function loadGoogleMaps(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (!MAPS_KEY) return reject(new Error("no-key"));
-    if (window.__hercMapsReady && window.google?.maps) return resolve(window.google);
-    const existing = document.getElementById("herc-gmaps");
-    const done = () => (window.google?.maps ? resolve(window.google) : reject(new Error("failed")));
-    window.__hercInitMaps = () => {
-      window.__hercMapsReady = true;
-      done();
-    };
-    if (existing) return;
-    const s = document.createElement("script");
-    s.id = "herc-gmaps";
-    s.async = true;
-    s.src =
-      `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&loading=async&callback=__hercInitMaps` +
-      (MAPS_CHANNEL ? `&channel=${MAPS_CHANNEL}` : "");
-    s.onerror = () => reject(new Error("script-error"));
-    document.head.appendChild(s);
-  });
-}
 
 /**
  * REAL US HIGHWAY SHIELDS
