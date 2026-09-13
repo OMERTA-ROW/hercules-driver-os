@@ -91,10 +91,12 @@ export const getCreditState = createServerFn({ method: "GET" })
           order: (
             c: string,
             o: { ascending: boolean },
-          ) => { limit: (n: number) => Promise<{ data: Record<string, unknown>[] | null }> };
+          ) => { limit: (n: number) => Promise<{ data: Record<string, string | number | boolean | null>[] | null }> };
         };
       };
     };
+
+    type Row = Record<string, string | number | boolean | null>;
 
     const wallet = await db
       .from("ai_credit_wallets")
@@ -140,8 +142,8 @@ export const getCreditState = createServerFn({ method: "GET" })
         quality: (w["quality_pref"] as string) ?? "balanced",
         low: monthly + purchased <= aiLimits.lowBalance,
       },
-      ledger: ledger.data ?? [],
-      usage: usage.data ?? [],
+      ledger: (ledger.data ?? []) as Row[],
+      usage: (usage.data ?? []) as Row[],
       costs: aiActionCosts,
       assumptions: providerCostAssumptions,
       purchasing: {
