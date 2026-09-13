@@ -240,3 +240,34 @@ entry (see `priceEnv` in `src/data/ai-credits.ts`). Optional: `APP_BASE_URL`.
   `src/data/ai-credits.ts` for display. **PROPOSED, awaiting owner sign-off:**
   Assist 20/day 100/week · Pro 60/day 320/week · Max 200/day 1,100/week.
   Monthly included amounts are unchanged (300 / 1,000 / 3,500).
+
+
+## Monthly totals are pending (owner, 2026-09-13)
+
+The owner has decided the included monthly amounts will be **reduced** and will
+state the three figures. Until they arrive:
+
+- `MONTHLY_CREDITS_PENDING = true` in `src/data/ai-credits.ts`. The credits
+  screen says the counts are a placeholder and not an offer, and each plan card
+  is marked "not final".
+- The previous 300 / 1,000 / 3,500 are kept only as
+  `monthlyCreditPlaceholders` and must NOT be treated as approved.
+- Daily and weekly limits are never hand-written: `derivedAllowance` takes
+  `ALLOWANCE_SHARE` (1/15 of the month per day, 1/3 per week) so a reduced total
+  reduces both limits in proportion.
+
+To apply the approved amounts:
+
+1. Set the three numbers in `monthlyCreditPlaceholders` and flip
+   `MONTHLY_CREDITS_PENDING` to `false`.
+2. Sync the enforced limits (values from `allowanceRows()`):
+
+```sql
+INSERT INTO public.ai_plan_allowances (plan_id, daily_credits, weekly_credits) VALUES
+  ('assist', <daily>, <weekly>), ('pro', <daily>, <weekly>), ('max', <daily>, <weekly>)
+ON CONFLICT (plan_id) DO UPDATE
+  SET daily_credits = EXCLUDED.daily_credits,
+      weekly_credits = EXCLUDED.weekly_credits, updated_at = now();
+```
+
+Top-up unit price is settled: **$0.30 per credit, subscribers only**.

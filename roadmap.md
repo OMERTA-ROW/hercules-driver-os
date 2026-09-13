@@ -90,4 +90,4 @@
 - Subscriber-only one-time top-ups at $0.30 per credit (50/100/250/500). No purchase and no paid credit use without an active monthly plan, enforced in the database.
 - Server-enforced daily and weekly allowances per monthly plan; weeks reset Saturday 00:00 UTC. Paid voice pauses at the limit and names the reset; nothing extra is charged.
 - Company access fix: the membership list is scoped to the signed-in account; the direct hotfixes (null-safe member removal, owner-only dispatcher decisions, confirmed-email invites) are reconciled into a migration.
-- PENDING OWNER SIGN-OFF: exact daily/weekly counts and any revision to included monthly amounts.
+- PENDING OWNER: the three reduced monthly credit totals (Assist/Pro/Max). Until they arrive the catalogue is marked not final, the old 300/1,000/3,500 are placeholders only, and the daily/weekly limits are derived from whatever total is set (1/15 per day, 1/3 per week) rather than hand-written.
