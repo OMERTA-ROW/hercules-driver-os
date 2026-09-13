@@ -159,6 +159,7 @@ export const getCreditState = createServerFn({ method: "GET" })
       return {
         error: "Your credit balance could not be read just now. This is not a zero balance.",
         wallet: null,
+        allowance,
         ledger: [] as Row[],
         usage: [] as Row[],
         costs: aiActionCosts,
