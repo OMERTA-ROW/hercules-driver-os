@@ -1,14 +1,43 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * The one surface every screen is built from: layered dark glass, a hairline
+ * edge and a crisp gold top rule. `flush` drops the padding for maps and other
+ * edge-to-edge content; `plain` drops the gold rule for quiet nested cards.
+ */
 export function Panel({
+  className,
+  children,
+  flush = false,
+  plain = false,
+}: {
+  className?: string | undefined;
+  children: ReactNode;
+  flush?: boolean;
+  plain?: boolean;
+}) {
+  return (
+    <div className={cn("panel relative overflow-hidden", flush ? "" : "p-4 sm:p-5", className)}>
+      {plain ? null : (
+        <div aria-hidden className="edge-gold pointer-events-none absolute inset-x-0 top-0 h-px" />
+      )}
+      {children}
+    </div>
+  );
+}
+
+/** A nested block inside a panel — one step lighter, no competing border. */
+export function Slab({
   className,
   children,
 }: {
   className?: string | undefined;
   children: ReactNode;
 }) {
-  return <div className={cn("panel p-4 sm:p-5", className)}>{children}</div>;
+  return (
+    <div className={cn("surface-1 hairline rounded-lg p-3 sm:p-4", className)}>{children}</div>
+  );
 }
 
 export function PanelTitle({
@@ -19,8 +48,13 @@ export function PanelTitle({
   right?: ReactNode;
 }) {
   return (
-    <div className="mb-3 flex items-center justify-between gap-3">
-      <h2 className="text-lg font-semibold uppercase tracking-wide sm:text-xl">{children}</h2>
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <span aria-hidden className="h-6 w-px bg-primary/70 shadow-[0_0_10px_var(--primary)]" />
+        <h2 className="truncate font-display text-lg font-light uppercase tracking-[0.14em] sm:text-xl">
+          {children}
+        </h2>
+      </div>
       {right}
     </div>
   );
@@ -57,7 +91,7 @@ export function Metric({
   };
   return (
     <div className={cn("metric flex items-baseline gap-1.5 font-bold", tones[tone], className)}>
-      <span className="text-3xl sm:text-4xl">{value}</span>
+      <span className="text-4xl sm:text-5xl">{value}</span>
       {unit ? (
         <span className="text-sm font-semibold uppercase tracking-wider opacity-70">{unit}</span>
       ) : null}
@@ -72,7 +106,7 @@ const statusTone = {
   warn: "border-warn/45 bg-warn/12 text-warn",
   alert: "border-destructive/50 bg-destructive/15 text-destructive",
   info: "border-info/45 bg-info/12 text-info",
-  neutral: "border-border bg-secondary text-muted-foreground",
+  neutral: "border-primary/25 surface-2 text-muted-foreground",
   primary: "border-primary/50 bg-primary/12 text-primary",
 } as const;
 
@@ -160,12 +194,20 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-primary/30 bg-card/40 p-5 text-center">
-      <div className="font-display text-base uppercase tracking-[0.12em] text-primary">{title}</div>
+    /* An empty screen still has to look finished — grid, edge and a clear next
+       step, never a blank hole or invented numbers. */
+    <div className="corner-ticks inner-grid surface-1 hairline relative overflow-hidden rounded-xl p-6 text-center sm:p-8">
+      <div aria-hidden className="edge-gold pointer-events-none absolute inset-x-0 top-0 h-px" />
+      <div className="tech-label">Nothing here yet</div>
+      <div className="mt-1 font-display text-lg font-light uppercase tracking-[0.14em] text-primary sm:text-xl">
+        {title}
+      </div>
       {children ? (
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{children}</p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+          {children}
+        </p>
       ) : null}
-      {action ? <div className="mt-3 flex justify-center">{action}</div> : null}
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
 }
