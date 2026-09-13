@@ -9,7 +9,7 @@ import { __webhookHandlers as H } from "@/routes/api/public/stripe-webhook";
  */
 
 const PLAN_PRICE = "price_plan_pro_test";
-const PACK_PRICE = "price_pack_550_test";
+const PACK_PRICE = "price_topup_100_test";
 
 type Call = { fn: string; args: Record<string, unknown> };
 
@@ -57,7 +57,7 @@ function invoicePaid(over: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   process.env["STRIPE_PRICE_AI_PRO"] = PLAN_PRICE;
-  process.env["STRIPE_PRICE_AI_PACK_550"] = PACK_PRICE;
+  process.env["STRIPE_PRICE_AI_TOPUP_100"] = PACK_PRICE;
 });
 
 describe("current Stripe invoice shape", () => {
