@@ -244,7 +244,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       if (!(Number.isInteger(d.axles) && d.axles >= 2 && d.axles <= 13))
         return { ok: false, message: "Axles should be a whole number between 2 and 13." };
       setSaving(true);
-      const { error } = await supabase.from("vehicles").insert({
+      const base = {
         owner_id: userId,
         label: spec.label,
         unit_number: name,
@@ -253,8 +253,17 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         length_inches: Math.round(d.lengthFt * 12),
         gross_weight_lb: d.grossWeightLbs,
         axles: d.axles,
-        ...(account?.company?.code ? { company_code: account.company.code } : {}),
-      });
+      };
+      const code = account?.company?.code ?? null;
+      let { error } = code
+        ? await supabase.from("vehicles").insert({ ...base, company_code: code })
+        : await supabase.from("vehicles").insert(base);
+      // A carrier code typed onto a profile proves nothing: the database only
+      // accepts a company tag from a real member. If it refuses the tag, the
+      // vehicle is still saved to the driver's own account, untagged.
+      if (error && code && /not_company_member/.test(error.message)) {
+        ({ error } = await supabase.from("vehicles").insert(base));
+      }
       setSaving(false);
       if (error) {
         console.error(`[vehicles] save failed: ${error.message}`);

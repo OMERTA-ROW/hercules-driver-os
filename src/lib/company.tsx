@@ -39,7 +39,7 @@ type MemberRow = {
   company_id: string;
   role: string;
   status: string;
-  companies: {
+  company: {
     id: string;
     name: string;
     code: string;
@@ -47,24 +47,23 @@ type MemberRow = {
     mc_number: string | null;
     load_board_connected: boolean;
     load_board_provider: string | null;
-  } | null;
+  };
 };
 
-function toMembership(row: MemberRow): Membership | null {
-  if (!row.companies) return null;
+function toMembership(row: MemberRow): Membership {
   return {
     id: row.id,
     companyId: row.company_id,
     role: row.role as CompanyRole,
     status: row.status as MemberStatus,
     company: {
-      id: row.companies.id,
-      name: row.companies.name,
-      code: row.companies.code,
-      dotNumber: row.companies.dot_number,
-      mcNumber: row.companies.mc_number,
-      loadBoardConnected: row.companies.load_board_connected,
-      loadBoardProvider: row.companies.load_board_provider,
+      id: row.company.id,
+      name: row.company.name,
+      code: row.company.code,
+      dotNumber: row.company.dot_number,
+      mcNumber: row.company.mc_number,
+      loadBoardConnected: row.company.load_board_connected,
+      loadBoardProvider: row.company.load_board_provider,
     },
   };
 }
@@ -75,18 +74,14 @@ export function useMemberships() {
     queryKey: ["memberships", userId],
     enabled: ready && !!userId,
     queryFn: async (): Promise<Membership[]> => {
-      const { data, error } = await supabase
-        .from("company_members")
-        .select(
-          "id, company_id, role, status, companies(id, name, code, dot_number, mc_number, load_board_connected, load_board_provider)",
-        )
-        .eq("user_id", userId!)
-        .neq("status", "removed")
-        .order("created_at");
+      // The database decides what the caller may see. Pending applications come
+      // back with their carrier's name, so an application never vanishes on
+      // reload just because the row is not active yet.
+      const { data, error } = await supabase.rpc("company_my_memberships");
       if (error) throw new Error(error.message);
-      return ((data ?? []) as unknown as MemberRow[])
-        .map(toMembership)
-        .filter((m): m is Membership => m !== null);
+      const res = (data ?? {}) as { ok?: boolean; error?: string; memberships?: MemberRow[] };
+      if (!res.ok) throw new Error(res.error ?? "unknown");
+      return (res.memberships ?? []).map(toMembership);
     },
   });
   const active = useMemo(() => (q.data ?? []).filter((m) => m.status === "active"), [q.data]);
@@ -125,32 +120,31 @@ export function useRoster(companyId: string | null, canManage = true) {
     queryKey: ["company-roster", companyId, canManage],
     enabled: !!companyId && canManage,
     queryFn: async (): Promise<RosterMember[]> => {
-      const { data, error } = await supabase
-        .from("company_members")
-        .select("id, user_id, role, status, joined_at")
-        .eq("company_id", companyId!)
-        .neq("status", "removed")
-        .order("created_at");
+      // Manager-only, decided in the database: an outsider or an ordinary driver
+      // is refused there, not merely hidden in the interface.
+      const { data, error } = await supabase.rpc("company_roster", { _company: companyId! });
       if (error) throw new Error(error.message);
-      const rows = data ?? [];
-      const ids = rows.map((r) => r.user_id);
-      // Profile rows are readable only for your own account, so a name may be
-      // absent here. That is shown as "Driver on file", never invented.
-      const names = new Map<string, { name: string | null; email: string | null }>();
-      if (ids.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("id, full_name, email")
-          .in("id", ids);
-        for (const p of profs ?? []) names.set(p.id, { name: p.full_name, email: p.email });
-      }
-      return rows.map((r) => ({
+      const res = (data ?? {}) as {
+        ok?: boolean;
+        error?: string;
+        members?: {
+          id: string;
+          user_id: string;
+          role: string;
+          status: string;
+          joined_at: string | null;
+          name: string | null;
+          email: string | null;
+        }[];
+      };
+      if (!res.ok) throw new Error(res.error ?? "not_permitted");
+      return (res.members ?? []).map((r) => ({
         id: r.id,
         userId: r.user_id,
         role: r.role as CompanyRole,
         status: r.status as MemberStatus,
-        name: names.get(r.user_id)?.name ?? null,
-        email: names.get(r.user_id)?.email ?? null,
+        name: r.name,
+        email: r.email,
         joinedAt: r.joined_at,
       }));
     },
