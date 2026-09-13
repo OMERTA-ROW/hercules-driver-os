@@ -286,25 +286,13 @@ Enforcement facts:
 - No live billing: Stripe credentials are still unset, so every purchase path
   reports itself unavailable and no card can be charged.
 
-## Superseded: monthly totals pending (2026-09-13, resolved above)
+## Approved amounts (superseding the earlier pending note)
 
-The owner has decided the included monthly amounts will be **reduced** and will
-state the three figures. Until they arrive:
-
-- `MONTHLY_CREDITS_PENDING = true` in `src/data/ai-credits.ts`. The credits
-  screen says the counts are a placeholder and not an offer, and each plan card
-  is marked "not final".
-- The previous 300 / 1,000 / 3,500 are kept only as
-  `monthlyCreditPlaceholders` and must NOT be treated as approved.
-- Daily and weekly limits are never hand-written: `derivedAllowance` takes
-  `ALLOWANCE_SHARE` (1/15 of the month per day, 1/3 per week) so a reduced total
-  reduces both limits in proportion.
-
-To apply the approved amounts:
-
-1. Set the three numbers in `monthlyCreditPlaceholders` and flip
-   `MONTHLY_CREDITS_PENDING` to `false`.
-2. Sync the enforced limits (values from `allowanceRows()`):
+The three monthly totals and their day/week limits are approved and applied:
+Assist $9 / 150, Pro $29 / 600, Max $100 / 3,000, with day/week limits of
+10/40, 25/150 and 110/750. `MONTHLY_CREDITS_PENDING` is `false` and nothing in
+the UI is labelled provisional any more. To change them later, edit
+`src/data/ai-credits.ts` and sync the enforced limits:
 
 ```sql
 INSERT INTO public.ai_plan_allowances (plan_id, daily_credits, weekly_credits) VALUES
@@ -313,5 +301,13 @@ ON CONFLICT (plan_id) DO UPDATE
   SET daily_credits = EXCLUDED.daily_credits,
       weekly_credits = EXCLUDED.weekly_credits, updated_at = now();
 ```
+
+## Not connected on purpose
+
+- No supplier, parts or delivery partner is wired up, so those screens offer
+  nothing and show no prices, stock or arrival times.
+- No diagnostics hardware adapter exists, so engine health shows "not
+  connected" rather than any reading.
+
 
 Top-up unit price is settled: **$0.30 per credit, subscribers only**.
