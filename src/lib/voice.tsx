@@ -717,7 +717,7 @@ type Ctx = {
   speechNote: string | null;
 };
 
-export type SpeechSource = "premium" | "device" | "unavailable" | null;
+export type SpeechSource = "premium" | "sample" | "device" | "unavailable" | null;
 
 
 const VoiceContext = createContext<Ctx | null>(null);
@@ -911,12 +911,47 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     async (id: VoiceId) => {
       const persona = voiceById(id);
       setPreviewing(id);
+
+      /* Previews play a static clip of the real neural voice that ships with the
+         app — identical for every driver, no account data in it, no paid call,
+         no credits spent. So a brand-new account hears the actual character. */
+      killAudio();
+      const sampleGen = speechGen.current;
+      const clip = new Audio(`/voice-samples/${id}.mp3`);
+      const heard = await new Promise<boolean>((resolve) => {
+        let settled = false;
+        const done = (ok: boolean) => {
+          if (settled) return;
+          settled = true;
+          resolve(ok);
+        };
+        clip.onerror = () => done(false);
+        clip.oncanplay = () => done(true);
+        void clip.play().then(
+          () => done(true),
+          () => done(false),
+        );
+        setTimeout(() => done(false), 4000);
+      });
+      if (sampleGen !== speechGen.current) return; // stopped or superseded
+      if (heard) {
+        audio.current = clip;
+        detachLevel.current = attachAudioLevel(clip);
+        setSpeechSource("sample");
+        setSpeechNote("Sample clip of the real voice — no credits used.");
+        clip.onended = () => setPreviewing(null);
+        return;
+      }
+      clip.pause();
+      clip.src = "";
+
+      // No clip available in this build: fall back to the live paid path.
       const gen = speechGen.current + 1; // playAs claims this generation
       const source = await playAs(id, persona.sample);
       // A newer preview or a Stop owns the UI now — leave its state alone.
       if (gen !== speechGen.current) return;
       const el = audio.current;
-      if (source === "premium" && el) el.onended = () => setPreviewing(null);
+      if ((source === "premium" || source === "sample") && el) el.onended = () => setPreviewing(null);
       else setPreviewing(null);
     },
     [playAs],

@@ -116,11 +116,11 @@ export function VoicePicker() {
 
       <div className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
         <p>
-          <span className="text-foreground">About the previews:</span> the nine characters are
-          neural voices that cost AI credits to speak. Until credits are on your account, a preview
-          plays through your device's own built-in voice, which does not sound like the character —
-          you'll see that said plainly on the row you press. There are no saved sample clips of the
-          real voices in the app yet, so this is the honest limit of the preview.
+          <span className="text-foreground">About the previews:</span> each Play button plays a
+          short recorded clip of that real neural voice that ships with the app — free, no credits
+          used, the same clip for everyone. Speaking your own lines aloud in that voice during a
+          drive is the part that costs AI credits; without credits your device's own built-in voice
+          reads them instead, and you'll see that said plainly on the row.
         </p>
         <p>
           What the voice understands today is a fixed set of spoken commands — loads, money, the
@@ -128,7 +128,7 @@ export function VoicePicker() {
           pick still asks before it books, spends or commits anything, and your choice stays on your
           profile.
         </p>
-        {speechSource === "premium" ? (
+        {speechSource === "premium" || speechSource === "sample" ? (
           <p className="text-primary">You just heard the real neural voice.</p>
         ) : null}
       </div>
