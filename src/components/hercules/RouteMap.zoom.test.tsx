@@ -78,8 +78,8 @@ const segments = [
     note: "test",
     miles: 190,
     truckLegal: true,
-    clearanceFt: null,
-    weightLimitLbs: null,
+    clearanceFt: 14.5,
+    weightLimitLbs: 80000,
   },
 ];
 
