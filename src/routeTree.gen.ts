@@ -34,6 +34,7 @@ import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
@@ -162,6 +163,11 @@ const VoiceRoute = VoiceRouteImport.update({
   path: '/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZeusRoute = ZeusRouteImport.update({
   id: '/zeus',
   path: '/zeus',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
+  '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -289,6 +298,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/welcome'
     | '/zeus'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/welcome'
     | '/zeus'
     | '/api/public/stripe-webhook'
   id:
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/supply'
     | '/voice'
+    | '/welcome'
     | '/zeus'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -377,6 +389,7 @@ export interface RootRouteChildren {
   StoreRoute: typeof StoreRoute
   SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
+  WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -558,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zeus': {
       id: '/zeus'
       path: '/zeus'
@@ -601,6 +621,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoreRoute: StoreRoute,
   SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
+  WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }

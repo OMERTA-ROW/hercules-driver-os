@@ -36,6 +36,7 @@ function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [plan, setPlan] = useState<PlanId>("owner");
+  const [submitting, setSubmitting] = useState(false);
   const [seats, setSeats] = useState(3);
 
   const selected = plans.find((p) => p.id === plan)!;
@@ -63,10 +64,20 @@ function SignUp() {
             className="mt-4 grid gap-4 lg:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
-              if (!name || !email || !password) {
+              if (!name.trim() || !email.trim() || !password) {
                 toast.error("Fill in your name, email, and password");
                 return;
               }
+              if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+                toast.error("That email doesn't look right");
+                return;
+              }
+              if (password.length < 8) {
+                toast.error("Use at least 8 characters for your password");
+                return;
+              }
+              if (submitting) return;
+              setSubmitting(true);
               void (async () => {
                 const { error, needsConfirmation } = await signUp({
                   name,
@@ -75,6 +86,7 @@ function SignUp() {
                   plan,
                   seats,
                 });
+                setSubmitting(false);
                 if (error) {
                   toast.error("Could not create your account", { description: error });
                   return;
@@ -89,7 +101,7 @@ function SignUp() {
                 toast.success(`${TRIAL_DAYS}-day trial started`, {
                   description: `${selected.name} — you can change or cancel any time.`,
                 });
-                void navigate({ to: "/" });
+                void navigate({ to: "/welcome" });
               })();
             }}
           >
@@ -141,8 +153,9 @@ function SignUp() {
                   />
                 </div>
               ) : null}
-              <Button type="submit" size="lg" className="w-full gap-2">
-                <UserPlus className="h-4 w-4" /> Start free trial
+              <Button type="submit" size="lg" disabled={submitting} className="w-full gap-2">
+                <UserPlus className="h-4 w-4" />{" "}
+                {submitting ? "Creating your account…" : "Start free trial"}
               </Button>
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
