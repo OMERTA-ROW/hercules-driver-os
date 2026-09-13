@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { defaultOrigin, trustedOrigins } from "@/data/app-origins";
+import { stripe, stripeKey } from "@/lib/stripe.server";
 import {
   aiActionCosts,
   aiLimits,
@@ -20,12 +22,6 @@ import {
  * the server-only database routines it calls.
  */
 
-const STRIPE_API = "https://api.stripe.com/v1";
-
-function stripeKey() {
-  return process.env["STRIPE_SECRET_KEY"] ?? "";
-}
-
 /** Server-side allowlist: only these ids map to a price, and only from env. */
 function priceIdFor(kind: "plan" | "pack", id: string): string | null {
   const item = kind === "plan" ? aiPlanById(id) : aiPackById(id);
@@ -33,37 +29,51 @@ function priceIdFor(kind: "plan" | "pack", id: string): string | null {
   return process.env[item.priceEnv] ?? null;
 }
 
-async function stripe(path: string, form: Record<string, string>) {
-  const body = new URLSearchParams(form);
-  const res = await fetch(`${STRIPE_API}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${stripeKey()}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    console.error(`[stripe] ${path} failed [${res.status}]: ${text}`);
-    throw new Error(`Payment provider error [${res.status}]`);
-  }
-  return JSON.parse(text) as Record<string, unknown>;
-}
-
-function originOf(): string {
+/**
+ * Return address for checkout. A request header is attacker-controlled, so a
+ * candidate must appear in the app's own trusted list (or APP_BASE_URL).
+ */
+function trustedOrigin(): string {
+  const allowed = [...trustedOrigins, process.env["APP_BASE_URL"] ?? ""].filter(Boolean);
   const req = getRequest();
+  const candidates: string[] = [];
   const origin = req?.headers.get("origin");
-  if (origin) return origin;
+  if (origin) candidates.push(origin);
   const ref = req?.headers.get("referer");
   if (ref) {
     try {
-      return new URL(ref).origin;
+      candidates.push(new URL(ref).origin);
     } catch {
-      /* fall through */
+      /* ignore an unparseable referer */
     }
   }
-  return "";
+  for (const c of candidates) if (allowed.includes(c)) return c;
+  return process.env["APP_BASE_URL"] ?? defaultOrigin;
+}
+
+/** The account's payment customer, from the service-only billing mapping.
+ *  The browser cannot write this, so it cannot point at someone else's. */
+async function customerFor(userId: string): Promise<{ customerId: string | null; subscriptionId: string | null; status: string | null }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const db = supabaseAdmin as never as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => {
+          maybeSingle: () => Promise<{ data: Record<string, string | null> | null }>;
+        };
+      };
+    };
+  };
+  const { data } = await db
+    .from("ai_billing_customers")
+    .select("customer_id, subscription_id, subscription_status")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return {
+    customerId: data?.["customer_id"] ?? null,
+    subscriptionId: data?.["subscription_id"] ?? null,
+    status: data?.["subscription_status"] ?? null,
+  };
 }
 
 /** What is missing before real purchases can work — reported honestly in the UI. */
@@ -83,20 +93,30 @@ function missingConfig(): string[] {
 export const getCreditState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    type Row = Record<string, string | number | boolean | null>;
+
+    // Settle an elapsed month BEFORE reading, so a lapsed allowance is never
+    // shown as spendable balance.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const adminDb = supabaseAdmin as never as {
+      rpc: (f: string, a: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    };
+    const touched = await adminDb.rpc("ai_credits_touch", { _user: context.userId });
+    if (touched.error) console.error(`[credits] touch failed: ${touched.error.message}`);
+
     const db = context.supabase as never as {
-      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }>;
       from: (t: string) => {
         select: (c: string) => {
-          maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+          maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>;
           order: (
             c: string,
             o: { ascending: boolean },
-          ) => { limit: (n: number) => Promise<{ data: Record<string, string | number | boolean | null>[] | null }> };
+          ) => {
+            limit: (n: number) => Promise<{ data: Row[] | null; error: { message: string } | null }>;
+          };
         };
       };
     };
-
-    type Row = Record<string, string | number | boolean | null>;
 
     const wallet = await db
       .from("ai_credit_wallets")
@@ -119,6 +139,22 @@ export const getCreditState = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(25);
 
+    // A failed read is reported, never rendered as a zero or stale balance.
+    const readError =
+      wallet.error?.message ?? ledger.error?.message ?? usage.error?.message ?? null;
+    if (readError) {
+      console.error(`[credits] read failed: ${readError}`);
+      return {
+        error: "Your credit balance could not be read just now. This is not a zero balance.",
+        wallet: null,
+        ledger: [] as Row[],
+        usage: [] as Row[],
+        costs: aiActionCosts,
+        assumptions: providerCostAssumptions,
+        purchasing: { available: false, missing: missingConfig() },
+      };
+    }
+
     const w = wallet.data ?? {
       monthly_balance: 0,
       monthly_expires_at: null,
@@ -128,15 +164,19 @@ export const getCreditState = createServerFn({ method: "GET" })
       quality_pref: "balanced",
     };
 
-    const monthly = Number(w["monthly_balance"] ?? 0);
+    // Belt and braces: if the period has elapsed, treat monthly as spent.
+    const expiresAt = (w["monthly_expires_at"] as string | null) ?? null;
+    const elapsed = Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
+    const monthly = elapsed ? 0 : Number(w["monthly_balance"] ?? 0);
     const purchased = Number(w["purchased_balance"] ?? 0);
 
     return {
+      error: null as string | null,
       wallet: {
         monthly,
         purchased,
         total: monthly + purchased,
-        monthlyExpiresAt: (w["monthly_expires_at"] as string | null) ?? null,
+        monthlyExpiresAt: elapsed ? null : expiresAt,
         planId: (w["ai_plan_id"] as string | null) ?? null,
         renewsAt: (w["ai_plan_renews_at"] as string | null) ?? null,
         quality: (w["quality_pref"] as string) ?? "balanced",
@@ -197,36 +237,47 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "unknown_item" as const, message: "Unknown item." };
     }
 
-    const origin = originOf();
-    if (!origin) {
-      return { ok: false as const, reason: "error" as const, message: "Could not build a return address." };
+    const origin = trustedOrigin();
+    const client = stripe();
+    if (!client) {
+      return { ok: false as const, reason: "unconfigured" as const, message: "Payment setup is incomplete.", missing };
+    }
+
+    const existing = await customerFor(context.userId);
+
+    // One live AI subscription per account — no stacking two monthly plans.
+    if (data.kind === "plan" && existing.subscriptionId && existing.status === "active") {
+      return {
+        ok: false as const,
+        reason: "already_subscribed" as const,
+        message: "This account already has a monthly AI plan. Change it in billing settings instead.",
+      };
     }
 
     try {
-      const session = await stripe("/checkout/sessions", {
+      const session = await client.checkout.sessions.create({
         mode: data.kind === "plan" ? "subscription" : "payment",
-        "line_items[0][price]": price,
-        "line_items[0][quantity]": "1",
+        line_items: [{ price, quantity: 1 }],
+        // Reuse the one customer this account already owns.
+        ...(existing.customerId
+          ? { customer: existing.customerId }
+          : { client_reference_id: context.userId }),
         client_reference_id: context.userId,
-        "metadata[user_id]": context.userId,
-        "metadata[kind]": data.kind,
-        "metadata[item_id]": data.id,
+        metadata: { user_id: context.userId, kind: data.kind, item_id: data.id },
         ...(data.kind === "plan"
-          ? {
-              "subscription_data[metadata][user_id]": context.userId,
-              "subscription_data[metadata][item_id]": data.id,
-            }
-          : {}),
+          ? { subscription_data: { metadata: { user_id: context.userId, item_id: data.id } } }
+          : { payment_intent_data: { metadata: { user_id: context.userId, item_id: data.id } } }),
         success_url: `${origin}/credits?checkout=complete`,
         cancel_url: `${origin}/credits?checkout=cancelled`,
         // Credits are granted only by the signed webhook, never by this URL.
       });
-      return { ok: true as const, url: String(session["url"] ?? "") };
+      return { ok: true as const, url: session.url ?? "" };
     } catch (e) {
+      console.error(`[credits] checkout failed: ${e instanceof Error ? e.message : String(e)}`);
       return {
         ok: false as const,
         reason: "error" as const,
-        message: e instanceof Error ? e.message : "Checkout could not be opened.",
+        message: "Checkout could not be opened.",
       };
     }
   });
@@ -235,39 +286,38 @@ export const startAiCheckout = createServerFn({ method: "POST" })
 export const openBillingPortal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    if (!stripeKey()) {
+    const client = stripe();
+    if (!stripeKey() || !client) {
       return {
         ok: false as const,
         reason: "unconfigured" as const,
         message: "Billing management is not switched on yet.",
       };
     }
-    const db = context.supabase as never as {
-      from: (t: string) => {
-        select: (c: string) => { maybeSingle: () => Promise<{ data: Record<string, unknown> | null }> };
-      };
-    };
-    const prof = await db.from("profiles").select("stripe_customer_id").maybeSingle();
-    const customer = prof.data?.["stripe_customer_id"] as string | undefined;
-    if (!customer) {
+
+    // Ownership comes from the service-only mapping, not from any row the
+    // browser can write, so nobody can open another account's portal.
+    const { customerId } = await customerFor(context.userId);
+    if (!customerId) {
       return {
         ok: false as const,
         reason: "no_customer" as const,
         message: "No AI subscription on this account yet.",
       };
     }
+
     try {
-      const origin = originOf();
-      const portal = await stripe("/billing_portal/sessions", {
-        customer,
-        return_url: `${origin}/credits`,
+      const portal = await client.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${trustedOrigin()}/credits`,
       });
-      return { ok: true as const, url: String(portal["url"] ?? "") };
+      return { ok: true as const, url: portal.url };
     } catch (e) {
+      console.error(`[credits] portal failed: ${e instanceof Error ? e.message : String(e)}`);
       return {
         ok: false as const,
         reason: "error" as const,
-        message: e instanceof Error ? e.message : "Billing portal unavailable.",
+        message: "Billing portal unavailable.",
       };
     }
   });

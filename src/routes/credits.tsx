@@ -97,9 +97,22 @@ function CreditsPage() {
   const w = state.data?.wallet;
   const purchasing = state.data?.purchasing;
 
+  const readError = state.data?.error ?? null;
+
   return (
     <AppShell title="AI Credits" subtitle="Separate from your HERCULES plan — nothing bills without your word">
       <div className="grid gap-4">
+        {/* An unreadable balance is said out loud — never shown as zero */}
+        {readError ? (
+          <Panel>
+            <Label>Balance unavailable</Label>
+            <p className="mt-2 flex items-center gap-2 text-sm text-primary">
+              <TriangleAlert className="h-4 w-4" />
+              {readError}
+            </p>
+          </Panel>
+        ) : null}
+
         {/* BALANCE */}
         <Panel>
           <Label>Available balance</Label>

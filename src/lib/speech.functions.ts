@@ -12,20 +12,21 @@ import {
   cacheGet,
   cacheKey,
   cacheSet,
-  commit,
-  dedupe,
   rateLimit,
-  refund,
-  reserve,
+  requestIdentity,
+  runMetered,
+  walletQuality,
 } from "@/lib/ai-meter.server";
 
 /**
  * PREMIUM SPEECH — authenticated, rate limited, credit metered.
  *
- * Nothing reaches the paid speech provider until a signed-in account has had
- * the credits held for it. If the provider fails, the hold is returned in full.
- * The caller falls back to the device's own free voice whenever this says no,
- * so the driver always hears the line.
+ * De-duplication, the credit hold, the provider call and settlement are ONE
+ * operation (`runMetered`), so two identical concurrent requests produce one
+ * provider call and one debit. Eco quality is enforced here on the server: no
+ * paid call happens at all, whatever the caller sends. If the provider fails,
+ * the hold is returned in full and the caller falls back to the device's own
+ * free voice, so the driver always hears the line.
  */
 export const speakLine = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -43,13 +44,22 @@ export const speakLine = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "unconfigured" as const, message: "Premium voice is not configured." };
     }
 
-    // Hard input cap — long lines are trimmed at a sentence break, never sent whole.
+    // Hard input cap — long lines are trimmed, never sent whole.
     const text = data.text.slice(0, aiLimits.maxSpeechChars);
     const persona = voiceById(data.voiceId as never);
     const premium = persona.tts !== "alloy";
     const action = premium ? "speech_premium" : "speech";
     const cost = creditCost(action, text.length);
     const model = "openai/gpt-4o-mini-tts";
+
+    // Eco: the account has asked for zero-cost speech. Refuse before any spend.
+    if ((await walletQuality(context.userId)) === "eco") {
+      return {
+        ok: false as const,
+        reason: "eco" as const,
+        message: "Eco voice is on — this line is spoken by your device at no credit cost.",
+      };
+    }
 
     const limited = rateLimit(context.userId);
     if (!limited.ok) {
@@ -58,36 +68,25 @@ export const speakLine = createServerFn({ method: "POST" })
 
     const ck = cacheKey(context.userId, [model, data.voiceId, text]);
 
-    // Repeat of a line this same account just heard — free, and recorded as saved.
+    // Repeat of a line this same account just heard — free, nothing reserved.
     const cached = cacheGet(ck);
     if (cached) {
-      const held = await reserve(context.userId, `${action}_cached`, 0);
-      if (held.ok) {
-        await commit(context.userId, held.reservation.id, {
-          charge: 0,
-          model,
-          providerCostUsd: 0,
-          costBasis: "none",
-          cached: true,
-          saved: cost,
-        });
-      }
-      return { ok: true as const, audio: cached, charged: 0, cached: true };
+      return { ok: true as const, audio: cached, charged: 0, cached: true, saved: cost };
     }
 
-    const held = await reserve(context.userId, action, cost, `${ck}::${Date.now() - (Date.now() % (aiLimits.cacheTtlSeconds * 1000))}`);
-    if (!held.ok) {
-      return {
-        ok: false as const,
-        reason: held.reason === "insufficient" ? ("insufficient" as const) : ("error" as const),
-        message: held.message,
-        needed: cost,
-      };
-    }
+    const identity = await requestIdentity(context.userId, [model, data.voiceId, text]);
 
-    try {
-      // One identical request in flight at a time — retries collapse into it.
-      const audio = await dedupe(ck, async () => {
+    const result = await runMetered<string>({
+      userId: context.userId,
+      action,
+      cost,
+      identity,
+      model,
+      costBasis: "estimated",
+      // The gateway returns no per-call price, so this is our published
+      // assumption and is labelled estimated everywhere it is shown.
+      providerCostUsd: () => estimatedTtsCostUsd(text.length),
+      run: async () => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 20_000);
         try {
@@ -118,29 +117,30 @@ export const speakLine = createServerFn({ method: "POST" })
         } finally {
           clearTimeout(timer);
         }
-      });
+      },
+    });
 
-      cacheSet(ck, audio);
-      await commit(context.userId, held.reservation.id, {
-        charge: cost,
-        model,
-        // The gateway does not return a per-call price, so this is our own
-        // published assumption, and it is labelled estimated everywhere.
-        providerCostUsd: estimatedTtsCostUsd(text.length),
-        costBasis: "estimated",
-      });
-      return { ok: true as const, audio, charged: cost, cached: false };
-    } catch (e) {
-      await refund(context.userId, held.reservation.id, "Speech provider failed — credits returned");
-      const status = (e as { status?: number }).status ?? 0;
-      const message =
-        status === 402
-          ? "The voice service is out of credit on this account."
-          : status === 429
-            ? "Voice service is busy — try that again in a moment."
-            : "Voice service could not speak that line.";
-      return { ok: false as const, reason: "provider" as const, message, status };
+    if (!result.ok) {
+      if (result.reason === "provider") {
+        const status = result.status ?? 0;
+        const message =
+          status === 402
+            ? "The voice service is out of credit on this account."
+            : status === 429
+              ? "Voice service is busy — try that again in a moment."
+              : "Voice service could not speak that line.";
+        return { ok: false as const, reason: "provider" as const, message, status };
+      }
+      return {
+        ok: false as const,
+        reason: result.reason,
+        message: result.message,
+        needed: result.needed ?? cost,
+      };
     }
+
+    cacheSet(ck, result.value);
+    return { ok: true as const, audio: result.value, charged: result.charged, cached: false, saved: 0 };
   });
 
 /** Costs shown to the driver BEFORE anything is spoken. */

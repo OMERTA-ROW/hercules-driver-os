@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_billing_customers: {
+        Row: {
+          created_at: string
+          customer_id: string
+          provider: string
+          subscription_id: string | null
+          subscription_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          provider?: string
+          subscription_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          provider?: string
+          subscription_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_credit_ledger: {
         Row: {
           created_at: string
@@ -125,6 +155,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_purchases: {
+        Row: {
+          amount_paid_cents: number | null
+          bucket: string
+          created_at: string
+          credits: number
+          credits_owed: number
+          credits_reversed: number
+          currency: string | null
+          id: string
+          invoice_id: string | null
+          item_id: string
+          kind: string
+          payment_ref: string
+          period_end: string | null
+          period_start: string | null
+          provider: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid_cents?: number | null
+          bucket: string
+          created_at?: string
+          credits: number
+          credits_owed?: number
+          credits_reversed?: number
+          currency?: string | null
+          id?: string
+          invoice_id?: string | null
+          item_id: string
+          kind: string
+          payment_ref: string
+          period_end?: string | null
+          period_start?: string | null
+          provider?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid_cents?: number | null
+          bucket?: string
+          created_at?: string
+          credits?: number
+          credits_owed?: number
+          credits_reversed?: number
+          currency?: string | null
+          id?: string
+          invoice_id?: string | null
+          item_id?: string
+          kind?: string
+          payment_ref?: string
+          period_end?: string | null
+          period_start?: string | null
+          provider?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_usage_events: {
         Row: {
           action: string
@@ -220,33 +313,42 @@ export type Database = {
       }
       billing_events: {
         Row: {
+          attempts: number
           event_id: string
           event_type: string
           id: string
+          last_error: string | null
           payload: Json | null
           processed_at: string | null
           provider: string
           received_at: string
+          status: string
           user_id: string | null
         }
         Insert: {
+          attempts?: number
           event_id: string
           event_type: string
           id?: string
+          last_error?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider: string
           received_at?: string
+          status?: string
           user_id?: string | null
         }
         Update: {
+          attempts?: number
           event_id?: string
           event_type?: string
           id?: string
+          last_error?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider?: string
           received_at?: string
+          status?: string
           user_id?: string | null
         }
         Relationships: []
@@ -747,6 +849,58 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_billing_claim_event: {
+        Args: {
+          _event_id: string
+          _payload: Json
+          _provider: string
+          _type: string
+        }
+        Returns: string
+      }
+      ai_billing_finish_event: {
+        Args: {
+          _error?: string
+          _event_id: string
+          _ok: boolean
+          _provider: string
+        }
+        Returns: boolean
+      }
+      ai_billing_fulfill: {
+        Args: {
+          _amount_cents?: number
+          _bucket: string
+          _credits: number
+          _currency?: string
+          _invoice?: string
+          _item_id: string
+          _kind: string
+          _payment_ref: string
+          _period_end?: string
+          _period_start?: string
+          _subscription?: string
+          _user: string
+        }
+        Returns: string
+      }
+      ai_billing_link_customer: {
+        Args: {
+          _customer: string
+          _status?: string
+          _subscription?: string
+          _user: string
+        }
+        Returns: boolean
+      }
+      ai_billing_owner_of_customer: {
+        Args: { _customer: string }
+        Returns: string
+      }
+      ai_billing_reverse: {
+        Args: { _payment_ref: string; _reason: string; _refunded_cents: number }
+        Returns: string
+      }
       ai_credits_commit: {
         Args: {
           _cached?: boolean

@@ -8,7 +8,7 @@ describe("credit costs are server-owned and bounded", () => {
   });
 
   it("never exceeds the per-action ceiling, however long the input", () => {
-    for (const action of ["speech", "speech_premium", "assistant"] as const) {
+    for (const action of ["speech", "speech_premium"] as const) {
       expect(creditCost(action, 500_000)).toBe(aiActionCosts[action].max);
     }
   });

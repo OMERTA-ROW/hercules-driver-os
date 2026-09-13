@@ -21,6 +21,11 @@ import { cn } from "@/lib/utils";
  * offscreen or hidden, and holds still under prefers-reduced-motion.
  */
 
+/** The warm gold light that sits BEHIND the orb in every colourway. */
+const GOLD_CORE = "oklch(0.86 0.15 84 / 0.5)";
+const GOLD = "oklch(0.8 0.15 84)";
+const GOLD_DEEP = "oklch(0.62 0.13 78)";
+
 /** Metallic tint per colourway — all of them are mercury, only the light changes. */
 const metals: Record<
   OrbColorway,
@@ -297,13 +302,28 @@ export function Orb({
         mode === "idle" && "orb-state-idle",
       )}
     >
-      {/* Ambient bloom — cold metal light, warmed slightly when live */}
+      {/* WARM GOLD BACKLIGHT — sits behind the silver body in every colourway.
+          The body itself stays mercury; only this halo is gold. */}
+      <span
+        aria-hidden
+        className="absolute -inset-[26%] rounded-full"
+        style={{
+          background: `radial-gradient(circle, ${GOLD_CORE} 0%, color-mix(in oklab, ${GOLD} ${
+            speaking ? 30 : listening ? 24 : 18
+          }%, transparent) 34%, color-mix(in oklab, ${GOLD_DEEP} ${
+            speaking ? 14 : 10
+          }%, transparent) 58%, transparent 76%)`,
+          filter: "blur(6px)",
+        }}
+      />
+
+      {/* Cold specular bloom on top of the gold, so the metal still reads silver */}
       <span
         aria-hidden
         ref={bloomRef}
         className="absolute -inset-[14%] rounded-full"
         style={{
-          background: `radial-gradient(circle, color-mix(in oklab, ${m.hi} ${speaking ? 16 : listening ? 12 : 7}%, transparent) 0%, color-mix(in oklab, ${m.tint} 7%, transparent) 46%, transparent 70%)`,
+          background: `radial-gradient(circle, color-mix(in oklab, ${m.hi} ${speaking ? 14 : listening ? 11 : 6}%, transparent) 0%, transparent 62%)`,
         }}
       />
 
