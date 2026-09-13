@@ -14,11 +14,11 @@
  * every data file were searched for a pre-existing numeric AI credit
  * allowance and none exists — the only earlier "credits" in this project are
  * truck-stop shower credits and supplier loyalty credits, which are
- * unrelated. The owner then set the current amounts directly: "lower the
- * credits a lil so we can keep users spending and making money" — the
- * original provisional allowances reduced by 20%, prices unchanged. These
- * amounts are now the owner's guideline; change them here only. Nothing else
- * hardcodes an amount.
+ * unrelated. The owner then set the current amounts directly: monthly tiers
+ * reduced 20% from the provisional allowances ("lower the credits a lil so we
+ * can keep users spending and making money"), and buy-once packs re-priced
+ * "$10 to $50". These amounts are now the owner's guideline; change them here
+ * only. Nothing else hardcodes an amount.
  *
  * Core app prices are authoritative and are NOT defined here:
  *   - platform plans .......... src/data/plans.ts  ($5 / $29 / $19 per truck)
@@ -28,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack200" | "pack800" | "pack2400";
+export type AiPackId = "pack300" | "pack800" | "pack1800";
 
 export type AiPlan = {
   id: AiPlanId;
@@ -80,28 +80,28 @@ export const aiPlans: AiPlan[] = [
 /** Buy-once packs. These credits carry over and never expire. */
 export const aiPacks: AiPack[] = [
   {
-    id: "pack200",
-    name: "200 credits",
-    credits: 200,
-    price: 6,
+    id: "pack300",
+    name: "300 credits",
+    credits: 300,
+    price: 10,
     blurb: "Top up for a busy week.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_200",
+    priceEnv: "STRIPE_PRICE_AI_PACK_300",
   },
   {
     id: "pack800",
     name: "800 credits",
     credits: 800,
-    price: 20,
+    price: 25,
     blurb: "Best value top-up.",
     priceEnv: "STRIPE_PRICE_AI_PACK_800",
   },
   {
-    id: "pack2400",
-    name: "2,400 credits",
-    credits: 2400,
-    price: 49,
+    id: "pack1800",
+    name: "1,800 credits",
+    credits: 1800,
+    price: 50,
     blurb: "Stock up once, use it all year.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_2400",
+    priceEnv: "STRIPE_PRICE_AI_PACK_1800",
   },
 ];
 

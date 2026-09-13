@@ -28,9 +28,9 @@ is entirely separate from the prices above.
 
 ## Owner-set catalogue (2026-09-13 — edit in `src/data/ai-credits.ts`)
 
-Set by owner direction: "lower the credits a lil so we can keep users spending
-and making money" — original provisional allowances reduced by 20%, prices
-unchanged.
+Set by owner direction: monthly tiers reduced 20% from the provisional
+allowances ("lower the credits a lil so we can keep users spending and making
+money"); buy-once packs re-priced "$10 to $50".
 
 ### Monthly — replenishes once per paid period, expires at period end
 
@@ -44,9 +44,9 @@ unchanged.
 
 | Pack  | Credits | Price        |
 | ----- | ------- | ------------ |
-| Small | 200     | $6 one time  |
-| Best  | 800     | $20 one time |
-| Bulk  | 2,400   | $49 one time |
+| Small | 300     | $10 one time |
+| Best  | 800     | $25 one time |
+| Bulk  | 1,800   | $50 one time |
 
 Monthly credits are always consumed before bought-once credits, so nothing
 expires that could have been spent.
@@ -100,7 +100,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_200`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_2400`
+- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
