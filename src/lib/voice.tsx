@@ -55,7 +55,6 @@ import {
   startSynthLevel,
 } from "@/lib/voice-level";
 
-
 /**
  * LIVE SNAPSHOT
  * The voice brain answers from the driver's own rows. When a table is empty
@@ -89,7 +88,6 @@ function rateLine(l: LoadRow) {
   ).toFixed(2)} a mile`;
 }
 
-
 /**
  * HERCULES VOICE LAYER
  * -------------------------------------------------------------------------
@@ -122,8 +120,6 @@ export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = 
    speech service all read the same cast. */
 export { voiceOptions, voiceById, maleVoices, femaleVoices } from "@/data/voices";
 export type { VoiceId, VoiceOption } from "@/data/voices";
-
-
 
 /* ------------------------------------------------------------------ CONVERSATION */
 
@@ -193,7 +189,6 @@ function spokenVehicle(t: string): VehicleSpec | null {
   if (/(18 ?wheeler|eighteen wheeler)/.test(t)) return specFor("eighteen", "dryVan");
   return null;
 }
-
 
 function hm(min: number) {
   return `${Math.floor(min / 60)} hours ${min % 60} minutes`;
@@ -340,9 +335,7 @@ function followUp(topic: Topic, text: string): Reply | null {
       };
     }
     if (/(call|connect|dial|get them|phone)/.test(t)) {
-      const best = rank(
-        lastProblem ? filterByProblem(services, lastProblem) : services,
-      )[0]!;
+      const best = rank(lastProblem ? filterByProblem(services, lastProblem) : services)[0]!;
       return {
         topic: "breakdown",
         text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I am not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
@@ -352,7 +345,6 @@ function followUp(topic: Topic, text: string): Reply | null {
       };
     }
   }
-
 
   if (topic === "loads" && (wantsMore || wantsNext)) {
     const l = live.loads[wantsNext ? 1 : 0];
@@ -508,7 +500,6 @@ export function respond(text: string, topic: Topic): Reply {
     };
   }
 
-
   /* EQUIPMENT / VOCATION — what the driver is in today drives the whole route. */
   if (
     /(what am i in|i'?m in the|im in the|today i'?m|equipment|vocation|sprinter|cargo van|flat ?bed|18 ?wheeler|eighteen wheeler|dry van|line ?haul|intermodal|car haul|heavy haul|bobtail)/.test(
@@ -618,7 +609,9 @@ export function respond(text: string, topic: Topic): Reply {
     return {
       topic: "parts",
       text: `${
-        fromCode ? `${codeMatch?.[0].toUpperCase()} points at the ${fromCode.name}. ${fromCode.why} ` : ""
+        fromCode
+          ? `${codeMatch?.[0].toUpperCase()} points at the ${fromCode.name}. ${fromCode.why} `
+          : ""
       }Best I can get you: ${spokenListing(pick.label, pick.listing)} Plus a ${fee.toFixed(
         2,
       )} dollar HERCULES service fee, because I place it and pay the supplier — that's what keeps HERCULES running. Say "order it" and I'll read the whole thing back. Nothing is ordered yet.`,
@@ -629,7 +622,10 @@ export function respond(text: string, topic: Topic): Reply {
       t,
     )
   ) {
-    return { topic: "supply", text: `${coverageLine()} Say "order it" and I'll read the whole thing back before anything is placed.` };
+    return {
+      topic: "supply",
+      text: `${coverageLine()} Say "order it" and I'll read the whole thing back before anything is placed.`,
+    };
   }
   if (/(shower|park|stop|diesel|fuel|sleep|rest|eat|food)/.test(t)) {
     const s = truckStops[0]!;
@@ -638,7 +634,11 @@ export function respond(text: string, topic: Topic): Reply {
       text: `${s.name} is ${s.milesAhead} miles ahead — diesel $${s.dieselPrice.toFixed(3)}, ${s.parkingOpen} of ${s.parkingTotal} truck spaces open, ${s.showersOpen} showers free. Say "book it" and I'll read the total plus the ${BOOKING_FEE} dollar booking fee before anything is charged.`,
     };
   }
-  if (/(fault|engine|health|tire|maintenance|def|coolant|brake|bolt|diagnostic|mpg|fuel economy|what'?s wrong)/.test(t)) {
+  if (
+    /(fault|engine|health|tire|maintenance|def|coolant|brake|bolt|diagnostic|mpg|fuel economy|what'?s wrong)/.test(
+      t,
+    )
+  ) {
     const f = activeFaults()[0]!;
     const pred = activePredictions()[0]!;
     return {
@@ -722,7 +722,6 @@ type Ctx = {
 
 export type SpeechSource = "premium" | "sample" | "device" | "unavailable" | null;
 
-
 const VoiceContext = createContext<Ctx | null>(null);
 
 const COLOR_KEY = "hercules.orb-colorway";
@@ -745,6 +744,8 @@ function fallbackNote(reason: string | undefined, message?: string): string {
       return "Sign in to hear the real voice — your device spoke this line free.";
     case "rate_limited":
       return "Too many spoken lines just now, so your device spoke this one free.";
+    case "no_allowance_config":
+      return "Paid voice is held back on this plan until its allowance is set up. Your device spoke this line free.";
     case "no_subscription":
       return "The real AI voice needs a monthly AI plan. Your device spoke this line free.";
     case "daily_limit":
@@ -915,7 +916,6 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     [killAudio, speakOnDevice],
   );
 
-
   const preview = useCallback(
     async (id: VoiceId) => {
       const persona = voiceById(id);
@@ -960,12 +960,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       // A newer preview or a Stop owns the UI now — leave its state alone.
       if (gen !== speechGen.current) return;
       const el = audio.current;
-      if ((source === "premium" || source === "sample") && el) el.onended = () => setPreviewing(null);
+      if ((source === "premium" || source === "sample") && el)
+        el.onended = () => setPreviewing(null);
       else setPreviewing(null);
     },
     [playAs],
   );
-
 
   const push = useCallback((turn: Turn) => setTurns((prev) => [...prev, turn]), []);
 
@@ -974,8 +974,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   turnsRef.current = turns;
 
   /* Spoken confirmation must be explicit — a clear yes or no, nothing inferred. */
-  const YES = /^(yes|yeah|yep|yes[, ]+(do it|book it|approve.*)|do it|book it|approve it|go ahead|confirm it?)\b/i;
-  const NO = /^(no|nope|no[, ]+(thanks|don'?t|drop it)|don'?t|cancel( that)?|drop it|skip it|forget it)\b/i;
+  const YES =
+    /^(yes|yeah|yep|yes[, ]+(do it|book it|approve.*)|do it|book it|approve it|go ahead|confirm it?)\b/i;
+  const NO =
+    /^(no|nope|no[, ]+(thanks|don'?t|drop it)|don'?t|cancel( that)?|drop it|skip it|forget it)\b/i;
 
   /** Driver line in → HERCULES thinks → HERCULES speaks. */
   const say = useCallback(
@@ -1069,7 +1071,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   );
 
   const decline = useCallback(
-    (turnId: string) => settle(turnId, "declined", "Dropped it. Nothing was booked and nothing was charged."),
+    (turnId: string) =>
+      settle(turnId, "declined", "Dropped it. Nothing was booked and nothing was charged."),
     [settle],
   );
 
@@ -1117,21 +1120,16 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     };
   }, [mode]);
 
-
   useEffect(() => {
     if (mode === "idle") setVoiceLevel(0);
   }, [mode]);
-
 
   const lastLine = useMemo(() => {
     const last = [...turns].reverse().find((t) => t.from === "hercules");
     return last?.text ?? "";
   }, [turns]);
 
-  const pending = useMemo(
-    () => [...turns].reverse().find((t) => t.proposal && !t.status),
-    [turns],
-  );
+  const pending = useMemo(() => [...turns].reverse().find((t) => t.proposal && !t.status), [turns]);
 
   const value: Ctx = {
     mode,
@@ -1154,7 +1152,6 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     lastLine,
     pending,
   };
-
 
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }

@@ -54,9 +54,7 @@ export function AppShell({
   const { data: vehicles } = useVehicles();
   const rig = vehicles?.find((v) => v.active) ?? vehicles?.[0] ?? null;
 
-  const items = nav.filter(
-    (n) => !n.feature || !account || can(n.feature as Feature),
-  );
+  const items = nav.filter((n) => !n.feature || !account || can(n.feature as Feature));
   const canReset = !account || can("loadReset");
 
   return (
@@ -94,7 +92,10 @@ export function AppShell({
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 border-b border-primary/20 bg-background/95 backdrop-blur-xl shadow-[0_8px_28px_-24px_var(--primary)]">
-            <div aria-hidden className="edge-gold h-px w-full shadow-[0_0_14px_-4px_var(--primary)]" />
+            <div
+              aria-hidden
+              className="edge-gold h-px w-full shadow-[0_0_14px_-4px_var(--primary)]"
+            />
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
               <div className="min-w-0">
                 <div className="lg:hidden">

@@ -41,12 +41,22 @@ function itemFromPriceId(priceId: string | null | undefined) {
   if (!priceId) return null;
   for (const plan of [aiPlanById("assist"), aiPlanById("pro"), aiPlanById("max")]) {
     if (plan && process.env[plan.priceEnv] === priceId) {
-      return { kind: "plan" as const, id: plan.id, bucket: "monthly" as const, credits: plan.credits };
+      return {
+        kind: "plan" as const,
+        id: plan.id,
+        bucket: "monthly" as const,
+        credits: plan.credits,
+      };
     }
   }
   for (const pack of aiPacks) {
     if (pack && process.env[pack.priceEnv] === priceId) {
-      return { kind: "pack" as const, id: pack.id, bucket: "purchased" as const, credits: pack.credits };
+      return {
+        kind: "pack" as const,
+        id: pack.id,
+        bucket: "purchased" as const,
+        credits: pack.credits,
+      };
     }
   }
   return null;
@@ -77,9 +87,11 @@ function linePriceId(line: LooseLine | undefined): string | null {
 }
 
 function invoiceSubscription(invoice: Stripe.Invoice, line: LooseLine | undefined): string | null {
-  const parent = (invoice as unknown as {
-    parent?: { subscription_details?: { subscription?: unknown } };
-  }).parent;
+  const parent = (
+    invoice as unknown as {
+      parent?: { subscription_details?: { subscription?: unknown } };
+    }
+  ).parent;
   return (
     id(parent?.subscription_details?.subscription) ??
     id(line?.parent?.subscription_item_details?.subscription) ??
@@ -89,23 +101,27 @@ function invoiceSubscription(invoice: Stripe.Invoice, line: LooseLine | undefine
 }
 
 function invoiceUserHint(invoice: Stripe.Invoice): string | null {
-  const parent = (invoice as unknown as {
-    parent?: { subscription_details?: { metadata?: Record<string, string> } };
-  }).parent;
+  const parent = (
+    invoice as unknown as {
+      parent?: { subscription_details?: { metadata?: Record<string, string> } };
+    }
+  ).parent;
   return (
     (invoice.metadata?.["user_id"] as string | undefined) ??
     parent?.subscription_details?.metadata?.["user_id"] ??
-    ((invoice as unknown as { subscription_details?: { metadata?: Record<string, string> } })
-      .subscription_details?.metadata?.["user_id"]) ??
+    (invoice as unknown as { subscription_details?: { metadata?: Record<string, string> } })
+      .subscription_details?.metadata?.["user_id"] ??
     null
   );
 }
 
 /** The invoice's real payment identifiers, for refund tracing. */
 function invoicePayment(invoice: Stripe.Invoice): { intent: string | null; charge: string | null } {
-  const payments = (invoice as unknown as {
-    payments?: { data?: { payment?: { payment_intent?: unknown; charge?: unknown } }[] };
-  }).payments?.data;
+  const payments = (
+    invoice as unknown as {
+      payments?: { data?: { payment?: { payment_intent?: unknown; charge?: unknown } }[] };
+    }
+  ).payments?.data;
   const first = payments?.[0]?.payment;
   return {
     intent:
@@ -158,7 +174,10 @@ async function handleCheckoutCompleted(
   await db.rpc("ai_checkout_settle", {
     _user: userId,
     _session: session.id,
-    _status: session.payment_status === "paid" || session.mode === "subscription" ? "completed" : "abandoned",
+    _status:
+      session.payment_status === "paid" || session.mode === "subscription"
+        ? "completed"
+        : "abandoned",
   });
 
   // Subscriptions are granted ONLY from the paid invoice, never here — the
@@ -265,11 +284,11 @@ async function handleSubscriptionStopped(
   const line = (obj as Stripe.Invoice).lines?.data?.[0] as unknown as LooseLine | undefined;
   const periodEnd = line?.period?.end
     ? new Date(line.period.end * 1000).toISOString()
-    : ((obj as Stripe.Subscription).items?.data?.[0]?.current_period_end
-        ? new Date(
-            ((obj as Stripe.Subscription).items.data[0]!.current_period_end as number) * 1000,
-          ).toISOString()
-        : null);
+    : (obj as Stripe.Subscription).items?.data?.[0]?.current_period_end
+      ? new Date(
+          ((obj as Stripe.Subscription).items.data[0]!.current_period_end as number) * 1000,
+        ).toISOString()
+      : null;
 
   const { data, error } = await db.rpc("ai_billing_stop_monthly", {
     _user: owner,
@@ -293,7 +312,7 @@ async function handleReversal(
   const charge = "amount_refunded" in obj ? (obj as Stripe.Charge) : null;
   const dispute = !charge ? (obj as Stripe.Dispute) : null;
 
-  let chargeId = charge?.id ?? (dispute ? id(dispute.charge) : null);
+  const chargeId = charge?.id ?? (dispute ? id(dispute.charge) : null);
   let paymentIntent = id((obj as { payment_intent?: unknown }).payment_intent);
   let invoiceId = charge ? id((charge as unknown as { invoice?: unknown }).invoice) : null;
 

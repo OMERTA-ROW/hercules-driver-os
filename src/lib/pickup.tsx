@@ -291,7 +291,8 @@ export function PickupProvider({ children }: { children: ReactNode }) {
           return { ...r, status: "offered" as PickupStatus, spoken };
         }
 
-        if (r.status !== "routed" || !r.route) return spoken.length === r.spoken.length ? r : { ...r, spoken };
+        if (r.status !== "routed" || !r.route)
+          return spoken.length === r.spoken.length ? r : { ...r, spoken };
 
         const minsOut = (r.route.dueAt - stamp) / MS_PER_MIN;
 

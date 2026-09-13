@@ -163,6 +163,7 @@ export type Database = {
           monthly_balance: number
           monthly_expires_at: string | null
           paid_through_at: string | null
+          pending_purchased_balance: number
           purchased_balance: number
           quality_pref: string
           updated_at: string
@@ -175,6 +176,7 @@ export type Database = {
           monthly_balance?: number
           monthly_expires_at?: string | null
           paid_through_at?: string | null
+          pending_purchased_balance?: number
           purchased_balance?: number
           quality_pref?: string
           updated_at?: string
@@ -187,6 +189,7 @@ export type Database = {
           monthly_balance?: number
           monthly_expires_at?: string | null
           paid_through_at?: string | null
+          pending_purchased_balance?: number
           purchased_balance?: number
           quality_pref?: string
           updated_at?: string
@@ -1311,6 +1314,7 @@ export type Database = {
           monthly_balance: number
           monthly_expires_at: string | null
           paid_through_at: string | null
+          pending_purchased_balance: number
           purchased_balance: number
           quality_pref: string
           updated_at: string
@@ -1346,6 +1350,10 @@ export type Database = {
         }
         Returns: Json
       }
+      ai_gate_check: {
+        Args: { _amount: number; _new_hold: boolean; _user: string }
+        Returns: Json
+      }
       ai_set_quality_pref: { Args: { _pref: string }; Returns: string }
       company_code_gen: { Args: { _len?: number }; Returns: string }
       company_create: {
@@ -1375,6 +1383,7 @@ export type Database = {
         Returns: Json
       }
       company_member_remove: { Args: { _member: string }; Returns: Json }
+      load_book: { Args: { _load: string; _vehicle?: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

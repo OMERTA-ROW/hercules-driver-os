@@ -28,7 +28,13 @@ import {
   type NetworkException,
   type PostedLoad,
 } from "@/data/network";
-import { roleAtLeast, roleHasScope, roleSpec, type NetworkRole, type NetworkScope } from "@/data/roles";
+import {
+  roleAtLeast,
+  roleHasScope,
+  roleSpec,
+  type NetworkRole,
+  type NetworkScope,
+} from "@/data/roles";
 
 const ROLE_KEY = "hercules.network.role";
 const POSTINGS_KEY = "hercules.network.postings";
@@ -190,10 +196,17 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
         postings.map((p) => {
           if (p.id !== id) return p;
           const idx = loadStages.indexOf(p.stage);
-          const next = (loadStages[Math.min(idx + 1, loadStages.length - 1)] ?? p.stage) as LoadStage;
+          const next = (loadStages[Math.min(idx + 1, loadStages.length - 1)] ??
+            p.stage) as LoadStage;
           const taken =
             next === "accepted" && !p.takenBy
-              ? { takenBy: { name: "Sooner Freight Systems", unit: "T-233", kind: "fleet" as const } }
+              ? {
+                  takenBy: {
+                    name: "Sooner Freight Systems",
+                    unit: "T-233",
+                    kind: "fleet" as const,
+                  },
+                }
               : {};
           return { ...p, stage: next, ...taken };
         }),

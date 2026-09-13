@@ -12,12 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import {
-  doorFor,
-  fleetTierSpec,
-  fleetTiers,
-  tierForTrucks,
-} from "@/data/accounts";
+import { doorFor, fleetTierSpec, fleetTiers, tierForTrucks } from "@/data/accounts";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { vehicleCatalog } from "@/data/vehicles";
@@ -107,7 +102,8 @@ function ZeusOnboarding() {
                     {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).label} ·{" "}
                     {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).range}
                   </span>{" "}
-                  — {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).resolution}
+                  —{" "}
+                  {fleetTierSpec(onboarded.fleetTier ?? tierForTrucks(onboarded.seats)).resolution}
                 </p>
                 <Button size="lg" className="mt-3 w-full gap-2" asChild>
                   <Link to="/fleet">
@@ -191,7 +187,9 @@ function ZeusOnboarding() {
                         key={t.id}
                         type="button"
                         aria-pressed={tier.id === t.id}
-                        onClick={() => setTrucks(t.id === "tier1" ? 3 : t.id === "tier2" ? 25 : 120)}
+                        onClick={() =>
+                          setTrucks(t.id === "tier1" ? 3 : t.id === "tier2" ? 25 : 120)
+                        }
                         className={cn(
                           "min-h-[76px] rounded-lg border p-3 text-left transition-colors",
                           tier.id === t.id
@@ -216,8 +214,11 @@ function ZeusOnboarding() {
                     className="mt-1 h-12 text-base"
                   />
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Recorded as <span className="text-primary">{tier.label} · {tier.range}</span>.
-                    No ceiling at any tier — a hundred-plus truck carrier onboards every driver it
+                    Recorded as{" "}
+                    <span className="text-primary">
+                      {tier.label} · {tier.range}
+                    </span>
+                    . No ceiling at any tier — a hundred-plus truck carrier onboards every driver it
                     has.
                   </p>
                   <p className="mt-1 flex items-start gap-2 text-xs">

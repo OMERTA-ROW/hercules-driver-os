@@ -22,20 +22,70 @@ export type Chain = {
 };
 
 export const chains: Chain[] = [
-  { id: "pilot", name: "Pilot / Flying J", short: "PFJ", fill: "#c8102e", text: "#ffffff", loyalty: "Pilot myRewards Plus" },
-  { id: "loves", name: "Love's Travel Stops", short: "LOVE", fill: "#f2c200", text: "#151005", loyalty: "Love's Connect" },
-  { id: "ta", name: "TA Travel Center", short: "TA", fill: "#0a5ca8", text: "#ffffff", loyalty: "TA Ultra One" },
-  { id: "petro", name: "Petro Stopping Center", short: "PETRO", fill: "#1c8a3c", text: "#ffffff", loyalty: "TA Ultra One" },
-  { id: "quiktrip", name: "QuikTrip", short: "QT", fill: "#d0202c", text: "#ffffff", loyalty: "QT Rewards" },
-  { id: "racetrac", name: "RaceTrac", short: "RT", fill: "#e0521c", text: "#ffffff", loyalty: "RaceTrac Rewards" },
-  { id: "independent", name: "Independent truck stop", short: "IND", fill: "#8b95a1", text: "#0b0d10", loyalty: null },
+  {
+    id: "pilot",
+    name: "Pilot / Flying J",
+    short: "PFJ",
+    fill: "#c8102e",
+    text: "#ffffff",
+    loyalty: "Pilot myRewards Plus",
+  },
+  {
+    id: "loves",
+    name: "Love's Travel Stops",
+    short: "LOVE",
+    fill: "#f2c200",
+    text: "#151005",
+    loyalty: "Love's Connect",
+  },
+  {
+    id: "ta",
+    name: "TA Travel Center",
+    short: "TA",
+    fill: "#0a5ca8",
+    text: "#ffffff",
+    loyalty: "TA Ultra One",
+  },
+  {
+    id: "petro",
+    name: "Petro Stopping Center",
+    short: "PETRO",
+    fill: "#1c8a3c",
+    text: "#ffffff",
+    loyalty: "TA Ultra One",
+  },
+  {
+    id: "quiktrip",
+    name: "QuikTrip",
+    short: "QT",
+    fill: "#d0202c",
+    text: "#ffffff",
+    loyalty: "QT Rewards",
+  },
+  {
+    id: "racetrac",
+    name: "RaceTrac",
+    short: "RT",
+    fill: "#e0521c",
+    text: "#ffffff",
+    loyalty: "RaceTrac Rewards",
+  },
+  {
+    id: "independent",
+    name: "Independent truck stop",
+    short: "IND",
+    fill: "#8b95a1",
+    text: "#0b0d10",
+    loyalty: null,
+  },
 ];
 
 export function chainOf(id: ChainId): Chain {
   return chains.find((c) => c.id === id) ?? chains[6]!;
 }
 
-export type Amenity = "showers" | "parking" | "scales" | "food" | "dieselLanes" | "laundry" | "dogArea";
+export type Amenity =
+  "showers" | "parking" | "scales" | "food" | "dieselLanes" | "laundry" | "dogArea";
 
 export const amenityLabels: Record<Amenity, string> = {
   showers: "Showers",
@@ -249,11 +299,36 @@ export type LoyaltyProgram = {
 };
 
 export const loyaltyPrograms: LoyaltyProgram[] = [
-  { chain: "pilot", program: "Pilot myRewards Plus", authKind: "oauth", signInHint: "myRewards number or email" },
-  { chain: "loves", program: "Love's Connect", authKind: "oauth", signInHint: "Love's Connect email" },
-  { chain: "ta", program: "TA Ultra One", authKind: "password", signInHint: "Ultra One card number" },
-  { chain: "quiktrip", program: "QT Rewards", authKind: "password", signInHint: "QT Rewards phone number" },
-  { chain: "racetrac", program: "RaceTrac Rewards", authKind: "password", signInHint: "RaceTrac Rewards email" },
+  {
+    chain: "pilot",
+    program: "Pilot myRewards Plus",
+    authKind: "oauth",
+    signInHint: "myRewards number or email",
+  },
+  {
+    chain: "loves",
+    program: "Love's Connect",
+    authKind: "oauth",
+    signInHint: "Love's Connect email",
+  },
+  {
+    chain: "ta",
+    program: "TA Ultra One",
+    authKind: "password",
+    signInHint: "Ultra One card number",
+  },
+  {
+    chain: "quiktrip",
+    program: "QT Rewards",
+    authKind: "password",
+    signInHint: "QT Rewards phone number",
+  },
+  {
+    chain: "racetrac",
+    program: "RaceTrac Rewards",
+    authKind: "password",
+    signInHint: "RaceTrac Rewards email",
+  },
 ];
 
 export type LoyaltyAccount = {
@@ -269,13 +344,62 @@ export type LoyaltyAccount = {
 
 /** Mock account payloads returned by the fake chain sign-in. */
 export const mockLoyaltyAccounts: Record<ChainId, Omit<LoyaltyAccount, "linkedAt" | "memberId">> = {
-  pilot: { chain: "pilot", program: "Pilot myRewards Plus", points: 12480, showerCredits: 3, fuelDiscount: 0.15, tier: "Platinum" },
-  loves: { chain: "loves", program: "Love's Connect", points: 8210, showerCredits: 2, fuelDiscount: 0.11, tier: "Gold" },
-  ta: { chain: "ta", program: "TA Ultra One", points: 4360, showerCredits: 1, fuelDiscount: 0.08, tier: "Silver" },
-  quiktrip: { chain: "quiktrip", program: "QT Rewards", points: 1150, showerCredits: 0, fuelDiscount: 0.04, tier: "Member" },
-  racetrac: { chain: "racetrac", program: "RaceTrac Rewards", points: 640, showerCredits: 0, fuelDiscount: 0.03, tier: "Member" },
-  petro: { chain: "petro", program: "TA Ultra One", points: 4360, showerCredits: 1, fuelDiscount: 0.08, tier: "Silver" },
-  independent: { chain: "independent", program: "—", points: 0, showerCredits: 0, fuelDiscount: 0, tier: "—" },
+  pilot: {
+    chain: "pilot",
+    program: "Pilot myRewards Plus",
+    points: 12480,
+    showerCredits: 3,
+    fuelDiscount: 0.15,
+    tier: "Platinum",
+  },
+  loves: {
+    chain: "loves",
+    program: "Love's Connect",
+    points: 8210,
+    showerCredits: 2,
+    fuelDiscount: 0.11,
+    tier: "Gold",
+  },
+  ta: {
+    chain: "ta",
+    program: "TA Ultra One",
+    points: 4360,
+    showerCredits: 1,
+    fuelDiscount: 0.08,
+    tier: "Silver",
+  },
+  quiktrip: {
+    chain: "quiktrip",
+    program: "QT Rewards",
+    points: 1150,
+    showerCredits: 0,
+    fuelDiscount: 0.04,
+    tier: "Member",
+  },
+  racetrac: {
+    chain: "racetrac",
+    program: "RaceTrac Rewards",
+    points: 640,
+    showerCredits: 0,
+    fuelDiscount: 0.03,
+    tier: "Member",
+  },
+  petro: {
+    chain: "petro",
+    program: "TA Ultra One",
+    points: 4360,
+    showerCredits: 1,
+    fuelDiscount: 0.08,
+    tier: "Silver",
+  },
+  independent: {
+    chain: "independent",
+    program: "—",
+    points: 0,
+    showerCredits: 0,
+    fuelDiscount: 0,
+    tier: "—",
+  },
 };
 
 export type ReservationKind = "shower" | "parking";
@@ -298,4 +422,8 @@ export type Reservation = {
 
 /** Reservation windows offered by the mock provider. */
 export const showerWindows = ["19:00 – 19:45", "20:30 – 21:15", "22:00 – 22:45", "05:30 – 06:15"];
-export const parkingWindows = ["Tonight 18:00 – 06:00", "Tonight 20:00 – 06:00", "Tonight 22:00 – 08:00"];
+export const parkingWindows = [
+  "Tonight 18:00 – 06:00",
+  "Tonight 20:00 – 06:00",
+  "Tonight 22:00 – 08:00",
+];

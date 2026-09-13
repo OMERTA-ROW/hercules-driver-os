@@ -41,7 +41,11 @@ export const speakLine = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) {
-      return { ok: false as const, reason: "unconfigured" as const, message: "Premium voice is not configured." };
+      return {
+        ok: false as const,
+        reason: "unconfigured" as const,
+        message: "Premium voice is not configured.",
+      };
     }
 
     // Hard input cap — long lines are trimmed, never sent whole.
@@ -140,7 +144,13 @@ export const speakLine = createServerFn({ method: "POST" })
     }
 
     cacheSet(ck, result.value);
-    return { ok: true as const, audio: result.value, charged: result.charged, cached: false, saved: 0 };
+    return {
+      ok: true as const,
+      audio: result.value,
+      charged: result.charged,
+      cached: false,
+      saved: 0,
+    };
   });
 
 /** Costs shown to the driver BEFORE anything is spoken. */

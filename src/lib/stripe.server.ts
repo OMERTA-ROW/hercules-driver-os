@@ -37,7 +37,13 @@ export async function verifyStripeEvent(
   const sdk = stripe() ?? new Stripe("sk_unset", { httpClient: Stripe.createFetchHttpClient() });
   if (!signature) return null;
   try {
-    return await sdk.webhooks.constructEventAsync(raw, signature, secret, undefined, cryptoProvider);
+    return await sdk.webhooks.constructEventAsync(
+      raw,
+      signature,
+      secret,
+      undefined,
+      cryptoProvider,
+    );
   } catch (e) {
     console.error(`[stripe] signature rejected: ${e instanceof Error ? e.message : String(e)}`);
     return null;

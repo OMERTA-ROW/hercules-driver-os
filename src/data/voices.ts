@@ -12,15 +12,7 @@
  */
 
 export type VoiceId =
-  | "hercules"
-  | "zeus"
-  | "ares"
-  | "atlas"
-  | "apollo"
-  | "athena"
-  | "medusa"
-  | "hera"
-  | "artemis";
+  "hercules" | "zeus" | "ares" | "atlas" | "apollo" | "athena" | "medusa" | "hera" | "artemis";
 
 /** The speech model every persona is spoken with. */
 export const TTS_MODEL = "openai/gpt-4o-mini-tts";

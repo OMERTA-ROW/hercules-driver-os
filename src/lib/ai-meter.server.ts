@@ -18,7 +18,10 @@ import { aiLimits, allowancePausedLine } from "@/data/ai-credits";
  *  authenticated, so ONLY this client can move credits — a signed-in browser
  *  cannot reserve, settle or refund anything, not even on its own account. */
 type AdminClient = {
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc: (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
 async function admin(): Promise<AdminClient> {
@@ -97,7 +100,10 @@ export async function reserve(
   action: string,
   amount: number,
   idemKey?: string,
-): Promise<{ ok: true; reservation: Reservation } | { ok: false; reason: "insufficient" | "error"; message: string }> {
+): Promise<
+  | { ok: true; reservation: Reservation }
+  | { ok: false; reason: "insufficient" | "error"; message: string }
+> {
   const db = await admin();
   const { data, error } = await db.rpc("ai_credits_reserve", {
     _user: userId,
@@ -166,11 +172,18 @@ export async function walletQuality(userId: string): Promise<"eco" | "balanced">
   const db = supabaseAdmin as never as {
     from: (t: string) => {
       select: (c: string) => {
-        eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { quality_pref?: string } | null }> };
+        eq: (
+          c: string,
+          v: string,
+        ) => { maybeSingle: () => Promise<{ data: { quality_pref?: string } | null }> };
       };
     };
   };
-  const { data } = await db.from("ai_credit_wallets").select("quality_pref").eq("user_id", userId).maybeSingle();
+  const { data } = await db
+    .from("ai_credit_wallets")
+    .select("quality_pref")
+    .eq("user_id", userId)
+    .maybeSingle();
   return data?.quality_pref === "eco" ? "eco" : "balanced";
 }
 
@@ -202,6 +215,7 @@ export type MeteredResult<T> =
         | "pending"
         | "already_served"
         | "no_subscription"
+        | "no_allowance_config"
         | "daily_limit"
         | "weekly_limit";
       resetsAt?: string | null;
@@ -218,6 +232,7 @@ type ClaimOutcome = {
     | "insufficient"
     | "error"
     | "no_subscription"
+    | "no_allowance_config"
     | "daily_limit"
     | "weekly_limit";
   reservation?: string;
@@ -279,8 +294,7 @@ async function finishExecution(
     return { status: "unsettled", charged: 0 };
   }
   const row = data as { status?: string; charged?: number } | null;
-  const status =
-    row?.status === "settled" || row?.status === "failed" ? row.status : "unsettled";
+  const status = row?.status === "settled" || row?.status === "failed" ? row.status : "unsettled";
   return { status, charged: Number(row?.charged ?? 0) };
 }
 
@@ -323,6 +337,14 @@ export async function runMetered<T>(opts: {
           "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
       };
     }
+    if (claim.outcome === "no_allowance_config") {
+      return {
+        ok: false as const,
+        reason: "no_allowance_config" as const,
+        message:
+          "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Your device's own voice is speaking, free.",
+      };
+    }
     if (claim.outcome === "daily_limit" || claim.outcome === "weekly_limit") {
       const scope = claim.outcome === "daily_limit" ? "daily" : "weekly";
       return {
@@ -341,7 +363,11 @@ export async function runMetered<T>(opts: {
       };
     }
     if (claim.outcome === "error") {
-      return { ok: false as const, reason: "error" as const, message: "Could not reserve AI credits." };
+      return {
+        ok: false as const,
+        reason: "error" as const,
+        message: "Could not reserve AI credits.",
+      };
     }
     if (claim.outcome === "pending") {
       return {
@@ -385,7 +411,6 @@ export async function runMetered<T>(opts: {
   });
 }
 
-
 /* ---- daily / weekly allowance ------------------------------------------- */
 
 export type Allowance = {
@@ -398,6 +423,12 @@ export type Allowance = {
   weeklyUsed: number;
   dailyResetsAt: string | null;
   weeklyResetsAt: string | null;
+  /** End of the period actually paid for; drives the subscribed decision. */
+  paidThrough: string | null;
+  /** True when the plan has no configured caps — paid voice is refused. */
+  configMissing: boolean;
+  /** Top-up credits paid for while lapsed, kept and released on the next paid month. */
+  pendingPurchased: number;
 };
 
 /** Read straight from the database routine that the paid path enforces, so the
@@ -420,5 +451,8 @@ export async function allowanceStatus(userId: string): Promise<Allowance | null>
     weeklyUsed: Number(r["weekly_used"] ?? 0),
     dailyResetsAt: (r["daily_resets_at"] as string | null) ?? null,
     weeklyResetsAt: (r["weekly_resets_at"] as string | null) ?? null,
+    paidThrough: (r["paid_through"] as string | null) ?? null,
+    configMissing: r["config_missing"] === true,
+    pendingPurchased: Number(r["pending_purchased"] ?? 0),
   };
 }

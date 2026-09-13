@@ -35,7 +35,7 @@ import { feeConfig, serviceFeeFor, spokenFee, totalWithFee, type FeeCategory } f
  * a tap on "Approve & order" or a spoken yes to a read-back proposal. Nothing
  * in this file orders anything on its own.
  *
- * PROVIDER SEAM: `getPartsProvider()` returns the mock. A real dealer /
+ * PROVIDER SEAM: `getPartsProvider()` returns a not-connected provider. A real dealer /
  * supplier parts API (PACCAR, Navistar, Volvo/Mack, FleetPride, TruckPro,
  * NAPA HD) drops in here — the screens and voice layer never change.
  */
@@ -84,16 +84,24 @@ export type PartsProvider = {
   availability: (listings: Listing[]) => Promise<Listing[]>;
 };
 
-const mockProvider: PartsProvider = {
-  name: "HERCULES mock supplier network",
-  identify: async (text) => {
-    await wait(320);
-    const found = matchParts(text);
-    return found.length ? found : partCatalog.slice(0, 2);
+/**
+ * NO SUPPLIER IS CONNECTED. Nothing here queries a real dealer, warehouse or
+ * roadside network, so this provider returns nothing at all rather than showing
+ * invented prices, stock or arrival times. A real supplier API implements the
+ * same seam and every screen above fills in for real.
+ */
+export const PARTS_UNAVAILABLE =
+  "No parts or supply network is connected yet, so there is nothing real to price or order. Prices, stock and arrival times would be invented, so none are shown.";
+
+const unavailableProvider: PartsProvider = {
+  name: "not connected",
+  identify: async () => {
+    await wait(0);
+    return [];
   },
-  availability: async (listings) => {
-    await wait(220);
-    return listings;
+  availability: async () => {
+    await wait(0);
+    return [];
   },
 };
 
@@ -101,7 +109,7 @@ function wait(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-let provider: PartsProvider = mockProvider;
+let provider: PartsProvider = unavailableProvider;
 
 /** Swap in a commercial supplier API here. */
 export function setPartsProvider(p: PartsProvider) {
@@ -154,7 +162,12 @@ type Ctx = {
   /** Source the part a live fault code points at. */
   sourceFault: (code: string) => PartMatch | undefined;
   itemsFor: (category: SupplyCategoryId) => SupplyItem[];
-  quote: (label: string, category: SupplyCategoryId, listing: Listing, partNumber?: string) => Quote;
+  quote: (
+    label: string,
+    category: SupplyCategoryId,
+    listing: Listing,
+    partNumber?: string,
+  ) => Quote;
   /** DRIVER APPROVED ONLY — called after the driver's explicit yes. */
   place: (q: Quote) => PlacedSupplyOrder;
   cancel: (id: string) => void;

@@ -60,7 +60,7 @@ export const Route = createFileRoute("/breakdown")({
       {
         name: "description",
         content:
-          "Say \"I'm broke down\" and HERCULES reads your exact location back, ranks heavy-duty mechanics, mobile repair, truck-capable tow and truck stop service bays, and rebuilds your day.",
+          'Say "I\'m broke down" and HERCULES reads your exact location back, ranks heavy-duty mechanics, mobile repair, truck-capable tow and truck stop service bays, and rebuilds your day.',
       },
       { property: "og:title", content: "Breakdown Assist — HERCULES" },
       {
@@ -150,9 +150,7 @@ function BreakdownPage() {
       {tracked ? (
         <Panel
           className={
-            tracked.status === "overdue"
-              ? "mb-3 border-destructive/60"
-              : "mb-3 border-primary/50"
+            tracked.status === "overdue" ? "mb-3 border-destructive/60" : "mb-3 border-primary/50"
           }
         >
           <PanelTitle
@@ -230,7 +228,12 @@ function BreakdownPage() {
             </div>
           ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="lg" variant="secondary" className="h-14" onClick={() => markArrived(tracked.id)}>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="h-14"
+              onClick={() => markArrived(tracked.id)}
+            >
               <Check className="mr-2 h-5 w-5" /> They showed up
             </Button>
             <Button size="lg" variant="ghost" className="h-14" onClick={() => dismiss(tracked.id)}>
@@ -322,9 +325,7 @@ function BreakdownPage() {
               {shoulderGuidance.why}
             </p>
           ) : null}
-          {fix ? (
-            <p className="mb-3 text-sm text-muted-foreground">{fix.shoulder}</p>
-          ) : null}
+          {fix ? <p className="mb-3 text-sm text-muted-foreground">{fix.shoulder}</p> : null}
           <ol className="space-y-2">
             {shoulderGuidance.steps.map((s, i) => (
               <li key={s} className="flex gap-3 rounded-lg border border-border bg-card/60 p-3">
@@ -364,7 +365,8 @@ function BreakdownPage() {
           ))}
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          Or just say it — “blown tire”, “won't start”, “air leak”, “DEF light”. {activeProblem.spoken}
+          Or just say it — “blown tire”, “won't start”, “air leak”, “DEF light”.{" "}
+          {activeProblem.spoken}
         </p>
       </Panel>
 
@@ -388,7 +390,11 @@ function BreakdownPage() {
                       <Pill tone={s.kind === "mobile" ? "go" : "neutral"}>
                         <Wrench className="h-3.5 w-3.5" /> {kindLabel(s.kind)}
                       </Pill>
-                      {s.open24 ? <Pill tone="go">24 hours</Pill> : <Pill tone="watch">{s.hours}</Pill>}
+                      {s.open24 ? (
+                        <Pill tone="go">24 hours</Pill>
+                      ) : (
+                        <Pill tone="watch">{s.hours}</Pill>
+                      )}
                     </div>
                     <h3 className="mt-2 font-display text-xl font-semibold uppercase tracking-wide">
                       {s.name}
@@ -405,7 +411,10 @@ function BreakdownPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="metric text-3xl font-bold text-primary">{s.etaMin}<span className="ml-1 text-sm uppercase tracking-wider opacity-70">min</span></div>
+                    <div className="metric text-3xl font-bold text-primary">
+                      {s.etaMin}
+                      <span className="ml-1 text-sm uppercase tracking-wider opacity-70">min</span>
+                    </div>
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
                       {s.kind === "mobile" || s.kind === "tow" ? "to reach you" : "drive time"}
                     </p>
@@ -517,8 +526,10 @@ function BreakdownPage() {
               <>
                 <p className="text-sm text-muted-foreground">
                   Logging the breakdown rebuilds the day — hours, ETA on{" "}
-                  {liveLoad ? place(liveLoad.dest_city, liveLoad.dest_state) : "your current destination"},
-                  load impact, parking, and rest. Nothing changes until you approve the plan.
+                  {liveLoad
+                    ? place(liveLoad.dest_city, liveLoad.dest_state)
+                    : "your current destination"}
+                  , load impact, parking, and rest. Nothing changes until you approve the plan.
                 </p>
                 <Button
                   size="lg"
@@ -605,11 +616,13 @@ function BreakdownPage() {
                 <p className="text-sm leading-snug text-muted-foreground">
                   Pay the shop yourself and HERCULES charges you nothing. If you have HERCULES book
                   and pay it — roadside, parts, tires — the service fee scales with the bill and is
-                  shown and read to you first: {feeBands
+                  shown and read to you first:{" "}
+                  {feeBands
                     .slice(0, 3)
                     .map((b) => `${b.label} → $${b.fee.toFixed(2)}`)
-                    .join(" · ")}, up to ${feeBands[feeBands.length - 1]?.fee.toFixed(2)} on the
-                  largest parts orders. It is what keeps HERCULES running.
+                    .join(" · ")}
+                  , up to ${feeBands[feeBands.length - 1]?.fee.toFixed(2)} on the largest parts
+                  orders. It is what keeps HERCULES running.
                 </p>
               </div>
               <div className="rounded-lg border border-primary/40 bg-primary/10 p-3">
@@ -617,7 +630,8 @@ function BreakdownPage() {
                 <p className="text-sm leading-snug">{fix ? spokenLocation(fix) : ""}</p>
               </div>
               <DriverApprovedNote>
-                You are placing this call. HERCULES does not dispatch anyone or authorize any charge.
+                You are placing this call. HERCULES does not dispatch anyone or authorize any
+                charge.
               </DriverApprovedNote>
             </div>
           ) : null}

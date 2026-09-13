@@ -121,7 +121,9 @@ function Welcome() {
                   card was taken and nothing is charged.
                 </>
               ) : (
-                <>Create your account or sign in. Everything you save belongs to that account only.</>
+                <>
+                  Create your account or sign in. Everything you save belongs to that account only.
+                </>
               )}
               {!signedIn ? (
                 <span className="mt-3 flex flex-wrap gap-2">
@@ -160,19 +162,28 @@ function Welcome() {
               icon={Building2}
               action={
                 <Button asChild size="lg" variant={linked ? "outline" : "default"}>
-                  <Link to="/company">{linked ? "Company & dispatch" : "Connect or start a fleet"}</Link>
+                  <Link to="/company">
+                    {linked ? "Company & dispatch" : "Connect or start a fleet"}
+                  </Link>
                 </Button>
               }
             >
               {linked ? (
-                <>Connected to {linked.company.name}. You see the loads and trucks that company shares with its members, and nothing from anyone else.</>
+                <>
+                  Connected to {linked.company.name}. You see the loads and trucks that company
+                  shares with its members, and nothing from anyone else.
+                </>
               ) : awaiting ? (
-                <>You asked to join {awaiting.company.name}. Their dispatch appears once someone there approves you.</>
+                <>
+                  You asked to join {awaiting.company.name}. Their dispatch appears once someone
+                  there approves you.
+                </>
               ) : (
                 <>
                   Company drivers and leased owner-operators join their carrier with the invite code
-                  the carrier issues — codes expire and the carrier approves each person. Running your
-                  own trucks? Create your fleet and invite your drivers. Skip this if you run alone.
+                  the carrier issues — codes expire and the carrier approves each person. Running
+                  your own trucks? Create your fleet and invite your drivers. Skip this if you run
+                  alone.
                 </>
               )}
             </Step>
@@ -189,17 +200,17 @@ function Welcome() {
               }
             >
               You're set to {voice.name} right now. There are nine characters — five male, four
-              female — and each has a Play button with a short recorded clip of that real voice, free
-              and with no credits used. Your pick is remembered. What the voice understands is a set
-              of spoken commands, not open-ended conversation; speaking lines aloud in the real voice
-              during a drive uses AI credits, and without credits your device reads them free
-              instead.
+              female — and each has a Play button with a short recorded clip of that real voice,
+              free and with no credits used. Your pick is remembered. What the voice understands is
+              a set of spoken commands, not open-ended conversation; speaking lines aloud in the
+              real voice during a drive uses AI credits, and without credits your device reads them
+              free instead.
             </Step>
           </div>
           <div className="mt-3">
             <DriverApprovedNote>
-              I can propose and read anything aloud, but booking, spending or committing always waits
-              for your explicit yes.
+              I can propose and read anything aloud, but booking, spending or committing always
+              waits for your explicit yes.
             </DriverApprovedNote>
           </div>
         </Panel>
@@ -229,8 +240,8 @@ function Welcome() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
               <Label>Payments</Label> No card can be charged yet, so the store, document unlock, the
-              Voice Hand-Off add-on and AI credit packs can't be bought. Prices are shown, nothing is
-              billed and nothing unlocks itself.
+              Voice Hand-Off add-on and AI credit packs can't be bought. Prices are shown, nothing
+              is billed and nothing unlocks itself.
             </li>
             <li>
               <Label>Truck-legal routing</Label> Routes and restrictions come from the map provider

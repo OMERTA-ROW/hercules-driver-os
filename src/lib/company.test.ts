@@ -53,14 +53,12 @@ describe.runIf(live)("company tables are closed to signed-out visitors", () => {
   });
 
   it("cannot insert a membership directly", async () => {
-    const { error } = await anon
-      .from("company_members")
-      .insert({
-        company_id: "00000000-0000-0000-0000-000000000000",
-        user_id: "00000000-0000-0000-0000-000000000000",
-        role: "owner",
-        status: "active",
-      });
+    const { error } = await anon.from("company_members").insert({
+      company_id: "00000000-0000-0000-0000-000000000000",
+      user_id: "00000000-0000-0000-0000-000000000000",
+      role: "owner",
+      status: "active",
+    });
     expect(error).toBeTruthy();
   });
 

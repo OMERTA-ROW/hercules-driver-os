@@ -91,3 +91,22 @@
 - Server-enforced daily and weekly allowances per monthly plan; weeks reset Saturday 00:00 UTC. Paid voice pauses at the limit and names the reset; nothing extra is charged.
 - Company access fix: the membership list is scoped to the signed-in account; the direct hotfixes (null-safe member removal, owner-only dispatcher decisions, confirmed-email invites) are reconciled into a migration.
 - APPROVED catalogue: Assist $9/150 (10 day / 40 week), Pro $29/600 (25 / 150), Max $100/3,000 (110 / 750); top-ups $0.30 a credit — 10/$3, 50/$15, 100/$30, subscribers only. Days end midnight America/New_York, weeks Saturday 00:00 same zone. Caps reset counters only and never mint credits; subscribed means a paid period still running, including cancel-at-period-end.
+
+## Release review items closed (this pass)
+
+- Booking now goes through one checked database routine: two drivers cannot both
+  take a load, non-members and people awaiting approval are refused, and the
+  driver who missed out is told so instead of seeing a false success. Verified
+  with a throwaway fleet in a transaction that was undone.
+- The roster and invites load only for an owner or dispatcher of that company.
+- Held top-ups (paid while no monthly plan was running) and plans with no
+  allowance set are now shown plainly on the credits screen and refuse paid
+  voice instead of running without a limit.
+- All invented operational data is gone: no engine readings, no supplier stock or
+  prices, no delivery quotes or favourites. Those screens say nothing is
+  connected.
+- Accepted database warnings: the five billing tables have row security on with
+  no policies on purpose (no one but the server reaches them), and the eight
+  company/booking routines are callable by signed-in users on purpose because
+  each one checks who is calling. No credit-granting routine is reachable by a
+  signed-in user.

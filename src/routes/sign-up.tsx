@@ -61,9 +61,9 @@ function SignUp() {
             {TRIAL_DAYS} days free — no card needed
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Nothing is charged now and there is no automatic charge later. Billing is not switched on
-            in this app yet; the {selected.name} price of ${monthly}/month applies only once it is,
-            and only after you say yes.
+            Nothing is charged now and there is no automatic charge later. Billing is not switched
+            on in this app yet; the {selected.name} price of ${monthly}/month applies only once it
+            is, and only after you say yes.
           </p>
 
           <form

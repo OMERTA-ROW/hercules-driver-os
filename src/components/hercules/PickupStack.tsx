@@ -34,7 +34,11 @@ function Card({ r }: { r: PickupRun }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-violet-300/80">
-            {held ? "Pickup held — part not ready" : routed ? "Pickup route dispatched" : "Pickup route ready"}
+            {held
+              ? "Pickup held — part not ready"
+              : routed
+                ? "Pickup route dispatched"
+                : "Pickup route ready"}
           </p>
           <p className="truncate text-lg font-bold uppercase tracking-wide text-foreground">
             {r.label}

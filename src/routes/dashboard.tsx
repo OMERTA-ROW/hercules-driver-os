@@ -84,7 +84,13 @@ function Dashboard() {
         <div className="grid gap-4 lg:grid-cols-2">
           {/* CLOCK */}
           <Panel>
-            <PanelTitle right={<Pill tone="primary"><Gauge className="h-3.5 w-3.5" /> Clock</Pill>}>
+            <PanelTitle
+              right={
+                <Pill tone="primary">
+                  <Gauge className="h-3.5 w-3.5" /> Clock
+                </Pill>
+              }
+            >
               Hours of service
             </PanelTitle>
             {hours ? (
@@ -120,7 +126,13 @@ function Dashboard() {
 
           {/* CURRENT LOAD */}
           <Panel>
-            <PanelTitle right={<Pill tone="primary"><Package className="h-3.5 w-3.5" /> Load</Pill>}>
+            <PanelTitle
+              right={
+                <Pill tone="primary">
+                  <Package className="h-3.5 w-3.5" /> Load
+                </Pill>
+              }
+            >
               Current run
             </PanelTitle>
             {load ? (
@@ -131,7 +143,8 @@ function Dashboard() {
                 </div>
                 <Label className="mt-1">
                   {load.reference ?? load.id.slice(0, 8)}
-                  {load.broker_name ? ` · ${load.broker_name}` : ""} · {load.status.replace(/_/g, " ")}
+                  {load.broker_name ? ` · ${load.broker_name}` : ""} ·{" "}
+                  {load.status.replace(/_/g, " ")}
                 </Label>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div>
@@ -187,10 +200,7 @@ function Dashboard() {
           </Panel>
           <Panel>
             <Label>Open alerts</Label>
-            <Metric
-              value={openAlerts.length}
-              tone={openAlerts.length > 0 ? "warn" : "go"}
-            />
+            <Metric value={openAlerts.length} tone={openAlerts.length > 0 ? "warn" : "go"} />
             <Button asChild size="lg" variant="outline" className="mt-2 w-full gap-2">
               <Link to="/alerts">
                 <ShieldAlert className="h-4 w-4" /> Alerts
@@ -200,7 +210,13 @@ function Dashboard() {
         </div>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary"><Wrench className="h-3.5 w-3.5" /> Diagnostics</Pill>}>
+          <PanelTitle
+            right={
+              <Pill tone="primary">
+                <Wrench className="h-3.5 w-3.5" /> Diagnostics
+              </Pill>
+            }
+          >
             Vehicle health
           </PanelTitle>
           {(readings.data ?? []).length === 0 ? (
@@ -225,7 +241,9 @@ function Dashboard() {
                   className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/50 p-3"
                 >
                   <div>
-                    <div className="font-display text-sm uppercase tracking-[0.1em]">{r.metric}</div>
+                    <div className="font-display text-sm uppercase tracking-[0.1em]">
+                      {r.metric}
+                    </div>
                     <Label>{new Date(r.recorded_at).toLocaleString()}</Label>
                   </div>
                   <span className="metric font-bold text-primary">

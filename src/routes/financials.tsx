@@ -82,10 +82,7 @@ function Financials() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Panel>
                 <Label>Miles this month</Label>
-                <Metric
-                  value={monthMiles > 0 ? monthMiles.toLocaleString() : "—"}
-                  unit="mi"
-                />
+                <Metric value={monthMiles > 0 ? monthMiles.toLocaleString() : "—"} unit="mi" />
                 <p className="mt-1 text-sm text-muted-foreground">
                   {miles.hasData
                     ? "From your logged trips."
@@ -94,10 +91,7 @@ function Financials() {
               </Panel>
               <Panel>
                 <Label>Revenue per mile</Label>
-                <Metric
-                  value={perMile ? `$${perMile.toFixed(2)}` : "—"}
-                  tone="primary"
-                />
+                <Metric value={perMile ? `$${perMile.toFixed(2)}` : "—"} tone="primary" />
                 <p className="mt-1 text-sm text-muted-foreground">
                   {perMile
                     ? "Revenue divided by your own logged miles."

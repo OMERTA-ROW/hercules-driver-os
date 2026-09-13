@@ -41,7 +41,8 @@ export const Route = createFileRoute("/credits")({
       { property: "og:title", content: "AI Credits — HERCULES" },
       {
         property: "og:description",
-        content: "Monthly and buy-once AI credits, with the cost of every action shown before you use it.",
+        content:
+          "Monthly and buy-once AI credits, with the cost of every action shown before you use it.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -133,7 +134,10 @@ function CreditsPage() {
   }
 
   return (
-    <AppShell title="AI Credits" subtitle="Separate from your HERCULES plan — nothing bills without your word">
+    <AppShell
+      title="AI Credits"
+      subtitle="Separate from your HERCULES plan — nothing bills without your word"
+    >
       <div className="grid gap-4">
         {/* An unreadable balance is said out loud — never shown as zero */}
         {readError ? (
@@ -151,8 +155,8 @@ function CreditsPage() {
           <Panel>
             <Label>Your balance</Label>
             <p className="mt-2 text-sm text-muted-foreground">
-              All tiers and prices are below — no account needed to read them. Sign in to see your balance,
-              buy credits, choose how HERCULES speaks and request an Enterprise quote.
+              All tiers and prices are below — no account needed to read them. Sign in to see your
+              balance, buy credits, choose how HERCULES speaks and request an Enterprise quote.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button size="lg" asChild>
@@ -164,39 +168,62 @@ function CreditsPage() {
             </div>
           </Panel>
         ) : (
-        <Panel>
-          <Label>Available balance</Label>
-          <div className="mt-2 flex flex-wrap items-end gap-6">
-            <div className="flex items-center gap-3">
-              <Coins className="h-8 w-8 text-primary" />
-              <span className="font-display text-5xl font-light">{w?.total ?? "—"}</span>
-              <span className="tech-label mb-2">credits</span>
+          <Panel>
+            <Label>Available balance</Label>
+            <div className="mt-2 flex flex-wrap items-end gap-6">
+              <div className="flex items-center gap-3">
+                <Coins className="h-8 w-8 text-primary" />
+                <span className="font-display text-5xl font-light">{w?.total ?? "—"}</span>
+                <span className="tech-label mb-2">credits</span>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>
+                  <span className="text-foreground">{w?.monthly ?? 0}</span> monthly
+                  {w?.monthlyExpiresAt
+                    ? ` — expires ${new Date(w.monthlyExpiresAt).toLocaleDateString()}`
+                    : " — no active monthly plan"}
+                </p>
+                <p>
+                  <span className="text-foreground">{w?.purchased ?? 0}</span> bought once — never
+                  expires
+                </p>
+                {w?.renewsAt ? <p>Renews {new Date(w.renewsAt).toLocaleDateString()}</p> : null}
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">
-              <p>
-                <span className="text-foreground">{w?.monthly ?? 0}</span> monthly
-                {w?.monthlyExpiresAt
-                  ? ` — expires ${new Date(w.monthlyExpiresAt).toLocaleDateString()}`
-                  : " — no active monthly plan"}
+            {w?.low ? (
+              <p className="mt-3 flex items-center gap-2 text-sm text-primary">
+                <TriangleAlert className="h-4 w-4" />
+                Low balance — at or below {aiLimits.lowBalance} credits. Premium speech falls back
+                to your device's own voice, free, until you top up.
               </p>
-              <p>
-                <span className="text-foreground">{w?.purchased ?? 0}</span> bought once — never expires
-              </p>
-              {w?.renewsAt ? <p>Renews {new Date(w.renewsAt).toLocaleDateString()}</p> : null}
-            </div>
-          </div>
-          {w?.low ? (
-            <p className="mt-3 flex items-center gap-2 text-sm text-primary">
-              <TriangleAlert className="h-4 w-4" />
-              Low balance — at or below {aiLimits.lowBalance} credits. Premium speech falls back to your
-              device's own voice, free, until you top up.
+            ) : null}
+            <p className="mt-3 text-sm text-muted-foreground">
+              Monthly credits are used first, so nothing expires that could have been spent.
             </p>
-          ) : null}
-          <p className="mt-3 text-sm text-muted-foreground">
-            Monthly credits are used first, so nothing expires that could have been spent.
-          </p>
-        </Panel>
+          </Panel>
         )}
+
+        {/* TOP-UP PAID WHILE LAPSED */}
+        {allowance && allowance.pendingPurchased > 0 ? (
+          <Panel>
+            <Label>Top-up held for you</Label>
+            <p className="mt-2 text-sm">
+              You paid for {allowance.pendingPurchased} credits while no monthly plan was running, so
+              they are being held on your account rather than lost. They land in your balance the
+              moment a monthly plan is paid, and they are refundable in the meantime.
+            </p>
+          </Panel>
+        ) : null}
+
+        {allowance?.subscribed && allowance.configMissing ? (
+          <Panel>
+            <Label>Allowance not set up</Label>
+            <p className="mt-2 text-sm">
+              This plan has no day or week allowance set, so the real voice is held back rather than
+              run with no limit. Nothing is being charged. The account owner sets the allowance.
+            </p>
+          </Panel>
+        ) : null}
 
         {/* DAILY / WEEKLY ALLOWANCE */}
         {signedOut ? null : (
@@ -237,17 +264,18 @@ function CreditsPage() {
                   </div>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  When either runs out, the real AI voice pauses and your device's own voice takes over
-                  free until the time shown — even if you still hold bought credits, because a top-up
-                  cannot lift a day or week cap. Nothing extra is ever charged for going over, and a
-                  reset only clears the counter; it never adds credits. Times are New York time.
+                  When either runs out, the real AI voice pauses and your device's own voice takes
+                  over free until the time shown — even if you still hold bought credits, because a
+                  top-up cannot lift a day or week cap. Nothing extra is ever charged for going
+                  over, and a reset only clears the counter; it never adds credits. Times are New
+                  York time.
                 </p>
               </>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">
-                A paid monthly AI plan sets a daily and weekly spoken-line allowance. Without one the
-                real AI voice is off on this account and your device's own voice is used, free — as are
-                the map, the clock, your hours, and every breakdown and safety action.
+                A paid monthly AI plan sets a daily and weekly spoken-line allowance. Without one
+                the real AI voice is off on this account and your device's own voice is used, free —
+                as are the map, the clock, your hours, and every breakdown and safety action.
               </p>
             )}
           </Panel>
@@ -258,12 +286,13 @@ function CreditsPage() {
           <Panel>
             <Label>Purchases not switched on</Label>
             <p className="mt-2 text-sm text-muted-foreground">
-              Buying credits is not live yet — the payment setup for this app is incomplete, so nothing can be
-              charged and no credits can be added. The tiers below are the catalogue that will go live.
+              Buying credits is not live yet — the payment setup for this app is incomplete, so
+              nothing can be charged and no credits can be added. The tiers below are the catalogue
+              that will go live.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Nothing is required from you. The account owner finishes the billing setup — until then
-              this screen is a price list only.
+              Nothing is required from you. The account owner finishes the billing setup — until
+              then this screen is a price list only.
             </p>
           </Panel>
         ) : null}
@@ -272,14 +301,15 @@ function CreditsPage() {
         <Panel>
           <Label>Monthly AI assistance</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            Replenishes once each paid period. Unused monthly credits expire at the end of the period.
+            Replenishes once each paid period. Unused monthly credits expire at the end of the
+            period.
           </p>
           {MONTHLY_CREDITS_PENDING ? (
             <p className="mt-2 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
               The monthly credit amounts are being lowered and the final figures are not set yet, so
-              the counts below are a placeholder, not an offer. The prices, the {money(TOPUP_USD_PER_CREDIT)}
-              {" "}per-credit top-up rate and the day and week limits are the parts that are settled — and
-              nothing can be bought or charged on this app yet.
+              the counts below are a placeholder, not an offer. The prices, the{" "}
+              {money(TOPUP_USD_PER_CREDIT)} per-credit top-up rate and the day and week limits are
+              the parts that are settled — and nothing can be bought or charged on this app yet.
             </p>
           ) : null}
           <div className="mt-3 grid gap-3 md:grid-cols-3">
@@ -309,11 +339,11 @@ function CreditsPage() {
         <Panel>
           <Label>Top-ups — subscribers only</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            {money(TOPUP_USD_PER_CREDIT)} per credit, one payment, only when you ask for it — nothing
-            is ever charged automatically. Top-up credits never expire and are used after your monthly
-            ones. Buying and spending them both need a paid monthly plan that is still running (a plan
-            you have cancelled still counts until the paid period ends). Credits you already hold stay
-            on the account, and day and week caps still apply to them.
+            {money(TOPUP_USD_PER_CREDIT)} per credit, one payment, only when you ask for it —
+            nothing is ever charged automatically. Top-up credits never expire and are used after
+            your monthly ones. Buying and spending them both need a paid monthly plan that is still
+            running (a plan you have cancelled still counts until the paid period ends). Credits you
+            already hold stay on the account, and day and week caps still apply to them.
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             {aiPacks.map((p) => (
@@ -338,13 +368,15 @@ function CreditsPage() {
         {/* ENTERPRISE */}
         <EnterpriseQuote signedOut={signedOut} />
 
-
         {/* COSTS BEFORE USE */}
         <Panel>
           <Label>What things cost — before you use them</Label>
           <div className="mt-3 grid gap-2">
             {Object.entries(costs).map(([k, c]) => (
-              <div key={k} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-primary/15 pb-2">
+              <div
+                key={k}
+                className="flex flex-wrap items-baseline justify-between gap-2 border-b border-primary/15 pb-2"
+              >
                 <span className="text-sm">{c.label}</span>
                 <span className="tech-label text-primary">
                   {c.base} credit start + 1 per {c.unit} characters · never more than {c.max}
@@ -359,31 +391,31 @@ function CreditsPage() {
 
         {/* QUALITY — account only */}
         {signedOut ? null : (
-        <Panel>
-          <Label>Speech quality</Label>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              variant={w?.quality === "eco" ? "default" : "outline"}
-              onClick={() => quality.mutate("eco")}
-              disabled={quality.isPending}
-            >
-              <Gauge className="mr-2 h-5 w-5" /> Eco — device voice, 0 credits
-            </Button>
-            <Button
-              size="lg"
-              variant={w?.quality === "balanced" ? "default" : "outline"}
-              onClick={() => quality.mutate("balanced")}
-              disabled={quality.isPending}
-            >
-              <Zap className="mr-2 h-5 w-5" /> Balanced — persona voice, metered
-            </Button>
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Eco uses your device's built-in voice and never spends a credit. Balanced uses your chosen persona
-            and charges the amounts above. Repeating a line you just heard is free.
-          </p>
-        </Panel>
+          <Panel>
+            <Label>Speech quality</Label>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                variant={w?.quality === "eco" ? "default" : "outline"}
+                onClick={() => quality.mutate("eco")}
+                disabled={quality.isPending}
+              >
+                <Gauge className="mr-2 h-5 w-5" /> Eco — device voice, 0 credits
+              </Button>
+              <Button
+                size="lg"
+                variant={w?.quality === "balanced" ? "default" : "outline"}
+                onClick={() => quality.mutate("balanced")}
+                disabled={quality.isPending}
+              >
+                <Zap className="mr-2 h-5 w-5" /> Balanced — persona voice, metered
+              </Button>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Eco uses your device's built-in voice and never spends a credit. Balanced uses your
+              chosen persona and charges the amounts above. Repeating a line you just heard is free.
+            </p>
+          </Panel>
         )}
 
         {/* FREE */}
@@ -398,58 +430,70 @@ function CreditsPage() {
 
         {/* USAGE HISTORY — account only */}
         {signedOut ? null : (
-        <Panel>
-          <Label>Usage history</Label>
-          {state.data?.usage.length ? (
-            <div className="mt-2 grid gap-2 text-sm">
-              {state.data.usage.map((u, i) => (
-                <div key={i} className="flex flex-wrap justify-between gap-2 border-b border-primary/15 pb-2">
-                  <span>{String(u["action"])}</span>
-                  <span className="text-muted-foreground">
-                    {Number(u["credits_charged"] ?? 0)} credits
-                    {u["served_from_cache"] ? " · repeat, free" : ""}
-                    {Number(u["credits_saved"] ?? 0) > 0 ? ` · saved ${Number(u["credits_saved"])}` : ""}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {u["created_at"] ? new Date(String(u["created_at"])).toLocaleString() : ""}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-2 text-sm text-muted-foreground">No AI usage on this account yet.</p>
-          )}
-        </Panel>
+          <Panel>
+            <Label>Usage history</Label>
+            {state.data?.usage.length ? (
+              <div className="mt-2 grid gap-2 text-sm">
+                {state.data.usage.map((u, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-wrap justify-between gap-2 border-b border-primary/15 pb-2"
+                  >
+                    <span>{String(u["action"])}</span>
+                    <span className="text-muted-foreground">
+                      {Number(u["credits_charged"] ?? 0)} credits
+                      {u["served_from_cache"] ? " · repeat, free" : ""}
+                      {Number(u["credits_saved"] ?? 0) > 0
+                        ? ` · saved ${Number(u["credits_saved"])}`
+                        : ""}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {u["created_at"] ? new Date(String(u["created_at"])).toLocaleString() : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No AI usage on this account yet.</p>
+            )}
+          </Panel>
         )}
 
         {/* LEDGER — account only */}
         {signedOut ? null : (
-        <Panel>
-          <Label>Credit history</Label>
-          {state.data?.ledger.length ? (
-            <div className="mt-2 grid gap-2 text-sm">
-              {state.data.ledger.map((l, i) => (
-                <div key={i} className="flex flex-wrap justify-between gap-2 border-b border-primary/15 pb-2">
-                  <span>{String(l["reason"] ?? l["kind"])}</span>
-                  <span className="text-muted-foreground">
-                    {Number(l["monthly_delta"] ?? 0) !== 0 ? `${Number(l["monthly_delta"])} monthly ` : ""}
-                    {Number(l["purchased_delta"] ?? 0) !== 0 ? `${Number(l["purchased_delta"])} bought` : ""}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {l["created_at"] ? new Date(String(l["created_at"])).toLocaleString() : ""}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-2 text-sm text-muted-foreground">No credits added or spent yet.</p>
-          )}
-        </Panel>
+          <Panel>
+            <Label>Credit history</Label>
+            {state.data?.ledger.length ? (
+              <div className="mt-2 grid gap-2 text-sm">
+                {state.data.ledger.map((l, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-wrap justify-between gap-2 border-b border-primary/15 pb-2"
+                  >
+                    <span>{String(l["reason"] ?? l["kind"])}</span>
+                    <span className="text-muted-foreground">
+                      {Number(l["monthly_delta"] ?? 0) !== 0
+                        ? `${Number(l["monthly_delta"])} monthly `
+                        : ""}
+                      {Number(l["purchased_delta"] ?? 0) !== 0
+                        ? `${Number(l["purchased_delta"])} bought`
+                        : ""}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {l["created_at"] ? new Date(String(l["created_at"])).toLocaleString() : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No credits added or spent yet.</p>
+            )}
+          </Panel>
         )}
 
         <DriverApprovedNote>
-          Credits are only ever added after a payment is confirmed by the payment provider itself. Nothing
-          renews, tops up or escalates on its own.
+          Credits are only ever added after a payment is confirmed by the payment provider itself.
+          Nothing renews, tops up or escalates on its own.
         </DriverApprovedNote>
       </div>
     </AppShell>
@@ -496,8 +540,7 @@ function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
         toast.error(res.message);
       }
     },
-    onError: () =>
-      toast.error("Your request was not saved — nothing was sent. Please try again."),
+    onError: () => toast.error("Your request was not saved — nothing was sent. Please try again."),
   });
 
   const valid =
@@ -512,14 +555,16 @@ function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
 
   return (
     <Panel>
-      <Label>{aiEnterprise.name} — {aiEnterprise.priceLabel}</Label>
+      <Label>
+        {aiEnterprise.name} — {aiEnterprise.priceLabel}
+      </Label>
       <p className="mt-1 text-sm text-muted-foreground">{aiEnterprise.blurb}</p>
 
       {signedOut ? (
         <div className="mt-4">
           <p className="text-sm text-muted-foreground">
-            Enterprise is quoted for your fleet. Sign in to send us your numbers — we never set a price
-            without talking to you.
+            Enterprise is quoted for your fleet. Sign in to send us your numbers — we never set a
+            price without talking to you.
           </p>
           <Button size="lg" className="mt-3" asChild>
             <Link to="/sign-in">Sign in to request a quote</Link>
@@ -536,23 +581,39 @@ function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
           }}
         >
           <div className="grid gap-1">
-            <label htmlFor="ent-company" className="tech-label">Company</label>
+            <label htmlFor="ent-company" className="tech-label">
+              Company
+            </label>
             <Input id="ent-company" value={form.company} onChange={set("company")} required />
           </div>
           <div className="grid gap-1">
-            <label htmlFor="ent-name" className="tech-label">Your name</label>
+            <label htmlFor="ent-name" className="tech-label">
+              Your name
+            </label>
             <Input id="ent-name" value={form.contactName} onChange={set("contactName")} required />
           </div>
           <div className="grid gap-1">
-            <label htmlFor="ent-email" className="tech-label">Email</label>
-            <Input id="ent-email" type="email" value={form.email} onChange={set("email")} required />
+            <label htmlFor="ent-email" className="tech-label">
+              Email
+            </label>
+            <Input
+              id="ent-email"
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              required
+            />
           </div>
           <div className="grid gap-1">
-            <label htmlFor="ent-phone" className="tech-label">Phone (optional)</label>
+            <label htmlFor="ent-phone" className="tech-label">
+              Phone (optional)
+            </label>
             <Input id="ent-phone" value={form.phone} onChange={set("phone")} />
           </div>
           <div className="grid gap-1">
-            <label htmlFor="ent-fleet" className="tech-label">How many trucks</label>
+            <label htmlFor="ent-fleet" className="tech-label">
+              How many trucks
+            </label>
             <Input
               id="ent-fleet"
               type="number"
@@ -566,10 +627,18 @@ function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
             <label htmlFor="ent-usage" className="tech-label">
               Expected AI use (drivers, hours a day, what for)
             </label>
-            <Textarea id="ent-usage" rows={3} value={form.expectedUsage} onChange={set("expectedUsage")} required />
+            <Textarea
+              id="ent-usage"
+              rows={3}
+              value={form.expectedUsage}
+              onChange={set("expectedUsage")}
+              required
+            />
           </div>
           <div className="grid gap-1 md:col-span-2">
-            <label htmlFor="ent-notes" className="tech-label">Anything else (optional)</label>
+            <label htmlFor="ent-notes" className="tech-label">
+              Anything else (optional)
+            </label>
             <Textarea id="ent-notes" rows={2} value={form.notes} onChange={set("notes")} />
           </div>
           {/* Honeypot — hidden from drivers, filled only by bots. */}
@@ -586,8 +655,8 @@ function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
               {submit.isPending ? "Saving…" : "Request a quote"}
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">
-              This saves your request on your account for our review. No price is set, nothing is charged, and
-              no plan changes.
+              This saves your request on your account for our review. No price is set, nothing is
+              charged, and no plan changes.
             </p>
           </div>
         </form>

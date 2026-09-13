@@ -80,7 +80,10 @@ vi.mock("@/integrations/supabase/client.server", () => ({
           existing.status = "running";
           existing.attempts += 1;
           existing.lease = Date.now() + 60_000;
-          return { data: { outcome: "owner", reservation: prior.id, amount: prior.amount }, error: null };
+          return {
+            data: { outcome: "owner", reservation: prior.id, amount: prior.amount },
+            error: null,
+          };
         }
         let fresh: Res;
         try {
@@ -120,7 +123,9 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       return { data: 0, error: null };
     },
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { quality_pref: "balanced" } }) }) }),
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: { quality_pref: "balanced" } }) }),
+      }),
     }),
   },
 }));
@@ -260,7 +265,9 @@ describe("metered operations", () => {
       },
     });
     expect(result.ok).toBe(false);
-    expect(rpcCalls.filter((c) => c.fn === "ai_exec_finish" && c.args["_ok"] === false)).toHaveLength(1);
+    expect(
+      rpcCalls.filter((c) => c.fn === "ai_exec_finish" && c.args["_ok"] === false),
+    ).toHaveLength(1);
     expect(balance).toBe(1000);
   });
 
@@ -307,7 +314,6 @@ describe("metered operations", () => {
     expect(providerCalls).toBe(0);
   });
 
-
   it("gives the same durable identity to a retry of the same request", async () => {
     const { requestIdentity } = await import("@/lib/ai-meter.server");
     const a = await requestIdentity("user-1", ["tts", "zeus", "Roll out"]);
@@ -336,14 +342,26 @@ describe("stripe webhook signatures", () => {
   }
 
   it("accepts a correctly signed raw body", async () => {
-    const event = await sdk.webhooks.constructEventAsync(payload, sign(payload), secret, undefined, crypto);
+    const event = await sdk.webhooks.constructEventAsync(
+      payload,
+      sign(payload),
+      secret,
+      undefined,
+      crypto,
+    );
     expect(event.id).toBe("evt_1");
   });
 
   it("rejects a tampered body", async () => {
     const header = sign(payload);
     await expect(
-      sdk.webhooks.constructEventAsync(payload.replace("evt_1", "evt_2"), header, secret, undefined, crypto),
+      sdk.webhooks.constructEventAsync(
+        payload.replace("evt_1", "evt_2"),
+        header,
+        secret,
+        undefined,
+        crypto,
+      ),
     ).rejects.toThrow();
   });
 

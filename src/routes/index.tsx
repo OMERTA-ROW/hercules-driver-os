@@ -3,7 +3,6 @@ import { LiveOrb } from "@/components/hercules/Orb";
 import { DotMenu } from "@/components/hercules/DotMenu";
 import { useVoice } from "@/lib/voice";
 
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -57,6 +56,5 @@ function OrbHome() {
         ) : null}
       </div>
     </main>
-
   );
 }

@@ -25,8 +25,8 @@ export function setVoiceLevel(v: number) {
 export function attachAudioLevel(el: HTMLAudioElement): () => void {
   const Ctor =
     typeof window !== "undefined"
-      ? window.AudioContext ??
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      ? (window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)
       : undefined;
   if (!Ctor) return () => setVoiceLevel(0);
 
@@ -89,13 +89,11 @@ export function startSynthLevel(strength = 0.55): () => void {
  * Returns a teardown; if permission is refused the caller falls back to the
  * synthetic envelope.
  */
-export function attachMicLevel(
-  onFail: () => void = () => {},
-): () => void {
+export function attachMicLevel(onFail: () => void = () => {}): () => void {
   const Ctor =
     typeof window !== "undefined"
-      ? window.AudioContext ??
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      ? (window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)
       : undefined;
   if (!Ctor || !navigator?.mediaDevices?.getUserMedia) {
     onFail();

@@ -83,15 +83,13 @@ export function relevantToVehicle(h: Hazard, spec: VehicleSpec) {
   return true;
 }
 
-
 // ---------------------------------------------------------------- toggles ---
 
 const STORAGE_KEY = "hercules.hazardLayers";
 
 type Toggles = Record<HazardKind, boolean>;
 
-const allOn = (): Toggles =>
-  hazardKinds.reduce((acc, k) => ({ ...acc, [k]: true }), {} as Toggles);
+const allOn = (): Toggles => hazardKinds.reduce((acc, k) => ({ ...acc, [k]: true }), {} as Toggles);
 
 type Ctx = {
   enabled: Toggles;
@@ -133,8 +131,7 @@ export function HazardLayerProvider({ children }: { children: ReactNode }) {
       enabled,
       isOn: (k) => enabled[k] !== false,
       toggle: (k) => persist({ ...enabled, [k]: !(enabled[k] !== false) }),
-      setAll: (on) =>
-        persist(hazardKinds.reduce((acc, k) => ({ ...acc, [k]: on }), {} as Toggles)),
+      setAll: (on) => persist(hazardKinds.reduce((acc, k) => ({ ...acc, [k]: on }), {} as Toggles)),
     }),
     [enabled, persist],
   );

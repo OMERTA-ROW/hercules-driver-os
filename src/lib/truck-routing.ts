@@ -34,11 +34,7 @@ export type TruckProfile = VehicleProfile;
 export type TruckRoutingProvider = {
   name: string;
   /** Truck-legal route for a given origin/destination and truck configuration. */
-  route(args: {
-    from: LatLng;
-    to: LatLng;
-    profile: TruckProfile;
-  }): Promise<TruckRoute>;
+  route(args: { from: LatLng; to: LatLng; profile: TruckProfile }): Promise<TruckRoute>;
   /** Called automatically when the truck leaves the corridor. No driver tap. */
   reroute(args: {
     position: LatLng;
@@ -46,7 +42,7 @@ export type TruckRoutingProvider = {
     profile: TruckProfile;
   }): Promise<TruckRoute>;
   /** Roads excluded for this configuration — surfaced so the driver sees WHY. */
-  restrictions(profile: TruckProfile): typeof excludedRoads[number][];
+  restrictions(profile: TruckProfile): (typeof excludedRoads)[number][];
 };
 
 export const mockTruckRoutingProvider: TruckRoutingProvider = {
@@ -90,7 +86,6 @@ export function legalFor(route: TruckRoute, profile: TruckProfile): TruckRoute {
 
 /** Swap this line for a HERE/Trimble implementation when going live. */
 export const truckRouting: TruckRoutingProvider = mockTruckRoutingProvider;
-
 
 /** Straight-line off-route test. Real providers return a corridor offset in meters. */
 export function metersOffRoute(p: LatLng, polyline: LatLng[]) {

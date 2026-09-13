@@ -40,13 +40,7 @@ export function Slab({
   );
 }
 
-export function PanelTitle({
-  children,
-  right,
-}: {
-  children: ReactNode;
-  right?: ReactNode;
-}) {
+export function PanelTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
@@ -174,8 +168,8 @@ export function DriverApprovedNote({ children }: { children?: ReactNode }) {
 export function NotConnectedNote({ what }: { what: string }) {
   return (
     <p className="text-xs leading-relaxed text-muted-foreground">
-      Not connected yet: {what} is shown as a worked example, not live data. Treat it as a preview of the
-      screen, not as fact — check the real source before you act on it.
+      Not connected yet: {what} would have to come from a live service, and none is connected, so
+      nothing is shown here rather than numbers we made up.
     </p>
   );
 }
@@ -213,11 +207,19 @@ export function EmptyState({
 }
 
 export function money(n: number) {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  return n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
 }
 
 export function money2(n: number) {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+  return n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  });
 }
 
 export function hm(min: number) {

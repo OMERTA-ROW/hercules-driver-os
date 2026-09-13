@@ -117,7 +117,12 @@ export const mockFmcsa: FmcsaProvider = {
           carrier: "Great West Casualty",
           effective: stamp(-320),
         },
-        { type: "Cargo", amount: "$100,000", carrier: "Great West Casualty", effective: stamp(-320) },
+        {
+          type: "Cargo",
+          amount: "$100,000",
+          carrier: "Great West Casualty",
+          effective: stamp(-320),
+        },
       ],
       outOfServiceDate: null,
       checkedAt: stamp(),
@@ -137,7 +142,11 @@ export const mockFmcsa: FmcsaProvider = {
       outOfServiceRate: { vehicle: `${8 + (seed % 12)}%`, driver: `${1 + (seed % 5)}%` },
       basics: [
         { label: "Unsafe driving", percentile: 22 + (seed % 30), alert: false },
-        { label: "Hours-of-service compliance", percentile: 18 + (seed % 40), alert: seed % 9 === 0 },
+        {
+          label: "Hours-of-service compliance",
+          percentile: 18 + (seed % 40),
+          alert: seed % 9 === 0,
+        },
         { label: "Vehicle maintenance", percentile: 30 + (seed % 45), alert: false },
         { label: "Controlled substances", percentile: null, alert: false },
       ],

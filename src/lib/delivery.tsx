@@ -10,7 +10,6 @@ import {
 import {
   coverageFor,
   currentLocation,
-  favorites as mockFavorites,
   nearestCovered,
   orderOptions,
   serviceOf,
@@ -29,7 +28,7 @@ import {
  *
  * `deliveryProvider` is the single place real service APIs get wired in:
  * per-service coverage check for the truck's lat/lng, storefront search, quote,
- * and the hand-off itself. Today it answers from mock data and keeps hand-offs
+ * and the hand-off itself. No partner is connected today, so it answers with nothing and keeps hand-offs
  * in local storage so the whole voice flow is drivable.
  *
  * HERCULES DOES NOT PROCESS THESE ORDERS. DoorDash, Uber Eats, Grubhub,
@@ -77,15 +76,20 @@ export type DeliveryProviderApi = {
   cancel: (id: string) => Promise<void>;
 };
 
-export const mockDeliveryProvider: DeliveryProviderApi = {
-  name: "mock-delivery-aggregator",
-  async checkCoverage(loc) {
-    return loc.coverage;
+/**
+ * NO DELIVERY PARTNER IS CONNECTED. Nothing below reaches a real platform, so it
+ * offers nothing rather than fabricating menus, prices or arrival times.
+ */
+export const DELIVERY_UNAVAILABLE =
+  "No delivery or supply partner is connected yet, so nothing can be ordered from here and no prices or arrival times are shown.";
+
+export const unavailableDeliveryProvider: DeliveryProviderApi = {
+  name: "not connected",
+  async checkCoverage() {
+    return [];
   },
-  async quote(category) {
-    return category === "all"
-      ? orderOptions
-      : orderOptions.filter((o) => serviceOf(o.service).category === category);
+  async quote() {
+    return [];
   },
   async handOff({ option, dropLabel, meetNote }) {
     return {
@@ -106,7 +110,7 @@ export const mockDeliveryProvider: DeliveryProviderApi = {
     };
   },
   async cancel() {
-    /* mock provider has nothing to call */
+    /* nothing is connected, so there is nothing to cancel */
   },
 };
 
@@ -140,7 +144,7 @@ const DeliveryContext = createContext<Ctx | null>(null);
 
 export function DeliveryProvider({
   children,
-  provider = mockDeliveryProvider,
+  provider = unavailableDeliveryProvider,
 }: {
   children: ReactNode;
   provider?: DeliveryProviderApi;
@@ -203,10 +207,7 @@ export function DeliveryProvider({
     [orders, provider, saveOrders],
   );
 
-  const lookup = useCallback(
-    (service: ServiceId) => coverageFor(currentLocation, service),
-    [],
-  );
+  const lookup = useCallback((service: ServiceId) => coverageFor(currentLocation, service), []);
 
   const spoken = useCallback((service: ServiceId) => spokenCoverage(currentLocation, service), []);
 
@@ -235,7 +236,7 @@ export function DeliveryProvider({
       noFoodHere,
       nearestCoveredAhead: nearestCovered("food"),
       options,
-      favorites: mockFavorites,
+      favorites: [],
       meetNote,
       setMeetNote,
       orders,

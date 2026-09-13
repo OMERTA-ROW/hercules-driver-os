@@ -71,9 +71,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const items = sections.filter(
-    (s) => !s.feature || !account || can(s.feature as Feature),
-  );
+  const items = sections.filter((s) => !s.feature || !account || can(s.feature as Feature));
 
   return (
     <>

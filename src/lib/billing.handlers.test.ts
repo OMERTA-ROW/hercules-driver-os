@@ -20,7 +20,8 @@ function makeDb(behaviour: Partial<Record<string, unknown>> = {}) {
     rpc: async (fn: string, args: Record<string, unknown>) => {
       calls.push({ fn, args });
       const v = behaviour[fn];
-      const data = typeof v === "function" ? (v as (a: Record<string, unknown>) => unknown)(args) : v;
+      const data =
+        typeof v === "function" ? (v as (a: Record<string, unknown>) => unknown)(args) : v;
       return { data: data ?? null, error: null };
     },
   };
@@ -28,7 +29,9 @@ function makeDb(behaviour: Partial<Record<string, unknown>> = {}) {
 }
 
 const sdk = {
-  checkout: { sessions: { listLineItems: async () => ({ data: [{ price: { id: PACK_PRICE } }] }) } },
+  checkout: {
+    sessions: { listLineItems: async () => ({ data: [{ price: { id: PACK_PRICE } }] }) },
+  },
   paymentIntents: { retrieve: async () => ({ latest_charge: "ch_pack" }) },
   charges: { retrieve: async () => ({ payment_intent: "pi_month", invoice: "in_1" }) },
 } as unknown as Stripe;
@@ -87,7 +90,9 @@ describe("current Stripe invoice shape", () => {
 describe("invoice arriving before checkout completion", () => {
   it("is retried, not marked processed and lost", async () => {
     const db = makeDb({ ai_billing_owner_of_customer: null });
-    await expect(H.handleInvoicePaid(db as never, invoicePaid())).rejects.toThrow(/no account mapping/);
+    await expect(H.handleInvoicePaid(db as never, invoicePaid())).rejects.toThrow(
+      /no account mapping/,
+    );
     expect(db.calls.some((c) => c.fn === "ai_billing_fulfill")).toBe(false);
   });
 
@@ -163,28 +168,44 @@ describe("monthly refund mapping", () => {
     } as unknown as Stripe.Charge;
     const out = await H.handleReversal(db as never, sdk, charge, "refund");
     expect(out.note).toContain("reversed");
-    const refs = db.calls.filter((c) => c.fn === "ai_billing_reverse").map((c) => c.args["_payment_ref"]);
+    const refs = db.calls
+      .filter((c) => c.fn === "ai_billing_reverse")
+      .map((c) => c.args["_payment_ref"]);
     expect(refs).toContain("in_1");
   });
 
   it("a second identical refund is 'already_reversed', not a second removal", async () => {
     const db = makeDb({ ai_billing_reverse: "already_reversed" });
-    const charge = { id: "ch_x", amount_refunded: 2900, payment_intent: "pi_x" } as unknown as Stripe.Charge;
+    const charge = {
+      id: "ch_x",
+      amount_refunded: 2900,
+      payment_intent: "pi_x",
+    } as unknown as Stripe.Charge;
     const out = await H.handleReversal(db as never, sdk, charge, "refund");
     expect(out.note).toContain("already_reversed");
   });
 
   it("a partial refund passes the real refunded amount through", async () => {
     const db = makeDb({ ai_billing_reverse: "reversed" });
-    const charge = { id: "ch_p", amount_refunded: 1000, payment_intent: "pi_p" } as unknown as Stripe.Charge;
+    const charge = {
+      id: "ch_p",
+      amount_refunded: 1000,
+      payment_intent: "pi_p",
+    } as unknown as Stripe.Charge;
     await H.handleReversal(db as never, sdk, charge, "refund");
     expect(db.calls[0]!.args["_refunded_cents"]).toBe(1000);
   });
 
   it("an unmatched refund stays retryable instead of processed", async () => {
     const db = makeDb({ ai_billing_reverse: "unknown_payment" });
-    const charge = { id: "ch_u", amount_refunded: 100, payment_intent: "pi_u" } as unknown as Stripe.Charge;
-    await expect(H.handleReversal(db as never, sdk, charge, "refund")).rejects.toThrow(/reconciliation/);
+    const charge = {
+      id: "ch_u",
+      amount_refunded: 100,
+      payment_intent: "pi_u",
+    } as unknown as Stripe.Charge;
+    await expect(H.handleReversal(db as never, sdk, charge, "refund")).rejects.toThrow(
+      /reconciliation/,
+    );
   });
 });
 

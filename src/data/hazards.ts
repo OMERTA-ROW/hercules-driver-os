@@ -13,13 +13,7 @@
 import type { LatLng } from "./routing";
 
 export type HazardKind =
-  | "clearance"
-  | "grade"
-  | "switchback"
-  | "runaway"
-  | "emergencyExit"
-  | "scale"
-  | "railroad";
+  "clearance" | "grade" | "switchback" | "runaway" | "emergencyExit" | "scale" | "railroad";
 
 export type Hazard = {
   id: string;
@@ -46,10 +40,7 @@ export type Hazard = {
   severity: "info" | "caution" | "critical";
 };
 
-export const hazardMeta: Record<
-  HazardKind,
-  { label: string; short: string; blurb: string }
-> = {
+export const hazardMeta: Record<HazardKind, { label: string; short: string; blurb: string }> = {
   clearance: {
     label: "Low bridge clearances",
     short: "Clearance",
@@ -316,4 +307,3 @@ export const hazards: Hazard[] = [
     severity: "caution",
   },
 ];
-

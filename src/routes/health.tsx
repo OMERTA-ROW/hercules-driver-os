@@ -13,26 +13,35 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote, NotConnectedNote } from "@/components/hercules/primitives";
+import {
+  Panel,
+  PanelTitle,
+  Label,
+  Metric,
+  Pill,
+  Bar,
+  DriverApprovedNote,
+  NotConnectedNote,
+} from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
-import { useBolt } from "@/lib/bolt";
+import { BOLT_UNAVAILABLE, useBolt } from "@/lib/bolt";
 import { usePurchases } from "@/lib/purchases";
 import { useVehicle } from "@/lib/vehicles";
 
 export const Route = createFileRoute("/health")({
   head: () => ({
     meta: [
-      { title: "Vehicle Health — live engine diagnostics from THE BOLT" },
+      { title: "Vehicle Health — THE BOLT engine diagnostics" },
       {
         name: "description",
         content:
-          "THE BOLT streams live engine data to HERCULES from heavy trucks on the nine-pin J1939 port and from cars, vans and hotshot pickups on the OBD-II port. Fault codes in plain English, live readouts and predictive maintenance.",
+          "THE BOLT is built to read engine data over the nine-pin J1939 port on heavy trucks and the OBD-II port on cars, vans and pickups, and turn fault codes into plain English. No adapter is connected yet, so this screen reports nothing until one is.",
       },
-      { property: "og:title", content: "Vehicle Health — live engine diagnostics" },
+      { property: "og:title", content: "Vehicle Health — THE BOLT engine diagnostics" },
       {
         property: "og:description",
         content:
-          "Two HERCULES adapters, one screen. It shows only what your vehicle can actually report, and speaks up on its own when something needs attention.",
+          "Two HERCULES adapters, one screen. It shows only what your vehicle actually reports — and says plainly when no adapter is connected.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -56,7 +65,7 @@ function BoltStatus() {
         right={
           <Pill tone={connected ? "go" : state === "pairing" ? "watch" : "alert"}>
             {connected ? <Zap className="h-3.5 w-3.5" /> : <ZapOff className="h-3.5 w-3.5" />}
-            {connected ? "Connected" : state === "pairing" ? "Pairing" : "Not detected"}
+            {connected ? "Connected" : state === "pairing" ? "Pairing" : "Not connected"}
           </Pill>
         }
       >
@@ -85,6 +94,13 @@ function BoltStatus() {
           </p>
         </div>
       </div>
+
+      {state === "unavailable" ? (
+        <p className="mt-3 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+          {BOLT_UNAVAILABLE} When a reader is supported, this screen will fill in from your own
+          engine and nowhere else.
+        </p>
+      ) : null}
 
       <p className="mt-3 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs leading-relaxed text-muted-foreground">
         <Cable className="mt-0.5 h-4 w-4 shrink-0 text-primary/80" />
@@ -147,7 +163,7 @@ function HealthPage() {
     <AppShell
       title="Vehicle Health"
       subtitle={`${active.label} · ${active.unit} · ${
-        connected ? `${adapter.name} live stream` : "last sync"
+        connected ? `${adapter.name} live stream` : "no reader connected"
       }`}
     >
       {autoAlerts.length ? (
@@ -194,6 +210,11 @@ function HealthPage() {
           <p className="mb-2 text-xs text-muted-foreground">
             {adapter.tagline} · only what this vehicle can actually report is shown.
           </p>
+          {values.length === 0 ? (
+            <div className="rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+              {BOLT_UNAVAILABLE}
+            </div>
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {values.map((m) => (
               <div key={m.key} className="rounded-lg border border-border bg-card/60 p-3">
@@ -339,9 +360,7 @@ function HealthPage() {
                     <p className="text-xs text-muted-foreground">{r.detail}</p>
                   </div>
                   <Pill
-                    tone={
-                      r.state === "ready" ? "go" : r.state === "not-ready" ? "warn" : "info"
-                    }
+                    tone={r.state === "ready" ? "go" : r.state === "not-ready" ? "warn" : "info"}
                   >
                     {r.state === "ready"
                       ? "Ready"

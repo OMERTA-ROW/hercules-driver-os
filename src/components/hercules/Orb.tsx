@@ -70,12 +70,7 @@ type Dent = {
   age: number;
 };
 
-function buildPath(
-  t: number,
-  loud: number,
-  dents: Dent[],
-  out: number[],
-): string {
+function buildPath(t: number, loud: number, dents: Dent[], out: number[]): string {
   const amp = 0.028 + loud * 0.075;
   let d = "";
   for (let i = 0; i < SEGMENTS; i++) {
@@ -184,7 +179,7 @@ export function Orb({
       /* Reflections roll across the body at different rates — that shear is
          what sells heavy liquid metal rather than a shaded ball. */
       const roll = ((t * 26 + smooth * 90) % 520) - 260;
-      const roll2 = 260 - (((t * 15 + smooth * 40) % 520));
+      const roll2 = 260 - ((t * 15 + smooth * 40) % 520);
       bandsRef.current?.setAttribute(
         "transform",
         `translate(0 ${roll.toFixed(1)}) rotate(${(-14 + Math.sin(t * 0.3) * 6).toFixed(2)} 200 200)`,

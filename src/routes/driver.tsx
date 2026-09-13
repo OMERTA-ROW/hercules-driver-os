@@ -97,7 +97,13 @@ function Driver() {
         </Panel>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary"><UserCog className="h-3.5 w-3.5" /> Logged</Pill>}>
+          <PanelTitle
+            right={
+              <Pill tone="primary">
+                <UserCog className="h-3.5 w-3.5" /> Logged
+              </Pill>
+            }
+          >
             Hours and miles
           </PanelTitle>
           {hours ? (
@@ -170,7 +176,13 @@ function Driver() {
         </Panel>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary"><Mic className="h-3.5 w-3.5" /> Voice</Pill>}>
+          <PanelTitle
+            right={
+              <Pill tone="primary">
+                <Mic className="h-3.5 w-3.5" /> Voice
+              </Pill>
+            }
+          >
             What you can say
           </PanelTitle>
           <ul className="space-y-2">

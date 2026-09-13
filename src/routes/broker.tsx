@@ -97,7 +97,13 @@ function BrokerView() {
     ? postings.reduce((s, p) => s + p.rate / Math.max(1, p.miles), 0) / postings.length
     : 0;
 
-  const ready = origin && destination && Number(miles) > 0 && Number(rate) > 0 && pickupWindow && deliveryWindow;
+  const ready =
+    origin &&
+    destination &&
+    Number(miles) > 0 &&
+    Number(rate) > 0 &&
+    pickupWindow &&
+    deliveryWindow;
 
   return (
     <>
@@ -131,27 +137,65 @@ function BrokerView() {
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
             <Label>Origin</Label>
-            <Input aria-label="Origin" value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Dallas, TX" className="mt-1 h-12" />
+            <Input
+              aria-label="Origin"
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+              placeholder="Dallas, TX"
+              className="mt-1 h-12"
+            />
           </div>
           <div>
             <Label>Destination</Label>
-            <Input aria-label="Destination" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Kansas City, MO" className="mt-1 h-12" />
+            <Input
+              aria-label="Destination"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="Kansas City, MO"
+              className="mt-1 h-12"
+            />
           </div>
           <div>
             <Label>Miles</Label>
-            <Input aria-label="Miles" inputMode="numeric" value={miles} onChange={(e) => setMiles(e.target.value.replace(/[^0-9]/g, ""))} placeholder="552" className="mt-1 h-12" />
+            <Input
+              aria-label="Miles"
+              inputMode="numeric"
+              value={miles}
+              onChange={(e) => setMiles(e.target.value.replace(/[^0-9]/g, ""))}
+              placeholder="552"
+              className="mt-1 h-12"
+            />
           </div>
           <div>
             <Label>Rate (USD)</Label>
-            <Input aria-label="Rate" inputMode="numeric" value={rate} onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ""))} placeholder="1710" className="mt-1 h-12" />
+            <Input
+              aria-label="Rate"
+              inputMode="numeric"
+              value={rate}
+              onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ""))}
+              placeholder="1710"
+              className="mt-1 h-12"
+            />
           </div>
           <div>
             <Label>Pickup window</Label>
-            <Input aria-label="Pickup window" value={pickupWindow} onChange={(e) => setPickupWindow(e.target.value)} placeholder="Today 14:00–16:00" className="mt-1 h-12" />
+            <Input
+              aria-label="Pickup window"
+              value={pickupWindow}
+              onChange={(e) => setPickupWindow(e.target.value)}
+              placeholder="Today 14:00–16:00"
+              className="mt-1 h-12"
+            />
           </div>
           <div>
             <Label>Delivery window</Label>
-            <Input aria-label="Delivery window" value={deliveryWindow} onChange={(e) => setDeliveryWindow(e.target.value)} placeholder="Tomorrow 08:00–12:00" className="mt-1 h-12" />
+            <Input
+              aria-label="Delivery window"
+              value={deliveryWindow}
+              onChange={(e) => setDeliveryWindow(e.target.value)}
+              placeholder="Tomorrow 08:00–12:00"
+              className="mt-1 h-12"
+            />
           </div>
         </div>
 
@@ -177,7 +221,13 @@ function BrokerView() {
 
         <div className="mt-3">
           <Label>Notes for the driver</Label>
-          <Input aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Tarps required. Receiver will not accept early." className="mt-1 h-12" />
+          <Input
+            aria-label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Tarps required. Receiver will not accept early."
+            className="mt-1 h-12"
+          />
         </div>
 
         <Button
@@ -189,8 +239,8 @@ function BrokerView() {
           <Send className="h-4 w-4" /> Review and post
         </Button>
         <DriverApprovedNote>
-          Posting puts the load in front of matching carriers. A driver still accepts it themselves —
-          nothing is assigned to anyone.
+          Posting puts the load in front of matching carriers. A driver still accepts it themselves
+          — nothing is assigned to anyone.
         </DriverApprovedNote>
       </Panel>
 
@@ -207,8 +257,18 @@ function BrokerView() {
                   <Truck className="h-4 w-4 text-primary" /> {c.name}
                 </span>
                 <div className="flex items-center gap-2">
-                  <Pill tone="neutral">{c.kind === "fleet" ? `${c.trucks} trucks` : "Owner-operator"}</Pill>
-                  <Pill tone={c.standing === "matched" ? "go" : c.standing === "available" ? "primary" : "neutral"}>
+                  <Pill tone="neutral">
+                    {c.kind === "fleet" ? `${c.trucks} trucks` : "Owner-operator"}
+                  </Pill>
+                  <Pill
+                    tone={
+                      c.standing === "matched"
+                        ? "go"
+                        : c.standing === "available"
+                          ? "primary"
+                          : "neutral"
+                    }
+                  >
                     {c.standing}
                   </Pill>
                 </div>
@@ -243,7 +303,8 @@ function BrokerView() {
                   </div>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {p.id} · {p.miles} mi · {money2(p.rate / Math.max(1, p.miles))}/mi · posted {p.postedAt}
+                  {p.id} · {p.miles} mi · {money2(p.rate / Math.max(1, p.miles))}/mi · posted{" "}
+                  {p.postedAt}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Pickup {p.pickupWindow} · Delivery {p.deliveryWindow}
@@ -279,7 +340,9 @@ function BrokerView() {
                     disabled={p.stage === "delivered"}
                     onClick={() => {
                       advanceStage(p.id);
-                      toast.success(`${p.id} moved on`, { description: "Status updated for every party." });
+                      toast.success(`${p.id} moved on`, {
+                        description: "Status updated for every party.",
+                      });
                     }}
                   >
                     Advance status
@@ -323,7 +386,9 @@ function BrokerView() {
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-xs">
                 <Clock className="h-3.5 w-3.5 text-info" />
-                {f.overnightParking ? `Overnight parking · ${f.spots} spots` : "No overnight parking"}{" "}
+                {f.overnightParking
+                  ? `Overnight parking · ${f.spots} spots`
+                  : "No overnight parking"}{" "}
                 · {f.appointment ? "Appointment" : "First come"} · detention averages{" "}
                 {f.avgDetentionMin} min
               </p>
@@ -335,10 +400,35 @@ function BrokerView() {
         <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
           <Label>Add a facility</Label>
           <div className="mt-1 grid gap-2 sm:grid-cols-2">
-            <Input aria-label="Facility name" value={facName} onChange={(e) => setFacName(e.target.value)} placeholder="Meridian DC 7 — Tulsa" className="h-12" />
-            <Input aria-label="Facility address" value={facAddress} onChange={(e) => setFacAddress(e.target.value)} placeholder="900 N Mingo Rd, Tulsa, OK" className="h-12" />
-            <Input aria-label="Facility hours" value={facHours} onChange={(e) => setFacHours(e.target.value)} placeholder="06:00–22:00" className="h-12" />
-            <Input aria-label="Parking spots" inputMode="numeric" value={facSpots} onChange={(e) => setFacSpots(e.target.value.replace(/[^0-9]/g, ""))} placeholder="14" className="h-12" />
+            <Input
+              aria-label="Facility name"
+              value={facName}
+              onChange={(e) => setFacName(e.target.value)}
+              placeholder="Meridian DC 7 — Tulsa"
+              className="h-12"
+            />
+            <Input
+              aria-label="Facility address"
+              value={facAddress}
+              onChange={(e) => setFacAddress(e.target.value)}
+              placeholder="900 N Mingo Rd, Tulsa, OK"
+              className="h-12"
+            />
+            <Input
+              aria-label="Facility hours"
+              value={facHours}
+              onChange={(e) => setFacHours(e.target.value)}
+              placeholder="06:00–22:00"
+              className="h-12"
+            />
+            <Input
+              aria-label="Parking spots"
+              inputMode="numeric"
+              value={facSpots}
+              onChange={(e) => setFacSpots(e.target.value.replace(/[^0-9]/g, ""))}
+              placeholder="14"
+              className="h-12"
+            />
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {(["shipper", "receiver"] as const).map((r) => (
@@ -349,7 +439,9 @@ function BrokerView() {
                 onClick={() => setFacRole(r)}
                 className={cn(
                   "min-h-[48px] rounded-lg border px-3 text-sm capitalize transition-colors",
-                  facRole === r ? "border-primary/60 bg-primary/12 text-primary" : "border-border bg-card/50",
+                  facRole === r
+                    ? "border-primary/60 bg-primary/12 text-primary"
+                    : "border-border bg-card/50",
                 )}
               >
                 {r}

@@ -4,7 +4,13 @@ import { Zap, Check, ShieldCheck, FileText, Cable, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { toast as notify } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
+import {
+  Panel,
+  PanelTitle,
+  Label,
+  Pill,
+  DriverApprovedNote,
+} from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -142,7 +148,10 @@ function StorePage() {
   const hasDocs = owns("documents");
 
   const recommended = adapterForSpec(active);
-  const order: AdapterProduct[] = [adapters[recommended], adapters[recommended === "j1939" ? "obd2" : "j1939"]];
+  const order: AdapterProduct[] = [
+    adapters[recommended],
+    adapters[recommended === "j1939" ? "obd2" : "j1939"],
+  ];
 
   const confirmProduct =
     confirming === "bolt" ? adapters.j1939 : confirming === "boltObd" ? adapters.obd2 : null;
@@ -202,7 +211,10 @@ function StorePage() {
             <div className="mt-3">
               {hasDocs ? (
                 <Button asChild size="lg" className="w-full">
-                  <Link to="/documents" search={{ load: undefined, type: undefined, capture: false }}>
+                  <Link
+                    to="/documents"
+                    search={{ load: undefined, type: undefined, capture: false }}
+                  >
                     Open Documents
                   </Link>
                 </Button>
@@ -231,8 +243,8 @@ function StorePage() {
             <Mic className="h-10 w-10 text-primary" />
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{handoff.blurb}</p>
             <p className="mt-2 text-xs text-go">
-              No per-order fee. The delivery app takes the payment — HERCULES only fills the order in
-              for you.
+              No per-order fee. The delivery app takes the payment — HERCULES only fills the order
+              in for you.
             </p>
             <div className="mt-3 space-y-2">
               <Button

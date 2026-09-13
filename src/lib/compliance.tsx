@@ -60,7 +60,6 @@ export type VerificationRequest = {
   result?: string;
 };
 
-
 /**
  * THE COMPLIANCE BOT'S STATE
  * ==========================
@@ -125,7 +124,12 @@ type Ctx = {
   pendingDrivers: (companyCode?: string | null) => DriverRow[];
   /** Share one record out to a broker without duplicating it. */
   shareWithBroker: (recordId: string) => void;
-  exportSet: (scope: ExportScope) => { fileName: string; count: number; pages: number; csv: string };
+  exportSet: (scope: ExportScope) => {
+    fileName: string;
+    count: number;
+    pages: number;
+    csv: string;
+  };
 
   /* ---- THE SINGLE STATUS INDICATOR, ONE BOT PER ACCOUNT ---- */
   /** Compliance for one driver or one vehicle: missing, expired, coming due. */
@@ -149,7 +153,11 @@ type Ctx = {
   clearinghouse: Record<string, ClearinghouseResult>;
   checkAuthority: (dot: string) => Promise<FmcsaAuthority>;
   checkSafety: (dot: string) => Promise<FmcsaSafety>;
-  runClearinghouse: (driverId: string, queryType: "limited" | "full", by: string) => Promise<ClearinghouseResult>;
+  runClearinghouse: (
+    driverId: string,
+    queryType: "limited" | "full",
+    by: string,
+  ) => Promise<ClearinghouseResult>;
   refreshMvr: (driverId: string, by: string) => Promise<MvrPull>;
 
   /* ---- BROKER VERIFICATION ---- */
@@ -383,9 +391,7 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
         }),
 
       pendingDrivers: (companyCode) => {
-        const waiting = drivers.filter(
-          (d) => (approvals[d.id]?.state ?? "pending") !== "approved",
-        );
+        const waiting = drivers.filter((d) => (approvals[d.id]?.state ?? "pending") !== "approved");
         const mine = companyCode ? waiting.filter((d) => d.companyCode === companyCode) : [];
         /* A carrier sees its own linked drivers; a broker onboarding carriers
            direct, or a fleet with nobody linked yet, sees the open queue. */
@@ -393,9 +399,7 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
       },
 
       shareWithBroker: (recordId) =>
-        saveRecords(
-          records.map((r) => (r.id === recordId ? { ...r, visibleTo: allSides } : r)),
-        ),
+        saveRecords(records.map((r) => (r.id === recordId ? { ...r, visibleTo: allSides } : r))),
 
       exportSet: (scope) => {
         const pkg = exportPackage(scope, records);
@@ -494,7 +498,10 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
           uploadedAt: stamp(),
           visibleTo: bothSides,
         };
-        saveRecords([rec, ...records.filter((r) => !(r.kind === "clearinghouse" && r.subjectId === driverId))]);
+        saveRecords([
+          rec,
+          ...records.filter((r) => !(r.kind === "clearinghouse" && r.subjectId === driverId)),
+        ]);
         return res;
       },
 
@@ -526,7 +533,10 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
           uploadedAt: stamp(),
           visibleTo: bothSides,
         };
-        saveRecords([rec, ...records.filter((r) => !(r.kind === "mvr" && r.subjectId === driverId))]);
+        saveRecords([
+          rec,
+          ...records.filter((r) => !(r.kind === "mvr" && r.subjectId === driverId)),
+        ]);
         return res;
       },
 

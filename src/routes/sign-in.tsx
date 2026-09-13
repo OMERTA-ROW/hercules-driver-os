@@ -168,8 +168,8 @@ function SignIn() {
               </div>
               {kind !== "solo" ? (
                 <p className="rounded-lg border border-border bg-card/40 p-3 text-xs text-muted-foreground">
-                  You link to a carrier after signing in, using the invite code they issue you. Codes
-                  expire and the carrier approves you — nothing here can link you on its own.
+                  You link to a carrier after signing in, using the invite code they issue you.
+                  Codes expire and the carrier approves you — nothing here can link you on its own.
                 </p>
               ) : null}
               <Button type="submit" size="lg" className="w-full gap-2" disabled={busy}>
@@ -197,8 +197,8 @@ function SignIn() {
                 </p>
               )}
               <DriverApprovedNote>
-                Your own account, your own data. Nothing is charged and nothing is committed
-                without your approval.
+                Your own account, your own data. Nothing is charged and nothing is committed without
+                your approval.
               </DriverApprovedNote>
             </form>
           </div>

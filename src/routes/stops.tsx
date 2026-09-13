@@ -75,8 +75,18 @@ function StopsScreen() {
   const { hours } = useHours();
   /** Range left on the driver's own logged clock. No clock, no guess. */
   const rangeMiles = hours ? Math.round((hours.driveRemainingMin / 60) * 55) : null;
-  const { stops, accounts, accountFor, linkLoyalty, unlinkLoyalty, reservations, book, cancel, effectiveDiesel, provider } =
-    useStops();
+  const {
+    stops,
+    accounts,
+    accountFor,
+    linkLoyalty,
+    unlinkLoyalty,
+    reservations,
+    book,
+    cancel,
+    effectiveDiesel,
+    provider,
+  } = useStops();
 
   const [chainFilter, setChainFilter] = useState<ChainId[]>([]);
   const [amenityFilter, setAmenityFilter] = useState<Amenity[]>([]);
@@ -107,7 +117,8 @@ function StopsScreen() {
   /** Clock-aware suggestion: bookable stops the driver can still legally reach. */
   const clockTight = hours !== null && hours.driveRemainingMin <= 300;
   const inRange = stops.filter(
-    (s) => rangeMiles !== null && s.milesAhead <= rangeMiles && s.parkingReservable && s.showersOpen > 0,
+    (s) =>
+      rangeMiles !== null && s.milesAhead <= rangeMiles && s.parkingReservable && s.showersOpen > 0,
   );
 
   const toggle = <T,>(list: T[], v: T, set: (n: T[]) => void) =>
@@ -190,7 +201,11 @@ function StopsScreen() {
               <Label>Hercules said</Label>
               <p className="mt-1 text-base leading-relaxed">{spoken}</p>
             </div>
-            <Button variant="ghost" className="ml-auto h-11 w-11 p-0" onClick={() => setSpoken(null)}>
+            <Button
+              variant="ghost"
+              className="ml-auto h-11 w-11 p-0"
+              onClick={() => setSpoken(null)}
+            >
               <X className="h-5 w-5" />
               <span className="sr-only">Dismiss</span>
             </Button>
@@ -257,8 +272,8 @@ function StopsScreen() {
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Distance is measured ahead along your current truck-legal route, not straight line.
-          Live prices, parking counts and shower availability come from the stop feed ({provider}).
+          Distance is measured ahead along your current truck-legal route, not straight line. Live
+          prices, parking counts and shower availability come from the stop feed ({provider}).
         </p>
       </Panel>
 
@@ -293,13 +308,16 @@ function StopsScreen() {
                       </div>
                       <div className="text-sm text-muted-foreground">{s.exit}</div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                        <Pill tone="primary">{s.milesAhead} mi · {hm(s.etaMin)}</Pill>
+                        <Pill tone="primary">
+                          {s.milesAhead} mi · {hm(s.etaMin)}
+                        </Pill>
                         <Pill tone="go">
                           <Fuel className="h-3.5 w-3.5" /> ${effectiveDiesel(s).toFixed(3)}/gal
                           {acct ? " (member)" : ""}
                         </Pill>
                         <Pill tone={s.parkingOpen > 10 ? "go" : "warn"}>
-                          <ParkingSquare className="h-3.5 w-3.5" /> {s.parkingOpen}/{s.parkingTotal} open
+                          <ParkingSquare className="h-3.5 w-3.5" /> {s.parkingOpen}/{s.parkingTotal}{" "}
+                          open
                         </Pill>
                         {s.showers > 0 ? (
                           <Pill tone={s.showersOpen > 0 ? "go" : "alert"}>
@@ -353,7 +371,11 @@ function StopsScreen() {
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div>
                   <Label>Diesel</Label>
-                  <Metric value={`$${effectiveDiesel(selected).toFixed(3)}`} unit="/gal" tone="go" />
+                  <Metric
+                    value={`$${effectiveDiesel(selected).toFixed(3)}`}
+                    unit="/gal"
+                    tone="go"
+                  />
                   {accountFor(selected.chain) ? (
                     <div className="text-xs text-go">
                       ${selected.dieselPrice.toFixed(3)} posted · member discount applied
@@ -458,7 +480,9 @@ function StopsScreen() {
 
           {/* MY STOPS */}
           <Panel>
-            <PanelTitle right={<Pill tone="go">{reservations.length} booked</Pill>}>My Stops</PanelTitle>
+            <PanelTitle right={<Pill tone="go">{reservations.length} booked</Pill>}>
+              My Stops
+            </PanelTitle>
             {reservations.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No reservations yet. Showers and parking you book will show here with the window and
@@ -516,7 +540,8 @@ function StopsScreen() {
                   <div className="min-w-0 flex-1">
                     <div className="text-base font-semibold">{p.program}</div>
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {c.name} · {p.authKind === "oauth" ? "Sign in with chain account" : "Card number + PIN"}
+                      {c.name} ·{" "}
+                      {p.authKind === "oauth" ? "Sign in with chain account" : "Card number + PIN"}
                     </div>
                   </div>
                   {acct ? (
@@ -541,7 +566,9 @@ function StopsScreen() {
                   <div className="mt-3 grid grid-cols-3 gap-3">
                     <div>
                       <Label>Points</Label>
-                      <div className="metric text-2xl font-bold">{acct.points.toLocaleString()}</div>
+                      <div className="metric text-2xl font-bold">
+                        {acct.points.toLocaleString()}
+                      </div>
                       <div className="text-xs text-muted-foreground">{acct.tier}</div>
                     </div>
                     <div>
@@ -635,7 +662,8 @@ function StopsScreen() {
               </p>
             </div>
 
-            {pending.kind === "shower" && (accountFor(pending.stop.chain)?.showerCredits ?? 0) > 0 ? (
+            {pending.kind === "shower" &&
+            (accountFor(pending.stop.chain)?.showerCredits ?? 0) > 0 ? (
               <label className="mt-4 flex items-center gap-3 rounded-xl border border-go/40 bg-go/8 p-3 text-sm">
                 <input
                   type="checkbox"
@@ -644,8 +672,8 @@ function StopsScreen() {
                   className="h-6 w-6 accent-[var(--go,#22c55e)]"
                 />
                 <span>
-                  Use one of your {accountFor(pending.stop.chain)!.showerCredits} shower credits
-                  ({chainOf(pending.stop.chain).loyalty})
+                  Use one of your {accountFor(pending.stop.chain)!.showerCredits} shower credits (
+                  {chainOf(pending.stop.chain).loyalty})
                 </span>
               </label>
             ) : null}
@@ -725,8 +753,8 @@ function StopsScreen() {
           <li>· Stops are ranked by distance ahead on your current truck-legal route.</li>
           <li>· Your hours of service decide which stops HERCULES suggests as shutdown options.</li>
           <li>
-            · The load board's parking intelligence and this layer share the same lots, so a receiver
-            with no overnight parking always points at a bookable one.
+            · The load board's parking intelligence and this layer share the same lots, so a
+            receiver with no overnight parking always points at a bookable one.
           </li>
           <li>· Linked loyalty accounts change the fuel price HERCULES compares with.</li>
         </ul>
