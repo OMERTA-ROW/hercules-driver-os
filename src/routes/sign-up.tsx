@@ -6,7 +6,7 @@ import { Panel, Label, DriverApprovedNote } from "@/components/hercules/primitiv
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import { plans, TRIAL_DAYS, type PlanId } from "@/data/plans";
+import { featureLabels, plans, TRIAL_DAYS, type PlanId } from "@/data/plans";
 import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,8 @@ export const Route = createFileRoute("/sign-up")({
       { property: "og:title", content: "Start Your Free Trial — HERCULES" },
       {
         property: "og:description",
-        content: "Pick your tier and run 7 days free. Cancel before it ends and pay nothing.",
+        content:
+          "Start your 7-day trial with no card and no charge. Pick the tier that fits how you run.",
       },
     ],
   }),
