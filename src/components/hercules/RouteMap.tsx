@@ -231,11 +231,11 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
   const [ready, setReady] = useState(0);
   const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
-    map?: google.maps.Map;
-    maps?: MapsApi;
-    line?: google.maps.Polyline;
-    casing?: google.maps.Polyline;
-    truck?: google.maps.Marker;
+    map?: google.maps.Map | undefined;
+    maps?: MapsApi | undefined;
+    line?: google.maps.Polyline | undefined;
+    casing?: google.maps.Polyline | undefined;
+    truck?: google.maps.Marker | undefined;
     shields: google.maps.Marker[];
     hazards: google.maps.Marker[];
     stops: google.maps.Marker[];
