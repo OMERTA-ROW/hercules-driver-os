@@ -116,14 +116,14 @@ const planBase: { id: AiPlanId; name: string; price: number; blurb: string; pric
     id: "pro",
     name: "Pro",
     price: 29,
-    blurb: "Heavy all-day use, long conversations, premium voices.",
+    blurb: "Heavy all-day use, long spoken read-backs, premium personas.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
   },
   {
     id: "max",
     name: "Max",
     price: 100,
-    blurb: "The largest monthly allowance, for drivers who talk to HERCULES all day.",
+    blurb: "The largest monthly allowance, for drivers using spoken commands all day.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
 ];

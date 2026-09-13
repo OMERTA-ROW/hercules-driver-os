@@ -242,7 +242,51 @@ entry (see `priceEnv` in `src/data/ai-credits.ts`). Optional: `APP_BASE_URL`.
   Monthly included amounts are unchanged (300 / 1,000 / 3,500).
 
 
-## Monthly totals are pending (owner, 2026-09-13)
+## Approved catalogue (owner, 2026-09-13) — supersedes everything above
+
+Monthly (granted only on a verified paid invoice, once per paid period):
+
+| Plan | Price | Credits / month | Per day | Per week |
+| --- | --- | --- | --- | --- |
+| Assist | $9 | 150 | 10 | 40 |
+| Pro | $29 | 600 | 25 | 150 |
+| Max | $100 | 3,000 | 110 | 750 |
+
+One-time top-ups, $0.30 per credit, subscribers only, explicit purchase only:
+10 / $3, 50 / $15, 100 / $30. The earlier 200/550/1200 and 250/500 packs are gone.
+
+Proportions were adapted from a public consumer voice-plan ladder (ElevenLabs'
+published Starter / Creator / Pro tiers) as a shape only. Their allowances are
+provider characters, not HERCULES credits: no equivalence, parity or proven cost
+basis is claimed anywhere in the app.
+
+Enforcement facts:
+
+- `ai_plan_allowances` holds the live caps; `src/data/ai-credits.ts` (`planCaps`)
+  mirrors them for display. Keep them in step.
+- Caps reset **usage counters only**. No reset, day or week, ever adds a credit
+  to a wallet. Monthly balance is written only by `ai_credits_grant` from a
+  verified paid invoice.
+- Day ends at midnight `America/New_York`; week ends Saturday 00:00
+  `America/New_York`. Both computed with `AT TIME ZONE`, so DST is correct.
+- Caps are checked inside `ai_exec_claim`, which serialises on the wallet row and
+  holds credits atomically, so concurrent requests cannot overspend a cap.
+- Reaching a cap pauses paid speech **even with bought credits** and reports the
+  next eligible time (Saturday when the week is out, local midnight otherwise).
+  Running the monthly balance out is different: a top-up restores balance, but
+  the day and week caps still apply.
+- Subscribed = `ai_plan_id` set **and** `paid_through_at` still in the future.
+  That covers cancel-at-period-end. There is no trial path and no profile column
+  that can grant it; only the signed webhook writes it.
+- Free at all times: the map and navigation, hazard warnings, the clock and
+  hours, loads, money, health, every breakdown and safety action, the fixed
+  spoken commands the app answers itself, and the device's own voice.
+- Voice is a fixed set of spoken commands plus spoken read-backs. There is no
+  open-ended text or voice chat assistant, and nothing in the UI claims one.
+- No live billing: Stripe credentials are still unset, so every purchase path
+  reports itself unavailable and no card can be charged.
+
+## Superseded: monthly totals pending (2026-09-13, resolved above)
 
 The owner has decided the included monthly amounts will be **reduced** and will
 state the three figures. Until they arrive:

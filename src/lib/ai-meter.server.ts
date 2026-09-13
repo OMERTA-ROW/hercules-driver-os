@@ -391,6 +391,7 @@ export async function runMetered<T>(opts: {
 export type Allowance = {
   subscribed: boolean;
   plan: string | null;
+  timezone: string;
   dailyLimit: number | null;
   dailyUsed: number;
   weeklyLimit: number | null;
@@ -412,6 +413,7 @@ export async function allowanceStatus(userId: string): Promise<Allowance | null>
   return {
     subscribed: r["subscribed"] === true,
     plan: (r["plan"] as string | null) ?? null,
+    timezone: (r["timezone"] as string) ?? "America/New_York",
     dailyLimit: r["daily_limit"] == null ? null : Number(r["daily_limit"]),
     dailyUsed: Number(r["daily_used"] ?? 0),
     weeklyLimit: r["weekly_limit"] == null ? null : Number(r["weekly_limit"]),
