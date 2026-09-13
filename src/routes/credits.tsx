@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import {
   ALLOWANCE_WEEK_RESET_DAY,
+  MONTHLY_CREDITS_PENDING,
   TOPUP_USD_PER_CREDIT,
   aiActionCosts,
   aiEnterprise,
@@ -270,12 +271,22 @@ function CreditsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Replenishes once each paid period. Unused monthly credits expire at the end of the period.
           </p>
+          {MONTHLY_CREDITS_PENDING ? (
+            <p className="mt-2 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
+              The monthly credit amounts are being lowered and the final figures are not set yet, so
+              the counts below are a placeholder, not an offer. The prices, the {money(TOPUP_USD_PER_CREDIT)}
+              {" "}per-credit top-up rate and the day and week limits are the parts that are settled — and
+              nothing can be bought or charged on this app yet.
+            </p>
+          ) : null}
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             {aiPlans.map((p) => (
               <div key={p.id} className="rounded-lg border border-primary/25 p-4">
                 <p className="font-display text-xl uppercase tracking-[0.12em]">{p.name}</p>
                 <p className="mt-1 text-3xl font-light">{p.credits.toLocaleString()}</p>
-                <p className="tech-label">credits / month</p>
+                <p className="tech-label">
+                  credits / month{p.monthlyPendingApproval ? " · not final" : ""}
+                </p>
                 <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
                 <p className="mt-2 text-lg">{money(p.price)} / month</p>
                 <p className="mt-1 text-xs text-muted-foreground">
