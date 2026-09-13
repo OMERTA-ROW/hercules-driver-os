@@ -237,14 +237,17 @@ function CreditsPage() {
                   </div>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  When either runs out, the real AI voice pauses and your device's own voice takes
-                  over free until the reset. Nothing extra is ever charged for going over.
+                  When either runs out, the real AI voice pauses and your device's own voice takes over
+                  free until the time shown — even if you still hold bought credits, because a top-up
+                  cannot lift a day or week cap. Nothing extra is ever charged for going over, and a
+                  reset only clears the counter; it never adds credits. Times are New York time.
                 </p>
               </>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">
-                A monthly AI plan sets a daily and weekly voice allowance. Without a plan the real AI
-                voice is off on this account and your device's own voice is used, free.
+                A paid monthly AI plan sets a daily and weekly spoken-line allowance. Without one the
+                real AI voice is off on this account and your device's own voice is used, free — as are
+                the map, the clock, your hours, and every breakdown and safety action.
               </p>
             )}
           </Panel>
@@ -306,8 +309,11 @@ function CreditsPage() {
         <Panel>
           <Label>Top-ups — subscribers only</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            {money(TOPUP_USD_PER_CREDIT)} per credit, one payment. Top-up credits never expire and are
-            used after your monthly ones. They are only available on an account with a monthly AI plan.
+            {money(TOPUP_USD_PER_CREDIT)} per credit, one payment, only when you ask for it — nothing
+            is ever charged automatically. Top-up credits never expire and are used after your monthly
+            ones. Buying and spending them both need a paid monthly plan that is still running (a plan
+            you have cancelled still counts until the paid period ends). Credits you already hold stay
+            on the account, and day and week caps still apply to them.
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             {aiPacks.map((p) => (

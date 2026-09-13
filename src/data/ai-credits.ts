@@ -29,7 +29,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "topup50" | "topup100" | "topup250" | "topup500";
+export type AiPackId = "topup10" | "topup50" | "topup100";
 
 /**
  * SUBSCRIBER-ONLY TOP-UPS — owner-set price, USD $0.30 per credit.
@@ -46,56 +46,53 @@ export type AiPlan = {
   price: number;
   blurb: string;
   /**
-   * Daily and weekly spending allowance, in credits. NEVER hand-written: both
-   * are derived from the plan's monthly total by `derivedAllowance`, so when the
-   * owner supplies the reduced monthly amounts the limits follow automatically.
-   * They are limits only — going over never causes a charge. The live values the
-   * server enforces are rows in `ai_plan_allowances`; `allowanceRows()` below is
-   * the single source both sides are synced from.
+   * Owner-approved daily and weekly caps, in credits (see `planCaps`). Caps are
+   * limits only — going over never causes a charge, and a reset never adds a
+   * credit. The live values the server enforces are rows in
+   * `ai_plan_allowances`; `allowanceRows()` is what both sides are synced from.
    */
   dailyCredits: number;
   weeklyCredits: number;
-  /** True while the monthly total is still awaiting the owner's figure. */
+  /** True only while a monthly total is awaiting the owner's figure. */
   monthlyPendingApproval: boolean;
   /** Server-side env var holding the payment provider's price id. */
   priceEnv: string;
 };
 
 /* ------------------------------------------------------------------------ *
- * MONTHLY TOTALS — AWAITING THE OWNER'S REDUCED AMOUNTS
+ * MONTHLY TOTALS AND CAPS — owner approved 2026-09-13
  *
- * The owner has decided the monthly included totals will be REDUCED and will
- * state the three amounts. Until then the numbers below are the last-known
- * placeholders and are NOT an approved catalogue: `MONTHLY_CREDITS_PENDING`
- * stays true, the screen says so plainly, and no purchase can happen anyway
- * (payment credentials are not configured).
+ * Shaped after a public consumer voice plan ladder (ElevenLabs' published
+ * Starter / Creator / Pro tiers) purely as a PROPORTION guide. Their allowances
+ * are provider characters, not HERCULES credits, so nothing here claims parity,
+ * equivalence or a proven cost basis — the proportions were adapted and the
+ * amounts set by the owner.
  *
- * To apply the approved amounts later: change the three numbers here, then run
- * the one statement in docs/ai-credits.md to sync `ai_plan_allowances`.
+ * Change a number here, then sync `ai_plan_allowances` with the statement in
+ * docs/ai-credits.md so the server enforces the same caps.
  * ------------------------------------------------------------------------ */
 
-export const MONTHLY_CREDITS_PENDING = true;
+export const MONTHLY_CREDITS_PENDING = false;
 
-/** Last-known placeholders, pending the owner's reduced figures. */
-export const monthlyCreditPlaceholders: Record<AiPlanId, number> = {
-  assist: 300,
-  pro: 1000,
-  max: 3500,
+/** Owner-approved monthly included amounts. */
+export const monthlyCreditAmounts: Record<AiPlanId, number> = {
+  assist: 150,
+  pro: 600,
+  max: 3000,
 };
 
 /**
- * How much of a monthly total may be spent in one day and in one week.
- * Editable in one place; every plan's limits are computed from it, so reduced
- * monthly totals reduce the daily and weekly limits in the same proportion.
+ * Owner-approved caps. These reset USAGE COUNTERS only — a reset never adds a
+ * credit to the wallet. Days end at midnight America/New_York, weeks at
+ * Saturday 00:00 America/New_York (daylight saving handled server-side).
  */
-export const ALLOWANCE_SHARE = { daily: 1 / 15, weekly: 1 / 3 };
+export const planCaps: Record<AiPlanId, { daily: number; weekly: number }> = {
+  assist: { daily: 10, weekly: 40 },
+  pro: { daily: 25, weekly: 150 },
+  max: { daily: 110, weekly: 750 },
+};
 
-export function derivedAllowance(monthlyCredits: number) {
-  return {
-    daily: Math.max(1, Math.ceil(monthlyCredits * ALLOWANCE_SHARE.daily)),
-    weekly: Math.max(2, Math.ceil(monthlyCredits * ALLOWANCE_SHARE.weekly)),
-  };
-}
+export const ALLOWANCE_TIMEZONE = "America/New_York";
 
 export type AiPack = {
   id: AiPackId;
@@ -119,29 +116,25 @@ const planBase: { id: AiPlanId; name: string; price: number; blurb: string; pric
     id: "pro",
     name: "Pro",
     price: 29,
-    blurb: "Heavy all-day use, long conversations, premium voices.",
+    blurb: "Heavy all-day use, long spoken read-backs, premium personas.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
   },
   {
     id: "max",
     name: "Max",
     price: 100,
-    blurb: "The largest monthly allowance, for drivers who talk to HERCULES all day.",
+    blurb: "The largest monthly allowance, for drivers using spoken commands all day.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
 ];
 
-export const aiPlans: AiPlan[] = planBase.map((p) => {
-  const credits = monthlyCreditPlaceholders[p.id];
-  const a = derivedAllowance(credits);
-  return {
-    ...p,
-    credits,
-    dailyCredits: a.daily,
-    weeklyCredits: a.weekly,
-    monthlyPendingApproval: MONTHLY_CREDITS_PENDING,
-  };
-});
+export const aiPlans: AiPlan[] = planBase.map((p) => ({
+  ...p,
+  credits: monthlyCreditAmounts[p.id],
+  dailyCredits: planCaps[p.id].daily,
+  weeklyCredits: planCaps[p.id].weekly,
+  monthlyPendingApproval: MONTHLY_CREDITS_PENDING,
+}));
 
 /** The rows the database's `ai_plan_allowances` table must hold. */
 export function allowanceRows() {
@@ -157,7 +150,7 @@ export function allowanceRows() {
  * Every amount below is exactly $0.30 per credit, the owner's set rate.
  * Only an account with an active monthly plan may buy or spend these.
  */
-export const aiPacks: AiPack[] = [50, 100, 250, 500].map((credits) => ({
+export const aiPacks: AiPack[] = [10, 50, 100].map((credits) => ({
   id: `topup${credits}` as AiPackId,
   name: `${credits.toLocaleString()} credits`,
   credits,
@@ -293,13 +286,22 @@ export function allowanceFor(planId: string | null | undefined) {
   return { daily: plan.dailyCredits, weekly: plan.weeklyCredits, plan };
 }
 
-/** Plain-language line shown when paid conversation is paused. */
+/** Plain-language line shown when paid speech is paused at a cap. */
 export function allowancePausedLine(
   scope: "daily" | "weekly",
   resetsAt: string | null,
 ): string {
-  const when = resetsAt ? new Date(resetsAt).toLocaleString() : "the next reset";
+  const when = resetsAt
+    ? new Date(resetsAt).toLocaleString("en-US", {
+        timeZone: ALLOWANCE_TIMEZONE,
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+        month: "short",
+        day: "numeric",
+      }) + " ET"
+    : "the next reset";
   return scope === "daily"
-    ? `You have used today's AI voice allowance. It resets at ${when} — your device's own voice keeps working until then, free.`
-    : `You have used this week's AI voice allowance. It resets ${ALLOWANCE_WEEK_RESET_DAY} at ${when} — your device's own voice keeps working until then, free.`;
+    ? `That is today's spoken-line allowance used. The real voice comes back ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift today's cap.`
+    : `That is this week's spoken-line allowance used. The real voice comes back ${ALLOWANCE_WEEK_RESET_DAY}, ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift the weekly cap.`;
 }

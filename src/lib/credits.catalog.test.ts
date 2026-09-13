@@ -7,7 +7,7 @@ import {
   aiPlans,
   allowanceFor,
   allowanceRows,
-  derivedAllowance,
+  planCaps,
   allowancePausedLine,
 } from "@/data/ai-credits";
 
@@ -26,29 +26,28 @@ describe("credit catalogue", () => {
     }
   });
 
-  it("marks the monthly totals as awaiting the owner's reduced amounts", () => {
-    expect(MONTHLY_CREDITS_PENDING).toBe(true);
-    for (const p of aiPlans) expect(p.monthlyPendingApproval).toBe(true);
-    // Prices are the owner's confirmed figures and stay put.
-    expect(aiPlans.map((p) => [p.id, p.price])).toEqual([
-      ["assist", 9],
-      ["pro", 29],
-      ["max", 100],
+  it("carries the owner-approved monthly amounts and prices", () => {
+    expect(MONTHLY_CREDITS_PENDING).toBe(false);
+    for (const p of aiPlans) expect(p.monthlyPendingApproval).toBe(false);
+    expect(aiPlans.map((p) => [p.id, p.credits, p.price])).toEqual([
+      ["assist", 150, 9],
+      ["pro", 600, 29],
+      ["max", 3000, 100],
     ]);
   });
 
-  it("derives every limit from the monthly total, so reduced totals reduce limits", () => {
+  it("carries the owner-approved caps for every plan", () => {
+    expect(aiPlans.map((p) => [p.id, p.dailyCredits, p.weeklyCredits])).toEqual([
+      ["assist", 10, 40],
+      ["pro", 25, 150],
+      ["max", 110, 750],
+    ]);
     for (const p of aiPlans) {
-      expect({ daily: p.dailyCredits, weekly: p.weeklyCredits }).toEqual(
-        derivedAllowance(p.credits),
-      );
+      expect({ daily: p.dailyCredits, weekly: p.weeklyCredits }).toEqual(planCaps[p.id]);
+      // A cap can never let a month be spent in a day or a week.
+      expect(p.weeklyCredits).toBeLessThan(p.credits);
+      expect(p.dailyCredits).toBeLessThan(p.weeklyCredits);
     }
-    const big = derivedAllowance(1000);
-    const small = derivedAllowance(400);
-    expect(small.daily).toBeLessThan(big.daily);
-    expect(small.weekly).toBeLessThan(big.weekly);
-    // Never zero, whatever total is set.
-    expect(derivedAllowance(1).daily).toBe(1);
   });
 
   it("states a daily and weekly allowance that fits inside the monthly amount", () => {
@@ -87,9 +86,11 @@ describe("credit catalogue", () => {
 
   it("names the reset when paid conversation pauses", () => {
     expect(ALLOWANCE_WEEK_RESET_DAY).toBe("Saturday");
-    const daily = allowancePausedLine("daily", "2026-09-14T00:00:00Z");
+    const daily = allowancePausedLine("daily", "2026-09-14T04:00:00Z");
     expect(daily).toMatch(/today/i);
-    expect(daily).toMatch(/resets/i);
+    // The exact next eligible time, in the driver-facing timezone.
+    expect(daily).toContain("ET");
+    expect(daily).toMatch(/top-up will not lift/i);
     const weekly = allowancePausedLine("weekly", null);
     expect(weekly).toMatch(/Saturday/);
     expect(weekly).toMatch(/free/i);

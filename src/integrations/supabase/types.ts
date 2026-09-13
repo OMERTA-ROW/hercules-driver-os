@@ -162,6 +162,7 @@ export type Database = {
           created_at: string
           monthly_balance: number
           monthly_expires_at: string | null
+          paid_through_at: string | null
           purchased_balance: number
           quality_pref: string
           updated_at: string
@@ -173,6 +174,7 @@ export type Database = {
           created_at?: string
           monthly_balance?: number
           monthly_expires_at?: string | null
+          paid_through_at?: string | null
           purchased_balance?: number
           quality_pref?: string
           updated_at?: string
@@ -184,6 +186,7 @@ export type Database = {
           created_at?: string
           monthly_balance?: number
           monthly_expires_at?: string | null
+          paid_through_at?: string | null
           purchased_balance?: number
           quality_pref?: string
           updated_at?: string
@@ -1307,6 +1310,7 @@ export type Database = {
           created_at: string
           monthly_balance: number
           monthly_expires_at: string | null
+          paid_through_at: string | null
           purchased_balance: number
           quality_pref: string
           updated_at: string
