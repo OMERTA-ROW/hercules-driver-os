@@ -134,6 +134,19 @@ export function DriverApprovedNote({ children }: { children?: ReactNode }) {
 }
 
 /**
+ * Truthful source label. Anything on screen that is NOT coming from a live,
+ * connected service must say so in plain words — no implied verification.
+ */
+export function NotConnectedNote({ what }: { what: string }) {
+  return (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Not connected yet: {what} is shown as a worked example, not live data. Treat it as a preview of the
+      screen, not as fact — check the real source before you act on it.
+    </p>
+  );
+}
+
+/**
  * Honest empty state. HERCULES never fills a gap with invented numbers — if a
  * source isn't connected yet, it says so and says what to do about it.
  */
