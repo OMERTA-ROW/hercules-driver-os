@@ -9,7 +9,6 @@ import type { MapsApi } from "@/lib/google-maps";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-
 /**
  * Base map layer.
  *
@@ -96,7 +95,6 @@ export function RouteShield({ road, cls }: { road: string; cls: RoadClass }) {
     />
   );
 }
-
 
 /**
  * HAZARD ICONS — glanceable badges for the truck hazard layer.
@@ -220,7 +218,14 @@ type Props = {
   stops?: TruckStop[];
 };
 
-export function RouteMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
+export function RouteMap({
+  polyline,
+  position,
+  segments,
+  offRoute,
+  hazards = [],
+  stops = [],
+}: Props) {
   const { theme } = useTheme();
   const [view, setView] = useState<BaseView>("map");
   const [camera, setCamera] = useState<CameraMode>("nav3d");
@@ -301,7 +306,8 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           title: `${hazard.name} — ${hazard.detail}`,
           icon: {
             url:
-              "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(hazardIconSvg(hazard, severity)),
+              "data:image/svg+xml;charset=UTF-8," +
+              encodeURIComponent(hazardIconSvg(hazard, severity)),
             anchor: new maps.Point(30, 42),
           },
           zIndex: severity === "critical" ? 900 : 500,
@@ -316,7 +322,9 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
           map,
           title: `${stop.name} — $${stop.dieselPrice.toFixed(3)}/gal · ${stop.parkingOpen}/${stop.parkingTotal} spaces · ${stop.showersOpen} showers open`,
           icon: {
-            url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(chainMarkerSvg(stop.chain, 46)),
+            url:
+              "data:image/svg+xml;charset=UTF-8," +
+              encodeURIComponent(chainMarkerSvg(stop.chain, 46)),
             anchor: new maps.Point(26, 56),
           },
           zIndex: 400,
@@ -441,13 +449,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
  * Base imagery switch — big, glanceable targets in the map corner. Satellite is
  * the one a driver reaches for on the approach, so it is never buried in a menu.
  */
-function BaseViewSwitch({
-  view,
-  onChange,
-}: {
-  view: BaseView;
-  onChange: (v: BaseView) => void;
-}) {
+function BaseViewSwitch({ view, onChange }: { view: BaseView; onChange: (v: BaseView) => void }) {
   return (
     // Top-left corner is reserved for the navigation page's next-turn card, so
     // the imagery switch sits just below it instead of being covered.
@@ -472,7 +474,6 @@ function BaseViewSwitch({
     </div>
   );
 }
-
 
 /**
  * MAP VIEW CONTROLS — the one visible button cluster in the app. Small glass
@@ -510,12 +511,14 @@ function MapViewControls({
     <div className="absolute left-3 right-20 top-44 flex flex-wrap items-center gap-2">
       {/* camera: tilted 3D navigation view vs flat 2D overhead */}
       <div className="flex gap-1 rounded-xl border border-foreground/12 bg-background/60 p-1 backdrop-blur-xl">
-        {(
-          [
-            { id: "nav3d" as const, label: "3D", hint: "Navigation view — tilted, follows your heading" },
-            { id: "top2d" as const, label: "2D", hint: "Overhead view" },
-          ]
-        ).map((c) => (
+        {[
+          {
+            id: "nav3d" as const,
+            label: "3D",
+            hint: "Navigation view — tilted, follows your heading",
+          },
+          { id: "top2d" as const, label: "2D", hint: "Overhead view" },
+        ].map((c) => (
           <button
             key={c.id}
             type="button"
@@ -524,7 +527,9 @@ function MapViewControls({
             title={c.hint}
             className={cn(
               "min-h-9 rounded-lg px-3 font-display text-[0.66rem] font-light uppercase tracking-[0.2em] transition-colors",
-              camera === c.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              camera === c.id
+                ? "bg-primary/20 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
           >
             {c.label}
@@ -540,15 +545,42 @@ function MapViewControls({
         className={cn(pill, headingUp && active)}
       >
         {headingUp ? (
-          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-4.5 w-4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
             <path d="M12 3l4 9h-8z" fill="currentColor" stroke="none" />
             <path d="M12 15v6" />
           </svg>
         ) : (
-          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-4.5 w-4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden
+          >
             <circle cx="12" cy="12" r="9" />
             <path d="M12 5v3M12 5l-2 3M12 5l2 3" />
-            <text x="12" y="17" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none" fontWeight="700">N</text>
+            <text
+              x="12"
+              y="17"
+              textAnchor="middle"
+              fontSize="7"
+              fill="currentColor"
+              stroke="none"
+              fontWeight="700"
+            >
+              N
+            </text>
           </svg>
         )}
       </button>
@@ -560,15 +592,37 @@ function MapViewControls({
         title={following ? "Following your truck" : "Recenter on your truck"}
         className={cn(pill, following && active)}
       >
-        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4.5 w-4.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          aria-hidden
+        >
           <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
           <circle cx="12" cy="12" r="7" />
           <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
         </svg>
       </button>
       {/* whole route at once */}
-      <button type="button" onClick={onWholeRoute} title="Zoom out to the whole route" className={pill}>
-        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <button
+        type="button"
+        onClick={onWholeRoute}
+        title="Zoom out to the whole route"
+        className={pill}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4.5 w-4.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
           <path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3" />
           <circle cx="7.5" cy="16.5" r="1.4" fill="currentColor" stroke="none" />
           <circle cx="16.5" cy="7.5" r="1.4" fill="currentColor" stroke="none" />
@@ -583,7 +637,16 @@ function MapViewControls({
         title={traffic ? "Live traffic on — tap to hide" : "Live traffic off — tap to show"}
         className={cn(pill, traffic && active)}
       >
-        <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4.5 w-4.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
           <rect x="8" y="2.5" width="8" height="19" rx="3" />
           <circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none" />
           <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
@@ -599,7 +662,11 @@ const darkMapStyle = [
   { elementType: "labels.text.fill", stylers: [{ color: "#93a1ad" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#05080b" }] },
   { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#2a323b" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#b9c4ce" }] },
+  {
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#b9c4ce" }],
+  },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
   { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#0e141a" }] },
@@ -608,7 +675,11 @@ const darkMapStyle = [
   { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#222d38" }] },
   { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#33424f" }] },
   { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#0a0e12" }] },
-  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#3d4e5e" }] },
+  {
+    featureType: "road.highway.controlled_access",
+    elementType: "geometry",
+    stylers: [{ color: "#3d4e5e" }],
+  },
   { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9aa7b3" }] },
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#060b11" }] },
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3f5566" }] },

@@ -48,7 +48,10 @@ export function rank(list: Service[]) {
   const kindWeight: Record<ServiceKind, number> = { mobile: 0, tow: 12, bay: 18, shop: 22 };
   return [...list].sort(
     (a, b) =>
-      a.etaMin + kindWeight[a.kind] - (a.open24 ? 10 : 0) - a.rating * 3 -
+      a.etaMin +
+      kindWeight[a.kind] -
+      (a.open24 ? 10 : 0) -
+      a.rating * 3 -
       (b.etaMin + kindWeight[b.kind] - (b.open24 ? 10 : 0) - b.rating * 3),
   );
 }

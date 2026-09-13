@@ -159,7 +159,12 @@ export function StopsProvider({
   );
 
   const book = useCallback(
-    async (input: { stop: TruckStop; kind: ReservationKind; window: string; useCredit: boolean }) => {
+    async (input: {
+      stop: TruckStop;
+      kind: ReservationKind;
+      window: string;
+      useCredit: boolean;
+    }) => {
       const res = await provider.book(input);
       saveReservations([...reservations, res]);
       return res;

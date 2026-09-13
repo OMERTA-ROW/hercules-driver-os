@@ -256,9 +256,27 @@ export const drivers: DriverRow[] = [
 ];
 
 export const vehicles: VehicleRow[] = [
-  { id: "HERC-114", label: "Peterbilt 579 — Unit 4471", vin: "1XPBD49X1MD712004", plate: "TX 4H-8821", companyCode: null },
-  { id: "TRL-9920", label: "Wabash 53' dry van", vin: "1JJV532W7NL209920", plate: "TX 9K-2210", companyCode: null },
-  { id: "SOON-77", label: "Freightliner Cascadia — 77", vin: "3AKJHHDR9LSLR1477", plate: "OK 2C-7714", companyCode: "SOON-4412" },
+  {
+    id: "HERC-114",
+    label: "Peterbilt 579 — Unit 4471",
+    vin: "1XPBD49X1MD712004",
+    plate: "TX 4H-8821",
+    companyCode: null,
+  },
+  {
+    id: "TRL-9920",
+    label: "Wabash 53' dry van",
+    vin: "1JJV532W7NL209920",
+    plate: "TX 9K-2210",
+    companyCode: null,
+  },
+  {
+    id: "SOON-77",
+    label: "Freightliner Cascadia — 77",
+    vin: "3AKJHHDR9LSLR1477",
+    plate: "OK 2C-7714",
+    companyCode: "SOON-4412",
+  },
 ];
 
 export function subjectName(kind: SubjectKind, id: string) {
@@ -308,7 +326,12 @@ export const seedRecords: DocRecord[] = [
     subjectId: "DR-114",
     fileName: "cdl-front.jpg",
     pages: 1,
-    read: { "Licence number": "TX 41128822", Class: "A", Endorsements: "N, T", Expires: "Apr 18, 2028" },
+    read: {
+      "Licence number": "TX 41128822",
+      Class: "A",
+      Endorsements: "N, T",
+      Expires: "Apr 18, 2028",
+    },
     issued: iso(2024, 4, 18),
     expires: iso(2028, 4, 18),
     checks: [
@@ -413,7 +436,12 @@ export const seedRecords: DocRecord[] = [
     subjectId: "HERC-114",
     fileName: "cab-card-4471.pdf",
     pages: 1,
-    read: { Plate: "TX 4H-8821", VIN: "1XPBD49X1MD712004", Weight: "80,000 lb", Expires: "Sep 21, 2026" },
+    read: {
+      Plate: "TX 4H-8821",
+      VIN: "1XPBD49X1MD712004",
+      Weight: "80,000 lb",
+      Expires: "Sep 21, 2026",
+    },
     issued: iso(2025, 9, 21),
     expires: iso(2026, 9, 21),
     checks: [
@@ -432,7 +460,12 @@ export const seedRecords: DocRecord[] = [
     subjectId: "DR-114",
     fileName: "mvr-tx-pull.pdf",
     pages: 3,
-    read: { State: "TX", "Pull date": "Feb 14, 2026", Violations: "None in 36 months", "Valid through": "Feb 14, 2027" },
+    read: {
+      State: "TX",
+      "Pull date": "Feb 14, 2026",
+      Violations: "None in 36 months",
+      "Valid through": "Feb 14, 2027",
+    },
     issued: iso(2026, 2, 14),
     expires: iso(2027, 2, 14),
     checks: [
@@ -519,7 +552,12 @@ export const seedRecords: DocRecord[] = [
     subjectId: "DR-209",
     fileName: "whitlock-mvr.pdf",
     pages: 2,
-    read: { State: "KS", "Pull date": "Aug 22, 2026", Violations: "1 — speeding, 2024", "Valid through": "Aug 22, 2027" },
+    read: {
+      State: "KS",
+      "Pull date": "Aug 22, 2026",
+      Violations: "1 — speeding, 2024",
+      "Valid through": "Aug 22, 2027",
+    },
     issued: iso(2026, 8, 22),
     expires: iso(2027, 8, 22),
     checks: [
@@ -538,7 +576,12 @@ export const seedRecords: DocRecord[] = [
     subjectId: "DR-209",
     fileName: "whitlock_dl.jpg",
     pages: 1,
-    read: { "Licence number": "KS 4419902", Class: "A", Endorsements: "N", Expires: "Nov 12, 2027" },
+    read: {
+      "Licence number": "KS 4419902",
+      Class: "A",
+      Endorsements: "N",
+      Expires: "Nov 12, 2027",
+    },
     issued: iso(2023, 11, 12),
     expires: iso(2027, 11, 12),
     checks: [{ label: "Legible front", pass: true }],
@@ -629,9 +672,13 @@ export function fmtDate(isoDate?: string) {
 /** What HERCULES says out loud about a document coming due or gone by. */
 export function spokenExpiry(rec: DocRecord, from: Date = TODAY) {
   const spec = kindSpec(rec.kind);
-  const who = rec.subjectKind === "driver" ? subjectName("driver", rec.subjectId) : subjectName("vehicle", rec.subjectId);
+  const who =
+    rec.subjectKind === "driver"
+      ? subjectName("driver", rec.subjectId)
+      : subjectName("vehicle", rec.subjectId);
   const d = daysUntil(rec.expires, from);
-  const owner = rec.subjectId === "DR-114" || rec.subjectId === "HERC-114" || rec.subjectId === "TRL-9920";
+  const owner =
+    rec.subjectId === "DR-114" || rec.subjectId === "HERC-114" || rec.subjectId === "TRL-9920";
   const label = owner ? spec.spoken : `${who}'s ${spec.short.toLowerCase()}`;
   if (d < 0) {
     return `Heads up — ${label} expired ${Math.abs(d)} ${Math.abs(d) === 1 ? "day" : "days"} ago. Running on it is an out-of-service violation. I can put in the renewal request, but I'm not sending anything until you say so.`;
@@ -669,7 +716,10 @@ export type Classified = {
 };
 
 /** Mock field read — a real build hands the page to OCR plus a field extractor. */
-function readFields(kind: DocKind, seedNum: number): { read: Record<string, string>; expires?: string } {
+function readFields(
+  kind: DocKind,
+  seedNum: number,
+): { read: Record<string, string>; expires?: string } {
   const spec = kindSpec(kind);
   const months = 6 + (seedNum % 30);
   const exp = new Date(TODAY.getTime() + months * 30 * 86_400_000).toISOString().slice(0, 10);
@@ -679,7 +729,10 @@ function readFields(kind: DocKind, seedNum: number): { read: Record<string, stri
       f === "Expires" || f === "Valid through"
         ? fmtDate(exp)
         : f.toLowerCase().includes("number")
-          ? `${spec.short.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3)}-${100000 + seedNum * 37}`
+          ? `${spec.short
+              .toUpperCase()
+              .replace(/[^A-Z]/g, "")
+              .slice(0, 3)}-${100000 + seedNum * 37}`
           : "Read off the document";
   }
   return spec.expires ? { read, expires: exp } : { read };
@@ -710,14 +763,19 @@ export function classify(fileName: string, index = 0): Classified {
 
   const driver = drivers.find((d) => {
     const [first = "", last = ""] = d.name.toLowerCase().split(" ");
-    return (last && n.includes(last)) || n.includes(d.id.toLowerCase()) || (first.length > 3 && n.includes(first));
+    return (
+      (last && n.includes(last)) ||
+      n.includes(d.id.toLowerCase()) ||
+      (first.length > 3 && n.includes(first))
+    );
   });
   const vehicle = vehicles.find(
     (v) =>
       n.includes(v.id.toLowerCase()) ||
       n.includes(v.plate.toLowerCase().replace(/[^a-z0-9]/g, "")) ||
       n.includes(v.vin.slice(-6).toLowerCase()) ||
-      /(4471|9920|unit ?77)/.test(n) === (v.id === "HERC-114" || v.id === "TRL-9920" || v.id === "SOON-77"),
+      /(4471|9920|unit ?77)/.test(n) ===
+        (v.id === "HERC-114" || v.id === "TRL-9920" || v.id === "SOON-77"),
   );
 
   if (!best) {
@@ -794,9 +852,7 @@ export const sampleBatch = [
 /* ------------------------------------------------------------- EXPORT */
 
 export type ExportScope =
-  | { kind: "driver"; id: string }
-  | { kind: "vehicle"; id: string }
-  | { kind: "fleet"; id: string };
+  { kind: "driver"; id: string } | { kind: "vehicle"; id: string } | { kind: "fleet"; id: string };
 
 export function exportPackage(scope: ExportScope, records: DocRecord[]) {
   const picked =
@@ -806,7 +862,9 @@ export function exportPackage(scope: ExportScope, records: DocRecord[]) {
   const name =
     scope.kind === "fleet"
       ? "fleet-document-set"
-      : `${subjectName(scope.kind, scope.id).toLowerCase().replace(/[^a-z0-9]+/g, "-")}-document-set`;
+      : `${subjectName(scope.kind, scope.id)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")}-document-set`;
   return {
     fileName: `${name}-${TODAY.toISOString().slice(0, 10)}.zip`,
     count: picked.length,
@@ -894,7 +952,8 @@ export function complianceFor(
   from: Date = TODAY,
 ): SubjectCompliance {
   const held = records.filter((r) => r.subjectKind === subjectKind && r.subjectId === subjectId);
-  const required = subjectKind === "vehicle" ? requiredForVehicle(subjectId) : requiredFor("driver");
+  const required =
+    subjectKind === "vehicle" ? requiredForVehicle(subjectId) : requiredFor("driver");
   const missing = required.filter((k) => !held.some((r) => r.kind === k.id));
   const expired = held.filter((r) => statusOf(r, from) === "expired");
   const expiring = held.filter((r) => statusOf(r, from) === "expiring");

@@ -97,7 +97,6 @@ function SupplyScreen() {
   const addon = addonById("voiceHandoff");
   const unlocked = has("voiceHandoff");
 
-
   const [spokenLine, setSpokenLine] = useState<string | null>(null);
   const [pending, setPending] = useState<OrderOption | null>(null);
 
@@ -192,8 +191,8 @@ function SupplyScreen() {
             </Button>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            $5.00 a month on top of your plan. No per-order fee — the delivery app takes the payment,
-            not HERCULES. Switch it off any time in Settings.
+            $5.00 a month on top of your plan. No per-order fee — the delivery app takes the
+            payment, not HERCULES. Switch it off any time in Settings.
           </p>
           <div className="mt-3">
             <NotConnectedNote what="supplier stock, coverage and delivery quotes" />
@@ -298,7 +297,9 @@ function SupplyScreen() {
                               </Pill>
                             </div>
                             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                              {c.status === "none" ? `No ${s.name} available in this area.` : c.note}
+                              {c.status === "none"
+                                ? `No ${s.name} available in this area.`
+                                : c.note}
                               {c.deliveryFee ? ` · ${money2(c.deliveryFee)} delivery` : ""}
                             </p>
                           </div>
@@ -353,10 +354,7 @@ function SupplyScreen() {
               {coveragePoints.map((p) => {
                 const good = p.coverage.filter((c) => c.status === "available").length;
                 return (
-                  <div
-                    key={p.id}
-                    className="rounded-lg border border-primary/20 bg-background p-3"
-                  >
+                  <div key={p.id} className="rounded-lg border border-primary/20 bg-background p-3">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-display text-sm uppercase tracking-[0.12em]">
                         {p.label}
@@ -428,8 +426,8 @@ function SupplyScreen() {
           </div>
           <div className="mt-3">
             <DriverApprovedNote>
-              HERCULES reads prices and ETAs aloud and waits. Nothing is handed into a delivery
-              app until you say yes — and HERCULES never charges you for a hand-off.
+              HERCULES reads prices and ETAs aloud and waits. Nothing is handed into a delivery app
+              until you say yes — and HERCULES never charges you for a hand-off.
             </DriverApprovedNote>
           </div>
         </Panel>
@@ -480,10 +478,7 @@ function SupplyScreen() {
             ) : (
               <div className="space-y-2">
                 {orders.map((o) => (
-                  <div
-                    key={o.id}
-                    className="rounded-lg border border-go/40 bg-go/8 p-3"
-                  >
+                  <div key={o.id} className="rounded-lg border border-go/40 bg-go/8 p-3">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-display text-sm uppercase tracking-[0.12em]">
                         {o.vendor}

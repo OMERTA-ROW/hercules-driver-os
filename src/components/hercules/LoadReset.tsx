@@ -20,7 +20,12 @@ export function LoadResetButton({ className }: { className?: string }) {
   const [phase, setPhase] = useState<"reasons" | "working" | "plan">("reasons");
   const [reason, setReason] = useState<string | null>(null);
 
-  const reasons = ["Load fell through", "Breakdown", "Stuck in detention", "Weather / road closure"];
+  const reasons = [
+    "Load fell through",
+    "Breakdown",
+    "Stuck in detention",
+    "Weather / road closure",
+  ];
   const { hours } = useHours();
   const { load } = useCurrentLoad();
 
@@ -69,7 +74,11 @@ export function LoadResetButton({ className }: { className?: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="destructive" size="lg" className={cn("gap-2 font-display uppercase tracking-wider", className)}>
+        <Button
+          variant="destructive"
+          size="lg"
+          className={cn("gap-2 font-display uppercase tracking-wider", className)}
+        >
           <RotateCcw className="h-5 w-5" />
           Load Reset
         </Button>
@@ -133,7 +142,8 @@ export function LoadResetButton({ className }: { className?: string }) {
                 setOpen(false);
                 reset();
                 toast.success("Day rebuilt on your approval", {
-                  description: "Route, rest, and replacement loads updated. You can override anything.",
+                  description:
+                    "Route, rest, and replacement loads updated. You can override anything.",
                 });
               }}
             >

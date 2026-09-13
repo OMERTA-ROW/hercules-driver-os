@@ -103,10 +103,10 @@ function DispatchView() {
         <div className="flex items-start gap-2">
           <Bot className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <p className="text-sm">
-            <strong className="uppercase tracking-[0.1em] text-primary">Hands off.</strong>{" "}
-            HERCULES matched and routed all {autoRouted} live loads on its own, and every driver
-            approved their own run. There is no assignment desk here — you watch the fleet and step
-            in on the {exceptions.length} open exception{exceptions.length === 1 ? "" : "s"}.
+            <strong className="uppercase tracking-[0.1em] text-primary">Hands off.</strong> HERCULES
+            matched and routed all {autoRouted} live loads on its own, and every driver approved
+            their own run. There is no assignment desk here — you watch the fleet and step in on the{" "}
+            {exceptions.length} open exception{exceptions.length === 1 ? "" : "s"}.
           </p>
         </div>
       </Panel>
@@ -157,9 +157,25 @@ function DispatchView() {
         <div className="grid gap-3 xl:grid-cols-[3fr_2fr]">
           <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-border bg-black">
             {/* corridor guide */}
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M 52 100 L 55 62 L 62 30 L 66 0" stroke="hsl(var(--primary))" strokeOpacity="0.55" strokeWidth="0.9" fill="none" />
-              <path d="M 0 74 L 100 66" stroke="hsl(var(--info))" strokeOpacity="0.28" strokeWidth="0.5" fill="none" />
+            <svg
+              className="absolute inset-0 h-full w-full"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M 52 100 L 55 62 L 62 30 L 66 0"
+                stroke="hsl(var(--primary))"
+                strokeOpacity="0.55"
+                strokeWidth="0.9"
+                fill="none"
+              />
+              <path
+                d="M 0 74 L 100 66"
+                stroke="hsl(var(--info))"
+                strokeOpacity="0.28"
+                strokeWidth="0.5"
+                fill="none"
+              />
             </svg>
             {trucks.map((t) => {
               const { x, y } = projectToBox(t.lat, t.lng);
@@ -178,7 +194,9 @@ function DispatchView() {
                       : "border-border/80 bg-black/80 text-foreground/85 hover:border-primary/50",
                   )}
                 >
-                  <span className={cn("mr-1 inline-block h-2 w-2 rounded-full", statusDot[t.status])} />
+                  <span
+                    className={cn("mr-1 inline-block h-2 w-2 rounded-full", statusDot[t.status])}
+                  />
                   {t.unit}
                 </button>
               );
@@ -332,7 +350,15 @@ function DispatchView() {
                   <span className="font-display text-base uppercase tracking-[0.08em]">
                     {exceptionLabel[x.kind]} · {x.unit}
                   </span>
-                  <Pill tone={x.severity === "critical" ? "alert" : x.severity === "warn" ? "warn" : "neutral"}>
+                  <Pill
+                    tone={
+                      x.severity === "critical"
+                        ? "alert"
+                        : x.severity === "warn"
+                          ? "warn"
+                          : "neutral"
+                    }
+                  >
                     {x.opened}
                   </Pill>
                 </div>
@@ -344,7 +370,9 @@ function DispatchView() {
                 <div className="mt-2 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-2.5 text-xs">
                   <Bot className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <span>
-                    <strong className="uppercase tracking-[0.08em] text-primary">Already handled: </strong>
+                    <strong className="uppercase tracking-[0.08em] text-primary">
+                      Already handled:{" "}
+                    </strong>
                     {x.hercules}
                   </span>
                 </div>

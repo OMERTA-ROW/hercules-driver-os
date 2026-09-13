@@ -58,8 +58,14 @@ describe.skipIf(!configured)("clients cannot move their own AI credits", () => {
 
   it("refuses ai_credits_grant, revoke and touch", async () => {
     for (const [fn, args] of [
-      ["ai_credits_grant", { _user: OWN, _bucket: "purchased", _amount: 9999, _ref: "x", _reason: "x" }],
-      ["ai_credits_revoke", { _user: OWN, _bucket: "purchased", _amount: 1, _ref: "y", _reason: "y" }],
+      [
+        "ai_credits_grant",
+        { _user: OWN, _bucket: "purchased", _amount: 9999, _ref: "x", _reason: "x" },
+      ],
+      [
+        "ai_credits_revoke",
+        { _user: OWN, _bucket: "purchased", _amount: 1, _ref: "y", _reason: "y" },
+      ],
       ["ai_credits_touch", { _user: OWN }],
     ] as const) {
       const r = await rpc(fn, args as Record<string, unknown>);

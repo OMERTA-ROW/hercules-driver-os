@@ -34,10 +34,42 @@ export const Route = createFileRoute("/fleet")({
 });
 
 const trucks = [
-  { unit: "T-114", driver: "V. Bass", status: "Rolling", loaded: true, ppm: 2.43, hos: 246, health: "ok" },
-  { unit: "T-207", driver: "M. Duarte", status: "At dock", loaded: true, ppm: 1.92, hos: 118, health: "watch" },
-  { unit: "T-233", driver: "R. Cole", status: "Empty — searching", loaded: false, ppm: 0.0, hos: 402, health: "ok" },
-  { unit: "T-318", driver: "J. Whitlow", status: "34-hr reset", loaded: false, ppm: 0.0, hos: 660, health: "alert" },
+  {
+    unit: "T-114",
+    driver: "V. Bass",
+    status: "Rolling",
+    loaded: true,
+    ppm: 2.43,
+    hos: 246,
+    health: "ok",
+  },
+  {
+    unit: "T-207",
+    driver: "M. Duarte",
+    status: "At dock",
+    loaded: true,
+    ppm: 1.92,
+    hos: 118,
+    health: "watch",
+  },
+  {
+    unit: "T-233",
+    driver: "R. Cole",
+    status: "Empty — searching",
+    loaded: false,
+    ppm: 0.0,
+    hos: 402,
+    health: "ok",
+  },
+  {
+    unit: "T-318",
+    driver: "J. Whitlow",
+    status: "34-hr reset",
+    loaded: false,
+    ppm: 0.0,
+    hos: 660,
+    health: "alert",
+  },
 ] as const;
 
 function Fleet() {
@@ -61,7 +93,9 @@ function Fleet() {
           <Panel>
             <PanelTitle right={<Pill tone="go">Consolidated</Pill>}>Revenue</PanelTitle>
             <Metric value={money(revenue)} tone="go" />
-            <p className="mt-3 text-xs text-muted-foreground">Gross line haul, 4 trucks, week to date.</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Gross line haul, 4 trucks, week to date.
+            </p>
           </Panel>
           <Panel>
             <PanelTitle right={<Pill tone="info">Fleet avg</Pill>}>Profit / mile</PanelTitle>
@@ -104,9 +138,7 @@ function Fleet() {
                 </div>
                 <div>
                   <Label>Profit / mile</Label>
-                  <div className="metric text-sm font-semibold">
-                    {t.ppm ? money2(t.ppm) : "—"}
-                  </div>
+                  <div className="metric text-sm font-semibold">{t.ppm ? money2(t.ppm) : "—"}</div>
                 </div>
                 <div className="flex items-center gap-2 sm:justify-end">
                   <Pill tone={t.health === "ok" ? "go" : t.health === "watch" ? "watch" : "alert"}>
@@ -143,8 +175,8 @@ function Fleet() {
           </div>
           <div className="mt-3">
             <DriverApprovedNote>
-              Fleet suggestions are proposals. Drivers keep the final say on their own loads, breaks,
-              and routes.
+              Fleet suggestions are proposals. Drivers keep the final say on their own loads,
+              breaks, and routes.
             </DriverApprovedNote>
           </div>
         </Panel>

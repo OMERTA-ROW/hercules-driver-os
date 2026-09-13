@@ -149,40 +149,37 @@ function RootComponent() {
         <AuthProvider>
           <PurchaseProvider>
             <AddonProvider>
-            <HazardLayerProvider>
-
-              <StopsProvider>
-                <DeliveryProvider>
-                <PartsProviderRoot>
-                <VehicleProvider>
-                <BoltProvider>
-                <PickupProvider>
-                <ArrivalsProvider>
-                <ComplianceProvider>
-                <VoiceProvider>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-            <TripVehiclePrompt />
-            <LiveVoiceBridge />
-            <ArrivalBridge />
-            <ComplianceBridge />
-            <PickupBridge />
-            <ArrivalStack />
-            <PickupStack />
-            <ScreenDim />
-            <Toaster />
-                </VoiceProvider>
-                </ComplianceProvider>
-                </ArrivalsProvider>
-                </PickupProvider>
-                </BoltProvider>
-                </VehicleProvider>
-                </PartsProviderRoot>
-
-
-                </DeliveryProvider>
-              </StopsProvider>
-            </HazardLayerProvider>
+              <HazardLayerProvider>
+                <StopsProvider>
+                  <DeliveryProvider>
+                    <PartsProviderRoot>
+                      <VehicleProvider>
+                        <BoltProvider>
+                          <PickupProvider>
+                            <ArrivalsProvider>
+                              <ComplianceProvider>
+                                <VoiceProvider>
+                                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                                  <Outlet />
+                                  <TripVehiclePrompt />
+                                  <LiveVoiceBridge />
+                                  <ArrivalBridge />
+                                  <ComplianceBridge />
+                                  <PickupBridge />
+                                  <ArrivalStack />
+                                  <PickupStack />
+                                  <ScreenDim />
+                                  <Toaster />
+                                </VoiceProvider>
+                              </ComplianceProvider>
+                            </ArrivalsProvider>
+                          </PickupProvider>
+                        </BoltProvider>
+                      </VehicleProvider>
+                    </PartsProviderRoot>
+                  </DeliveryProvider>
+                </StopsProvider>
+              </HazardLayerProvider>
             </AddonProvider>
           </PurchaseProvider>
         </AuthProvider>

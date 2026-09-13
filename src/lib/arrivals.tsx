@@ -133,9 +133,7 @@ export function ArrivalsProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as Arrival[];
-      setArrivals(
-        parsed.filter((a) => Date.now() - a.createdAt < 6 * 60 * 60 * 1000),
-      );
+      setArrivals(parsed.filter((a) => Date.now() - a.createdAt < 6 * 60 * 60 * 1000));
     } catch {
       /* ignore unreadable state */
     }
@@ -263,9 +261,7 @@ export function ArrivalsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const markArrived = useCallback((id: string) => {
-    setArrivals((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: "arrived" } : a)),
-    );
+    setArrivals((prev) => prev.map((a) => (a.id === id ? { ...a, status: "arrived" } : a)));
   }, []);
 
   const dismiss = useCallback((id: string) => {
@@ -277,10 +273,7 @@ export function ArrivalsProvider({ children }: { children: ReactNode }) {
   const takeAnnouncement = useCallback(() => queue.current.shift() ?? null, []);
 
   const inbound = useMemo(
-    () =>
-      arrivals
-        .filter((a) => a.status !== "arrived")
-        .sort((x, y) => x.arriveAt - y.arriveAt),
+    () => arrivals.filter((a) => a.status !== "arrived").sort((x, y) => x.arriveAt - y.arriveAt),
     [arrivals],
   );
 

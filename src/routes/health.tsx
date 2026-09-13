@@ -13,7 +13,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote, NotConnectedNote } from "@/components/hercules/primitives";
+import {
+  Panel,
+  PanelTitle,
+  Label,
+  Metric,
+  Pill,
+  Bar,
+  DriverApprovedNote,
+  NotConnectedNote,
+} from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { BOLT_UNAVAILABLE, useBolt } from "@/lib/bolt";
 import { usePurchases } from "@/lib/purchases";
@@ -351,9 +360,7 @@ function HealthPage() {
                     <p className="text-xs text-muted-foreground">{r.detail}</p>
                   </div>
                   <Pill
-                    tone={
-                      r.state === "ready" ? "go" : r.state === "not-ready" ? "warn" : "info"
-                    }
+                    tone={r.state === "ready" ? "go" : r.state === "not-ready" ? "warn" : "info"}
                   >
                     {r.state === "ready"
                       ? "Ready"

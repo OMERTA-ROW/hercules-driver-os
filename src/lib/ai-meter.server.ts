@@ -18,7 +18,10 @@ import { aiLimits, allowancePausedLine } from "@/data/ai-credits";
  *  authenticated, so ONLY this client can move credits — a signed-in browser
  *  cannot reserve, settle or refund anything, not even on its own account. */
 type AdminClient = {
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc: (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
 async function admin(): Promise<AdminClient> {
@@ -97,7 +100,10 @@ export async function reserve(
   action: string,
   amount: number,
   idemKey?: string,
-): Promise<{ ok: true; reservation: Reservation } | { ok: false; reason: "insufficient" | "error"; message: string }> {
+): Promise<
+  | { ok: true; reservation: Reservation }
+  | { ok: false; reason: "insufficient" | "error"; message: string }
+> {
   const db = await admin();
   const { data, error } = await db.rpc("ai_credits_reserve", {
     _user: userId,
@@ -166,11 +172,18 @@ export async function walletQuality(userId: string): Promise<"eco" | "balanced">
   const db = supabaseAdmin as never as {
     from: (t: string) => {
       select: (c: string) => {
-        eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { quality_pref?: string } | null }> };
+        eq: (
+          c: string,
+          v: string,
+        ) => { maybeSingle: () => Promise<{ data: { quality_pref?: string } | null }> };
       };
     };
   };
-  const { data } = await db.from("ai_credit_wallets").select("quality_pref").eq("user_id", userId).maybeSingle();
+  const { data } = await db
+    .from("ai_credit_wallets")
+    .select("quality_pref")
+    .eq("user_id", userId)
+    .maybeSingle();
   return data?.quality_pref === "eco" ? "eco" : "balanced";
 }
 
@@ -279,8 +292,7 @@ async function finishExecution(
     return { status: "unsettled", charged: 0 };
   }
   const row = data as { status?: string; charged?: number } | null;
-  const status =
-    row?.status === "settled" || row?.status === "failed" ? row.status : "unsettled";
+  const status = row?.status === "settled" || row?.status === "failed" ? row.status : "unsettled";
   return { status, charged: Number(row?.charged ?? 0) };
 }
 
@@ -341,7 +353,11 @@ export async function runMetered<T>(opts: {
       };
     }
     if (claim.outcome === "error") {
-      return { ok: false as const, reason: "error" as const, message: "Could not reserve AI credits." };
+      return {
+        ok: false as const,
+        reason: "error" as const,
+        message: "Could not reserve AI credits.",
+      };
     }
     if (claim.outcome === "pending") {
       return {
@@ -384,7 +400,6 @@ export async function runMetered<T>(opts: {
     return { ok: true as const, value, charged: settled.charged };
   });
 }
-
 
 /* ---- daily / weekly allowance ------------------------------------------- */
 

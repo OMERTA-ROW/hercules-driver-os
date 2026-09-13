@@ -27,7 +27,6 @@
  *   - Document Upload ......... src/data/addons.ts ($5.00 one time)
  */
 
-
 export type AiPlanId = "assist" | "pro" | "max";
 export type AiPackId = "topup10" | "topup50" | "topup100";
 
@@ -265,10 +264,9 @@ export const freeForever = [
   "Navigation, the map and hazard warnings",
   "Clock, loads, money and health screens",
   "Every safety and breakdown action, including calling for help",
-  "Fixed commands the app answers itself (\"where am I\", \"how many hours\")",
+  'Fixed commands the app answers itself ("where am I", "how many hours")',
   "Your device's own built-in voice, when premium speech is off or unavailable",
 ];
-
 
 /* ------------------------------------------------------------------------ */
 /* Daily and weekly allowance (monthly plans only)                          */
@@ -287,10 +285,7 @@ export function allowanceFor(planId: string | null | undefined) {
 }
 
 /** Plain-language line shown when paid speech is paused at a cap. */
-export function allowancePausedLine(
-  scope: "daily" | "weekly",
-  resetsAt: string | null,
-): string {
+export function allowancePausedLine(scope: "daily" | "weekly", resetsAt: string | null): string {
   const when = resetsAt
     ? new Date(resetsAt).toLocaleString("en-US", {
         timeZone: ALLOWANCE_TIMEZONE,

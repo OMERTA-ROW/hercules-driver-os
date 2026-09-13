@@ -98,10 +98,7 @@ function EquipmentScreen() {
   ];
 
   return (
-    <AppShell
-      title="Equipment"
-      subtitle="The profile drives the route — not the other way around"
-    >
+    <AppShell title="Equipment" subtitle="The profile drives the route — not the other way around">
       <div className="grid gap-3 xl:grid-cols-2">
         {/* SAVED EQUIPMENT */}
         <Panel>
@@ -122,8 +119,8 @@ function EquipmentScreen() {
             </div>
           ) : ready && profiles.length === 0 ? (
             <div className="mb-3 rounded-lg border border-info/35 bg-info/10 p-3 text-sm">
-              Nothing saved yet. Add the truck and trailer you actually run — routing, clearances and
-              hazard warnings all read from it.
+              Nothing saved yet. Add the truck and trailer you actually run — routing, clearances
+              and hazard warnings all read from it.
             </div>
           ) : null}
           <div className="space-y-2">
@@ -208,8 +205,8 @@ function EquipmentScreen() {
           ) : profiles.length > 1 ? (
             <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
               <Volume2 className="mt-0.5 h-4 w-4 shrink-0 text-info" /> You run more than one, so at
-              the start of every trip I ask out loud: “What are you in today?” Whatever you answer is
-              what I route for.
+              the start of every trip I ask out loud: “What are you in today?” Whatever you answer
+              is what I route for.
             </p>
           ) : null}
           <div className="mt-3">

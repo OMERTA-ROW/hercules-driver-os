@@ -54,12 +54,17 @@ function trustedOrigin(): string {
 
 /** The account's payment customer, from the service-only billing mapping.
  *  The browser cannot write this, so it cannot point at someone else's. */
-async function customerFor(userId: string): Promise<{ customerId: string | null; subscriptionId: string | null; status: string | null }> {
+async function customerFor(
+  userId: string,
+): Promise<{ customerId: string | null; subscriptionId: string | null; status: string | null }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const db = supabaseAdmin as never as {
     from: (t: string) => {
       select: (c: string) => {
-        eq: (c: string, v: string) => {
+        eq: (
+          c: string,
+          v: string,
+        ) => {
           maybeSingle: () => Promise<{ data: Record<string, string | null> | null }>;
         };
       };
@@ -109,7 +114,10 @@ export const getCreditState = createServerFn({ method: "GET" })
     // shown as spendable balance.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const adminDb = supabaseAdmin as never as {
-      rpc: (f: string, a: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+      rpc: (
+        f: string,
+        a: Record<string, unknown>,
+      ) => Promise<{ error: { message: string } | null }>;
     };
     const touched = await adminDb.rpc("ai_credits_touch", { _user: context.userId });
     if (touched.error) console.error(`[credits] touch failed: ${touched.error.message}`);
@@ -117,12 +125,17 @@ export const getCreditState = createServerFn({ method: "GET" })
     const db = context.supabase as never as {
       from: (t: string) => {
         select: (c: string) => {
-          maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>;
+          maybeSingle: () => Promise<{
+            data: Record<string, unknown> | null;
+            error: { message: string } | null;
+          }>;
           order: (
             c: string,
             o: { ascending: boolean },
           ) => {
-            limit: (n: number) => Promise<{ data: Row[] | null; error: { message: string } | null }>;
+            limit: (
+              n: number,
+            ) => Promise<{ data: Row[] | null; error: { message: string } | null }>;
           };
         };
       };
@@ -216,7 +229,10 @@ export const setAiQuality = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ quality: z.enum(["eco", "balanced"]) }).parse(d))
   .handler(async ({ data, context }) => {
     const db = context.supabase as never as {
-      rpc: (f: string, a: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+      rpc: (
+        f: string,
+        a: Record<string, unknown>,
+      ) => Promise<{ error: { message: string } | null }>;
     };
     const { error } = await db.rpc("ai_set_quality_pref", { _pref: data.quality });
     if (error) return { ok: false as const, message: "Could not save that preference." };
@@ -230,9 +246,7 @@ export const setAiQuality = createServerFn({ method: "POST" })
 export const startAiCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z
-      .object({ kind: z.enum(["plan", "pack"]), id: z.string().min(1).max(40) })
-      .parse(d),
+    z.object({ kind: z.enum(["plan", "pack"]), id: z.string().min(1).max(40) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const missing = missingConfig();
@@ -254,7 +268,12 @@ export const startAiCheckout = createServerFn({ method: "POST" })
     const origin = trustedOrigin();
     const client = stripe();
     if (!client) {
-      return { ok: false as const, reason: "unconfigured" as const, message: "Payment setup is incomplete.", missing };
+      return {
+        ok: false as const,
+        reason: "unconfigured" as const,
+        message: "Payment setup is incomplete.",
+        missing,
+      };
     }
 
     // Verify the real Stripe price matches what the catalogue shows the driver,
@@ -282,7 +301,11 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       }
     } catch (e) {
       console.error(`[credits] price check failed: ${e instanceof Error ? e.message : String(e)}`);
-      return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+      return {
+        ok: false as const,
+        reason: "error" as const,
+        message: "Checkout could not be opened.",
+      };
     }
 
     // Top-ups are a subscriber benefit: without an active monthly AI plan on the
@@ -316,14 +339,18 @@ export const startAiCheckout = createServerFn({ method: "POST" })
         return {
           ok: false as const,
           reason: "already_subscribed" as const,
-          message: "This account already has a monthly AI plan. Change it in billing settings instead.",
+          message:
+            "This account already has a monthly AI plan. Change it in billing settings instead.",
         };
       }
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const adminDb = supabaseAdmin as never as {
-      rpc: (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+      rpc: (
+        f: string,
+        a: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>;
     };
 
     // One authoritative customer, created and linked BEFORE checkout, so an
@@ -337,8 +364,14 @@ export const startAiCheckout = createServerFn({ method: "POST" })
         );
         customerId = created.id;
       } catch (e) {
-        console.error(`[credits] customer create failed: ${e instanceof Error ? e.message : String(e)}`);
-        return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+        console.error(
+          `[credits] customer create failed: ${e instanceof Error ? e.message : String(e)}`,
+        );
+        return {
+          ok: false as const,
+          reason: "error" as const,
+          message: "Checkout could not be opened.",
+        };
       }
       const linked = await adminDb.rpc("ai_billing_link_customer", {
         _user: context.userId,
@@ -348,7 +381,11 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       });
       if (linked.error) {
         console.error(`[credits] customer link failed: ${linked.error.message}`);
-        return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+        return {
+          ok: false as const,
+          reason: "error" as const,
+          message: "Checkout could not be opened.",
+        };
       }
     }
 
@@ -361,7 +398,11 @@ export const startAiCheckout = createServerFn({ method: "POST" })
     });
     if (begun.error) {
       console.error(`[credits] checkout begin failed: ${begun.error.message}`);
-      return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+      return {
+        ok: false as const,
+        reason: "error" as const,
+        message: "Checkout could not be opened.",
+      };
     }
     const intent = begun.data as { outcome?: string; intent?: string } | null;
     if (intent?.outcome === "pending") {
@@ -473,7 +514,10 @@ export const submitEnterpriseInquiry = createServerFn({ method: "POST" })
 
     const db = context.supabase as never as {
       from: (t: string) => {
-        select: (c: string, o?: { count: "exact"; head: true }) => {
+        select: (
+          c: string,
+          o?: { count: "exact"; head: true },
+        ) => {
           gte: (c: string, v: string) => Promise<{ count: number | null; error: unknown }>;
         };
         insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;

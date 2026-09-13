@@ -27,12 +27,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { asksVehiclePerTrip, tierForTrucks, type FleetTier } from "@/data/accounts";
 import {
-  asksVehiclePerTrip,
-  tierForTrucks,
-  type FleetTier,
-} from "@/data/accounts";
-import { assignmentFor, profileFromAssignment, type FleetAssignment } from "@/data/fleet-assignments";
+  assignmentFor,
+  profileFromAssignment,
+  type FleetAssignment,
+} from "@/data/fleet-assignments";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
 import {
@@ -76,7 +76,11 @@ type Ctx = {
   askForTrip: boolean;
   chooseForTrip: (id: string) => void;
   dismissTripPrompt: () => void;
-  addProfile: (kind: VehicleKind, sub: EighteenSub | undefined, unit: string) => Promise<SaveResult>;
+  addProfile: (
+    kind: VehicleKind,
+    sub: EighteenSub | undefined,
+    unit: string,
+  ) => Promise<SaveResult>;
   removeProfile: (id: string) => Promise<SaveResult>;
   /** Set when the saved equipment could not be read — never shown as "none". */
   loadError: string | null;
@@ -187,7 +191,8 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
   const addProfile = useCallback(
     async (kind: VehicleKind, sub: EighteenSub | undefined, unit: string): Promise<SaveResult> => {
-      if (!userId) return { ok: false, message: "Sign in first — equipment saves to your account." };
+      if (!userId)
+        return { ok: false, message: "Sign in first — equipment saves to your account." };
       const name = unit.trim();
       if (name.length < 2) {
         return { ok: false, message: "Give it a name you'll recognise, at least 2 characters." };
@@ -228,7 +233,11 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     async (id: string): Promise<SaveResult> => {
       if (!userId) return { ok: false, message: "Sign in first." };
       setSaving(true);
-      const { error } = await supabase.from("vehicles").delete().eq("id", id).eq("owner_id", userId);
+      const { error } = await supabase
+        .from("vehicles")
+        .delete()
+        .eq("id", id)
+        .eq("owner_id", userId);
       setSaving(false);
       if (error) {
         console.error(`[vehicles] remove failed: ${error.message}`);
@@ -243,7 +252,9 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(() => {
     return {
-      profiles: inherited ? [inherited, ...profiles.filter((p) => p.id !== inherited.id)] : profiles,
+      profiles: inherited
+        ? [inherited, ...profiles.filter((p) => p.id !== inherited.id)]
+        : profiles,
       active,
       rules: rulesFor(active),
       noneSaved: !inherited && profiles.length === 0,

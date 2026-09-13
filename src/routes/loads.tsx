@@ -88,7 +88,9 @@ function Loads() {
     >
       <div className="grid gap-4">
         <Panel>
-          <PanelTitle right={<Pill tone="primary">Live postings</Pill>}>Available freight</PanelTitle>
+          <PanelTitle right={<Pill tone="primary">Live postings</Pill>}>
+            Available freight
+          </PanelTitle>
 
           {!account ? (
             <EmptyState title="Sign in to see the board">
@@ -197,8 +199,7 @@ function Loads() {
                 >
                   <div>
                     <div className="font-display text-sm uppercase tracking-[0.1em]">
-                      {place(l.origin_city, l.origin_state)} →{" "}
-                      {place(l.dest_city, l.dest_state)}
+                      {place(l.origin_city, l.origin_state)} → {place(l.dest_city, l.dest_state)}
                     </div>
                     <Label>
                       {l.reference ?? l.id.slice(0, 8)} · {money(l.rate_cents)}

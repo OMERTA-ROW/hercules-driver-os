@@ -162,7 +162,12 @@ type Ctx = {
   /** Source the part a live fault code points at. */
   sourceFault: (code: string) => PartMatch | undefined;
   itemsFor: (category: SupplyCategoryId) => SupplyItem[];
-  quote: (label: string, category: SupplyCategoryId, listing: Listing, partNumber?: string) => Quote;
+  quote: (
+    label: string,
+    category: SupplyCategoryId,
+    listing: Listing,
+    partNumber?: string,
+  ) => Quote;
   /** DRIVER APPROVED ONLY — called after the driver's explicit yes. */
   place: (q: Quote) => PlacedSupplyOrder;
   cancel: (id: string) => void;

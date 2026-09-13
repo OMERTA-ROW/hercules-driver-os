@@ -55,7 +55,6 @@ vi.mock("./RealMap", () => ({
     useEffect(() => {
       propsRef.current.onStatus?.("ready");
       propsRef.current.onReady?.(fakeMap, fakeMaps);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return <div data-testid="fake-realmap" data-zoom={props.zoom ?? "default"} />;
   },

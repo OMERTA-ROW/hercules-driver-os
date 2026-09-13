@@ -42,7 +42,12 @@ export type LiveValue = {
   spoken: string;
 };
 
-export type TireFrame = { pos: string; psi: number; target: number; status: "ok" | "watch" | "alert" };
+export type TireFrame = {
+  pos: string;
+  psi: number;
+  target: number;
+  status: "ok" | "watch" | "alert";
+};
 
 export type Prediction = {
   title: string;
@@ -96,7 +101,8 @@ export const boltBaseline: LiveValue[] = [
     status: "ok",
     detail: "Trip average 7.1 · rolling 30-day 6.9",
     pct: 74,
-    spoken: "You're running seven and a half miles a gallon right now, a touch better than your month.",
+    spoken:
+      "You're running seven and a half miles a gallon right now, a touch better than your month.",
   },
   {
     key: "rpm",
@@ -116,7 +122,8 @@ export const boltBaseline: LiveValue[] = [
     status: "ok",
     detail: "Next service interval at 14,500 hrs",
     pct: 62,
-    spoken: "Fourteen thousand two hundred hours on the engine, service due in about three hundred.",
+    spoken:
+      "Fourteen thousand two hundred hours on the engine, service due in about three hundred.",
   },
   {
     key: "odo",
@@ -155,7 +162,8 @@ export const boltBaseline: LiveValue[] = [
     status: "watch",
     detail: "About 1,050 mi remaining — top off in OKC",
     pct: 38,
-    spoken: "DEF is at thirty-eight percent, roughly a thousand miles. Top it off in Oklahoma City.",
+    spoken:
+      "DEF is at thirty-eight percent, roughly a thousand miles. Top it off in Oklahoma City.",
   },
   {
     key: "aftertreatment",
@@ -374,7 +382,8 @@ export const obdBaseline: LiveValue[] = [
     status: "watch",
     detail: "Drifted up over 30 days — points at a vacuum leak",
     pct: 66,
-    spoken: "Your long-term fuel trim has drifted up over the month. That reads like a vacuum leak.",
+    spoken:
+      "Your long-term fuel trim has drifted up over the month. That reads like a vacuum leak.",
   },
   {
     key: "volts",
@@ -606,7 +615,8 @@ export function autoAlertsFor(kind: AdapterKind) {
  * on the nine-pin J1939 bus; everything lighter is OBD-II.
  */
 export function adapterForSpec(spec: Pick<VehicleSpec, "kind" | "pullsTrailer">): AdapterKind {
-  if (spec.kind === "car" || spec.kind === "passengerVan" || spec.kind === "cargoVan") return "obd2";
+  if (spec.kind === "car" || spec.kind === "passengerVan" || spec.kind === "cargoVan")
+    return "obd2";
   if (spec.kind === "boxTruck") return "obd2";
   return spec.pullsTrailer ? "j1939" : "obd2";
 }

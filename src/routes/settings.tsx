@@ -3,7 +3,13 @@ import { CreditCard, Monitor, LogOut, Check, TriangleAlert, Volume2, Circle } fr
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Pill, DriverApprovedNote } from "@/components/hercules/primitives";
+import {
+  Panel,
+  PanelTitle,
+  Label,
+  Pill,
+  DriverApprovedNote,
+} from "@/components/hercules/primitives";
 import { ThemePicker, BrightnessPicker } from "@/components/hercules/ThemeToggle";
 import { Orb } from "@/components/hercules/Orb";
 import { useVoice, orbColorways } from "@/lib/voice";
@@ -104,7 +110,9 @@ function Settings() {
                           : "border-border bg-card/50 hover:bg-accent",
                       )}
                     >
-                      <div className="font-display text-sm uppercase tracking-[0.1em]">{p.name}</div>
+                      <div className="font-display text-sm uppercase tracking-[0.1em]">
+                        {p.name}
+                      </div>
                       <div className="metric mt-1 font-bold text-primary">
                         ${p.price}
                         <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -249,7 +257,9 @@ function HazardToggles() {
           className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-lg border border-border bg-card/60 p-3"
         >
           <span className="min-w-0">
-            <span className="block font-display uppercase tracking-wide">{hazardMeta[k].label}</span>
+            <span className="block font-display uppercase tracking-wide">
+              {hazardMeta[k].label}
+            </span>
             <span className="block text-xs text-muted-foreground">{hazardMeta[k].blurb}</span>
           </span>
           <span
@@ -298,7 +308,9 @@ function OrbPicker() {
             aria-pressed={active}
             className={cn(
               "flex flex-col items-center gap-3 rounded-xl border p-4 transition-colors",
-              active ? "border-primary/60 bg-primary/10" : "border-border bg-card/50 hover:bg-accent",
+              active
+                ? "border-primary/60 bg-primary/10"
+                : "border-border bg-card/50 hover:bg-accent",
             )}
           >
             <Orb className="w-24" mode={active ? mode : "idle"} colorway={o.id} />
@@ -328,13 +340,7 @@ function AddonsPanel() {
 
   return (
     <Panel>
-      <PanelTitle
-        right={
-          <Pill tone="primary">
-            ${monthlyTotal.toFixed(2)} / month
-          </Pill>
-        }
-      >
+      <PanelTitle right={<Pill tone="primary">${monthlyTotal.toFixed(2)} / month</Pill>}>
         <span className="inline-flex items-center gap-2">
           <Layers className="h-5 w-5 text-primary" /> Add-ons
         </span>
@@ -363,7 +369,9 @@ function AddonsPanel() {
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{a.blurb}</p>
               {a.noPerOrderFee ? (
-                <p className="mt-1 text-xs text-go">No per-order fee — the app charges you, not HERCULES.</p>
+                <p className="mt-1 text-xs text-go">
+                  No per-order fee — the app charges you, not HERCULES.
+                </p>
               ) : null}
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
@@ -418,8 +426,8 @@ function AddonsPanel() {
       <div className="mt-4 rounded-lg border border-border bg-card/50 p-3">
         <Label>AI assistance credits</Label>
         <p className="mt-1 text-xs text-muted-foreground">
-          Billed separately from this subscription. Monthly credits expire at the end of each paid period;
-          bought-once credits never do.
+          Billed separately from this subscription. Monthly credits expire at the end of each paid
+          period; bought-once credits never do.
         </p>
         <Button size="lg" variant="outline" className="mt-3 min-h-[56px]" asChild>
           <Link to="/credits">Balance & credit packs</Link>

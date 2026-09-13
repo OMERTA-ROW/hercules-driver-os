@@ -1,12 +1,5 @@
 export type DocTypeId =
-  | "bol"
-  | "ratecon"
-  | "pod"
-  | "fuel"
-  | "scale"
-  | "lumper"
-  | "repair"
-  | "other";
+  "bol" | "ratecon" | "pod" | "fuel" | "scale" | "lumper" | "repair" | "other";
 
 export const docTypes: { id: DocTypeId; label: string; short: string }[] = [
   { id: "bol", label: "Bill of Lading (BOL)", short: "BOL" },

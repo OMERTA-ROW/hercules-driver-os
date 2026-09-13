@@ -292,9 +292,7 @@ function PartsPage() {
                         key={l.id}
                         listing={l}
                         onOrder={() => readBack(active.name, "parts", l, active.partNumber)}
-                        onRead={() =>
-                          announce(spokenListing(active.name, l))
-                        }
+                        onRead={() => announce(spokenListing(active.name, l))}
                       />
                     ))}
                   </div>
@@ -348,8 +346,8 @@ function PartsPage() {
               <p className="text-sm text-muted-foreground">
                 Closest heavy-duty help right now is {nearestMechanic.name} —{" "}
                 {nearestMechanic.milesAway.toFixed(1)} mi, about {nearestMechanic.etaMin} min
-                {nearestMechanic.open24 ? ", open 24 hours" : ""}. Order the part here, and Breakdown
-                Assist calls them on your word only.
+                {nearestMechanic.open24 ? ", open 24 hours" : ""}. Order the part here, and
+                Breakdown Assist calls them on your word only.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button asChild size="lg" className="h-14 gap-2">
@@ -379,9 +377,9 @@ function PartsPage() {
               </span>
             </PanelTitle>
             <p className="text-sm text-muted-foreground">
-              {cfg.note}. The fee scales with the order and it is a line item you see and hear before
-              you say yes. It is what keeps HERCULES running and the platform operating — it is not a
-              discount and it is not absorbed.
+              {cfg.note}. The fee scales with the order and it is a line item you see and hear
+              before you say yes. It is what keeps HERCULES running and the platform operating — it
+              is not a discount and it is not absorbed.
             </p>
             <div className="mt-3 space-y-1">
               {cfg.tiers.map((t) => (
@@ -484,8 +482,8 @@ function PartsPage() {
           <DialogHeader>
             <DialogTitle className="text-2xl uppercase">Place this order?</DialogTitle>
             <DialogDescription>
-              HERCULES reads it back with every charge on it. Nothing is ordered or paid for until you
-              approve it.
+              HERCULES reads it back with every charge on it. Nothing is ordered or paid for until
+              you approve it.
             </DialogDescription>
           </DialogHeader>
           {pending ? (
@@ -518,13 +516,13 @@ function PartsPage() {
                 </div>
                 <p className="mt-2 text-xs leading-snug text-muted-foreground">
                   The {money2(pending.fee)} fee is HERCULES' charge for sourcing it, placing it and
-                  paying the supplier. It is what keeps HERCULES running. It is never hidden and never
-                  added after the fact.
+                  paying the supplier. It is what keeps HERCULES running. It is never hidden and
+                  never added after the fact.
                 </p>
               </div>
               <DriverApprovedNote>
-                You are approving this order and this charge. HERCULES does not order anything on its
-                own.
+                You are approving this order and this charge. HERCULES does not order anything on
+                its own.
               </DriverApprovedNote>
             </div>
           ) : null}
@@ -660,7 +658,9 @@ function PickupRuns() {
               <p>
                 <MapPin className="mr-1 inline h-3 w-3 text-primary" />
                 {r.site.milesAhead} mi ahead · {r.site.milesOffRoute.toFixed(1)} mi off route ·{" "}
-                {r.status === "routed" ? `${Math.max(0, minutesOut(r))} min out` : `${r.driveMin} min`}
+                {r.status === "routed"
+                  ? `${Math.max(0, minutesOut(r))} min out`
+                  : `${r.driveMin} min`}
               </p>
               <p>
                 <Clock className="mr-1 inline h-3 w-3 text-primary" />

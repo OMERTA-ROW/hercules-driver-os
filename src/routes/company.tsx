@@ -80,7 +80,11 @@ function CompanyPage() {
     return (
       <AppShell title="Company & dispatch" subtitle="Sign in to connect to a carrier">
         <Panel>
-          <EmptyState title="Sign in first">{"Your company link belongs to your account, so you need to be signed in to join a carrier or start a fleet."}</EmptyState>
+          <EmptyState title="Sign in first">
+            {
+              "Your company link belongs to your account, so you need to be signed in to join a carrier or start a fleet."
+            }
+          </EmptyState>
           <div className="mt-3 flex gap-2">
             <Button asChild size="lg">
               <Link to="/sign-in">Sign in</Link>
@@ -167,9 +171,7 @@ function CompanyPage() {
         {/* CONNECTED AS DRIVER OR LEASED OPERATOR */}
         {driving ? (
           <Panel>
-            <PanelTitle right={<Pill tone="go">Connected</Pill>}>
-              {driving.company.name}
-            </PanelTitle>
+            <PanelTitle right={<Pill tone="go">Connected</Pill>}>{driving.company.name}</PanelTitle>
             <ul className="space-y-1 text-sm">
               <li>
                 <Label>Your role</Label> {roleLabel[driving.role]}
@@ -243,7 +245,9 @@ function CompanyPage() {
             </Panel>
 
             <Panel>
-              <PanelTitle right={<Pill tone="primary">Path 3</Pill>}>Start your own fleet</PanelTitle>
+              <PanelTitle right={<Pill tone="primary">Path 3</Pill>}>
+                Start your own fleet
+              </PanelTitle>
               <p className="text-sm text-muted-foreground">
                 Create the company, then invite your drivers and leased operators. You become its
                 owner; only an owner can add a dispatcher.
@@ -296,9 +300,7 @@ function CompanyPage() {
         {managed ? (
           <>
             <Panel>
-              <PanelTitle
-                right={<Pill tone="go">{roleLabel[managed.role]}</Pill>}
-              >
+              <PanelTitle right={<Pill tone="go">{roleLabel[managed.role]}</Pill>}>
                 {managed.company.name}
               </PanelTitle>
               <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -316,8 +318,8 @@ function CompanyPage() {
                 </Button>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                The code identifies your company. It does not let anyone in on its own — drivers join
-                only with an invite you issue below, and you approve each one.
+                The code identifies your company. It does not let anyone in on its own — drivers
+                join only with an invite you issue below, and you approve each one.
               </p>
               <LoadBoardState connected={managed.company.loadBoardConnected} />
             </Panel>
@@ -376,7 +378,10 @@ function CompanyPage() {
                 </div>
                 <Button
                   size="lg"
-                  disabled={actions.createInvite.isPending || inviteRole === "dispatcher" && managed.role !== "owner"}
+                  disabled={
+                    actions.createInvite.isPending ||
+                    (inviteRole === "dispatcher" && managed.role !== "owner")
+                  }
                   onClick={() => {
                     void (async () => {
                       const res = await actions.createInvite.mutateAsync({
@@ -398,7 +403,9 @@ function CompanyPage() {
 
               <div className="mt-3 space-y-2">
                 {(invites.data ?? []).length === 0 ? (
-                  <EmptyState title="No invites yet">{"Create one above and hand the code to your driver. It expires on its own."}</EmptyState>
+                  <EmptyState title="No invites yet">
+                    {"Create one above and hand the code to your driver. It expires on its own."}
+                  </EmptyState>
                 ) : null}
                 {(invites.data ?? []).map((iv) => {
                   const expired = new Date(iv.expiresAt).getTime() <= Date.now();
@@ -458,7 +465,9 @@ function CompanyPage() {
               <PanelTitle right={<Pill tone="primary">Roster</Pill>}>Your people</PanelTitle>
               <div className="space-y-2">
                 {(roster.data ?? []).length === 0 ? (
-                  <EmptyState title="Nobody yet">{"Invited drivers show up here to approve."}</EmptyState>
+                  <EmptyState title="Nobody yet">
+                    {"Invited drivers show up here to approve."}
+                  </EmptyState>
                 ) : null}
                 {(roster.data ?? []).map((m) => (
                   <div

@@ -89,14 +89,8 @@ export function useMemberships() {
         .filter((m): m is Membership => m !== null);
     },
   });
-  const active = useMemo(
-    () => (q.data ?? []).filter((m) => m.status === "active"),
-    [q.data],
-  );
-  const pending = useMemo(
-    () => (q.data ?? []).filter((m) => m.status === "pending"),
-    [q.data],
-  );
+  const active = useMemo(() => (q.data ?? []).filter((m) => m.status === "active"), [q.data]);
+  const pending = useMemo(() => (q.data ?? []).filter((m) => m.status === "pending"), [q.data]);
   return {
     memberships: q.data ?? [],
     active,

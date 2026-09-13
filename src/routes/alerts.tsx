@@ -101,12 +101,8 @@ function Alerts() {
                     <div className="mt-1.5 font-display text-base uppercase tracking-[0.08em]">
                       {a.title}
                     </div>
-                    {a.body ? (
-                      <p className="mt-1 text-sm text-muted-foreground">{a.body}</p>
-                    ) : null}
-                    <Label className="mt-1">
-                      {new Date(a.created_at).toLocaleString()}
-                    </Label>
+                    {a.body ? <p className="mt-1 text-sm text-muted-foreground">{a.body}</p> : null}
+                    <Label className="mt-1">{new Date(a.created_at).toLocaleString()}</Label>
                   </div>
                   {!a.acknowledged_at ? (
                     <Button

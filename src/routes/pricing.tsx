@@ -86,7 +86,8 @@ function Pricing() {
               </div>
               {p.minSeats ? (
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Truck className="h-3.5 w-3.5" /> {p.minSeats} truck minimum — ${p.price * p.minSeats}
+                  <Truck className="h-3.5 w-3.5" /> {p.minSeats} truck minimum — $
+                  {p.price * p.minSeats}
                   /month at 3 trucks
                 </p>
               ) : null}
@@ -134,7 +135,10 @@ function Pricing() {
             <tr className="border-b border-border text-left">
               <th className="py-2 font-display uppercase tracking-[0.12em]">Feature</th>
               {plans.map((p) => (
-                <th key={p.id} className="py-2 text-center font-display uppercase tracking-[0.12em]">
+                <th
+                  key={p.id}
+                  className="py-2 text-center font-display uppercase tracking-[0.12em]"
+                >
                   {p.name}
                 </th>
               ))}
@@ -165,8 +169,9 @@ function Pricing() {
         <div className="mt-3 rounded-lg border border-primary/40 bg-primary/8 p-3">
           <Label>AI assistance credits — separate from your plan</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            Spoken AI answers run on credits: a monthly allowance, or buy-once packs that never expire. Your
-            app plan above is unchanged either way, and every action's cost is shown before you use it.
+            Spoken AI answers run on credits: a monthly allowance, or buy-once packs that never
+            expire. Your app plan above is unchanged either way, and every action's cost is shown
+            before you use it.
           </p>
           <Button size="lg" variant="outline" className="mt-3" asChild>
             <Link to="/credits">See AI credits</Link>

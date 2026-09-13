@@ -61,7 +61,8 @@ export const Route = createFileRoute("/navigation")({
       { property: "og:title", content: "Navigation — HERCULES Truck-Legal Routing" },
       {
         property: "og:description",
-        content: "Truck-legal route, live position, automatic reroute. The AI proposes, you decide.",
+        content:
+          "Truck-legal route, live position, automatic reroute. The AI proposes, you decide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -195,7 +196,8 @@ function NavigationScreen() {
         <span className="tech-label text-primary">Routing for</span>
         <span className="font-display text-lg uppercase tracking-[0.1em]">{vehicle.label}</span>
         <span className="text-xs text-muted-foreground">
-          {vehicle.unit} · {rules.backRoadsAllowed
+          {vehicle.unit} ·{" "}
+          {rules.backRoadsAllowed
             ? "county and back roads permitted"
             : "blue-shield interstate and white-shield legal county highway only"}
           {rules.weightRestrictionChecks ? " · weight limits checked" : ""}
@@ -206,7 +208,7 @@ function NavigationScreen() {
         </Button>
       </div>
 
-          {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
+      {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
       {warning ? (
         <div
           className={`mb-3 rounded-2xl border-2 p-4 backdrop-blur ${
@@ -234,8 +236,8 @@ function NavigationScreen() {
                 </p>
               ) : null}
               <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look
-                down. Your call what you do with it.
+                <Volume2 className="h-4 w-4" /> Announced by voice — you never have to look down.
+                Your call what you do with it.
               </p>
             </div>
             <Button
@@ -286,7 +288,6 @@ function NavigationScreen() {
             </Pill>
           </div>
 
-
           {/* AUTO-REROUTE NOTICE */}
           {notice ? (
             <div className="absolute inset-x-3 bottom-3 rounded-xl border border-primary/50 bg-primary/12 p-3 backdrop-blur">
@@ -314,7 +315,9 @@ function NavigationScreen() {
                     onClick={() => {
                       setRoute(primaryRoute);
                       setNotice(null);
-                      setSpoken("Holding your original route. I will keep watching for a legal line.");
+                      setSpoken(
+                        "Holding your original route. I will keep watching for a legal line.",
+                      );
                     }}
                   >
                     <X className="mr-1 h-4 w-4" /> Dismiss
@@ -356,7 +359,12 @@ function NavigationScreen() {
               <span>“{spoken}”</span>
             </div>
           ) : null}
-          <Button size="lg" variant="outline" className="mt-3 w-full gap-2" onClick={simulateMissedTurn}>
+          <Button
+            size="lg"
+            variant="outline"
+            className="mt-3 w-full gap-2"
+            onClick={simulateMissedTurn}
+          >
             <Navigation2 className="h-4 w-4" /> Simulate a missed turn
           </Button>
           <div className="mt-3">
@@ -367,7 +375,11 @@ function NavigationScreen() {
 
         {/* TURN LIST */}
         <Panel>
-          <PanelTitle right={<Pill tone="info">{route.provider.includes("mock") ? "Mock provider" : "Live"}</Pill>}>
+          <PanelTitle
+            right={
+              <Pill tone="info">{route.provider.includes("mock") ? "Mock provider" : "Live"}</Pill>
+            }
+          >
             Turn by turn
           </PanelTitle>
           <ol className="space-y-2">
@@ -389,67 +401,66 @@ function NavigationScreen() {
         </Panel>
       </div>
 
-
-        {/* TRUCK HAZARDS AHEAD */}
-        <Panel>
-          <PanelTitle
-            right={
-              <Pill tone={hazardsAhead.some((h) => h.severity === "critical") ? "alert" : "info"}>
-                {hazardsAhead.length} ahead
-              </Pill>
-            }
-          >
-            <span className="inline-flex items-center gap-2">
-              <TriangleAlert className="h-5 w-5 text-warn" /> Hazards on your line
-            </span>
-          </PanelTitle>
-          <div className="space-y-2">
-            {hazardsAhead.slice(0, 9).map(({ hazard, severity, exceeds, milesAhead }) => (
-              <div
-                key={hazard.id}
-                className={`flex items-center gap-3 rounded-lg border p-2.5 ${
-                  severity === "critical"
-                    ? "border-destructive/45 bg-destructive/10"
-                    : severity === "caution"
-                      ? "border-warn/40 bg-warn/10"
-                      : "border-border bg-card/60"
-                }`}
-              >
-                <HazardBadge hazard={hazard} severity={severity} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{hazard.name}</div>
-                  <p className="text-xs text-muted-foreground">{hazard.detail}</p>
-                  {exceeds ? (
-                    <p className="text-xs font-semibold text-destructive">
-                      Over your limits — do not attempt
-                    </p>
-                  ) : null}
-                </div>
-                <span className="metric shrink-0 text-sm">{milesAhead} mi</span>
+      {/* TRUCK HAZARDS AHEAD */}
+      <Panel>
+        <PanelTitle
+          right={
+            <Pill tone={hazardsAhead.some((h) => h.severity === "critical") ? "alert" : "info"}>
+              {hazardsAhead.length} ahead
+            </Pill>
+          }
+        >
+          <span className="inline-flex items-center gap-2">
+            <TriangleAlert className="h-5 w-5 text-warn" /> Hazards on your line
+          </span>
+        </PanelTitle>
+        <div className="space-y-2">
+          {hazardsAhead.slice(0, 9).map(({ hazard, severity, exceeds, milesAhead }) => (
+            <div
+              key={hazard.id}
+              className={`flex items-center gap-3 rounded-lg border p-2.5 ${
+                severity === "critical"
+                  ? "border-destructive/45 bg-destructive/10"
+                  : severity === "caution"
+                    ? "border-warn/40 bg-warn/10"
+                    : "border-border bg-card/60"
+              }`}
+            >
+              <HazardBadge hazard={hazard} severity={severity} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold">{hazard.name}</div>
+                <p className="text-xs text-muted-foreground">{hazard.detail}</p>
+                {exceeds ? (
+                  <p className="text-xs font-semibold text-destructive">
+                    Over your limits — do not attempt
+                  </p>
+                ) : null}
               </div>
-            ))}
-            {hazardsAhead.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nothing flagged ahead, or every hazard layer is switched off in settings.
-              </p>
-            ) : null}
-          </div>
-          {hazardsAhead.some((h) => h.hazard.kind === "grade" && (h.hazard.gradePct ?? 0) < 0) ? (
-            <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
-              <Mountain className="mt-0.5 h-4 w-4 shrink-0 text-info" /> Marked descent ahead — every
-              runaway ramp on the grade is surfaced automatically, no request needed.
+              <span className="metric shrink-0 text-sm">{milesAhead} mi</span>
+            </div>
+          ))}
+          {hazardsAhead.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nothing flagged ahead, or every hazard layer is switched off in settings.
             </p>
           ) : null}
-          <Button variant="outline" size="lg" className="mt-3 w-full gap-2" asChild>
-            <Link to="/settings">
-              <TriangleAlert className="h-4 w-4" /> Turn hazard layers on or off
-            </Link>
-          </Button>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Clearance, grade, switchback, ramp, pull-off, scale and rough-crossing data comes from the
-            truck-attribute layer (mocked here, provider-pluggable) — never from the base map.
+        </div>
+        {hazardsAhead.some((h) => h.hazard.kind === "grade" && (h.hazard.gradePct ?? 0) < 0) ? (
+          <p className="mt-3 flex items-start gap-2 rounded-lg border border-info/35 bg-info/10 p-2.5 text-xs">
+            <Mountain className="mt-0.5 h-4 w-4 shrink-0 text-info" /> Marked descent ahead — every
+            runaway ramp on the grade is surfaced automatically, no request needed.
           </p>
-        </Panel>
+        ) : null}
+        <Button variant="outline" size="lg" className="mt-3 w-full gap-2" asChild>
+          <Link to="/settings">
+            <TriangleAlert className="h-4 w-4" /> Turn hazard layers on or off
+          </Link>
+        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Clearance, grade, switchback, ramp, pull-off, scale and rough-crossing data comes from the
+          truck-attribute layer (mocked here, provider-pluggable) — never from the base map.
+        </p>
+      </Panel>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         {/* SHIELD LEGEND + LEGAL SEGMENTS */}
@@ -473,7 +484,8 @@ function NavigationScreen() {
                   <span className="metric text-sm">{s.miles} mi</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Clearance {s.clearanceFt}' · limit {s.weightLimitLbs.toLocaleString()} lb · {s.note}
+                  Clearance {s.clearanceFt}' · limit {s.weightLimitLbs.toLocaleString()} lb ·{" "}
+                  {s.note}
                 </p>
               </div>
             ))}
@@ -600,7 +612,9 @@ function PickupBanner() {
           <p className="mt-1 text-xs text-muted-foreground">
             {r.site.counter} · {r.site.parking}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{r.site.hours} · {r.ready}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {r.site.hours} · {r.ready}
+          </p>
           {r.route!.hazards.length ? (
             <p className="mt-1 text-xs text-primary">
               On the way in: {r.route!.hazards.map((h) => h.name).join(" · ")}

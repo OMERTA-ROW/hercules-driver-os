@@ -27,8 +27,9 @@ export function RoleGate({ min, children }: { min: NetworkRole; children: ReactN
       <h2 className="mt-1 text-xl font-bold uppercase">{need.label} layer</h2>
       <p className="mt-1 text-sm text-muted-foreground">{need.job}</p>
       <p className="mt-2 text-sm">
-        Your current scope is <strong>{roleSpec(role).label}</strong>. The {need.label.toLowerCase()}{" "}
-        layer sits above it, so it stays closed until the scope is widened.
+        Your current scope is <strong>{roleSpec(role).label}</strong>. The{" "}
+        {need.label.toLowerCase()} layer sits above it, so it stays closed until the scope is
+        widened.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {roleSpecs.map((r) => (

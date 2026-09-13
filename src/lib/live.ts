@@ -244,9 +244,7 @@ export function useAlertRows() {
     queryFn: async (): Promise<AlertRow[]> => {
       const { data, error } = await supabase
         .from("alerts")
-        .select(
-          "id, kind, severity, title, body, vehicle_id, load_id, acknowledged_at, created_at",
-        )
+        .select("id, kind, severity, title, body, vehicle_id, load_id, acknowledged_at, created_at")
         .eq("owner_id", userId!)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -337,7 +335,9 @@ export function useMoneySummary() {
   const window = (days: number) => {
     const from = Date.now() - days * 86_400_000;
     const inWindow = rows.filter((r) => new Date(r.entry_date).getTime() >= from);
-    const revenue = inWindow.filter((r) => r.amount_cents > 0).reduce((s, r) => s + r.amount_cents, 0);
+    const revenue = inWindow
+      .filter((r) => r.amount_cents > 0)
+      .reduce((s, r) => s + r.amount_cents, 0);
     const cost = inWindow.filter((r) => r.amount_cents < 0).reduce((s, r) => s - r.amount_cents, 0);
     return { revenue, cost, net: revenue - cost, count: inWindow.length };
   };
@@ -353,7 +353,11 @@ export function useRefreshLive() {
 
 export function money(cents: number | null | undefined) {
   if (cents == null) return "—";
-  return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  return (cents / 100).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
 }
 
 export function place(city: string | null, state: string | null) {

@@ -9,12 +9,7 @@
  * Mock records behind the same shape a real fleet/TMS feed would supply.
  */
 
-import {
-  makeProfile,
-  type EighteenSub,
-  type VehicleKind,
-  type VehicleProfile,
-} from "./vehicles";
+import { makeProfile, type EighteenSub, type VehicleKind, type VehicleProfile } from "./vehicles";
 
 export type FleetAssignment = {
   companyCode: string;

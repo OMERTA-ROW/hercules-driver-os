@@ -78,9 +78,7 @@ export function ThemePicker() {
             <div className="flex items-center gap-2">
               <Icon className={cn("h-5 w-5", active ? "text-primary" : "text-muted-foreground")} />
               <span className="font-display text-base uppercase tracking-[0.12em]">{o.label}</span>
-              {o.id === "night" ? (
-                <span className="label-cap ml-auto">Default</span>
-              ) : null}
+              {o.id === "night" ? <span className="label-cap ml-auto">Default</span> : null}
             </div>
             <p className="mt-2 text-xs text-muted-foreground">{o.hint}</p>
           </button>
@@ -136,8 +134,8 @@ export function BrightnessPicker() {
             Automatic night mode
           </span>
           <span className="mt-1 block text-xs text-muted-foreground">
-            Dims the screen and the map on the clock — night after dark, gray at dusk and dawn,
-            day in the sun. Any manual pick below takes over.
+            Dims the screen and the map on the clock — night after dark, gray at dusk and dawn, day
+            in the sun. Any manual pick below takes over.
           </span>
         </span>
         <span

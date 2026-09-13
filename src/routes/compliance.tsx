@@ -137,7 +137,9 @@ function ComplianceScreen() {
           <p className="text-sm text-muted-foreground">
             Everything you send in is stored once. Your carrier and any broker you allow read that
             same record — nobody keeps a second copy that can drift out of date.
-            {account?.company ? ` Linked to ${account.company.name}.` : " You are solo, so nothing goes to a carrier."}
+            {account?.company
+              ? ` Linked to ${account.company.name}.`
+              : " You are solo, so nothing goes to a carrier."}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
             Compliance documents are part of your account at no extra charge. The $5.00 one-time
@@ -174,7 +176,11 @@ function StatusIndicator({ companySide }: { companySide: boolean }) {
         <ShieldCheck className="h-7 w-7 shrink-0" />
         <span className="min-w-0">
           <span className="block font-display text-lg uppercase tracking-[0.12em]">
-            {status === "compliant" ? "Compliant" : status === "expiring" ? "Expiring soon" : "Blocked"}
+            {status === "compliant"
+              ? "Compliant"
+              : status === "expiring"
+                ? "Expiring soon"
+                : "Blocked"}
           </span>
           <span className="block text-xs text-foreground/80">{statusLine(status)}</span>
         </span>
@@ -213,8 +219,16 @@ function RosterView() {
     <Panel>
       <PanelTitle
         right={
-          <Pill tone={roster.status === "compliant" ? "go" : roster.status === "expiring" ? "warn" : "alert"}>
-            {roster.status === "compliant" ? "All clear" : roster.status === "expiring" ? "Watch list" : "Blocked"}
+          <Pill
+            tone={
+              roster.status === "compliant" ? "go" : roster.status === "expiring" ? "warn" : "alert"
+            }
+          >
+            {roster.status === "compliant"
+              ? "All clear"
+              : roster.status === "expiring"
+                ? "Watch list"
+                : "Blocked"}
           </Pill>
         }
       >
@@ -239,7 +253,11 @@ function RosterView() {
               <Pill
                 tone={p.status === "compliant" ? "go" : p.status === "expiring" ? "warn" : "alert"}
               >
-                {p.status === "compliant" ? "Compliant" : p.status === "expiring" ? "Expiring" : "Blocked"}
+                {p.status === "compliant"
+                  ? "Compliant"
+                  : p.status === "expiring"
+                    ? "Expiring"
+                    : "Blocked"}
               </Pill>
               {p.subjectKind === "driver" ? (
                 <Button
@@ -299,7 +317,9 @@ function FmcsaPanel() {
   return (
     <div className="grid gap-3 xl:grid-cols-2">
       <Panel>
-        <PanelTitle right={<Pill tone={c.fmcsaLive ? "go" : "info"}>{c.fmcsaLive ? "Live" : "Mock"}</Pill>}>
+        <PanelTitle
+          right={<Pill tone={c.fmcsaLive ? "go" : "info"}>{c.fmcsaLive ? "Live" : "Mock"}</Pill>}
+        >
           Authority and safety rating
         </PanelTitle>
         <Label>DOT number</Label>
@@ -345,9 +365,7 @@ function FmcsaPanel() {
               {auth.commonAuthority}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {auth.insuranceOnFile
-                .map((i) => `${i.type} ${i.amount} (${i.carrier})`)
-                .join(" · ")}
+              {auth.insuranceOnFile.map((i) => `${i.type} ${i.amount} (${i.carrier})`).join(" · ")}
             </p>
           </div>
         ) : null}
@@ -406,7 +424,11 @@ function FmcsaPanel() {
             size="lg"
             className="gap-2"
             onClick={async () => {
-              const res = await c.runClearinghouse(driverId, "limited", account?.name ?? "Compliance bot");
+              const res = await c.runClearinghouse(
+                driverId,
+                "limited",
+                account?.name ?? "Compliance bot",
+              );
               toast.success(`Clearinghouse: ${res.status}`, {
                 description: `Filed as a document. Next annual query due ${fmtDate(res.validThrough)}.`,
               });
@@ -475,9 +497,18 @@ function VerifyPanel() {
           Request insurance and authority
         </PanelTitle>
         <Label>Carrier</Label>
-        <Input value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className="mt-1 h-12" />
+        <Input
+          value={carrierName}
+          onChange={(e) => setCarrierName(e.target.value)}
+          className="mt-1 h-12"
+        />
         <Label className="mt-3 block">DOT number</Label>
-        <Input value={dot} onChange={(e) => setDot(e.target.value)} className="mt-1 h-12" inputMode="numeric" />
+        <Input
+          value={dot}
+          onChange={(e) => setDot(e.target.value)}
+          className="mt-1 h-12"
+          inputMode="numeric"
+        />
         <Label className="mt-3 block">Note to the carrier</Label>
         <Input value={note} onChange={(e) => setNote(e.target.value)} className="mt-1 h-12" />
         <Button
@@ -517,8 +548,14 @@ function VerifyPanel() {
                   <span className="font-display text-base uppercase tracking-[0.1em]">
                     {v.carrierName}
                   </span>
-                  <Pill tone={v.state === "verified" ? "go" : v.state === "failed" ? "alert" : "warn"}>
-                    {v.state === "verified" ? "Verified" : v.state === "failed" ? "Not verified" : "Open"}
+                  <Pill
+                    tone={v.state === "verified" ? "go" : v.state === "failed" ? "alert" : "warn"}
+                  >
+                    {v.state === "verified"
+                      ? "Verified"
+                      : v.state === "failed"
+                        ? "Not verified"
+                        : "Open"}
                   </Pill>
                   {v.state === "open" ? (
                     <Button
@@ -579,7 +616,9 @@ function AttentionStrip() {
               gone ? "border-destructive/60 bg-destructive/12" : "border-warn/50 bg-warn/10",
             )}
           >
-            <AlertTriangle className={cn("h-6 w-6 shrink-0", gone ? "text-destructive" : "text-warn")} />
+            <AlertTriangle
+              className={cn("h-6 w-6 shrink-0", gone ? "text-destructive" : "text-warn")}
+            />
             <span className="min-w-0">
               <span className="block font-display text-base uppercase tracking-[0.1em]">
                 {kindSpec(r.kind).label} · {subjectName(r.subjectKind, r.subjectId)}
@@ -713,8 +752,12 @@ function RecordRow({ rec, onShare }: { rec: DocRecord; onShare?: () => void }) {
           </span>
           <span className="block truncate text-xs text-muted-foreground">
             {subjectName(rec.subjectKind, rec.subjectId)} · {rec.fileName} ·{" "}
-            {rec.source === "import" ? "folder import" : rec.source === "company" ? "company" : "driver"} ·{" "}
-            {rec.uploadedAt}
+            {rec.source === "import"
+              ? "folder import"
+              : rec.source === "company"
+                ? "company"
+                : "driver"}{" "}
+            · {rec.uploadedAt}
           </span>
         </span>
         <Pill tone={status === "expired" ? "alert" : status === "expiring" ? "warn" : "go"}>
@@ -868,8 +911,8 @@ function ApprovalQueue() {
                   {blocking.map((r) => (
                     <li key={r.id} className="flex items-start gap-1.5 text-xs text-destructive">
                       <FileWarning className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                      {kindSpec(r.kind).label} — {statusOf(r) === "expired" ? "expired" : "expiring"}{" "}
-                      {fmtDate(r.expires)}
+                      {kindSpec(r.kind).label} —{" "}
+                      {statusOf(r) === "expired" ? "expired" : "expiring"} {fmtDate(r.expires)}
                     </li>
                   ))}
                   {missing.map((k) => (
@@ -1003,8 +1046,8 @@ function BulkImport() {
         </PanelTitle>
         <p className="text-sm text-muted-foreground">
           Point it at a whole folder or a pile of files. Each one gets looked at: what kind of
-          document it is, the fields off its face, which driver or truck it belongs to. Anything I am
-          not sure about I do not guess on — it goes to review.
+          document it is, the fields off its face, which driver or truck it belongs to. Anything I
+          am not sure about I do not guess on — it goes to review.
         </p>
 
         <input
@@ -1263,8 +1306,8 @@ function ExportPanel() {
           ))}
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          These are counts of the same records seen through different permissions — not copies. Fix a
-          date once and everyone is looking at the fix.
+          These are counts of the same records seen through different permissions — not copies. Fix
+          a date once and everyone is looking at the fix.
         </p>
       </Panel>
     </div>

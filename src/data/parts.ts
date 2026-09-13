@@ -25,21 +25,126 @@ export type Supplier = {
 };
 
 export const suppliers: Supplier[] = [
-  { id: "freightliner", name: "Freightliner", kind: "dealer", badge: "FL", tint: "primary", note: "Detroit powertrain and Cascadia body parts, factory numbers" },
-  { id: "rush", name: "Rush Truck Centers", kind: "dealer", badge: "RU", tint: "primary", note: "Largest network — usually has it on the shelf" },
-  { id: "international", name: "Navistar / International", kind: "dealer", badge: "IN", tint: "primary", note: "International and MaxxForce, Fleetrite aftermarket line" },
-  { id: "peterbilt", name: "Peterbilt", kind: "dealer", badge: "PB", tint: "violet", note: "PACCAR parts counter, PacLease service bays" },
-  { id: "kenworth", name: "Kenworth", kind: "dealer", badge: "KW", tint: "violet", note: "PACCAR MX and Kenworth body parts" },
-  { id: "volvo", name: "Volvo Trucks", kind: "dealer", badge: "VO", tint: "violet", note: "Volvo D13 and VNL specific components" },
-  { id: "mack", name: "Mack Trucks", kind: "dealer", badge: "MK", tint: "violet", note: "Mack MP series and Anthem parts" },
-  { id: "fleetpride", name: "FleetPride", kind: "aftermarket", badge: "FP", tint: "neutral", note: "Heavy-duty aftermarket, strong on air, brakes and drivetrain" },
-  { id: "truckpro", name: "TruckPro", kind: "aftermarket", badge: "TP", tint: "neutral", note: "Aftermarket counter with same-day delivery in most metros" },
-  { id: "napahd", name: "NAPA Heavy Duty", kind: "aftermarket", badge: "NA", tint: "neutral", note: "Everywhere, including small towns off the interstate" },
-  { id: "amazon", name: "Amazon", kind: "aftermarket", badge: "AZ", tint: "neutral", note: "Cheapest on small consumables — slowest when you're broke down" },
-  { id: "loves-tire", name: "Love's Truck Care", kind: "service", badge: "LV", tint: "primary", note: "Tire and light mechanical at the stop, 24 hours" },
-  { id: "ta-petro", name: "TA / Petro RoadSquad", kind: "service", badge: "TA", tint: "primary", note: "Road service and full service bays" },
-  { id: "pilot", name: "Pilot / Flying J", kind: "stop", badge: "PJ", tint: "primary", note: "Diesel, DEF, showers, parking, laundry" },
-  { id: "permitco", name: "Permit & Tolling Desk", kind: "agency", badge: "PM", tint: "violet", note: "Trip permits, oversize, scale bypass and toll accounts" },
+  {
+    id: "freightliner",
+    name: "Freightliner",
+    kind: "dealer",
+    badge: "FL",
+    tint: "primary",
+    note: "Detroit powertrain and Cascadia body parts, factory numbers",
+  },
+  {
+    id: "rush",
+    name: "Rush Truck Centers",
+    kind: "dealer",
+    badge: "RU",
+    tint: "primary",
+    note: "Largest network — usually has it on the shelf",
+  },
+  {
+    id: "international",
+    name: "Navistar / International",
+    kind: "dealer",
+    badge: "IN",
+    tint: "primary",
+    note: "International and MaxxForce, Fleetrite aftermarket line",
+  },
+  {
+    id: "peterbilt",
+    name: "Peterbilt",
+    kind: "dealer",
+    badge: "PB",
+    tint: "violet",
+    note: "PACCAR parts counter, PacLease service bays",
+  },
+  {
+    id: "kenworth",
+    name: "Kenworth",
+    kind: "dealer",
+    badge: "KW",
+    tint: "violet",
+    note: "PACCAR MX and Kenworth body parts",
+  },
+  {
+    id: "volvo",
+    name: "Volvo Trucks",
+    kind: "dealer",
+    badge: "VO",
+    tint: "violet",
+    note: "Volvo D13 and VNL specific components",
+  },
+  {
+    id: "mack",
+    name: "Mack Trucks",
+    kind: "dealer",
+    badge: "MK",
+    tint: "violet",
+    note: "Mack MP series and Anthem parts",
+  },
+  {
+    id: "fleetpride",
+    name: "FleetPride",
+    kind: "aftermarket",
+    badge: "FP",
+    tint: "neutral",
+    note: "Heavy-duty aftermarket, strong on air, brakes and drivetrain",
+  },
+  {
+    id: "truckpro",
+    name: "TruckPro",
+    kind: "aftermarket",
+    badge: "TP",
+    tint: "neutral",
+    note: "Aftermarket counter with same-day delivery in most metros",
+  },
+  {
+    id: "napahd",
+    name: "NAPA Heavy Duty",
+    kind: "aftermarket",
+    badge: "NA",
+    tint: "neutral",
+    note: "Everywhere, including small towns off the interstate",
+  },
+  {
+    id: "amazon",
+    name: "Amazon",
+    kind: "aftermarket",
+    badge: "AZ",
+    tint: "neutral",
+    note: "Cheapest on small consumables — slowest when you're broke down",
+  },
+  {
+    id: "loves-tire",
+    name: "Love's Truck Care",
+    kind: "service",
+    badge: "LV",
+    tint: "primary",
+    note: "Tire and light mechanical at the stop, 24 hours",
+  },
+  {
+    id: "ta-petro",
+    name: "TA / Petro RoadSquad",
+    kind: "service",
+    badge: "TA",
+    tint: "primary",
+    note: "Road service and full service bays",
+  },
+  {
+    id: "pilot",
+    name: "Pilot / Flying J",
+    kind: "stop",
+    badge: "PJ",
+    tint: "primary",
+    note: "Diesel, DEF, showers, parking, laundry",
+  },
+  {
+    id: "permitco",
+    name: "Permit & Tolling Desk",
+    kind: "agency",
+    badge: "PM",
+    tint: "violet",
+    note: "Trip permits, oversize, scale bypass and toll accounts",
+  },
 ];
 
 export function supplierById(id: string): Supplier {
@@ -77,7 +182,24 @@ export const supplyCategories: SupplyCategory[] = [
     label: "Truck Parts",
     fee: "parts",
     blurb: "Dealer and aftermarket parts, sourced against your fault codes and your route",
-    phrases: ["part", "parts", "alternator", "turbo", "injector", "water pump", "air dryer", "sensor", "belt", "starter", "radiator", "fan clutch", "def pump", "doser", "egr", "filter"],
+    phrases: [
+      "part",
+      "parts",
+      "alternator",
+      "turbo",
+      "injector",
+      "water pump",
+      "air dryer",
+      "sensor",
+      "belt",
+      "starter",
+      "radiator",
+      "fan clutch",
+      "def pump",
+      "doser",
+      "egr",
+      "filter",
+    ],
   },
   {
     id: "tires",
@@ -119,7 +241,19 @@ export const supplyCategories: SupplyCategory[] = [
     label: "Load Securement",
     fee: "securement",
     blurb: "Straps, chains, binders, tarps, corner protectors, load bars",
-    phrases: ["strap", "straps", "chain", "chains", "tarp", "tarps", "binder", "binders", "load bar", "securement", "winch strap"],
+    phrases: [
+      "strap",
+      "straps",
+      "chain",
+      "chains",
+      "tarp",
+      "tarps",
+      "binder",
+      "binders",
+      "load bar",
+      "securement",
+      "winch strap",
+    ],
   },
   {
     id: "tools",
@@ -133,7 +267,17 @@ export const supplyCategories: SupplyCategory[] = [
     label: "Permits, Scales & Tolling",
     fee: "permits",
     blurb: "Trip and oversize permits, scale bypass, toll accounts — filed for you",
-    phrases: ["permit", "permits", "oversize", "toll", "tolling", "prepass", "bestpass", "scale bypass", "ifta"],
+    phrases: [
+      "permit",
+      "permits",
+      "oversize",
+      "toll",
+      "tolling",
+      "prepass",
+      "bestpass",
+      "scale bypass",
+      "ifta",
+    ],
   },
 ];
 
@@ -189,9 +333,16 @@ export const partCatalog: PartMatch[] = [
     partNumber: "DDE A004 153 2828",
     category: "parts",
     faultCodes: ["SPN 3251 / FMI 2", "SPN 3251"],
-    keywords: ["soot", "dpf", "differential pressure", "pressure sensor", "aftertreatment", "regen", "3251"],
-    why:
-      "Your erratic soot filter reading is almost always this sensor or its hose, not the filter itself. It's a cheap part and an hour of labour — replacing the filter is thousands.",
+    keywords: [
+      "soot",
+      "dpf",
+      "differential pressure",
+      "pressure sensor",
+      "aftertreatment",
+      "regen",
+      "3251",
+    ],
+    why: "Your erratic soot filter reading is almost always this sensor or its hose, not the filter itself. It's a cheap part and an hour of labour — replacing the filter is thousands.",
     confidence: 88,
     listings: [
       {
@@ -236,8 +387,7 @@ export const partCatalog: PartMatch[] = [
     category: "parts",
     faultCodes: ["SPN 110 / FMI 16", "SPN 110"],
     keywords: ["fan clutch", "fan", "overheat", "coolant hot", "running hot", "110", "cooling"],
-    why:
-      "Coolant climbing only under load, with the rest of the cooling system reading normal, points at the fan clutch not locking up when it should.",
+    why: "Coolant climbing only under load, with the rest of the cooling system reading normal, points at the fan clutch not locking up when it should.",
     confidence: 74,
     listings: [
       {
@@ -282,8 +432,7 @@ export const partCatalog: PartMatch[] = [
     category: "parts",
     faultCodes: [],
     keywords: ["air dryer", "air leak", "purge", "wet tank", "moisture", "air"],
-    why:
-      "If the dryer is spitting or the tanks are wet, the cartridge is saturated. Cheap part, and it saves your valves.",
+    why: "If the dryer is spitting or the tanks are wet, the cartridge is saturated. Cheap part, and it saves your valves.",
     confidence: 70,
     listings: [
       {
@@ -317,8 +466,7 @@ export const partCatalog: PartMatch[] = [
     category: "parts",
     faultCodes: [],
     keywords: ["alternator", "charging", "voltage", "not charging", "battery light", "electrical"],
-    why:
-      "Voltage sagging at idle with good batteries is the alternator or the belt. Cheapest way to find out is to swap the alternator.",
+    why: "Voltage sagging at idle with good batteries is the alternator or the belt. Cheapest way to find out is to swap the alternator.",
     confidence: 66,
     listings: [
       {
@@ -387,8 +535,7 @@ export const partCatalog: PartMatch[] = [
     category: "parts",
     faultCodes: ["SPN 4334", "SPN 3363"],
     keywords: ["def pump", "def", "doser", "urea", "derate", "emissions", "aftertreatment pump"],
-    why:
-      "A DEF derate with good fluid in the tank is usually the pump or the doser, and the clock on a derate is short — 5 mph territory if you leave it.",
+    why: "A DEF derate with good fluid in the tank is usually the pump or the doser, and the clock on a derate is short — 5 mph territory if you leave it.",
     confidence: 79,
     listings: [
       {
@@ -807,7 +954,9 @@ export function matchParts(text: string): PartMatch[] {
 /** The part a live fault code points at. */
 export function partForFault(code: string): PartMatch | undefined {
   const c = code.toLowerCase();
-  return partCatalog.find((p) => p.faultCodes.some((f) => c.includes(f.toLowerCase()) || f.toLowerCase().includes(c)));
+  return partCatalog.find((p) =>
+    p.faultCodes.some((f) => c.includes(f.toLowerCase()) || f.toLowerCase().includes(c)),
+  );
 }
 
 /** Which supply category the driver is talking about, if any. */

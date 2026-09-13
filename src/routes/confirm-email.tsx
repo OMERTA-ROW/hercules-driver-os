@@ -73,8 +73,7 @@ function ConfirmEmail() {
           <p className="mt-3 text-sm text-muted-foreground">
             {email ? (
               <>
-                We sent a confirmation link to{" "}
-                <span className="text-foreground">{email}</span>.
+                We sent a confirmation link to <span className="text-foreground">{email}</span>.
               </>
             ) : (
               <>We sent you a confirmation link.</>

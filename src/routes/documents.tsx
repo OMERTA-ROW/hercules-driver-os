@@ -53,9 +53,7 @@ type Search = { load: string | undefined; type: DocTypeId | undefined; capture: 
 export const Route = createFileRoute("/documents")({
   validateSearch: (search: Record<string, unknown>): Search => ({
     load: typeof search["load"] === "string" ? search["load"] : undefined,
-    type: docTypes.some((t) => t.id === search["type"])
-      ? (search["type"] as DocTypeId)
-      : undefined,
+    type: docTypes.some((t) => t.id === search["type"]) ? (search["type"] as DocTypeId) : undefined,
     capture: search["capture"] === true || search["capture"] === "true",
   }),
   head: () => ({
@@ -296,9 +294,8 @@ function Documents() {
   const search = Route.useSearch();
   const [sets, setSets] = useState<DocSet[]>(seedSets);
   const [type, setType] = useState<DocTypeId>(search.type ?? "bol");
-  const loadOptions = search.load && !docLoads.includes(search.load)
-    ? [search.load, ...docLoads]
-    : docLoads;
+  const loadOptions =
+    search.load && !docLoads.includes(search.load) ? [search.load, ...docLoads] : docLoads;
   const [load, setLoad] = useState<string>(search.load ?? docLoads[0]!);
   const [note, setNote] = useState("");
   const [autoCrop, setAutoCrop] = useState(true);
@@ -521,9 +518,7 @@ function Documents() {
                       {d.note ? (
                         <div className="truncate text-xs text-muted-foreground">{d.note}</div>
                       ) : null}
-                      {d.sentTo ? (
-                        <div className="text-xs text-go">Sent to {d.sentTo}</div>
-                      ) : null}
+                      {d.sentTo ? <div className="text-xs text-go">Sent to {d.sentTo}</div> : null}
                     </div>
                     <Pill tone={statusTone[d.status]}>{d.status}</Pill>
                     <Button

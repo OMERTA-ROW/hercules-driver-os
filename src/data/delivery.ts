@@ -170,7 +170,11 @@ export const currentLocation: DropLocation = {
   detail: "1201 S Portland Ave, Oklahoma City OK · industrial park, gated lot",
   milesAhead: 0,
   coverage: [
-    { service: "ubereats", status: "none", note: "No Uber Eats couriers cover this industrial park" },
+    {
+      service: "ubereats",
+      status: "none",
+      note: "No Uber Eats couriers cover this industrial park",
+    },
     { service: "doordash", status: "none", note: "No DoorDash coverage at this address" },
     { service: "grubhub", status: "none", note: "No Grubhub coverage at this address" },
     {
@@ -226,7 +230,12 @@ export const coveragePoints: DropLocation[] = [
         deliveryFee: 3.99,
         note: "DoorDash delivers to the fuel island side of the lot",
       },
-      { service: "grubhub", status: "limited", etaMin: 55, note: "Grubhub thin here — few drivers on" },
+      {
+        service: "grubhub",
+        status: "limited",
+        etaMin: 55,
+        note: "Grubhub thin here — few drivers on",
+      },
       {
         service: "instacart",
         status: "available",
@@ -243,9 +252,19 @@ export const coveragePoints: DropLocation[] = [
         deliveryFee: 9.95,
         note: "Walmart delivery covers this exit; pickup lot is not truck-friendly",
       },
-      { service: "walgreens", status: "available", etaMin: 0, note: "Walgreens pickup 1.2 miles off the exit" },
+      {
+        service: "walgreens",
+        status: "available",
+        etaMin: 0,
+        note: "Walgreens pickup 1.2 miles off the exit",
+      },
       { service: "cvs", status: "none", note: "No CVS at this exit" },
-      { service: "amazon", status: "available", etaMin: 1440, note: "Amazon locker inside the travel store" },
+      {
+        service: "amazon",
+        status: "available",
+        etaMin: 1440,
+        note: "Amazon locker inside the travel store",
+      },
     ],
   },
   {
@@ -267,10 +286,21 @@ export const coveragePoints: DropLocation[] = [
       { service: "grubhub", status: "none", note: "No Grubhub coverage in Pauls Valley" },
       { service: "instacart", status: "none", note: "No Instacart coverage in Pauls Valley" },
       { service: "gopuff", status: "none", note: "No GoPuff coverage in Pauls Valley" },
-      { service: "walmart", status: "available", etaMin: 120, deliveryFee: 9.95, note: "Walmart delivers to the lot" },
+      {
+        service: "walmart",
+        status: "available",
+        etaMin: 120,
+        deliveryFee: 9.95,
+        note: "Walmart delivers to the lot",
+      },
       { service: "walgreens", status: "none", note: "No Walgreens at this exit" },
       { service: "cvs", status: "available", etaMin: 0, note: "CVS pickup 0.8 miles off the exit" },
-      { service: "amazon", status: "available", etaMin: 1440, note: "Hold-for-pickup at the counter" },
+      {
+        service: "amazon",
+        status: "available",
+        etaMin: 1440,
+        note: "Hold-for-pickup at the counter",
+      },
     ],
   },
 ];
@@ -417,8 +447,6 @@ export function spokenCoverage(loc: DropLocation, service: ServiceId) {
 /** Nearest point ahead that has real delivery coverage. */
 export function nearestCovered(category: ServiceCategory = "food") {
   return coveragePoints.find((p) =>
-    p.coverage.some(
-      (c) => c.status === "available" && serviceOf(c.service).category === category,
-    ),
+    p.coverage.some((c) => c.status === "available" && serviceOf(c.service).category === category),
   );
 }

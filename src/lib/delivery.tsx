@@ -208,10 +208,7 @@ export function DeliveryProvider({
     [orders, provider, saveOrders],
   );
 
-  const lookup = useCallback(
-    (service: ServiceId) => coverageFor(currentLocation, service),
-    [],
-  );
+  const lookup = useCallback((service: ServiceId) => coverageFor(currentLocation, service), []);
 
   const spoken = useCallback((service: ServiceId) => spokenCoverage(currentLocation, service), []);
 

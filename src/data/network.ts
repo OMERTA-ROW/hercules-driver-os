@@ -14,14 +14,7 @@ import type { EighteenSub, VehicleKind } from "./vehicles";
  * ------------------------------------------------------------------ */
 
 export type TruckStatus =
-  | "rolling"
-  | "loading"
-  | "unloading"
-  | "detained"
-  | "break"
-  | "reset"
-  | "empty"
-  | "down";
+  "rolling" | "loading" | "unloading" | "detained" | "break" | "reset" | "empty" | "down";
 
 export const truckStatusLabel: Record<TruckStatus, string> = {
   rolling: "Rolling",
@@ -54,14 +47,116 @@ export type NetworkTruck = {
 };
 
 export const networkTrucks: NetworkTruck[] = [
-  { id: "t-114", unit: "T-114", driver: "V. Bass", companyCode: "SOON-4412", profile: { kind: "eighteen", sub: "dryVan", label: "18-Wheeler · Dry Van" }, status: "rolling", lat: 33.62, lng: -97.14, place: "I-35 N · MM 483, TX", hosMin: 246, loadId: "L-88214", speedMph: 63 },
-  { id: "t-207", unit: "T-207", driver: "M. Duarte", companyCode: "SOON-4412", profile: { kind: "eighteen", sub: "flatbed", label: "18-Wheeler · Flatbed" }, status: "detained", lat: 32.78, lng: -96.79, place: "Dallas, TX · Dock 14", hosMin: 118, loadId: "L-88190", speedMph: 0 },
-  { id: "t-233", unit: "T-233", driver: "R. Cole", companyCode: "SOON-4412", profile: { kind: "eighteen", sub: "intermodal", label: "18-Wheeler · Intermodal" }, status: "empty", lat: 35.22, lng: -97.44, place: "Norman, OK", hosMin: 402, speedMph: 0 },
-  { id: "t-318", unit: "T-318", driver: "J. Whitlow", companyCode: "SOON-4412", profile: { kind: "heavyHaul", label: "Heavy Haul" }, status: "reset", lat: 35.47, lng: -97.52, place: "Oklahoma City, OK", hosMin: 660, speedMph: 0 },
-  { id: "t-401", unit: "T-401", driver: "D. Okoro", companyCode: "SOON-4412", profile: { kind: "carHaul", label: "Car Haul" }, status: "rolling", lat: 34.18, lng: -97.13, place: "I-35 N · MM 42, OK", hosMin: 310, loadId: "L-88231", speedMph: 61 },
-  { id: "t-455", unit: "T-455", driver: "A. Reyes", companyCode: "SOON-4412", profile: { kind: "eighteen", sub: "lineHaul", label: "18-Wheeler · Line Haul" }, status: "down", lat: 33.10, lng: -97.03, place: "I-35 S · MM 461, TX", hosMin: 205, loadId: "L-88208", speedMph: 0 },
-  { id: "t-512", unit: "T-512", driver: "K. Lindqvist", companyCode: "SOON-4412", profile: { kind: "cargoVan", label: "Cargo Van" }, status: "rolling", lat: 32.95, lng: -96.60, place: "US-75 N · Plano, TX", hosMin: 388, loadId: "L-88244", speedMph: 54 },
-  { id: "t-560", unit: "T-560", driver: "P. Tran", companyCode: "SOON-4412", profile: { kind: "eighteen", sub: "dryVan", label: "18-Wheeler · Dry Van" }, status: "loading", lat: 35.05, lng: -97.03, place: "Pauls Valley, OK", hosMin: 291, loadId: "L-88252", speedMph: 0 },
+  {
+    id: "t-114",
+    unit: "T-114",
+    driver: "V. Bass",
+    companyCode: "SOON-4412",
+    profile: { kind: "eighteen", sub: "dryVan", label: "18-Wheeler · Dry Van" },
+    status: "rolling",
+    lat: 33.62,
+    lng: -97.14,
+    place: "I-35 N · MM 483, TX",
+    hosMin: 246,
+    loadId: "L-88214",
+    speedMph: 63,
+  },
+  {
+    id: "t-207",
+    unit: "T-207",
+    driver: "M. Duarte",
+    companyCode: "SOON-4412",
+    profile: { kind: "eighteen", sub: "flatbed", label: "18-Wheeler · Flatbed" },
+    status: "detained",
+    lat: 32.78,
+    lng: -96.79,
+    place: "Dallas, TX · Dock 14",
+    hosMin: 118,
+    loadId: "L-88190",
+    speedMph: 0,
+  },
+  {
+    id: "t-233",
+    unit: "T-233",
+    driver: "R. Cole",
+    companyCode: "SOON-4412",
+    profile: { kind: "eighteen", sub: "intermodal", label: "18-Wheeler · Intermodal" },
+    status: "empty",
+    lat: 35.22,
+    lng: -97.44,
+    place: "Norman, OK",
+    hosMin: 402,
+    speedMph: 0,
+  },
+  {
+    id: "t-318",
+    unit: "T-318",
+    driver: "J. Whitlow",
+    companyCode: "SOON-4412",
+    profile: { kind: "heavyHaul", label: "Heavy Haul" },
+    status: "reset",
+    lat: 35.47,
+    lng: -97.52,
+    place: "Oklahoma City, OK",
+    hosMin: 660,
+    speedMph: 0,
+  },
+  {
+    id: "t-401",
+    unit: "T-401",
+    driver: "D. Okoro",
+    companyCode: "SOON-4412",
+    profile: { kind: "carHaul", label: "Car Haul" },
+    status: "rolling",
+    lat: 34.18,
+    lng: -97.13,
+    place: "I-35 N · MM 42, OK",
+    hosMin: 310,
+    loadId: "L-88231",
+    speedMph: 61,
+  },
+  {
+    id: "t-455",
+    unit: "T-455",
+    driver: "A. Reyes",
+    companyCode: "SOON-4412",
+    profile: { kind: "eighteen", sub: "lineHaul", label: "18-Wheeler · Line Haul" },
+    status: "down",
+    lat: 33.1,
+    lng: -97.03,
+    place: "I-35 S · MM 461, TX",
+    hosMin: 205,
+    loadId: "L-88208",
+    speedMph: 0,
+  },
+  {
+    id: "t-512",
+    unit: "T-512",
+    driver: "K. Lindqvist",
+    companyCode: "SOON-4412",
+    profile: { kind: "cargoVan", label: "Cargo Van" },
+    status: "rolling",
+    lat: 32.95,
+    lng: -96.6,
+    place: "US-75 N · Plano, TX",
+    hosMin: 388,
+    loadId: "L-88244",
+    speedMph: 54,
+  },
+  {
+    id: "t-560",
+    unit: "T-560",
+    driver: "P. Tran",
+    companyCode: "SOON-4412",
+    profile: { kind: "eighteen", sub: "dryVan", label: "18-Wheeler · Dry Van" },
+    status: "loading",
+    lat: 35.05,
+    lng: -97.03,
+    place: "Pauls Valley, OK",
+    hosMin: 291,
+    loadId: "L-88252",
+    speedMph: 0,
+  },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -184,12 +279,7 @@ export const matchedLoads: MatchedLoad[] = [
  * EXCEPTIONS — the dispatcher's actual queue
  * ------------------------------------------------------------------ */
 
-export type ExceptionKind =
-  | "breakdown"
-  | "detention"
-  | "hos"
-  | "loadFellThrough"
-  | "hazard";
+export type ExceptionKind = "breakdown" | "detention" | "hos" | "loadFellThrough" | "hazard";
 
 export const exceptionLabel: Record<ExceptionKind, string> = {
   breakdown: "Breakdown",
@@ -372,11 +462,61 @@ export type LaneCandidate = {
 };
 
 export const laneCandidates: LaneCandidate[] = [
-  { id: "c-1", name: "Sooner Freight Systems", kind: "fleet", trucks: 38, equipment: ["Dry van", "Flatbed", "Intermodal"], standing: "matched", homeLane: "Dallas ⇄ Kansas City", onTimePct: 97, note: "HERCULES already routed T-114 on this lane today." },
-  { id: "c-2", name: "Red River Carriers", kind: "fleet", trucks: 12, equipment: ["Dry van", "Reefer"], standing: "available", homeLane: "Fort Worth ⇄ Tulsa", onTimePct: 94, note: "Three units empty in the origin market tomorrow morning." },
-  { id: "c-3", name: "V. Bass (Owner-Operator)", kind: "ownerOperator", trucks: 1, equipment: ["Dry van"], standing: "watching", homeLane: "I-35 corridor", onTimePct: 99, note: "Watching the lane — wants $0.10/mi more than the posted rate." },
-  { id: "c-4", name: "Chisholm Heavy", kind: "fleet", trucks: 21, equipment: ["Flatbed", "Heavy haul"], standing: "available", homeLane: "OKC ⇄ Denver", onTimePct: 91, note: "Tarped flatbed capacity for the Denver posting." },
-  { id: "c-5", name: "D. Okoro (Owner-Operator)", kind: "ownerOperator", trucks: 1, equipment: ["Car haul"], standing: "matched", homeLane: "DFW ⇄ Wichita", onTimePct: 98, note: "Accepted the Wichita car-haul posting 20 minutes ago." },
+  {
+    id: "c-1",
+    name: "Sooner Freight Systems",
+    kind: "fleet",
+    trucks: 38,
+    equipment: ["Dry van", "Flatbed", "Intermodal"],
+    standing: "matched",
+    homeLane: "Dallas ⇄ Kansas City",
+    onTimePct: 97,
+    note: "HERCULES already routed T-114 on this lane today.",
+  },
+  {
+    id: "c-2",
+    name: "Red River Carriers",
+    kind: "fleet",
+    trucks: 12,
+    equipment: ["Dry van", "Reefer"],
+    standing: "available",
+    homeLane: "Fort Worth ⇄ Tulsa",
+    onTimePct: 94,
+    note: "Three units empty in the origin market tomorrow morning.",
+  },
+  {
+    id: "c-3",
+    name: "V. Bass (Owner-Operator)",
+    kind: "ownerOperator",
+    trucks: 1,
+    equipment: ["Dry van"],
+    standing: "watching",
+    homeLane: "I-35 corridor",
+    onTimePct: 99,
+    note: "Watching the lane — wants $0.10/mi more than the posted rate.",
+  },
+  {
+    id: "c-4",
+    name: "Chisholm Heavy",
+    kind: "fleet",
+    trucks: 21,
+    equipment: ["Flatbed", "Heavy haul"],
+    standing: "available",
+    homeLane: "OKC ⇄ Denver",
+    onTimePct: 91,
+    note: "Tarped flatbed capacity for the Denver posting.",
+  },
+  {
+    id: "c-5",
+    name: "D. Okoro (Owner-Operator)",
+    kind: "ownerOperator",
+    trucks: 1,
+    equipment: ["Car haul"],
+    standing: "matched",
+    homeLane: "DFW ⇄ Wichita",
+    onTimePct: 98,
+    note: "Accepted the Wichita car-haul posting 20 minutes ago.",
+  },
 ];
 
 /** Facility intelligence the broker supplies on its own shippers and receivers. */
@@ -395,9 +535,45 @@ export type BrokerFacility = {
 };
 
 export const brokerFacilities: BrokerFacility[] = [
-  { id: "f-1", name: "Meridian DC 4 — Dallas", role: "shipper", address: "3400 Dowdy Ferry Rd, Dallas, TX", hours: "05:00–23:00", open24: false, overnightParking: true, spots: 24, appointment: true, avgDetentionMin: 46, notes: "Check in at the guard shack. Trailer swap available. No overnight before 20:00." },
-  { id: "f-2", name: "Riverbend Foods — Kansas City", role: "receiver", address: "1120 Chouteau Trafficway, Kansas City, MO", hours: "24 hours", open24: true, overnightParking: false, spots: 0, appointment: true, avgDetentionMin: 92, notes: "Lumper fee $148. Park at the TA two miles south — no overnight on site." },
-  { id: "f-3", name: "High Plains Steel — OKC", role: "shipper", address: "7700 SW 15th St, Oklahoma City, OK", hours: "06:00–18:00", open24: false, overnightParking: true, spots: 11, appointment: false, avgDetentionMin: 38, notes: "First come, first loaded. Tarps required year round. Gravel yard — heavy haul fine." },
+  {
+    id: "f-1",
+    name: "Meridian DC 4 — Dallas",
+    role: "shipper",
+    address: "3400 Dowdy Ferry Rd, Dallas, TX",
+    hours: "05:00–23:00",
+    open24: false,
+    overnightParking: true,
+    spots: 24,
+    appointment: true,
+    avgDetentionMin: 46,
+    notes: "Check in at the guard shack. Trailer swap available. No overnight before 20:00.",
+  },
+  {
+    id: "f-2",
+    name: "Riverbend Foods — Kansas City",
+    role: "receiver",
+    address: "1120 Chouteau Trafficway, Kansas City, MO",
+    hours: "24 hours",
+    open24: true,
+    overnightParking: false,
+    spots: 0,
+    appointment: true,
+    avgDetentionMin: 92,
+    notes: "Lumper fee $148. Park at the TA two miles south — no overnight on site.",
+  },
+  {
+    id: "f-3",
+    name: "High Plains Steel — OKC",
+    role: "shipper",
+    address: "7700 SW 15th St, Oklahoma City, OK",
+    hours: "06:00–18:00",
+    open24: false,
+    overnightParking: true,
+    spots: 11,
+    appointment: false,
+    avgDetentionMin: 38,
+    notes: "First come, first loaded. Tarps required year round. Gravel yard — heavy haul fine.",
+  },
 ];
 
 export function laneKey(origin: string, destination: string) {
