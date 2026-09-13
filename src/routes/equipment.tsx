@@ -292,6 +292,60 @@ function EquipmentScreen() {
             className="mt-1 h-12 text-base"
           />
 
+          {/*
+            The numbers that come with each vehicle type are common starting values, NOT this
+            driver's vehicle. Nothing is saved until they have looked at them, so no route or
+            clearance warning is ever built on a guess we made for them.
+          */}
+          <div className="mt-3 rounded-lg border border-warn/40 bg-warn/10 p-3">
+            <Label>Check these against your own vehicle</Label>
+            <p className="mt-1 text-xs">
+              These are common starting numbers for a {pickedSpec.label.toLowerCase()}, not your
+              vehicle. Read your height off the door sticker, cab card or registration and correct
+              anything that is off before you save — clearance and weight warnings are only as good
+              as what is here.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  { k: "heightFt" as const, label: "Height (feet)", ph: String(pickedSpec.heightFt) },
+                  { k: "lengthFt" as const, label: "Length (feet)", ph: String(pickedSpec.lengthFt) },
+                  {
+                    k: "grossWeightLbs" as const,
+                    label: "Gross weight (lb)",
+                    ph: String(pickedSpec.grossWeightLbs),
+                  },
+                  { k: "axles" as const, label: "Axles", ph: String(pickedSpec.axles) },
+                ] as const
+              ).map((f) => (
+                <div key={f.k}>
+                  <Label>{f.label}</Label>
+                  <Input
+                    value={dims[f.k]}
+                    inputMode="decimal"
+                    aria-label={f.label}
+                    placeholder={f.ph}
+                    onChange={(e) => setDims((d) => ({ ...d, [f.k]: e.target.value }))}
+                    className="mt-1 h-12 text-base"
+                  />
+                </div>
+              ))}
+            </div>
+            <label className="mt-3 flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
+              />
+              <span>
+                I have checked these numbers against my actual vehicle and they are right.
+              </span>
+            </label>
+          </div>
+
+
+
           {/* What this pick means for routing — stated before it is saved */}
           <div className="mt-3 rounded-lg border border-primary/25 bg-primary/8 p-3">
             <Label>How I route for it</Label>
