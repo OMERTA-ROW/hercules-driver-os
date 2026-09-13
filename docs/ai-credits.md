@@ -26,23 +26,27 @@ Authoritative, already-implemented and untouched:
 Every AI credit amount is editable in one file, `src/data/ai-credits.ts`, and
 is entirely separate from the prices above.
 
-## Suggested fallback catalogue (edit in `src/data/ai-credits.ts`)
+## Owner-set catalogue (2026-09-13 — edit in `src/data/ai-credits.ts`)
+
+Set by owner direction: "lower the credits a lil so we can keep users spending
+and making money" — original provisional allowances reduced by 20%, prices
+unchanged.
 
 ### Monthly — replenishes once per paid period, expires at period end
 
 | Tier   | Credits / month | Price      |
 | ------ | --------------- | ---------- |
-| Assist | 500             | $9 / mo    |
-| Pro    | 2,000           | $29 / mo   |
-| Max    | 5,000           | $59 / mo   |
+| Assist | 400             | $9 / mo    |
+| Pro    | 1,600           | $29 / mo   |
+| Max    | 4,000           | $59 / mo   |
 
 ### Buy once — never expires, carries over
 
 | Pack  | Credits | Price        |
 | ----- | ------- | ------------ |
-| Small | 250     | $6 one time  |
-| Best  | 1,000   | $20 one time |
-| Bulk  | 3,000   | $49 one time |
+| Small | 200     | $6 one time  |
+| Best  | 800     | $20 one time |
+| Bulk  | 2,400   | $49 one time |
 
 Monthly credits are always consumed before bought-once credits, so nothing
 expires that could have been spent.
@@ -96,7 +100,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_250`, `STRIPE_PRICE_AI_PACK_1000`, `STRIPE_PRICE_AI_PACK_3000`
+- `STRIPE_PRICE_AI_PACK_200`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_2400`
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
