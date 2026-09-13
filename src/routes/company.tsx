@@ -41,7 +41,7 @@ export const Route = createFileRoute("/company")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: CompanyPage;
+  component: CompanyPage,
 });
 
 const roleLabel: Record<CompanyRole, string> = {
