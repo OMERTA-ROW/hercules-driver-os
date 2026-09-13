@@ -357,6 +357,10 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           return new Response("Storage error", { status: 500 });
         }
         if (claim.data === "duplicate") return new Response("ok (already processed)");
+        // A redelivery arriving while the first attempt still holds the lease:
+        // never run the fulfilment twice in parallel. The in-flight attempt
+        // reports its own outcome, and a real failure releases the lease.
+        if (claim.data === "in_progress") return new Response("ok (in progress)");
 
         let outcome: Outcome = { ok: true, note: `ignored ${event.type}` };
         try {
