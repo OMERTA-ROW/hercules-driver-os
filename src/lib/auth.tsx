@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { TRIAL_DAYS, planHas, type Feature, type PlanId } from "@/data/plans";
 import {
+  companyByCode,
   doorFor,
   hasScope,
   makeCompanyCode,
