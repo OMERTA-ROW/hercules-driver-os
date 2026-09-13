@@ -118,7 +118,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`
+- `STRIPE_PRICE_AI_PACK_200`, `STRIPE_PRICE_AI_PACK_550`, `STRIPE_PRICE_AI_PACK_1200`
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
