@@ -71,3 +71,10 @@
 - Server-owned account columns locked: `authenticated` may update only name/email/kind/plan/seats/company/fleet_tier/home_base/cdl_number; `status`, `trial_ends_at`, `stripe_customer_id` are service-role only. `anon` lost INSERT/UPDATE/DELETE on profiles. Sign-up no longer writes status/trial (the trigger owns them).
 - `NotConnectedNote` labels simulated data on /navigation, /health, /supply, /parts, /breakdown, /stops.
 - 37 tests pass (added: profile self-upgrade + billing-table privilege regressions); typecheck and production build clean.
+
+## Driver onboarding (ready)
+- Sign-up → /welcome → /equipment → voice pick → returning sign-in verified end to end in browser.
+- Trial length is server-set (7 days) in handle_new_user; client cannot extend it.
+- Equipment is saved per account in the vehicles table with honest load/save errors and empty states.
+- Launch decision outstanding: email confirmation is required on sign-up, so a new driver cannot sign in until the emailed link is clicked. Enable auto-confirm for same-day onboarding, or verify auth email delivery.
+- Still unavailable and labelled as such on /welcome: payments/purchases, commercial truck-legal routing provider, engine telemetry adapter, partner ordering.
