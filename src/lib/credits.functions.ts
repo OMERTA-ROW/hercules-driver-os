@@ -86,6 +86,15 @@ function missingConfig(): string[] {
   return missing;
 }
 
+/**
+ * PUBLIC — can a credit purchase be taken at all? No account needed, and it
+ * leaks no configuration values, only which names are still missing.
+ */
+export const getPurchaseAvailability = createServerFn({ method: "GET" }).handler(async () => {
+  const missing = missingConfig();
+  return { available: missing.length === 0, missing };
+});
+
 /* ------------------------------------------------------------------ */
 /* Read the account                                                   */
 /* ------------------------------------------------------------------ */

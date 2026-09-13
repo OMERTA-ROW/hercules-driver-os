@@ -102,7 +102,8 @@ type Ctx = {
   signIn: (email: string, password: string, opts?: SignInOptions) => Promise<Result>;
   signUp: (input: SignUpInput) => Promise<Result>;
   signOut: () => Promise<void>;
-  changePlan: (plan: PlanId, seats?: number) => Promise<void>;
+  /** Records the driver's chosen plan. Never marks a subscription paid. */
+  changePlan: (plan: PlanId, seats?: number) => Promise<{ ok: boolean; message: string }>;
   refresh: () => Promise<void>;
   trialDaysLeft: number;
   can: (feature: Feature) => boolean;
@@ -117,7 +118,7 @@ const AuthContext = createContext<Ctx>({
   signIn: async () => ({ error: "Auth not ready" }),
   signUp: async () => ({ error: "Auth not ready" }),
   signOut: async () => {},
-  changePlan: async () => {},
+  changePlan: async () => ({ ok: false, message: "Accounts are not ready yet." }),
   refresh: async () => {},
   trialDaysLeft: 0,
   can: () => false,
@@ -230,6 +231,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       if (data.session && data.user) {
+        // status and trial_ends_at are server-owned: the sign-up trigger sets
+        // them from the metadata above, and this screen cannot write them.
         await supabase
           .from("profiles")
           .update({
@@ -238,8 +241,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             account_kind: kind,
             plan: input.plan,
             seats,
-            status: "trial",
-            trial_ends_at: trialEndsAt,
             company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
             fleet_tier: fleetTier,
@@ -264,9 +265,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const changePlan = useCallback(
     async (plan: PlanId, seats?: number) => {
-      if (!userId) return;
+      if (!userId) return { ok: false, message: "Sign in first." };
       const nextSeats = plan === "fleet" ? Math.max(3, seats ?? account?.seats ?? 3) : 1;
-      await supabase
+      // Only the driver's SELECTION is written here. Subscription status, trial
+      // expiry and the payment customer are server-owned and cannot be set from
+      // this screen — a plan choice is not a paid subscription.
+      const { error } = await supabase
         .from("profiles")
         .update({
           plan,
@@ -274,7 +278,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ...(plan === "fleet" ? { fleet_tier: tierToNumber(tierForTrucks(nextSeats)) } : {}),
         })
         .eq("id", userId);
+      if (error) {
+        console.error(`[auth] plan change failed: ${error.message}`);
+        return { ok: false, message: "Your plan could not be saved. Nothing was changed." };
+      }
       await loadProfile(userId);
+      return { ok: true, message: "Plan saved." };
     },
     [account?.seats, loadProfile, userId],
   );

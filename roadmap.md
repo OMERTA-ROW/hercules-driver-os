@@ -63,3 +63,11 @@
 - `src/lib/speech.functions.ts`: was an unauthenticated paid TTS endpoint — now auth-required, rate limited, cached per account, credit-reserved before the provider call, refunded in full on failure, input capped, 20 s abort, in-flight dedupe. Device voice fallback at zero credits.
 - `/credits` screen (menu, pricing, settings): balance split monthly vs bought, renewal/expiry dates, low-credit state, per-action costs before use, Eco/Balanced quality, usage and credit history.
 - Remaining setup + known limits: `docs/ai-credits.md`.
+
+## Final honesty & entitlement pass — done
+- /credits is public: monthly tiers, buy-once packs and Enterprise pricing show signed out (public `getPurchaseAvailability`); wallet, usage/credit history, quality choice, checkout and the quote form require sign-in.
+- Fake purchases removed: `src/lib/purchases.tsx` and `src/lib/addons.tsx` no longer grant or remember paid access in the browser; store/documents/settings/supply now report the honest payment-unavailable outcome instead of "purchased/added".
+- `/pricing` awaits `changePlan`, blocks double submit and reports real errors; `auth.changePlan` returns `{ok,message}` and surfaces the database error.
+- Server-owned account columns locked: `authenticated` may update only name/email/kind/plan/seats/company/fleet_tier/home_base/cdl_number; `status`, `trial_ends_at`, `stripe_customer_id` are service-role only. `anon` lost INSERT/UPDATE/DELETE on profiles. Sign-up no longer writes status/trial (the trigger owns them).
+- `NotConnectedNote` labels simulated data on /navigation, /health, /supply, /parts, /breakdown, /stops.
+- 37 tests pass (added: profile self-upgrade + billing-table privilege regressions); typecheck and production build clean.

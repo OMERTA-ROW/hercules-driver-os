@@ -79,3 +79,33 @@ describe.skipIf(!configured)("clients cannot move their own AI credits", () => {
     }
   });
 });
+
+/**
+ * Billing state on the account row is server-owned too: a driver may edit their
+ * own name, plan and carrier code, but never their subscription status, trial
+ * expiry or payment-customer link. Sent with the public key, exactly as a
+ * browser would.
+ */
+describe.skipIf(!configured)("clients cannot self-upgrade their account", () => {
+  it("refuses writes to status, trial_ends_at and stripe_customer_id", async () => {
+    for (const patch of [
+      { status: "active" },
+      { trial_ends_at: "2099-01-01T00:00:00Z" },
+      { stripe_customer_id: "cus_someone_else" },
+    ]) {
+      const res = await fetch(`${url}/rest/v1/profiles?id=eq.${OWN}`, {
+        method: "PATCH",
+        headers: { apikey: key, "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      expect(res.status, Object.keys(patch)[0]).toBeGreaterThanOrEqual(400);
+    }
+  });
+
+  it("refuses billing mapping and purchase tables outright", async () => {
+    for (const table of ["ai_billing_customers", "ai_purchases", "billing_events"]) {
+      const r = await insert(table, { user_id: OWN });
+      expect(r.status, table).toBeGreaterThanOrEqual(400);
+    }
+  });
+});

@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
   DriverApprovedNote,
+  NotConnectedNote,
   Label,
   Panel,
   PanelTitle,
@@ -236,6 +237,7 @@ function BreakdownPage() {
               <X className="mr-2 h-5 w-5" /> Stop the timer
             </Button>
           </div>
+          <NotConnectedNote what="mechanic availability, distance and callout pricing" />
           <DriverApprovedNote>
             HERCULES watches the clock and tells you. It does not call anyone or re-dispatch
             anything without your word.

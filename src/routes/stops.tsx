@@ -23,6 +23,7 @@ import {
   Pill,
   Bar,
   DriverApprovedNote,
+  NotConnectedNote,
   money2,
   hm,
 } from "@/components/hercules/primitives";
@@ -448,6 +449,7 @@ function StopsScreen() {
                   This lot is first come, first served — no reservations offered.
                 </p>
               ) : null}
+              <NotConnectedNote what="truck stop parking counts, amenities and bookings" />
               <DriverApprovedNote>
                 Nothing is held or charged until you confirm on the next screen, fee and all.
               </DriverApprovedNote>

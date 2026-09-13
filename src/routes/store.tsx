@@ -240,15 +240,10 @@ function StorePage() {
                 variant={hasHandoff ? "outline" : "default"}
                 className="w-full"
                 onClick={() => {
-                  toggle("voiceHandoff");
-                  notify.success(
-                    hasHandoff ? "Voice Hand-Off Ordering switched off" : "Voice Hand-Off Ordering added",
-                    {
-                      description: hasHandoff
-                        ? "Removed from your monthly total on your word."
-                        : "$5.00 a month on top of your plan, on your word.",
-                    },
-                  );
+                  const outcome = toggle("voiceHandoff");
+                  if (!outcome.ok) {
+                    notify.error("Not added", { description: outcome.message });
+                  }
                 }}
               >
                 {hasHandoff ? "Switch it off" : "Add it — $5.00 / month"}
@@ -293,12 +288,10 @@ function StorePage() {
               size="lg"
               onClick={() => {
                 if (!confirming) return;
-                purchase(confirming);
-                toast.success(
-                  confirmProduct
-                    ? `${confirmProduct.name} purchased — pair it on Vehicle Health`
-                    : "Document Upload unlocked permanently",
-                );
+                const outcome = purchase(confirming);
+                if (!outcome.ok) {
+                  toast.error("Nothing was charged", { description: outcome.message });
+                }
                 setConfirming(null);
               }}
             >

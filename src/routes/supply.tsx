@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -24,6 +25,7 @@ import {
   Label,
   Pill,
   DriverApprovedNote,
+  NotConnectedNote,
   money2,
 } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
@@ -176,7 +178,10 @@ function SupplyScreen() {
           </ul>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
-              onClick={() => enable("voiceHandoff")}
+              onClick={() => {
+                const outcome = enable("voiceHandoff");
+                if (!outcome.ok) toast.error("Not added", { description: outcome.message });
+              }}
               className="min-h-[60px] gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Check className="h-5 w-5" />
@@ -191,6 +196,7 @@ function SupplyScreen() {
             not HERCULES. Switch it off any time in Settings.
           </p>
           <div className="mt-3">
+            <NotConnectedNote what="supplier stock, coverage and delivery quotes" />
             <DriverApprovedNote>
               Nothing is added to your bill until you tap it, and your running monthly total updates
               in front of you in Settings.

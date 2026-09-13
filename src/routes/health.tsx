@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
-import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote } from "@/components/hercules/primitives";
+import { Panel, PanelTitle, Label, Metric, Pill, Bar, DriverApprovedNote, NotConnectedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { useBolt } from "@/lib/bolt";
 import { usePurchases } from "@/lib/purchases";
@@ -382,6 +382,7 @@ function HealthPage() {
             ))}
           </div>
           <div className="mt-3">
+            <NotConnectedNote what="engine telemetry and fault codes from the adapter" />
             <DriverApprovedNote>
               HERCULES watches the stream and tells you what it sees. No service is booked and no
               money is spent without your say-so.

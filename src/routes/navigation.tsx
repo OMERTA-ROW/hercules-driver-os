@@ -22,6 +22,7 @@ import {
   Metric,
   Pill,
   DriverApprovedNote,
+  NotConnectedNote,
 } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import {
@@ -359,6 +360,7 @@ function NavigationScreen() {
             <Navigation2 className="h-4 w-4" /> Simulate a missed turn
           </Button>
           <div className="mt-3">
+            <NotConnectedNote what="truck-legal routing, restrictions, hazards and parking availability" />
             <DriverApprovedNote />
           </div>
         </Panel>
