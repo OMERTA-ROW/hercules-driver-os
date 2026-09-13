@@ -769,11 +769,30 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  /* FREE FALLBACK: the device's own voice. Used whenever premium speech is
+     unavailable — not signed in, no credits, provider down — so the driver
+     always hears the line and never gets charged for this. */
+  const speakOnDevice = useCallback((text: string) => {
+    try {
+      const synth = window.speechSynthesis;
+      if (!synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1;
+      synth.speak(u);
+    } catch {
+      /* screen text still carries the line */
+    }
+  }, []);
+
   const playAs = useCallback(
     async (id: VoiceId, text: string) => {
       try {
         const res = await speakLine({ data: { voiceId: id, text } });
-        if (!res.ok) return;
+        if (!res.ok) {
+          speakOnDevice(text);
+          return;
+        }
         killAudio();
         const el = new Audio(res.audio);
         el.crossOrigin = "anonymous";
