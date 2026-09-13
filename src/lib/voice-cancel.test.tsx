@@ -41,6 +41,9 @@ class AudioStub {
     this.src = src ?? "";
   }
   play() {
+    // The bundled sample clips are not available in this environment, which is
+    // exactly the path that falls through to the live paid request under test.
+    if (this.src.includes("/voice-samples/")) return Promise.reject(new Error("no clip"));
     played.push(this.src);
     return Promise.resolve();
   }
