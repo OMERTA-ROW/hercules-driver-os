@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { defaultOrigin, trustedOrigins } from "@/data/app-origins";
 import { stripe, stripeKey } from "@/lib/stripe.server";
