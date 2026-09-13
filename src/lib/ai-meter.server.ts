@@ -1,4 +1,4 @@
-import { aiLimits } from "@/data/ai-credits";
+import { aiLimits, allowancePausedLine } from "@/data/ai-credits";
 
 /**
  * PAID-CALL GUARD — every provider call that costs money goes through here.
@@ -195,17 +195,37 @@ export type MeteredResult<T> =
   | { ok: true; value: T; charged: number }
   | {
       ok: false;
-      reason: "insufficient" | "error" | "provider" | "pending" | "already_served";
+      reason:
+        | "insufficient"
+        | "error"
+        | "provider"
+        | "pending"
+        | "already_served"
+        | "no_subscription"
+        | "daily_limit"
+        | "weekly_limit";
+      resetsAt?: string | null;
       message: string;
       needed?: number;
       status?: number;
     };
 
 type ClaimOutcome = {
-  outcome: "owner" | "pending" | "done" | "insufficient" | "error";
+  outcome:
+    | "owner"
+    | "pending"
+    | "done"
+    | "insufficient"
+    | "error"
+    | "no_subscription"
+    | "daily_limit"
+    | "weekly_limit";
   reservation?: string;
   amount?: number;
   charged?: number;
+  limit?: number;
+  used?: number;
+  resets_at?: string;
 };
 
 async function claimExecution(
@@ -295,6 +315,23 @@ export async function runMetered<T>(opts: {
   return dedupe(`metered:${opts.identity}`, async () => {
     const claim = await claimExecution(opts.userId, opts.identity, opts.action, opts.cost);
 
+    if (claim.outcome === "no_subscription") {
+      return {
+        ok: false as const,
+        reason: "no_subscription" as const,
+        message:
+          "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
+      };
+    }
+    if (claim.outcome === "daily_limit" || claim.outcome === "weekly_limit") {
+      const scope = claim.outcome === "daily_limit" ? "daily" : "weekly";
+      return {
+        ok: false as const,
+        reason: claim.outcome,
+        message: allowancePausedLine(scope, claim.resets_at ?? null),
+        resetsAt: claim.resets_at ?? null,
+      };
+    }
     if (claim.outcome === "insufficient") {
       return {
         ok: false as const,
@@ -346,4 +383,40 @@ export async function runMetered<T>(opts: {
     // Report the charge that actually happened — never the intended one.
     return { ok: true as const, value, charged: settled.charged };
   });
+}
+
+
+/* ---- daily / weekly allowance ------------------------------------------- */
+
+export type Allowance = {
+  subscribed: boolean;
+  plan: string | null;
+  dailyLimit: number | null;
+  dailyUsed: number;
+  weeklyLimit: number | null;
+  weeklyUsed: number;
+  dailyResetsAt: string | null;
+  weeklyResetsAt: string | null;
+};
+
+/** Read straight from the database routine that the paid path enforces, so the
+ *  screen can never show a limit that differs from the one actually applied. */
+export async function allowanceStatus(userId: string): Promise<Allowance | null> {
+  const db = await admin();
+  const { data, error } = await db.rpc("ai_allowance_status", { _user: userId });
+  if (error) {
+    console.error(`[credits] allowance read failed: ${error.message}`);
+    return null;
+  }
+  const r = (data ?? {}) as Record<string, unknown>;
+  return {
+    subscribed: r["subscribed"] === true,
+    plan: (r["plan"] as string | null) ?? null,
+    dailyLimit: r["daily_limit"] == null ? null : Number(r["daily_limit"]),
+    dailyUsed: Number(r["daily_used"] ?? 0),
+    weeklyLimit: r["weekly_limit"] == null ? null : Number(r["weekly_limit"]),
+    weeklyUsed: Number(r["weekly_used"] ?? 0),
+    dailyResetsAt: (r["daily_resets_at"] as string | null) ?? null,
+    weeklyResetsAt: (r["weekly_resets_at"] as string | null) ?? null,
+  };
 }
