@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import Stripe from "stripe";
-import { createFetchHttpClient, createSubtleCryptoProvider } from "stripe/cloudflare";
 
 /* --------------------------------------------------------------------------
  * One metered operation per identical concurrent request set.
@@ -88,9 +87,9 @@ describe("metered operations", () => {
 describe("stripe webhook signatures", () => {
   const secret = "whsec_test_secret_value";
   const sdk = new Stripe("sk_test_dummy", {
-    httpClient: createFetchHttpClient(),
+    httpClient: Stripe.createFetchHttpClient(),
   });
-  const crypto = createSubtleCryptoProvider();
+  const crypto = Stripe.createSubtleCryptoProvider();
 
   const payload = JSON.stringify({ id: "evt_1", type: "invoice.paid", data: { object: {} } });
 
