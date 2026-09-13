@@ -14,11 +14,12 @@
  * every data file were searched for a pre-existing numeric AI credit
  * allowance and none exists — the only earlier "credits" in this project are
  * truck-stop shower credits and supplier loyalty credits, which are
- * unrelated. The owner then set the current amounts directly: monthly tiers
- * reduced 20% from the provisional allowances ("lower the credits a lil so we
- * can keep users spending and making money"), and buy-once packs re-priced
- * "$10 to $50", and Max was moved to a $100 monthly subscription. These amounts are now the owner's guideline; change them here
- * only. Nothing else hardcodes an amount.
+ * unrelated. The owner set the FINAL amounts directly ("lower thw credits"):
+ * monthly Assist 300/$9, Pro 1000/$29, Max 3500/$100; buy-once Small
+ * 200/$10, Medium 550/$25, Large 1200/$50; Enterprise is contact-for-pricing.
+ * There is no $100 buy-once pack and no $59 monthly plan. These amounts are
+ * now the owner's final guideline; change them here only. Nothing else
+ * hardcodes an amount.
  *
  * Core app prices are authoritative and are NOT defined here:
  *   - platform plans .......... src/data/plans.ts  ($5 / $29 / $19 per truck)
