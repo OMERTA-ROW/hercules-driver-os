@@ -168,8 +168,8 @@ export function DriverApprovedNote({ children }: { children?: ReactNode }) {
 export function NotConnectedNote({ what }: { what: string }) {
   return (
     <p className="text-xs leading-relaxed text-muted-foreground">
-      Not connected yet: {what} is shown as a worked example, not live data. Treat it as a preview
-      of the screen, not as fact — check the real source before you act on it.
+      Not connected yet: {what} would have to come from a live service, and none is connected, so
+      nothing is shown here rather than numbers we made up.
     </p>
   );
 }
