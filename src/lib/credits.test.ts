@@ -76,13 +76,10 @@ describe("owner catalogue", () => {
     ]);
   });
 
-  it("has the exact monthly tiers the owner set", async () => {
-    const { aiPlans } = await import("@/data/ai-credits");
-    expect(aiPlans.map((p) => [p.credits, p.price])).toEqual([
-      [300, 9],
-      [1000, 29],
-      [3500, 100],
-    ]);
+  it("has the monthly prices the owner set, with totals still pending", async () => {
+    const { aiPlans, MONTHLY_CREDITS_PENDING } = await import("@/data/ai-credits");
+    expect(aiPlans.map((p) => p.price)).toEqual([9, 29, 100]);
+    expect(MONTHLY_CREDITS_PENDING).toBe(true);
   });
 
   it("never invents an enterprise price or credit allowance", async () => {

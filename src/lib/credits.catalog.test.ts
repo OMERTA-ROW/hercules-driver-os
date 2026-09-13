@@ -3,8 +3,11 @@ import {
   ALLOWANCE_WEEK_RESET_DAY,
   TOPUP_USD_PER_CREDIT,
   aiPacks,
+  MONTHLY_CREDITS_PENDING,
   aiPlans,
   allowanceFor,
+  allowanceRows,
+  derivedAllowance,
   allowancePausedLine,
 } from "@/data/ai-credits";
 
@@ -23,12 +26,29 @@ describe("credit catalogue", () => {
     }
   });
 
-  it("keeps the owner's monthly amounts unchanged", () => {
-    expect(aiPlans.map((p) => [p.id, p.credits, p.price])).toEqual([
-      ["assist", 300, 9],
-      ["pro", 1000, 29],
-      ["max", 3500, 100],
+  it("marks the monthly totals as awaiting the owner's reduced amounts", () => {
+    expect(MONTHLY_CREDITS_PENDING).toBe(true);
+    for (const p of aiPlans) expect(p.monthlyPendingApproval).toBe(true);
+    // Prices are the owner's confirmed figures and stay put.
+    expect(aiPlans.map((p) => [p.id, p.price])).toEqual([
+      ["assist", 9],
+      ["pro", 29],
+      ["max", 100],
     ]);
+  });
+
+  it("derives every limit from the monthly total, so reduced totals reduce limits", () => {
+    for (const p of aiPlans) {
+      expect({ daily: p.dailyCredits, weekly: p.weeklyCredits }).toEqual(
+        derivedAllowance(p.credits),
+      );
+    }
+    const big = derivedAllowance(1000);
+    const small = derivedAllowance(400);
+    expect(small.daily).toBeLessThan(big.daily);
+    expect(small.weekly).toBeLessThan(big.weekly);
+    // Never zero, whatever total is set.
+    expect(derivedAllowance(1).daily).toBe(1);
   });
 
   it("states a daily and weekly allowance that fits inside the monthly amount", () => {
@@ -44,6 +64,16 @@ describe("credit catalogue", () => {
     }
     expect(allowanceFor(null)).toBeNull();
     expect(allowanceFor("nope")).toBeNull();
+  });
+
+  it("keeps the database allowance rows in step with the catalogue", () => {
+    expect(allowanceRows()).toEqual(
+      aiPlans.map((p) => ({
+        planId: p.id,
+        dailyCredits: p.dailyCredits,
+        weeklyCredits: p.weeklyCredits,
+      })),
+    );
   });
 
   it("gives larger tiers more credits per dollar within each purchase type", () => {
