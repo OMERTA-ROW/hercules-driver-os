@@ -7,9 +7,10 @@ import { AppShell } from "@/components/hercules/AppShell";
 import { Panel, Label, DriverApprovedNote } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { aiEnterprise, aiLimits, aiPacks, aiPlans, freeForever } from "@/data/ai-credits";
+import { aiActionCosts, aiEnterprise, aiLimits, aiPacks, aiPlans, freeForever } from "@/data/ai-credits";
 import {
   getCreditState,
+  getPurchaseAvailability,
   setAiQuality,
   startAiCheckout,
   submitEnterpriseInquiry,
@@ -50,10 +51,18 @@ function CreditsPage() {
   const saveQuality = useServerFn(setAiQuality);
   const qc = useQueryClient();
 
+  const fetchAvailability = useServerFn(getPurchaseAvailability);
+
   const state = useQuery({
     queryKey: ["ai-credits"],
     queryFn: () => fetchState(),
     enabled: ready && !!account,
+  });
+
+  /** Public: everyone may see the tiers and whether buying is live. */
+  const availability = useQuery({
+    queryKey: ["ai-purchase-availability"],
+    queryFn: () => fetchAvailability(),
   });
 
   const buy = useMutation({
@@ -75,29 +84,42 @@ function CreditsPage() {
 
   if (!ready) return null;
 
-  if (!account) {
+  const signedOut = !account;
+  const w = state.data?.wallet;
+  /** Availability comes from the public check when signed out. */
+  const purchasing = state.data?.purchasing ?? availability.data;
+  const readError = state.data?.error ?? null;
+  const costs = state.data?.costs ?? aiActionCosts;
+
+  /** Buying always needs an account, so signed-out buttons lead to sign-in. */
+  function BuyButton({
+    label,
+    variant,
+    onBuy,
+  }: {
+    label: string;
+    variant?: "outline";
+    onBuy: () => void;
+  }) {
+    if (signedOut) {
+      return (
+        <Button size="lg" variant={variant} className="mt-3 w-full" asChild>
+          <Link to="/sign-in">Sign in to buy</Link>
+        </Button>
+      );
+    }
     return (
-      <AppShell title="AI Credits" subtitle="AI assistance, billed separately from your plan">
-        <Panel className="max-w-2xl">
-          <Label>Sign in required</Label>
-          <h2 className="mt-1 text-2xl font-bold uppercase">AI credits live on your account</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to see your balance, buy credits and choose how HERCULES speaks.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button size="lg" asChild>
-              <Link to="/sign-in">Sign in</Link>
-            </Button>
-          </div>
-        </Panel>
-      </AppShell>
+      <Button
+        size="lg"
+        variant={variant}
+        className="mt-3 w-full"
+        disabled={!purchasing?.available || buy.isPending}
+        onClick={onBuy}
+      >
+        {label}
+      </Button>
     );
   }
-
-  const w = state.data?.wallet;
-  const purchasing = state.data?.purchasing;
-
-  const readError = state.data?.error ?? null;
 
   return (
     <AppShell title="AI Credits" subtitle="Separate from your HERCULES plan — nothing bills without your word">
@@ -113,7 +135,24 @@ function CreditsPage() {
           </Panel>
         ) : null}
 
-        {/* BALANCE */}
+        {/* BALANCE — account only */}
+        {signedOut ? (
+          <Panel>
+            <Label>Your balance</Label>
+            <p className="mt-2 text-sm text-muted-foreground">
+              All tiers and prices are below — no account needed to read them. Sign in to see your balance,
+              buy credits, choose how HERCULES speaks and request an Enterprise quote.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button size="lg" asChild>
+                <Link to="/sign-in">Sign in</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/sign-up">Create an account</Link>
+              </Button>
+            </div>
+          </Panel>
+        ) : (
         <Panel>
           <Label>Available balance</Label>
           <div className="mt-2 flex flex-wrap items-end gap-6">
@@ -146,6 +185,7 @@ function CreditsPage() {
             Monthly credits are used first, so nothing expires that could have been spent.
           </p>
         </Panel>
+        )}
 
         {/* HONEST UNAVAILABLE STATE */}
         {purchasing && !purchasing.available ? (
@@ -175,14 +215,10 @@ function CreditsPage() {
                 <p className="tech-label">credits / month</p>
                 <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
                 <p className="mt-2 text-lg">{money(p.price)} / month</p>
-                <Button
-                  size="lg"
-                  className="mt-3 w-full"
-                  disabled={!purchasing?.available || buy.isPending}
-                  onClick={() => buy.mutate({ kind: "plan", id: p.id })}
-                >
-                  {w?.planId === p.id ? "Current plan" : `Subscribe — ${money(p.price)}/mo`}
-                </Button>
+                <BuyButton
+                  label={w?.planId === p.id ? "Current plan" : `Subscribe — ${money(p.price)}/mo`}
+                  onBuy={() => buy.mutate({ kind: "plan", id: p.id })}
+                />
               </div>
             ))}
           </div>
@@ -200,29 +236,25 @@ function CreditsPage() {
                 <p className="font-display text-xl uppercase tracking-[0.12em]">{p.name}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
                 <p className="mt-2 text-lg">{money(p.price)} one time</p>
-                <Button
-                  size="lg"
+                <BuyButton
                   variant="outline"
-                  className="mt-3 w-full"
-                  disabled={!purchasing?.available || buy.isPending}
-                  onClick={() => buy.mutate({ kind: "pack", id: p.id })}
-                >
-                  Buy {p.credits.toLocaleString()} credits
-                </Button>
+                  label={`Buy ${p.credits.toLocaleString()} credits`}
+                  onBuy={() => buy.mutate({ kind: "pack", id: p.id })}
+                />
               </div>
             ))}
           </div>
         </Panel>
 
         {/* ENTERPRISE */}
-        <EnterpriseQuote />
+        <EnterpriseQuote signedOut={signedOut} />
 
 
         {/* COSTS BEFORE USE */}
         <Panel>
           <Label>What things cost — before you use them</Label>
           <div className="mt-3 grid gap-2">
-            {Object.entries(state.data?.costs ?? {}).map(([k, c]) => (
+            {Object.entries(costs).map(([k, c]) => (
               <div key={k} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-primary/15 pb-2">
                 <span className="text-sm">{c.label}</span>
                 <span className="tech-label text-primary">
@@ -236,7 +268,8 @@ function CreditsPage() {
           </p>
         </Panel>
 
-        {/* QUALITY */}
+        {/* QUALITY — account only */}
+        {signedOut ? null : (
         <Panel>
           <Label>Speech quality</Label>
           <div className="mt-3 flex flex-wrap gap-3">
@@ -262,6 +295,7 @@ function CreditsPage() {
             and charges the amounts above. Repeating a line you just heard is free.
           </p>
         </Panel>
+        )}
 
         {/* FREE */}
         <Panel>
@@ -273,7 +307,8 @@ function CreditsPage() {
           </ul>
         </Panel>
 
-        {/* USAGE HISTORY */}
+        {/* USAGE HISTORY — account only */}
+        {signedOut ? null : (
         <Panel>
           <Label>Usage history</Label>
           {state.data?.usage.length ? (
@@ -296,8 +331,10 @@ function CreditsPage() {
             <p className="mt-2 text-sm text-muted-foreground">No AI usage on this account yet.</p>
           )}
         </Panel>
+        )}
 
-        {/* LEDGER */}
+        {/* LEDGER — account only */}
+        {signedOut ? null : (
         <Panel>
           <Label>Credit history</Label>
           {state.data?.ledger.length ? (
@@ -319,6 +356,7 @@ function CreditsPage() {
             <p className="mt-2 text-sm text-muted-foreground">No credits added or spent yet.</p>
           )}
         </Panel>
+        )}
 
         <DriverApprovedNote>
           Credits are only ever added after a payment is confirmed by the payment provider itself. Nothing
@@ -333,7 +371,7 @@ function CreditsPage() {
  * Enterprise is quoted, not priced. This form saves a real request on the
  * account; there is no email address to send to, so we never claim we sent one.
  */
-function EnterpriseQuote() {
+function EnterpriseQuote({ signedOut }: { signedOut: boolean }) {
   const send = useServerFn(submitEnterpriseInquiry);
   const [sent, setSent] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -388,7 +426,17 @@ function EnterpriseQuote() {
       <Label>{aiEnterprise.name} — {aiEnterprise.priceLabel}</Label>
       <p className="mt-1 text-sm text-muted-foreground">{aiEnterprise.blurb}</p>
 
-      {sent ? (
+      {signedOut ? (
+        <div className="mt-4">
+          <p className="text-sm text-muted-foreground">
+            Enterprise is quoted for your fleet. Sign in to send us your numbers — we never set a price
+            without talking to you.
+          </p>
+          <Button size="lg" className="mt-3" asChild>
+            <Link to="/sign-in">Sign in to request a quote</Link>
+          </Button>
+        </div>
+      ) : sent ? (
         <p className="mt-4 text-sm text-primary">{sent}</p>
       ) : (
         <form
