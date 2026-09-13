@@ -31,17 +31,17 @@ import { useVehicle } from "@/lib/vehicles";
 export const Route = createFileRoute("/health")({
   head: () => ({
     meta: [
-      { title: "Vehicle Health — live engine diagnostics from THE BOLT" },
+      { title: "Vehicle Health — THE BOLT engine diagnostics" },
       {
         name: "description",
         content:
-          "THE BOLT streams live engine data to HERCULES from heavy trucks on the nine-pin J1939 port and from cars, vans and hotshot pickups on the OBD-II port. Fault codes in plain English, live readouts and predictive maintenance.",
+          "THE BOLT is built to read engine data over the nine-pin J1939 port on heavy trucks and the OBD-II port on cars, vans and pickups, and turn fault codes into plain English. No adapter is connected yet, so this screen reports nothing until one is.",
       },
-      { property: "og:title", content: "Vehicle Health — live engine diagnostics" },
+      { property: "og:title", content: "Vehicle Health — THE BOLT engine diagnostics" },
       {
         property: "og:description",
         content:
-          "Two HERCULES adapters, one screen. It shows only what your vehicle can actually report, and speaks up on its own when something needs attention.",
+          "Two HERCULES adapters, one screen. It shows only what your vehicle actually reports — and says plainly when no adapter is connected.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
