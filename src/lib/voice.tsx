@@ -46,6 +46,7 @@ import {
   spokenService,
 } from "@/lib/breakdown";
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
+import { deviceDelivery, pickDeviceVoice } from "@/lib/device-voice";
 import { speakLine } from "@/lib/speech.functions";
 import {
   attachAudioLevel,
@@ -767,18 +768,34 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       audio.current.src = "";
       audio.current = null;
     }
+    // Never let a device line and a premium line overlap.
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* no device speech on this browser */
+    }
   }, []);
 
-  /* FREE FALLBACK: the device's own voice. Used whenever premium speech is
-     unavailable — not signed in, no credits, provider down — so the driver
-     always hears the line and never gets charged for this. */
-  const speakOnDevice = useCallback((text: string) => {
+  /* FREE FALLBACK: the device's own voice, matched to the persona's gender so a
+     female persona is not answered by a male device voice. Used whenever
+     premium speech is unavailable — not signed in, no credits, Eco quality,
+     provider down — so the driver always hears the line, never charged. */
+  const speakOnDevice = useCallback((text: string, persona?: VoiceOption) => {
     try {
       const synth = window.speechSynthesis;
       if (!synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1;
+      const delivery = deviceDelivery(persona?.speed ?? 1);
+      u.rate = delivery.rate;
+      u.pitch = delivery.pitch;
+      const match = pickDeviceVoice(synth.getVoices() ?? [], persona?.gender ?? "male");
+      // No voices exposed yet (some browsers load them late): speak anyway with
+      // the device default rather than claiming a voice we don't have.
+      if (match) {
+        u.voice = match as unknown as SpeechSynthesisVoice;
+        u.lang = match.lang;
+      }
       synth.speak(u);
     } catch {
       /* screen text still carries the line */
@@ -787,10 +804,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const playAs = useCallback(
     async (id: VoiceId, text: string) => {
+      const persona = voiceById(id);
       try {
         const res = await speakLine({ data: { voiceId: id, text } });
         if (!res.ok) {
-          speakOnDevice(text);
+          speakOnDevice(text, persona);
           return;
         }
         killAudio();
@@ -802,7 +820,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         await el.play().catch(() => {});
       } catch {
         // Unauthenticated or unreachable premium speech — device voice, free.
-        speakOnDevice(text);
+        speakOnDevice(text, persona);
       }
     },
     [killAudio, speakOnDevice],

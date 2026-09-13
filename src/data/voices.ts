@@ -22,14 +22,38 @@ export type VoiceId =
   | "hera"
   | "artemis";
 
+/** The speech model every persona is spoken with. */
+export const TTS_MODEL = "openai/gpt-4o-mini-tts";
+
+/**
+ * Neural voices this model actually serves. Each one was called and returned
+ * real audio; anything outside this list is rejected by the provider, so the
+ * personas below may only use these names.
+ */
+export const supportedTtsVoices = [
+  "alloy",
+  "ash",
+  "ballad",
+  "coral",
+  "echo",
+  "fable",
+  "nova",
+  "onyx",
+  "sage",
+  "shimmer",
+  "verse",
+] as const;
+
+export type SupportedTtsVoice = (typeof supportedTtsVoices)[number];
+
 export type VoiceOption = {
   id: VoiceId;
   name: string;
   gender: "male" | "female";
   /** Short character descriptor shown in the picker. */
   hint: string;
-  /** Underlying premium voice. */
-  tts: string;
+  /** Underlying premium neural voice. */
+  tts: SupportedTtsVoice;
   /** Natural-language delivery steering — this is what makes it a character. */
   direction: string;
   /** Speaking rate, 0.25–4.0. */
