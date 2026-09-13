@@ -73,7 +73,7 @@ export const aiPlans: AiPlan[] = [
     name: "Max",
     credits: 3500,
     price: 100,
-    blurb: "Team seats and constant assistance on long hauls.",
+    blurb: "The largest monthly allowance, for drivers who talk to HERCULES all day.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
 ];
@@ -132,7 +132,8 @@ export function aiPackById(id: string): AiPack | undefined {
 /* What things cost the driver                                              */
 /* ------------------------------------------------------------------------ */
 
-export type AiAction = "speech" | "speech_premium" | "assistant";
+/** Only actions that actually exist in the app are listed here. */
+export type AiAction = "speech" | "speech_premium";
 
 /**
  * Server-owned credit costs. `perUnit` is charged per `unit` characters of
@@ -156,13 +157,6 @@ export const aiActionCosts: Record<
     perUnit: 1,
     unit: 200,
     max: 10,
-  },
-  assistant: {
-    label: "AI assistant answer",
-    base: 2,
-    perUnit: 1,
-    unit: 400,
-    max: 15,
   },
 };
 
@@ -190,10 +184,6 @@ export const aiLimits = {
 export const providerCostAssumptions = {
   /** USD per 1,000 characters of text-to-speech. */
   ttsPerKChar: 0.015,
-  /** USD per 1,000 input tokens for the assistant model. */
-  assistantPerKInputTokens: 0.0006,
-  /** USD per 1,000 output tokens for the assistant model. */
-  assistantPerKOutputTokens: 0.0024,
   /** What one credit is sold for, averaged across the catalogue. */
   creditPriceUsd: 0.019,
   updated: "2026-09-13",
