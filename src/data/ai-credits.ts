@@ -286,13 +286,22 @@ export function allowanceFor(planId: string | null | undefined) {
   return { daily: plan.dailyCredits, weekly: plan.weeklyCredits, plan };
 }
 
-/** Plain-language line shown when paid conversation is paused. */
+/** Plain-language line shown when paid speech is paused at a cap. */
 export function allowancePausedLine(
   scope: "daily" | "weekly",
   resetsAt: string | null,
 ): string {
-  const when = resetsAt ? new Date(resetsAt).toLocaleString() : "the next reset";
+  const when = resetsAt
+    ? new Date(resetsAt).toLocaleString("en-US", {
+        timeZone: ALLOWANCE_TIMEZONE,
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+        month: "short",
+        day: "numeric",
+      }) + " ET"
+    : "the next reset";
   return scope === "daily"
-    ? `You have used today's AI voice allowance. It resets at ${when} — your device's own voice keeps working until then, free.`
-    : `You have used this week's AI voice allowance. It resets ${ALLOWANCE_WEEK_RESET_DAY} at ${when} — your device's own voice keeps working until then, free.`;
+    ? `That is today's spoken-line allowance used. The real voice comes back ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift today's cap.`
+    : `That is this week's spoken-line allowance used. The real voice comes back ${ALLOWANCE_WEEK_RESET_DAY}, ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift the weekly cap.`;
 }
