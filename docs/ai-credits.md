@@ -30,7 +30,8 @@ is entirely separate from the prices above.
 
 Set by owner direction: monthly tiers reduced 20% from the provisional
 allowances ("lower the credits a lil so we can keep users spending and making
-money"); buy-once packs re-priced "$10 to $50".
+money"); buy-once packs re-priced "$10 to $50" and then extended with a
+$100 Max pack plus a quote-only Enterprise tier.
 
 ### Monthly — replenishes once per paid period, expires at period end
 
@@ -42,11 +43,29 @@ money"); buy-once packs re-priced "$10 to $50".
 
 ### Buy once — never expires, carries over
 
-| Pack  | Credits | Price        |
-| ----- | ------- | ------------ |
-| Small | 300     | $10 one time |
-| Best  | 800     | $25 one time |
-| Bulk  | 1,800   | $50 one time |
+| Pack   | Credits | Price         |
+| ------ | ------- | ------------- |
+| Small  | 300     | $10 one time  |
+| Medium | 800     | $25 one time  |
+| Large  | 1,800   | $50 one time  |
+| Max    | 4,000   | $100 one time |
+
+### Enterprise — contact for pricing
+
+No price and no credit allowance are defined in code. There is no verified
+sales email or phone number in this project, so the app never claims to send
+one: the Enterprise card on `/credits` is a validated in-app form
+(company, contact name, email, optional phone, fleet size, expected AI use,
+optional notes) that writes a row to `public.enterprise_inquiries`.
+
+- Requires an authenticated account; `user_id` is taken from the session.
+- Spam controls: honeypot field, server-side Zod validation, and a limit of
+  3 requests per account per 24 hours.
+- RLS: a driver may create and read only their own rows. There is no update or
+  delete grant for drivers, and review/triage happens with `service_role`
+  (owner-only) — no client-side admin surface exists.
+- Success and failure messages are truthful: on a database error the driver is
+  told the request was NOT saved.
 
 Monthly credits are always consumed before bought-once credits, so nothing
 expires that could have been spent.
@@ -100,7 +119,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`
+- `STRIPE_PRICE_AI_PACK_300`, `STRIPE_PRICE_AI_PACK_800`, `STRIPE_PRICE_AI_PACK_1800`, `STRIPE_PRICE_AI_PACK_4000`
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
