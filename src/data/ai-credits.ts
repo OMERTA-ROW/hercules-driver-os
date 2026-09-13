@@ -10,8 +10,19 @@
  * This is SEPARATE from the platform plans in `src/data/plans.ts`. A driver's
  * app subscription is not affected by AI credits and vice versa.
  *
- * PROVISIONAL: the tiers below are a starter catalogue for review.
+ * PROVENANCE (checked 2026-09-13): the repository, its history and every data
+ * file were searched for a pre-existing numeric AI credit allowance and none
+ * exists — the only earlier "credits" in this project are truck-stop shower
+ * credits and supplier loyalty credits, which are unrelated. So the amounts
+ * below are SUGGESTED FALLBACKS awaiting the owner's own guideline. They are
+ * the single place to change them; nothing else hardcodes an amount.
+ *
+ * Core app prices are authoritative and are NOT defined here:
+ *   - platform plans .......... src/data/plans.ts  ($5 / $29 / $19 per truck)
+ *   - Voice Hand-Off add-on ... src/data/addons.ts ($5.00 / month)
+ *   - Document Upload ......... src/data/addons.ts ($5.00 one time)
  */
+
 
 export type AiPlanId = "assist" | "pro" | "max";
 export type AiPackId = "pack250" | "pack1000" | "pack3000";
