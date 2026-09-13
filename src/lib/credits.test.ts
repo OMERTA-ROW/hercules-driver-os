@@ -69,17 +69,20 @@ describe("owner catalogue", () => {
   it("has the subscriber top-ups the owner set, at $0.30 a credit", async () => {
     const { aiPacks } = await import("@/data/ai-credits");
     expect(aiPacks.map((p) => [p.credits, p.price])).toEqual([
+      [10, 3],
       [50, 15],
       [100, 30],
-      [250, 75],
-      [500, 150],
     ]);
   });
 
-  it("has the monthly prices the owner set, with totals still pending", async () => {
+  it("has the exact monthly tiers the owner approved", async () => {
     const { aiPlans, MONTHLY_CREDITS_PENDING } = await import("@/data/ai-credits");
-    expect(aiPlans.map((p) => p.price)).toEqual([9, 29, 100]);
-    expect(MONTHLY_CREDITS_PENDING).toBe(true);
+    expect(aiPlans.map((p) => [p.credits, p.price])).toEqual([
+      [150, 9],
+      [600, 29],
+      [3000, 100],
+    ]);
+    expect(MONTHLY_CREDITS_PENDING).toBe(false);
   });
 
   it("never invents an enterprise price or credit allowance", async () => {

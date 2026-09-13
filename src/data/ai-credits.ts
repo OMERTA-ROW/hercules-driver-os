@@ -94,6 +94,15 @@ export const planCaps: Record<AiPlanId, { daily: number; weekly: number }> = {
 
 export const ALLOWANCE_TIMEZONE = "America/New_York";
 
+export type AiPack = {
+  id: AiPackId;
+  name: string;
+  credits: number;
+  price: number;
+  blurb: string;
+  priceEnv: string;
+};
+
 /** Monthly subscriptions. Credits expire at the end of each paid period. */
 const planBase: { id: AiPlanId; name: string; price: number; blurb: string; priceEnv: string }[] = [
   {
