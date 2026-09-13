@@ -28,26 +28,26 @@ is entirely separate from the prices above.
 
 ## Owner-set catalogue (2026-09-13 — edit in `src/data/ai-credits.ts`)
 
-Set by owner direction: monthly tiers reduced 20% from the provisional
-allowances ("lower the credits a lil so we can keep users spending and making
-money"); buy-once packs re-priced "$10 to $50" and then extended with a
-quote-only Enterprise tier. Max is a $100 monthly subscription, not a pack.
+Set by owner direction, final values ("lower thw credits"): the monthly
+tiers and buy-once packs below supersede every earlier amount. Max is a $100
+monthly subscription; there is no $100 buy-once pack and no $59 monthly plan.
+Enterprise is quote-only.
 
 ### Monthly — replenishes once per paid period, expires at period end
 
 | Tier   | Credits / month | Price      |
 | ------ | --------------- | ---------- |
-| Assist | 400             | $9 / mo    |
-| Pro    | 1,600           | $29 / mo   |
-| Max    | 4,000           | $100 / mo  |
+| Assist | 300             | $9 / mo    |
+| Pro    | 1,000           | $29 / mo   |
+| Max    | 3,500           | $100 / mo  |
 
 ### Buy once — never expires, carries over
 
 | Pack   | Credits | Price         |
 | ------ | ------- | ------------- |
-| Small  | 300     | $10 one time  |
-| Medium | 800     | $25 one time  |
-| Large  | 1,800   | $50 one time  |
+| Small  | 200     | $10 one time  |
+| Medium | 550     | $25 one time  |
+| Large  | 1,200   | $50 one time  |
 
 ### Enterprise — contact for pricing
 
