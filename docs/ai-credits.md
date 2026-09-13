@@ -165,3 +165,31 @@ registration first.
 - Credit accounting was verified by unit tests and by reading the SQL routines;
   the end-to-end database exercise needs at least one real account, and this
   project currently has none.
+
+## Accounting hardening (final pass)
+
+- Holding, settling and refunding credits are service-role only. The browser
+  cannot reserve, commit or refund even for its own account — verified by
+  `src/lib/credits.security.test.ts` against the live database.
+- One paid operation = one hold = one debit. De-duplication, the hold, the
+  provider call and settlement all live inside `runMetered` in
+  `src/lib/ai-meter.server.ts`, keyed by a durable request identity, so a retry
+  on another instance reuses the same hold.
+- Monthly credits are granted **only** from a verified paid invoice, once per
+  subscription period, using Stripe's real period boundaries. Checkout
+  completion grants one-time packs only.
+- Webhook events are claimed as `pending`, and only marked `processed` after
+  the fulfilment RPC succeeds; a failed attempt stays retryable.
+- The payment customer for an account lives in `ai_billing_customers`
+  (service-role only), never in a client-writable column, so the billing
+  portal cannot be pointed at another customer.
+- Checkout return addresses must match `src/data/app-origins.ts` or the
+  optional `APP_BASE_URL` secret.
+- Eco quality is enforced server-side: no paid speech call is made at all.
+- Only implemented actions carry a credit cost: standard and premium spoken
+  lines. There is no assistant-answer cost, because there is no assistant.
+
+### Secrets still required before purchases can work
+
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and one price id per catalogue
+entry (see `priceEnv` in `src/data/ai-credits.ts`). Optional: `APP_BASE_URL`.
