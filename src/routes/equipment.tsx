@@ -35,13 +35,13 @@ export const Route = createFileRoute("/equipment")({
       {
         name: "description",
         content:
-          "Save every piece of equipment you run — cargo van, flatbed, 18-wheeler, car haul, heavy haul — and HERCULES routes to what is legal for it, asking what you are in at the start of every trip.",
+          "Save every piece of equipment you run — car, van, box truck, flatbed, 18-wheeler, car haul, heavy haul — and HERCULES sets its route preferences and warnings to match, asking what you are in at the start of every trip.",
       },
       { property: "og:title", content: "Equipment Profile — HERCULES" },
       {
         property: "og:description",
         content:
-          "The profile drives the route, so you never get sent where your equipment cannot legally or physically go.",
+          "Your equipment profile shapes the route it prefers and the warnings it speaks up about. Posted signs are always the final word.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -314,8 +314,8 @@ function EquipmentScreen() {
 
       {/* THE FULL RULE SET — plain language, per equipment type */}
       <Panel className="mt-3">
-        <PanelTitle right={<Pill tone="go">Legal by equipment</Pill>}>
-          What each profile is allowed on
+        <PanelTitle right={<Pill tone="info">Preferences, not clearance</Pill>}>
+          What each profile prefers, and what it watches for
         </PanelTitle>
         <div className="grid gap-2 lg:grid-cols-2">
           {vehicleCatalog.map((spec) => {
