@@ -86,9 +86,11 @@ describe("credit catalogue", () => {
 
   it("names the reset when paid conversation pauses", () => {
     expect(ALLOWANCE_WEEK_RESET_DAY).toBe("Saturday");
-    const daily = allowancePausedLine("daily", "2026-09-14T00:00:00Z");
+    const daily = allowancePausedLine("daily", "2026-09-14T04:00:00Z");
     expect(daily).toMatch(/today/i);
-    expect(daily).toMatch(/resets/i);
+    // The exact next eligible time, in the driver-facing timezone.
+    expect(daily).toContain("ET");
+    expect(daily).toMatch(/top-up will not lift/i);
     const weekly = allowancePausedLine("weekly", null);
     expect(weekly).toMatch(/Saturday/);
     expect(weekly).toMatch(/free/i);
