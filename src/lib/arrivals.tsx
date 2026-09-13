@@ -123,7 +123,7 @@ type Ctx = {
  * otherwise mint a second context — the provider above would then be invisible
  * to consumers below it ("must be used inside ArrivalsProvider").
  */
-const g = globalThis as { __herculesArrivalsCtx?: React.Context<Ctx | null> };
+const g = globalThis as { __herculesArrivalsCtx?: Context<Ctx | null> };
 const ArrivalsContext = (g.__herculesArrivalsCtx ??= createContext<Ctx | null>(null));
 
 let seq = 0;
