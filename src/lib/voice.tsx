@@ -801,10 +801,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         detachLevel.current = attachAudioLevel(el);
         await el.play().catch(() => {});
       } catch {
-        /* screen text still carries the line */
+        // Unauthenticated or unreachable premium speech — device voice, free.
+        speakOnDevice(text);
       }
     },
-    [killAudio],
+    [killAudio, speakOnDevice],
   );
 
 
