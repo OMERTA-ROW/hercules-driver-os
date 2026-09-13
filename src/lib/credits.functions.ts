@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { defaultOrigin, trustedOrigins } from "@/data/app-origins";
 import { stripe, stripeKey } from "@/lib/stripe.server";
+import { allowanceStatus } from "@/lib/ai-meter.server";
 import {
   aiActionCosts,
   aiLimits,
@@ -127,6 +128,8 @@ export const getCreditState = createServerFn({ method: "GET" })
       };
     };
 
+    const allowance = await allowanceStatus(context.userId);
+
     const wallet = await db
       .from("ai_credit_wallets")
       .select(
@@ -191,6 +194,7 @@ export const getCreditState = createServerFn({ method: "GET" })
         quality: (w["quality_pref"] as string) ?? "balanced",
         low: monthly + purchased <= aiLimits.lowBalance,
       },
+      allowance,
       ledger: (ledger.data ?? []) as Row[],
       usage: (usage.data ?? []) as Row[],
       costs: aiActionCosts,
@@ -278,6 +282,20 @@ export const startAiCheckout = createServerFn({ method: "POST" })
     } catch (e) {
       console.error(`[credits] price check failed: ${e instanceof Error ? e.message : String(e)}`);
       return { ok: false as const, reason: "error" as const, message: "Checkout could not be opened." };
+    }
+
+    // Top-ups are a subscriber benefit: without an active monthly AI plan on the
+    // wallet no top-up checkout is opened at all.
+    if (data.kind === "pack") {
+      const allowance = await allowanceStatus(context.userId);
+      if (!allowance?.subscribed) {
+        return {
+          ok: false as const,
+          reason: "subscription_required" as const,
+          message:
+            "Top-ups are for accounts on a monthly AI plan. Start a monthly plan first, then top up any time.",
+        };
+      }
     }
 
     const existing = await customerFor(context.userId);
