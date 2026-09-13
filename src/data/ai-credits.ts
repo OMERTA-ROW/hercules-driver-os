@@ -10,12 +10,15 @@
  * This is SEPARATE from the platform plans in `src/data/plans.ts`. A driver's
  * app subscription is not affected by AI credits and vice versa.
  *
- * PROVENANCE (checked 2026-09-13): the repository, its history and every data
- * file were searched for a pre-existing numeric AI credit allowance and none
- * exists — the only earlier "credits" in this project are truck-stop shower
- * credits and supplier loyalty credits, which are unrelated. So the amounts
- * below are SUGGESTED FALLBACKS awaiting the owner's own guideline. They are
- * the single place to change them; nothing else hardcodes an amount.
+ * PROVENANCE (owner direction, 2026-09-13): the repository, its history and
+ * every data file were searched for a pre-existing numeric AI credit
+ * allowance and none exists — the only earlier "credits" in this project are
+ * truck-stop shower credits and supplier loyalty credits, which are
+ * unrelated. The owner then set the current amounts directly: "lower the
+ * credits a lil so we can keep users spending and making money" — the
+ * original provisional allowances reduced by 20%, prices unchanged. These
+ * amounts are now the owner's guideline; change them here only. Nothing else
+ * hardcodes an amount.
  *
  * Core app prices are authoritative and are NOT defined here:
  *   - platform plans .......... src/data/plans.ts  ($5 / $29 / $19 per truck)
@@ -25,7 +28,7 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack250" | "pack1000" | "pack3000";
+export type AiPackId = "pack200" | "pack800" | "pack2400";
 
 export type AiPlan = {
   id: AiPlanId;
