@@ -135,9 +135,8 @@ function EquipmentScreen() {
             </div>
           ) : ready && profiles.length === 0 ? (
             <div className="mb-3 rounded-lg border border-info/35 bg-info/10 p-3 text-sm">
-              Nothing saved yet. Add the vehicle you actually run and put in its real height,
-              length and weight — the route it prefers and the warnings it speaks read from those
-              numbers.
+              Nothing saved yet. Add the vehicle you actually run and put in its real height, length
+              and weight — the route it prefers and the warnings it speaks read from those numbers.
             </div>
           ) : null}
           <div className="space-y-2">
@@ -308,8 +307,16 @@ function EquipmentScreen() {
             <div className="mt-2 grid grid-cols-2 gap-2">
               {(
                 [
-                  { k: "heightFt" as const, label: "Height (feet)", ph: String(pickedSpec.heightFt) },
-                  { k: "lengthFt" as const, label: "Length (feet)", ph: String(pickedSpec.lengthFt) },
+                  {
+                    k: "heightFt" as const,
+                    label: "Height (feet)",
+                    ph: String(pickedSpec.heightFt),
+                  },
+                  {
+                    k: "lengthFt" as const,
+                    label: "Length (feet)",
+                    ph: String(pickedSpec.lengthFt),
+                  },
                   {
                     k: "grossWeightLbs" as const,
                     label: "Gross weight (lb)",
@@ -344,15 +351,13 @@ function EquipmentScreen() {
             </label>
           </div>
 
-
-
           {/* What this pick means for routing — stated before it is saved */}
           <div className="mt-3 rounded-lg border border-primary/25 bg-primary/8 p-3">
             <Label>How I route for it</Label>
             <p className="mt-1 text-sm">{pickedRules.spoken}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Watching for anything posted under{" "}
-              {(enteredDims.heightFt + 1).toFixed(1)}' of clearance · {enteredDims.lengthFt}' long ·{" "}
+              Watching for anything posted under {(enteredDims.heightFt + 1).toFixed(1)}' of
+              clearance · {enteredDims.lengthFt}' long ·{" "}
               {enteredDims.grossWeightLbs.toLocaleString()} lb · {enteredDims.axles} axles
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -370,15 +375,20 @@ function EquipmentScreen() {
           <Button
             size="lg"
             className="mt-3 w-full gap-2"
-            disabled={saving}
+            disabled={saving || !checked}
             onClick={() => void save()}
           >
-            <Plus className="h-4 w-4" /> {saving ? "Saving…" : "Save this equipment"}
+            <Plus className="h-4 w-4" />{" "}
+            {saving
+              ? "Saving…"
+              : checked
+                ? "Save this equipment"
+                : "Confirm the numbers above to save"}
           </Button>
 
           <Button variant="outline" size="lg" className="mt-2 w-full gap-2" asChild>
             <Link to="/navigation">
-              <ShieldCheck className="h-4 w-4" /> See the route it produces
+              <ShieldCheck className="h-4 w-4" /> See the route it prefers
             </Link>
           </Button>
         </Panel>

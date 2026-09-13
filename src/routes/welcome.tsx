@@ -152,9 +152,9 @@ function Welcome() {
             >
               Height, length, weight and axles decide which roads I prefer for you and which
               clearance and hazard warnings I speak up about. The numbers I fill in for each vehicle
-              type are common starting values, not your truck — check them against your own paperwork
-              or the door sticker and correct them before you save. If you run more than one unit, I
-              ask which you're in at the start of every trip.
+              type are common starting values, not your truck — check them against your own
+              paperwork or the door sticker and correct them before you save. If you run more than
+              one unit, I ask which you're in at the start of every trip.
             </Step>
 
             <Step
