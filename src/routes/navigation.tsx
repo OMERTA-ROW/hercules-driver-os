@@ -56,13 +56,13 @@ export const Route = createFileRoute("/navigation")({
       {
         name: "description",
         content:
-          "Live GPS tracking on a street-level map with truck-legal routing, blue highway and white county route shields, and automatic reroute with voice announcement.",
+          "Live GPS tracking on a street-level map from Google Maps, route shields, and automatic reroute with voice announcement. Truck restriction data is not connected yet, so posted signs are the final word.",
       },
       { property: "og:title", content: "Navigation — HERCULES Truck-Legal Routing" },
       {
         property: "og:description",
         content:
-          "Truck-legal route, live position, automatic reroute. The AI proposes, you decide.",
+          "Live position, route preferences for your vehicle, automatic reroute. The AI proposes, you decide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -181,7 +181,7 @@ function NavigationScreen() {
     setOffRoute(true);
     setPosition(offRoutePosition);
     setNotice(null);
-    setSpoken("Off route. Recalculating a truck-legal path…");
+    setSpoken("Off route. Working out a new line for your vehicle…");
   };
 
   const nextStep = route.steps[0]!;
@@ -189,7 +189,7 @@ function NavigationScreen() {
   return (
     <AppShell
       title="Navigation"
-      subtitle={`${vehicle.label} · ${route.label} · legal for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
+      subtitle={`${vehicle.label} · ${route.label} · set for ${vehicle.heightFt}' / ${vehicle.grossWeightLbs.toLocaleString()} lb / ${vehicle.lengthFt}'`}
     >
       {/* ACTIVE EQUIPMENT — the profile that produced this route */}
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/8 p-3">
@@ -199,7 +199,7 @@ function NavigationScreen() {
           {vehicle.unit} ·{" "}
           {rules.backRoadsAllowed
             ? "county and back roads permitted"
-            : "blue-shield interstate and white-shield legal county highway only"}
+            : "prefers blue-shield interstate and white-shield county highway"}
           {rules.weightRestrictionChecks ? " · weight limits checked" : ""}
           {rules.gradeAndSwitchbackChecks ? " · grades and switchbacks checked" : ""}
         </span>
@@ -316,7 +316,7 @@ function NavigationScreen() {
                       setRoute(primaryRoute);
                       setNotice(null);
                       setSpoken(
-                        "Holding your original route. I will keep watching for a legal line.",
+                        "Holding your original route. I will keep watching the road ahead for you.",
                       );
                     }}
                   >
@@ -465,7 +465,7 @@ function NavigationScreen() {
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         {/* SHIELD LEGEND + LEGAL SEGMENTS */}
         <Panel>
-          <PanelTitle right={<Pill tone="go">Truck legal only</Pill>}>Route shields</PanelTitle>
+          <PanelTitle right={<Pill tone="info">Road preferences</Pill>}>Route shields</PanelTitle>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <RouteShield road="I-35" cls="interstate" />
@@ -607,7 +607,7 @@ function PickupBanner() {
           </p>
           <p className="text-sm text-muted-foreground">
             {r.site.name} — {r.site.milesAhead} mi ahead, {r.site.milesOffRoute.toFixed(1)} mi off
-            the mainline · {r.route!.profile} legal
+            the mainline · set for {r.route!.profile}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {r.site.counter} · {r.site.parking}
