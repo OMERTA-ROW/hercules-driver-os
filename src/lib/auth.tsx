@@ -231,6 +231,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       if (data.session && data.user) {
+        // status and trial_ends_at are server-owned: the sign-up trigger sets
+        // them from the metadata above, and this screen cannot write them.
         await supabase
           .from("profiles")
           .update({
@@ -239,8 +241,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             account_kind: kind,
             plan: input.plan,
             seats,
-            status: "trial",
-            trial_ends_at: trialEndsAt,
             company_code: companyCode,
             company_name: kind === "zeusFleet" ? input.companyName || null : null,
             fleet_tier: fleetTier,
