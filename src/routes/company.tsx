@@ -63,8 +63,10 @@ function CompanyPage() {
   const [inviteDays, setInviteDays] = useState(7);
   const [inviteUses, setInviteUses] = useState(1);
 
-  const roster = useRoster(managed?.companyId ?? null);
-  const invites = useInvites(managed?.companyId ?? null);
+  // Only an owner or dispatcher of that company loads the roster or the invites.
+  const canManage = managed?.role === "owner" || managed?.role === "dispatcher";
+  const roster = useRoster(canManage ? (managed?.companyId ?? null) : null, canManage);
+  const invites = useInvites(canManage ? (managed?.companyId ?? null) : null);
 
   if (!ready || isLoading) {
     return (

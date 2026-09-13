@@ -115,10 +115,15 @@ export type RosterMember = {
   joinedAt: string | null;
 };
 
-export function useRoster(companyId: string | null) {
+/**
+ * Roster is for MANAGERS only, and carries the least identity that still lets an
+ * owner run the fleet: the person's own name and email when the database lets us
+ * read it, otherwise "Driver on file". Nothing else about them is fetched.
+ */
+export function useRoster(companyId: string | null, canManage = true) {
   return useQuery({
-    queryKey: ["company-roster", companyId],
-    enabled: !!companyId,
+    queryKey: ["company-roster", companyId, canManage],
+    enabled: !!companyId && canManage,
     queryFn: async (): Promise<RosterMember[]> => {
       const { data, error } = await supabase
         .from("company_members")

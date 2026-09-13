@@ -61,19 +61,38 @@ function Loads() {
   const refresh = useRefreshLive();
   const [pending, setPending] = useState<LoadRow | null>(null);
 
+  /**
+   * Booking goes through one checked database routine that assigns the load only
+   * while it is still open, so two drivers tapping at once cannot both get it and
+   * the loser is told the truth instead of seeing a false success.
+   */
   async function book(load: LoadRow) {
     if (!userId) return;
-    const { error } = await supabase
-      .from("loads")
-      .update({ status: "booked", assigned_driver_id: userId })
-      .eq("id", load.id)
-      .eq("status", "available");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)("load_book", { _load: load.id });
     setPending(null);
     if (error) {
-      toast.error("Could not book that load", { description: error.message });
+      toast.error("Could not book that load", {
+        description: "Nothing was booked and nothing changed on the load.",
+      });
+      refresh();
       return;
     }
-    toast.success("Booked on your approval", {
+    const res = (data ?? {}) as { ok?: boolean; error?: string; already?: boolean };
+    if (!res.ok) {
+      const message =
+        res.error === "taken"
+          ? "Another driver took that load first. Nothing was booked for you."
+          : res.error === "not_permitted"
+            ? "That load belongs to a company you are not an active member of."
+            : res.error === "not_signed_in"
+              ? "Sign in first, then book."
+              : "That load could not be booked. Nothing changed.";
+      toast.error("Not booked", { description: message });
+      refresh();
+      return;
+    }
+    toast.success(res.already ? "Already yours" : "Booked on your approval", {
       description: `${place(load.origin_city, load.origin_state)} → ${place(load.dest_city, load.dest_state)}`,
     });
     refresh();
