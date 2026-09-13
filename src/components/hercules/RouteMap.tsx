@@ -221,73 +221,41 @@ type Props = {
 
 export function RouteMap({ polyline, position, segments, offRoute, hazards = [], stops = [] }: Props) {
   const { theme } = useTheme();
-  const holder = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<"loading" | "google" | "fallback">(
-    MAPS_KEY ? "loading" : "fallback",
-  );
   const [view, setView] = useState<BaseView>("map");
   const [camera, setCamera] = useState<CameraMode>("nav3d");
   const [headingUp, setHeadingUp] = useState(true);
   const [followTruck, setFollowTruck] = useState(true);
+  const [traffic, setTraffic] = useState(true);
+  const [status, setStatus] = useState<RealMapStatus>("loading");
+  const [zoom, setZoom] = useState(8);
+  const [ready, setReady] = useState(0);
   const heading = useMemo(() => routeHeading(polyline, position), [polyline, position]);
   const refs = useRef<{
-    map?: any;
-    line?: any;
-    casing?: any;
-    truck?: any;
-    shields: any[];
-    hazards: any[];
-    stops: any[];
+    map?: google.maps.Map;
+    maps?: MapsApi;
+    line?: google.maps.Polyline;
+    casing?: google.maps.Polyline;
+    truck?: google.maps.Marker;
+    shields: google.maps.Marker[];
+    hazards: google.maps.Marker[];
+    stops: google.maps.Marker[];
   }>({ shields: [], hazards: [], stops: [] });
 
-
-  useEffect(() => {
-    if (!MAPS_KEY) return;
-    let dead = false;
-    loadGoogleMaps()
-      .then((google) => {
-        if (dead || !holder.current) return;
-        const map = new google.maps.Map(holder.current, {
-          center: position,
-          zoom: 8,
-          disableDefaultUI: true,
-          zoomControl: true,
-          scaleControl: true,
-          clickableIcons: false,
-          gestureHandling: "greedy",
-          tilt: 0,
-          backgroundColor: "#0b0f14",
-          mapTypeId: "roadmap",
-          styles: theme === "day" ? [] : darkMapStyle,
-        });
-        refs.current.map = map;
-        setMode("google");
-      })
-      .catch(() => !dead && setMode("fallback"));
-    return () => {
-      dead = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleReady = useCallback((map: google.maps.Map, maps: MapsApi) => {
+    refs.current.map = map;
+    refs.current.maps = maps;
+    setReady((n) => n + 1);
   }, []);
 
-  // Base imagery choice. Custom styling only applies to the road map; satellite
-  // and hybrid imagery are dimmed with CSS instead.
+  // Draw only truck-legal geometry + shields on top of the real base layer.
   useEffect(() => {
+    const maps = refs.current.maps;
     const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    map.setMapTypeId(view === "map" ? "roadmap" : view === "satellite" ? "satellite" : "hybrid");
-    map.setOptions({ styles: view === "map" && theme !== "day" ? darkMapStyle : [] });
-  }, [mode, view, theme]);
-
-  // Draw only truck-legal geometry + shields on top of the Google base layer.
-  useEffect(() => {
-    const google = window.google;
-    const map = refs.current.map;
-    if (mode !== "google" || !google || !map) return;
+    if (!maps || !map) return;
     // Route line: a dark casing under a bright core, so the path stays the
     // brightest thing on screen over street detail or satellite imagery.
     refs.current.casing?.setMap(null);
-    refs.current.casing = new google.maps.Polyline({
+    refs.current.casing = new maps.Polyline({
       path: polyline,
       strokeColor: "#04121a",
       strokeOpacity: 0.9,
@@ -296,7 +264,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       map,
     });
     refs.current.line?.setMap(null);
-    refs.current.line = new google.maps.Polyline({
+    refs.current.line = new maps.Polyline({
       path: polyline,
       strokeColor: offRoute ? "#fbbf24" : "#39e6ff",
       strokeOpacity: 1,
@@ -307,7 +275,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.shields.forEach((m) => m.setMap(null));
     refs.current.shields = segments.map(
       (s) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: s.shieldAt,
           map,
           title: `${s.road} — ${s.note}`,
@@ -315,7 +283,7 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
             url:
               "data:image/svg+xml;charset=UTF-8," +
               encodeURIComponent(shieldSvg(s.road.replace(/\s*\(county\)/i, ""), s.class)),
-            anchor: new google.maps.Point(33, 70),
+            anchor: new maps.Point(33, 70),
           },
           zIndex: 600,
         }),
@@ -324,14 +292,14 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.hazards.forEach((m) => m.setMap(null));
     refs.current.hazards = hazards.map(
       ({ hazard, severity }) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: hazard.at,
           map,
           title: `${hazard.name} — ${hazard.detail}`,
           icon: {
             url:
               "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(hazardIconSvg(hazard, severity)),
-            anchor: new google.maps.Point(30, 42),
+            anchor: new maps.Point(30, 42),
           },
           zIndex: severity === "critical" ? 900 : 500,
         }),
@@ -340,24 +308,24 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
     refs.current.stops.forEach((m) => m.setMap(null));
     refs.current.stops = stops.map(
       (stop) =>
-        new google.maps.Marker({
+        new maps.Marker({
           position: stop.at,
           map,
           title: `${stop.name} — $${stop.dieselPrice.toFixed(3)}/gal · ${stop.parkingOpen}/${stop.parkingTotal} spaces · ${stop.showersOpen} showers open`,
           icon: {
             url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(chainMarkerSvg(stop.chain, 46)),
-            anchor: new google.maps.Point(26, 56),
+            anchor: new maps.Point(26, 56),
           },
           zIndex: 400,
         }),
     );
     refs.current.truck?.setMap(null);
-    refs.current.truck = new google.maps.Marker({
+    refs.current.truck = new maps.Marker({
       position,
       map,
       title: "Your truck",
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
+        path: maps.SymbolPath.CIRCLE,
         scale: 10,
         fillColor: "#39e6ff",
         fillOpacity: 1,
@@ -366,112 +334,80 @@ export function RouteMap({ polyline, position, segments, offRoute, hazards = [],
       },
       zIndex: 999,
     });
-    if (followTruck) map.panTo(position);
-  }, [mode, polyline, position, segments, offRoute, theme, hazards, stops, followTruck]);
+  }, [ready, polyline, position, segments, offRoute, hazards, stops]);
 
-  // Camera mode + orientation. 3D navigation tilts low and locks the view to
-  // the truck's heading; 2D is flat overhead. North-up overrides the heading
-  // lock in either mode.
-  useEffect(() => {
-    const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    const headingLocked = camera === "nav3d" && headingUp;
-    map.setOptions({
-      tilt: camera === "nav3d" ? 55 : 0,
-      heading: headingLocked ? heading : 0,
-    });
-    if (camera === "nav3d" && map.getZoom() < 12) map.setZoom(14);
-  }, [mode, camera, headingUp, heading]);
+  // Overlays we own are detached when the map screen goes away.
+  useEffect(
+    () => () => {
+      const r = refs.current;
+      r.casing?.setMap(null);
+      r.line?.setMap(null);
+      r.truck?.setMap(null);
+      [...r.shields, ...r.hazards, ...r.stops].forEach((m) => m.setMap(null));
+      r.shields = [];
+      r.hazards = [];
+      r.stops = [];
+      r.map = undefined;
+      r.maps = undefined;
+    },
+    [],
+  );
 
   const recenter = () => {
     setFollowTruck(true);
-    const map = refs.current.map;
-    if (map) {
-      map.panTo(position);
-      if (camera === "nav3d") map.setZoom(14);
-    }
+    if (camera === "nav3d") setZoom(14);
+    refs.current.map?.panTo(position);
   };
 
   const showWholeRoute = () => {
     setFollowTruck(false);
     setCamera("top2d");
-    const google = window.google;
+    const maps = refs.current.maps;
     const map = refs.current.map;
-    if (mode === "google" && google && map) {
-      const bounds = new google.maps.LatLngBounds();
+    if (maps && map && polyline.length) {
+      const bounds = new maps.LatLngBounds();
       polyline.forEach((p) => bounds.extend(p));
       map.fitBounds(bounds, 64);
     }
   };
 
-  const onUserPan = () => setFollowTruck(false);
-  useEffect(() => {
-    const map = refs.current.map;
-    if (mode !== "google" || !map) return;
-    const l = map.addListener("dragstart", onUserPan);
-    return () => window.google?.maps?.event?.removeListener(l);
-  }, [mode]);
-
-
-  if (mode === "google" || mode === "loading") {
-    return (
-      <div className="relative h-full w-full">
-        <div
-          ref={holder}
-          className={cn(
-            "h-full w-full",
-            view === "map" ? "map-dim" : "map-dim-imagery",
-          )}
-        />
-        <BaseViewSwitch view={view} onChange={setView} />
-        <MapViewControls
-          camera={camera}
-          onCamera={setCamera}
-          headingUp={headingUp}
-          onHeadingUp={setHeadingUp}
-          following={followTruck}
-          onRecenter={recenter}
-          onWholeRoute={showWholeRoute}
-        />
-        {mode === "loading" ? (
-          <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
-            Loading street map…
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+  // 3D navigation tilts low and locks the view to the truck's heading; 2D is
+  // flat overhead. North-up overrides the heading lock. Tilt only renders where
+  // Google supports it — elsewhere the map simply stays flat.
+  const headingLocked = camera === "nav3d" && headingUp;
 
   return (
     <div className="relative h-full w-full">
-      <SchematicMap
-        polyline={polyline}
-        position={position}
-        segments={segments}
-        offRoute={offRoute}
-        hazards={hazards}
-        stops={stops}
-        zoom={followTruck ? 2.6 : 1}
-        rotate={camera === "nav3d" && headingUp ? -heading : 0}
+      <RealMap
+        center={position}
+        zoom={zoom}
+        showTraffic={traffic}
+        mapTypeId={view === "map" ? "roadmap" : view}
+        {...(view === "map" && theme !== "day" ? { styles: darkMapStyle } : {})}
+        tilt={camera === "nav3d" ? 55 : 0}
+        heading={headingLocked ? heading : 0}
+        followCenter={followTruck}
+        onReady={handleReady}
+        onUserPan={() => setFollowTruck(false)}
+        onStatus={setStatus}
+        className={cn("rounded-none", view === "map" ? "map-dim" : "map-dim-imagery")}
       />
-      <MapViewControls
-        camera={camera}
-        onCamera={setCamera}
-        headingUp={headingUp}
-        onHeadingUp={setHeadingUp}
-        following={followTruck}
-        onRecenter={() => setFollowTruck(true)}
-        onWholeRoute={() => {
-          setFollowTruck(false);
-          setCamera("top2d");
-        }}
-      />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
-        <p className="glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
-          Schematic view. Add a Google Maps browser key to see the real roads, buildings and lot
-          layouts under the route, with satellite and hybrid for the last mile.
-        </p>
-      </div>
+      {status === "ready" ? (
+        <>
+          <BaseViewSwitch view={view} onChange={setView} />
+          <MapViewControls
+            camera={camera}
+            onCamera={setCamera}
+            headingUp={headingUp}
+            onHeadingUp={setHeadingUp}
+            following={followTruck}
+            onRecenter={recenter}
+            onWholeRoute={showWholeRoute}
+            traffic={traffic}
+            onTraffic={setTraffic}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
