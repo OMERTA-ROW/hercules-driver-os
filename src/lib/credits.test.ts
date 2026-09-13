@@ -66,12 +66,13 @@ describe("rate limiting", () => {
 });
 
 describe("owner catalogue", () => {
-  it("has the exact one-time packs the owner set", async () => {
+  it("has the subscriber top-ups the owner set, at $0.30 a credit", async () => {
     const { aiPacks } = await import("@/data/ai-credits");
     expect(aiPacks.map((p) => [p.credits, p.price])).toEqual([
-      [200, 10],
-      [550, 25],
-      [1200, 50],
+      [50, 15],
+      [100, 30],
+      [250, 75],
+      [500, 150],
     ]);
   });
 

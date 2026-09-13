@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type Stripe from "stripe";
-import { aiPackById, aiPlanById } from "@/data/ai-credits";
+import { aiPacks, aiPackById, aiPlanById } from "@/data/ai-credits";
 import { stripe, verifyStripeEvent } from "@/lib/stripe.server";
 
 /**
@@ -44,7 +44,7 @@ function itemFromPriceId(priceId: string | null | undefined) {
       return { kind: "plan" as const, id: plan.id, bucket: "monthly" as const, credits: plan.credits };
     }
   }
-  for (const pack of [aiPackById("pack200"), aiPackById("pack550"), aiPackById("pack1200")]) {
+  for (const pack of aiPacks) {
     if (pack && process.env[pack.priceEnv] === priceId) {
       return { kind: "pack" as const, id: pack.id, bucket: "purchased" as const, credits: pack.credits };
     }

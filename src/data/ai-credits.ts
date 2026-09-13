@@ -29,7 +29,15 @@
 
 
 export type AiPlanId = "assist" | "pro" | "max";
-export type AiPackId = "pack200" | "pack550" | "pack1200";
+export type AiPackId = "topup50" | "topup100" | "topup250" | "topup500";
+
+/**
+ * SUBSCRIBER-ONLY TOP-UPS — owner-set price, USD $0.30 per credit.
+ * An account with no active monthly AI plan cannot buy a top-up and cannot
+ * spend credits on paid voice at all. Enforced on the server, not here.
+ */
+export const TOPUP_USD_PER_CREDIT = 0.3;
+export const TOPUPS_SUBSCRIBERS_ONLY = true;
 
 export type AiPlan = {
   id: AiPlanId;
@@ -37,6 +45,15 @@ export type AiPlan = {
   credits: number;
   price: number;
   blurb: string;
+  /**
+   * PROPOSED daily and weekly spending allowance, in credits. The monthly
+   * amounts above are the owner's confirmed figures; these two are a proposal
+   * awaiting sign-off. They are enforced as limits only — they never cause a
+   * charge. The live values used by the server are in the database table
+   * `ai_plan_allowances`; keep the two in step when you change either.
+   */
+  dailyCredits: number;
+  weeklyCredits: number;
   /** Server-side env var holding the payment provider's price id. */
   priceEnv: string;
 };
@@ -57,6 +74,8 @@ export const aiPlans: AiPlan[] = [
     name: "Assist",
     credits: 300,
     price: 9,
+    dailyCredits: 20,
+    weeklyCredits: 100,
     blurb: "Everyday spoken answers and read-backs.",
     priceEnv: "STRIPE_PRICE_AI_ASSIST",
   },
@@ -65,6 +84,8 @@ export const aiPlans: AiPlan[] = [
     name: "Pro",
     credits: 1000,
     price: 29,
+    dailyCredits: 60,
+    weeklyCredits: 320,
     blurb: "Heavy all-day use, long conversations, premium voices.",
     priceEnv: "STRIPE_PRICE_AI_PRO",
   },
@@ -73,38 +94,26 @@ export const aiPlans: AiPlan[] = [
     name: "Max",
     credits: 3500,
     price: 100,
+    dailyCredits: 200,
+    weeklyCredits: 1100,
     blurb: "The largest monthly allowance, for drivers who talk to HERCULES all day.",
     priceEnv: "STRIPE_PRICE_AI_MAX",
   },
 ];
 
-/** Buy-once packs. These credits carry over and never expire. */
-export const aiPacks: AiPack[] = [
-  {
-    id: "pack200",
-    name: "200 credits",
-    credits: 200,
-    price: 10,
-    blurb: "Top up for a busy week.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_200",
-  },
-  {
-    id: "pack550",
-    name: "550 credits",
-    credits: 550,
-    price: 25,
-    blurb: "Best value top-up.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_550",
-  },
-  {
-    id: "pack1200",
-    name: "1,200 credits",
-    credits: 1200,
-    price: 50,
-    blurb: "Stock up once, use it all year.",
-    priceEnv: "STRIPE_PRICE_AI_PACK_1200",
-  },
-];
+/**
+ * SUBSCRIBER TOP-UPS — buy once, carried over, never expire.
+ * Every amount below is exactly $0.30 per credit, the owner's set rate.
+ * Only an account with an active monthly plan may buy or spend these.
+ */
+export const aiPacks: AiPack[] = [50, 100, 250, 500].map((credits) => ({
+  id: `topup${credits}` as AiPackId,
+  name: `${credits.toLocaleString()} credits`,
+  credits,
+  price: Number((credits * TOPUP_USD_PER_CREDIT).toFixed(2)),
+  blurb: `$${TOPUP_USD_PER_CREDIT.toFixed(2)} per credit · subscribers only`,
+  priceEnv: `STRIPE_PRICE_AI_TOPUP_${credits}`,
+}));
 
 /**
  * Enterprise / fleet AI assistance is quoted, never priced here. No credit
@@ -215,3 +224,31 @@ export const freeForever = [
   "Fixed commands the app answers itself (\"where am I\", \"how many hours\")",
   "Your device's own built-in voice, when premium speech is off or unavailable",
 ];
+
+
+/* ------------------------------------------------------------------------ */
+/* Daily and weekly allowance (monthly plans only)                          */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Weeks run Saturday to Saturday: an allowance week resets at 00:00 UTC on
+ * Saturday, days reset at 00:00 UTC. Both are enforced in the database.
+ */
+export const ALLOWANCE_WEEK_RESET_DAY = "Saturday";
+
+export function allowanceFor(planId: string | null | undefined) {
+  const plan = planId ? aiPlanById(planId) : undefined;
+  if (!plan) return null;
+  return { daily: plan.dailyCredits, weekly: plan.weeklyCredits, plan };
+}
+
+/** Plain-language line shown when paid conversation is paused. */
+export function allowancePausedLine(
+  scope: "daily" | "weekly",
+  resetsAt: string | null,
+): string {
+  const when = resetsAt ? new Date(resetsAt).toLocaleString() : "the next reset";
+  return scope === "daily"
+    ? `You have used today's AI voice allowance. It resets at ${when} — your device's own voice keeps working until then, free.`
+    : `You have used this week's AI voice allowance. It resets ${ALLOWANCE_WEEK_RESET_DAY} at ${when} — your device's own voice keeps working until then, free.`;
+}

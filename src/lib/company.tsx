@@ -80,6 +80,7 @@ export function useMemberships() {
         .select(
           "id, company_id, role, status, companies(id, name, code, dot_number, mc_number, load_board_connected, load_board_provider)",
         )
+        .eq("user_id", userId!)
         .neq("status", "removed")
         .order("created_at");
       if (error) throw new Error(error.message);

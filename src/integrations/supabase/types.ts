@@ -263,6 +263,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_plan_allowances: {
+        Row: {
+          daily_credits: number
+          plan_id: string
+          updated_at: string
+          weekly_credits: number
+        }
+        Insert: {
+          daily_credits: number
+          plan_id: string
+          updated_at?: string
+          weekly_credits: number
+        }
+        Update: {
+          daily_credits?: number
+          plan_id?: string
+          updated_at?: string
+          weekly_credits?: number
+        }
+        Relationships: []
+      }
       ai_purchases: {
         Row: {
           amount_paid_cents: number | null
@@ -1108,6 +1129,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_allowance_status: { Args: { _user: string }; Returns: Json }
       ai_billing_claim_event: {
         Args: {
           _event_id: string

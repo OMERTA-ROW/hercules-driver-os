@@ -14,7 +14,15 @@
 import type { RoadClass } from "./routing";
 import type { HazardKind } from "./hazards";
 
-export type VehicleKind = "cargoVan" | "flatbed" | "eighteen" | "carHaul" | "heavyHaul";
+export type VehicleKind =
+  | "car"
+  | "passengerVan"
+  | "cargoVan"
+  | "boxTruck"
+  | "flatbed"
+  | "eighteen"
+  | "carHaul"
+  | "heavyHaul";
 
 /** 18-wheeler sub-options — same tractor, different operation and trailer. */
 export type EighteenSub = "dryVan" | "lineHaul" | "intermodal" | "flatbed";
@@ -45,6 +53,42 @@ export const eighteenSubs: { id: EighteenSub; label: string; hint: string }[] = 
 
 /** Equipment the driver picks from at setup. */
 export const vehicleCatalog: VehicleSpec[] = [
+  {
+    kind: "car",
+    label: "Car / pickup",
+    who: "Courier, hotshot deadhead, personal vehicle, dispatch runabout",
+    heightFt: 5.5,
+    lengthFt: 16,
+    widthIn: 76,
+    grossWeightLbs: 6000,
+    axles: 2,
+    minClearanceFt: 6.5,
+    pullsTrailer: false,
+  },
+  {
+    kind: "passengerVan",
+    label: "Passenger van / minivan",
+    who: "Crew transport, shuttle, mobile service call",
+    heightFt: 7.0,
+    lengthFt: 19,
+    widthIn: 78,
+    grossWeightLbs: 8600,
+    axles: 2,
+    minClearanceFt: 8.0,
+    pullsTrailer: false,
+  },
+  {
+    kind: "boxTruck",
+    label: "Box truck (straight truck)",
+    who: "26' straight truck, local and regional freight, liftgate work",
+    heightFt: 13.0,
+    lengthFt: 30,
+    widthIn: 96,
+    grossWeightLbs: 26000,
+    axles: 2,
+    minClearanceFt: 13.5,
+    pullsTrailer: false,
+  },
   {
     kind: "cargoVan",
     label: "Cargo van / Sprinter",
@@ -196,14 +240,26 @@ const VAN_HAZARDS: HazardKind[] = ["clearance", "emergencyExit", "railroad"];
 
 export function rulesFor(spec: VehicleSpec): RoutingRules {
   if (!spec.pullsTrailer) {
+    // A straight truck pulls nothing but still stands tall and heavy enough that
+    // posted clearances and weight limits matter, so it is not routed like a car.
+    const tall = spec.minClearanceFt >= 11 || spec.grossWeightLbs >= 16000;
+    if (tall) {
+      return {
+        allowedClasses: ["interstate", "us", "county"],
+        backRoadsAllowed: false,
+        hazardKinds: ["clearance", "grade", "emergencyExit", "railroad", "scale"],
+        weightRestrictionChecks: true,
+        gradeAndSwitchbackChecks: false,
+        spoken: `${spec.label}. No trailer, but I keep you off anything posted lower than your ${spec.minClearanceFt} feet and check posted weight limits on the way.`,
+      };
+    }
     return {
       allowedClasses: ["interstate", "us", "county"],
       backRoadsAllowed: true,
       hazardKinds: VAN_HAZARDS,
       weightRestrictionChecks: false,
       gradeAndSwitchbackChecks: false,
-      spoken:
-        "Cargo van. County roads and back roads are open to you, so I will take the short line when it saves time.",
+      spoken: `${spec.label}. County roads and back roads are open to you, so I will take the short line when it saves time.`,
     };
   }
 
