@@ -83,3 +83,11 @@
 - Real companies/memberships/invites in the database; three paths: company driver, leased operator, fleet owner.
 - /company route + setup step; mock carrier directory removed from src/data/accounts.ts.
 - Open: payments not live (no card credentials); email confirmation on sign-up still required (awaiting decision); no outside load-board/dispatch integration.
+
+
+## Release pass — vehicles, top-ups, allowances (done, unpublished)
+- Vehicle onboarding covers cars/pickups, passenger vans, cargo/Sprinter vans and box trucks alongside trailers; straight trucks keep clearance and weight checks but are not routed like a car. OBD-II adapter is recommended for all of them.
+- Subscriber-only one-time top-ups at $0.30 per credit (50/100/250/500). No purchase and no paid credit use without an active monthly plan, enforced in the database.
+- Server-enforced daily and weekly allowances per monthly plan; weeks reset Saturday 00:00 UTC. Paid voice pauses at the limit and names the reset; nothing extra is charged.
+- Company access fix: the membership list is scoped to the signed-in account; the direct hotfixes (null-safe member removal, owner-only dispatcher decisions, confirmed-email invites) are reconciled into a migration.
+- PENDING OWNER SIGN-OFF: exact daily/weekly counts and any revision to included monthly amounts.

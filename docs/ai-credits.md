@@ -151,7 +151,7 @@ honest "purchases not switched on" state and no checkout can be started:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_AI_ASSIST`, `STRIPE_PRICE_AI_PRO`, `STRIPE_PRICE_AI_MAX`
-- `STRIPE_PRICE_AI_PACK_200`, `STRIPE_PRICE_AI_PACK_550`, `STRIPE_PRICE_AI_PACK_1200`
+- `STRIPE_PRICE_AI_TOPUP_50`, `STRIPE_PRICE_AI_TOPUP_100`, `STRIPE_PRICE_AI_TOPUP_250`, `STRIPE_PRICE_AI_TOPUP_500` (one-time, $0.30 per credit)
 
 Webhook endpoint: `POST https://<site>/api/public/stripe-webhook`.
 
@@ -220,3 +220,23 @@ entry (see `priceEnv` in `src/data/ai-credits.ts`). Optional: `APP_BASE_URL`.
 - **Purchases are not live:** no payment credentials are configured, so no
   monthly plan or credit pack can be bought or granted. Every credit balance is
   therefore zero until the setup in this document is completed.
+
+
+## Subscriber top-ups, daily and weekly allowances (2026-09-13)
+
+- One-time top-ups are priced at the owner's rate of **USD $0.30 per credit**
+  (50/$15, 100/$30, 250/$75, 500/$150). They are **subscribers only**: the
+  server refuses to open a top-up checkout without an active monthly AI plan,
+  and `ai_credits_grant` records a top-up paid without a plan in the ledger as
+  held, adding no spendable credits.
+- Paid voice requires a monthly plan. `ai_exec_claim` returns
+  `no_subscription` otherwise, and the app falls back to the device voice free.
+- Each monthly plan has a daily and weekly credit allowance, enforced by
+  `ai_exec_claim` via `ai_allowance_status`. Days reset 00:00 UTC, weeks reset
+  **Saturday** 00:00 UTC. Going over never charges anything: paid voice pauses
+  and the reset time is shown and spoken.
+- Live limits are rows in `ai_plan_allowances` (service-role writable, readable
+  by signed-in accounts). The same numbers are mirrored in
+  `src/data/ai-credits.ts` for display. **PROPOSED, awaiting owner sign-off:**
+  Assist 20/day 100/week · Pro 60/day 320/week · Max 200/day 1,100/week.
+  Monthly included amounts are unchanged (300 / 1,000 / 3,500).
