@@ -91,6 +91,8 @@ export type SignUpInput = {
   companyName?: string;
 };
 
+export type SignInOptions = { companyCode?: string; kind?: AccountKind };
+
 type Result = { error: string | null; needsConfirmation?: boolean };
 
 type Ctx = {
