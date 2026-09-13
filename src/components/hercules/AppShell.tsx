@@ -65,7 +65,7 @@ export function AppShell({
         {/* Left rail — primary nav for a cab-mounted landscape tablet */}
         <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-primary/25 bg-background/80 py-4 shadow-[8px_0_28px_-22px_var(--primary)] backdrop-blur-xl lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
           <Link to="/" className="mb-4 px-1 text-center xl:text-left">
-            <div className="font-display text-2xl font-bold uppercase tracking-[0.14em] text-primary">
+            <div className="font-display text-lg font-bold uppercase tracking-[0.08em] text-primary xl:text-2xl xl:tracking-[0.14em]">
               HERC
               <span className="text-foreground">ULES</span>
             </div>

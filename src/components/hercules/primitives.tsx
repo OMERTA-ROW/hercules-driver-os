@@ -122,7 +122,7 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-display text-[0.7rem] font-medium uppercase tracking-[0.12em]",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 font-display text-[0.7rem] font-medium uppercase tracking-[0.12em]",
         statusTone[tone],
         className,
       )}
