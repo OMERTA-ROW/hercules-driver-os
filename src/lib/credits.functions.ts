@@ -258,7 +258,7 @@ export const startAiCheckout = createServerFn({ method: "POST" })
     try {
       const live = await client.prices.retrieve(price);
       const cents = live.unit_amount ?? 0;
-      const expected = Math.round((catalogue?.priceUsd ?? 0) * 100);
+      const expected = Math.round((catalogue?.price ?? 0) * 100);
       const currencyOk = (live.currency ?? "usd").toLowerCase() === "usd";
       const intervalOk =
         data.kind === "plan"
@@ -302,7 +302,10 @@ export const startAiCheckout = createServerFn({ method: "POST" })
       }
     }
 
-    const adminDb = await adminRpc();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const adminDb = supabaseAdmin as never as {
+      rpc: (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+    };
 
     // One authoritative customer, created and linked BEFORE checkout, so an
     // invoice that arrives before the completion event still finds its account.
