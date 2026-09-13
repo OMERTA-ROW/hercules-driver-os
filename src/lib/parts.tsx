@@ -35,7 +35,7 @@ import { feeConfig, serviceFeeFor, spokenFee, totalWithFee, type FeeCategory } f
  * a tap on "Approve & order" or a spoken yes to a read-back proposal. Nothing
  * in this file orders anything on its own.
  *
- * PROVIDER SEAM: `getPartsProvider()` returns the mock. A real dealer /
+ * PROVIDER SEAM: `getPartsProvider()` returns a not-connected provider. A real dealer /
  * supplier parts API (PACCAR, Navistar, Volvo/Mack, FleetPride, TruckPro,
  * NAPA HD) drops in here — the screens and voice layer never change.
  */

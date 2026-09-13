@@ -10,7 +10,6 @@ import {
 import {
   coverageFor,
   currentLocation,
-  favorites as mockFavorites,
   nearestCovered,
   orderOptions,
   serviceOf,
@@ -29,7 +28,7 @@ import {
  *
  * `deliveryProvider` is the single place real service APIs get wired in:
  * per-service coverage check for the truck's lat/lng, storefront search, quote,
- * and the hand-off itself. Today it answers from mock data and keeps hand-offs
+ * and the hand-off itself. No partner is connected today, so it answers with nothing and keeps hand-offs
  * in local storage so the whole voice flow is drivable.
  *
  * HERCULES DOES NOT PROCESS THESE ORDERS. DoorDash, Uber Eats, Grubhub,
@@ -111,7 +110,7 @@ export const unavailableDeliveryProvider: DeliveryProviderApi = {
     };
   },
   async cancel() {
-    /* mock provider has nothing to call */
+    /* nothing is connected, so there is nothing to cancel */
   },
 };
 
