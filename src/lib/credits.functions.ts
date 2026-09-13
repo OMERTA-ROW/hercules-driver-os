@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { defaultOrigin, trustedOrigins } from "@/data/app-origins";
+import { stripe, stripeKey } from "@/lib/stripe.server";
 import {
   aiActionCosts,
   aiLimits,
@@ -20,12 +23,6 @@ import {
  * the server-only database routines it calls.
  */
 
-const STRIPE_API = "https://api.stripe.com/v1";
-
-function stripeKey() {
-  return process.env["STRIPE_SECRET_KEY"] ?? "";
-}
-
 /** Server-side allowlist: only these ids map to a price, and only from env. */
 function priceIdFor(kind: "plan" | "pack", id: string): string | null {
   const item = kind === "plan" ? aiPlanById(id) : aiPackById(id);
@@ -33,37 +30,51 @@ function priceIdFor(kind: "plan" | "pack", id: string): string | null {
   return process.env[item.priceEnv] ?? null;
 }
 
-async function stripe(path: string, form: Record<string, string>) {
-  const body = new URLSearchParams(form);
-  const res = await fetch(`${STRIPE_API}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${stripeKey()}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    console.error(`[stripe] ${path} failed [${res.status}]: ${text}`);
-    throw new Error(`Payment provider error [${res.status}]`);
-  }
-  return JSON.parse(text) as Record<string, unknown>;
-}
-
-function originOf(): string {
+/**
+ * Return address for checkout. A request header is attacker-controlled, so a
+ * candidate must appear in the app's own trusted list (or APP_BASE_URL).
+ */
+function trustedOrigin(): string {
+  const allowed = [...trustedOrigins, process.env["APP_BASE_URL"] ?? ""].filter(Boolean);
   const req = getRequest();
+  const candidates: string[] = [];
   const origin = req?.headers.get("origin");
-  if (origin) return origin;
+  if (origin) candidates.push(origin);
   const ref = req?.headers.get("referer");
   if (ref) {
     try {
-      return new URL(ref).origin;
+      candidates.push(new URL(ref).origin);
     } catch {
-      /* fall through */
+      /* ignore an unparseable referer */
     }
   }
-  return "";
+  for (const c of candidates) if (allowed.includes(c)) return c;
+  return process.env["APP_BASE_URL"] ?? defaultOrigin;
+}
+
+/** The account's payment customer, from the service-only billing mapping.
+ *  The browser cannot write this, so it cannot point at someone else's. */
+async function customerFor(userId: string): Promise<{ customerId: string | null; subscriptionId: string | null; status: string | null }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const db = supabaseAdmin as never as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => {
+          maybeSingle: () => Promise<{ data: Record<string, string | null> | null }>;
+        };
+      };
+    };
+  };
+  const { data } = await db
+    .from("ai_billing_customers")
+    .select("customer_id, subscription_id, subscription_status")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return {
+    customerId: data?.["customer_id"] ?? null,
+    subscriptionId: data?.["subscription_id"] ?? null,
+    status: data?.["subscription_status"] ?? null,
+  };
 }
 
 /** What is missing before real purchases can work — reported honestly in the UI. */
