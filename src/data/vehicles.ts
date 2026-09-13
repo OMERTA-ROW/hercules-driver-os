@@ -240,14 +240,26 @@ const VAN_HAZARDS: HazardKind[] = ["clearance", "emergencyExit", "railroad"];
 
 export function rulesFor(spec: VehicleSpec): RoutingRules {
   if (!spec.pullsTrailer) {
+    // A straight truck pulls nothing but still stands tall and heavy enough that
+    // posted clearances and weight limits matter, so it is not routed like a car.
+    const tall = spec.minClearanceFt >= 11 || spec.grossWeightLbs >= 16000;
+    if (tall) {
+      return {
+        allowedClasses: ["interstate", "us", "county"],
+        backRoadsAllowed: false,
+        hazardKinds: ["clearance", "grade", "emergencyExit", "railroad", "scale"],
+        weightRestrictionChecks: true,
+        gradeAndSwitchbackChecks: false,
+        spoken: `${spec.label}. No trailer, but I keep you off anything posted lower than your ${spec.minClearanceFt} feet and check posted weight limits on the way.`,
+      };
+    }
     return {
       allowedClasses: ["interstate", "us", "county"],
       backRoadsAllowed: true,
       hazardKinds: VAN_HAZARDS,
       weightRestrictionChecks: false,
       gradeAndSwitchbackChecks: false,
-      spoken:
-        "Cargo van. County roads and back roads are open to you, so I will take the short line when it saves time.",
+      spoken: `${spec.label}. County roads and back roads are open to you, so I will take the short line when it saves time.`,
     };
   }
 
