@@ -5,7 +5,7 @@ export const voiceCommands = [
   { phrase: "What's my profit per mile right now?", desc: "Live margin on the current run" },
   { phrase: "Any DOT ahead of me?", desc: "Reads driver alerts within 100 miles" },
   { phrase: "Read my fault codes", desc: "ECM faults in plain language" },
-  { phrase: "Reroute me around that scale", desc: "Finds another truck-legal path and reads it aloud" },
+  { phrase: "Reroute me around that scale", desc: "Finds another path for your unit and reads it aloud" },
   { phrase: "What's my next turn?", desc: "Reads the next turn, distance, and lane guidance" },
   { phrase: "Is this road legal for my truck?", desc: "Checks height, weight, length, width, and hazmat" },
   { phrase: "What hazards are ahead?", desc: "Reads low bridges, grades, ramps, scales, and rough crossings" },

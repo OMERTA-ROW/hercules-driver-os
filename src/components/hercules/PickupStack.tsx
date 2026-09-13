@@ -85,7 +85,7 @@ function Card({ r }: { r: PickupRun }) {
             onClick={() => {
               void approve(r.id).then(() =>
                 toast.success("Route dispatched on your word", {
-                  description: `${r.site.name} — truck-legal for your unit the whole way.`,
+                  description: `${r.site.name} — built for your unit's height and weight. Check posted signs.`,
                 }),
               );
             }}
