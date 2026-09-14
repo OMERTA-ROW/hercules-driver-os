@@ -68,10 +68,7 @@ export function ThemePicker() {
             type="button"
             onClick={() => setTheme(o.id)}
             aria-pressed={active}
-            className={cn(
-              "bubble-card p-4 text-left",
-              active && "bubble-card-on",
-            )}
+            className={cn("bubble-card p-4 text-left", active && "bubble-card-on")}
           >
             <div className="flex items-center gap-2">
               <Icon className={cn("h-5 w-5", active ? "text-primary" : "text-muted-foreground")} />
@@ -161,10 +158,7 @@ export function BrightnessPicker() {
               type="button"
               onClick={() => setBrightness(b.id)}
               aria-pressed={active}
-              className={cn(
-                "bubble-card p-4 text-left",
-                active && "bubble-card-on",
-              )}
+              className={cn("bubble-card p-4 text-left", active && "bubble-card-on")}
             >
               <div className="font-display text-sm uppercase tracking-[0.12em]">{b.label}</div>
               <p className="mt-1 text-xs text-muted-foreground">{b.hint}</p>

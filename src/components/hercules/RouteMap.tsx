@@ -461,10 +461,7 @@ function BaseViewSwitch({ view, onChange }: { view: BaseView; onChange: (v: Base
           onClick={() => onChange(b.id)}
           aria-pressed={view === b.id}
           title={b.hint}
-          className={cn(
-            "bubble-tab tracking-[0.18em]",
-            view === b.id && "bubble-tab-on",
-          )}
+          className={cn("bubble-tab tracking-[0.18em]", view === b.id && "bubble-tab-on")}
         >
           {b.label}
         </button>
@@ -524,10 +521,8 @@ function MapViewControls({
             aria-pressed={camera === c.id}
             title={c.hint}
             className={cn(
-              "min-h-9 rounded-lg px-3 font-display text-[0.66rem] font-light uppercase tracking-[0.2em] transition-colors",
-              camera === c.id
-                ? "bg-primary/20 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              "bubble-tab !px-4 !text-[0.66rem] tracking-[0.2em]",
+              camera === c.id && "bubble-tab-on",
             )}
           >
             {c.label}
