@@ -130,3 +130,31 @@ Not connected (no integration, shown as unavailable, never simulated):
 - Payments/Stripe (no credentials) — no live billing.
 - Commercial truck routing/restriction data — Google Maps base map only; posted signs govern.
 - OBD-II / THE BOLT telemetry, parts suppliers, delivery partners, load boards.
+
+## Release report — ElevenLabs live voice provider
+
+Implemented (test evidence, no credentials required):
+- `src/lib/elevenlabs.server.ts`: server-only adapter. `ELEVENLABS_API_KEY` read inside
+  handlers, sent as `xi-api-key`, never in a URL, never exposed to the browser or a VITE var.
+  Model `eleven_flash_v2_5` (low latency), MP3 44.1kHz/128kbps.
+- Nine personas (5 male / 4 female) mapped to distinct licensed stock voices, delivery set with
+  ElevenLabs voice settings; no cloning. Table in docs/voice-provider.md.
+- `speakLine` now calls ElevenLabs inside `runMetered`, so Eco, no-subscription, missing
+  allowance config, daily/weekly caps, dedupe, per-account cache, holds and refunds are all
+  unchanged. 401 credentials, 401 quota, 429 and outages refund the hold in full and return a
+  truthful device-fallback line stating no charge.
+- `voiceProviderStatus` (authenticated) validates every persona against the live `/v1/voices`
+  library; the voice picker shows connected/not-connected and any unlicensed persona.
+- Preview clips relabelled honestly: they are recorded clips from the earlier voice service, not
+  ElevenLabs audio; they stay free and identical for everyone.
+- `src/lib/elevenlabs.test.ts` (10 assertions, stubbed fetch) covers mapping, model, settings
+  ranges, key never in URL, refundable failures for 401/quota/429/5xx, licence gaps, no-key
+  refusal and long-clip encoding. Full suite: 95 tests pass; typecheck and build pass.
+
+Blocked — live verification not done:
+- No ElevenLabs connection exists on this project, so no real male/female audio has been
+  generated and the sample clips have not been re-rendered. The app truthfully reports
+  "not connected" and speaks every line with the device voice, free.
+
+Still not connected (unchanged): payments/Stripe, commercial truck routing data, OBD-II
+telemetry, parts suppliers, delivery partners, load boards.
