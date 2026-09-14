@@ -170,9 +170,14 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
       previewClipModel: PREVIEW_CLIP_MODEL,
     };
 
+    const checkedAt = new Date().toISOString();
+
     if (!elevenLabsConfigured()) {
+      // Logged so the true state is recorded, never inferred from the screen.
+      console.info(`[voice] provider=ElevenLabs connected=false reason=no_key at=${checkedAt}`);
       return {
         ...shared,
+        checkedAt,
         connected: false as const,
         message:
           "The real AI voice service isn't connected yet. Every line is spoken by your device, free, until it is.",
@@ -182,8 +187,12 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
 
     const check = await verifyElevenVoices(personas);
     if (!check.ok) {
+      console.info(
+        `[voice] provider=ElevenLabs connected=false status=${check.status} at=${checkedAt}`,
+      );
       return {
         ...shared,
+        checkedAt,
         connected: false as const,
         message: check.message,
         voices: [],
@@ -191,8 +200,12 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
     }
 
     const missing = check.voices.filter((v) => !v.available);
+    console.info(
+      `[voice] provider=ElevenLabs connected=true model=${ELEVEN_MODEL} voices=${check.voices.length} unlicensed=${missing.length} at=${checkedAt}`,
+    );
     return {
       ...shared,
+      checkedAt,
       connected: true as const,
       message: missing.length
         ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no licensed voice on this account and falls back to your device.`
