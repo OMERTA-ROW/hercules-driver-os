@@ -4,13 +4,11 @@ import { getVoiceLevel } from "@/lib/voice-level";
 import { cn } from "@/lib/utils";
 
 /**
- * THE ORB — a body of liquid mercury.
+ * THE ORB — a responsive body with a soft matte finish.
  *
  * The silhouette is a real closed path rebuilt every frame from a handful of
  * radial harmonics, so surface tension pulls it round while the mass keeps
- * folding. Chrome is done with hard light/dark banding rolling across the
- * body (that contrast is what makes metal read as metal), a sliding specular
- * hot spot, and a bright meniscus rim.
+ * folding. Broad tonal fields preserve its mass without chrome or hard shine.
  *
  *   base      — slow heavy churn; mercury shifting under its own weight.
  *   voice     — live loudness drives the harmonics, the bands and the highlight.
@@ -21,36 +19,39 @@ import { cn } from "@/lib/utils";
  * offscreen or hidden, and holds still under prefers-reduced-motion.
  */
 
-/** The warm gold light that sits BEHIND the orb in every colourway. */
-const GOLD_CORE = "oklch(0.86 0.15 84 / 0.5)";
-const GOLD = "oklch(0.8 0.15 84)";
-const GOLD_DEEP = "oklch(0.62 0.13 78)";
-
-/** Metallic tint per colourway — all of them are mercury, only the light changes. */
+/** Matte body and complementary backlight for each app colorway. */
 const metals: Record<
   OrbColorway,
-  { hi: string; lo: string; deep: string; rim: string; tint: string }
+  { hi: string; lo: string; deep: string; rim: string; tint: string; glow: string; glowDeep: string }
 > = {
   black: {
-    hi: "oklch(0.93 0.008 250)",
-    lo: "oklch(0.38 0.01 250)",
+    hi: "oklch(0.35 0.012 250)",
+    lo: "oklch(0.23 0.01 250)",
     deep: "oklch(0.11 0.008 250)",
-    rim: "oklch(0.97 0.006 250)",
-    tint: "oklch(0.8 0.09 84)",
+    rim: "oklch(0.7 0.12 82)", tint: "oklch(0.6 0.1 82)",
+    glow: "oklch(0.8 0.15 84)", glowDeep: "oklch(0.55 0.12 76)",
+  },
+  pink: {
+    hi: "oklch(0.65 0.11 350)", lo: "oklch(0.47 0.1 350)", deep: "oklch(0.24 0.07 350)",
+    rim: "oklch(0.84 0.07 205)", tint: "oklch(0.7 0.08 205)",
+    glow: "oklch(0.84 0.09 205)", glowDeep: "oklch(0.52 0.09 210)",
   },
   grey: {
-    hi: "oklch(0.97 0.005 250)",
-    lo: "oklch(0.55 0.008 250)",
+    hi: "oklch(0.64 0.005 250)",
+    lo: "oklch(0.46 0.008 250)",
     deep: "oklch(0.24 0.006 250)",
-    rim: "oklch(0.99 0.003 250)",
-    tint: "oklch(0.84 0.06 84)",
+    rim: "oklch(0.9 0.003 250)", tint: "oklch(0.76 0.008 250)",
+    glow: "oklch(0.94 0.004 250)", glowDeep: "oklch(0.62 0.008 250)",
   },
-  white: {
-    hi: "oklch(1 0 0)",
-    lo: "oklch(0.72 0.006 250)",
-    deep: "oklch(0.42 0.008 250)",
-    rim: "oklch(1 0 0)",
-    tint: "oklch(0.88 0.05 84)",
+  gold: {
+    hi: "oklch(0.74 0.12 82)", lo: "oklch(0.56 0.12 78)", deep: "oklch(0.32 0.08 72)",
+    rim: "oklch(0.16 0.02 70)", tint: "oklch(0.22 0.025 70)",
+    glow: "oklch(0.08 0.01 70)", glowDeep: "oklch(0.02 0 0)",
+  },
+  turquoise: {
+    hi: "oklch(0.66 0.11 185)", lo: "oklch(0.47 0.1 185)", deep: "oklch(0.23 0.065 190)",
+    rim: "oklch(0.76 0.12 28)", tint: "oklch(0.68 0.12 28)",
+    glow: "oklch(0.76 0.13 28)", glowDeep: "oklch(0.48 0.1 25)",
   },
 };
 
@@ -176,8 +177,7 @@ export function Orb({
       clipRef.current?.setAttribute("d", d);
       rimRef.current?.setAttribute("d", d);
 
-      /* Reflections roll across the body at different rates — that shear is
-         what sells heavy liquid metal rather than a shaded ball. */
+      /* Matte tonal fields roll slowly to keep the body dimensional. */
       const roll = ((t * 26 + smooth * 90) % 520) - 260;
       const roll2 = 260 - ((t * 15 + smooth * 40) % 520);
       bandsRef.current?.setAttribute(
@@ -202,13 +202,13 @@ export function Orb({
         s.setAttribute("cy", (134 + Math.cos(t * 0.33) * 11 - smooth * 14).toFixed(1));
         s.setAttribute("rx", (46 + smooth * 20).toFixed(1));
         s.setAttribute("ry", (26 - smooth * 7).toFixed(1));
-        s.setAttribute("opacity", (0.72 + smooth * 0.28).toFixed(3));
+        s.setAttribute("opacity", (0.1 + smooth * 0.08).toFixed(3));
       }
       if (spec2Ref.current) {
         const s = spec2Ref.current;
         s.setAttribute("cx", (246 + Math.cos(t * 0.29) * 16).toFixed(1));
         s.setAttribute("cy", (262 + Math.sin(t * 0.38) * 13).toFixed(1));
-        s.setAttribute("opacity", (0.24 + smooth * 0.3).toFixed(3));
+        s.setAttribute("opacity", (0.05 + smooth * 0.08).toFixed(3));
       }
       if (bloomRef.current) {
         bloomRef.current.style.opacity = (0.4 + smooth * 0.5).toFixed(3);
@@ -297,22 +297,21 @@ export function Orb({
         mode === "idle" && "orb-state-idle",
       )}
     >
-      {/* WARM GOLD BACKLIGHT — sits behind the silver body in every colourway.
-          The body itself stays mercury; only this halo is gold. */}
+      {/* Complementary backlight stays behind the matte body. */}
       <span
         aria-hidden
         className="absolute -inset-[26%] rounded-full"
         style={{
-          background: `radial-gradient(circle, ${GOLD_CORE} 0%, color-mix(in oklab, ${GOLD} ${
+          background: `radial-gradient(circle, color-mix(in oklab, ${m.glow} 50%, transparent) 0%, color-mix(in oklab, ${m.glow} ${
             speaking ? 30 : listening ? 24 : 18
-          }%, transparent) 34%, color-mix(in oklab, ${GOLD_DEEP} ${
+          }%, transparent) 34%, color-mix(in oklab, ${m.glowDeep} ${
             speaking ? 14 : 10
           }%, transparent) 58%, transparent 76%)`,
           filter: "blur(6px)",
         }}
       />
 
-      {/* Cold specular bloom on top of the gold, so the metal still reads silver */}
+      {/* Broad diffuse bloom adds depth without surface shine. */}
       <span
         aria-hidden
         ref={bloomRef}
@@ -363,22 +362,20 @@ export function Orb({
             <feGaussianBlur stdDeviation="2.2" />
           </filter>
 
-          {/* Base chrome: bright sky above, dark ground below — the classic
-              metal signature, before any reflection rolls over it. */}
+          {/* Low-contrast matte body shading. */}
           <linearGradient id={`${uid}-chrome`} x1="0" y1="0" x2="0.25" y2="1">
             <stop offset="0%" stopColor={m.hi} />
-            <stop offset="26%" stopColor={m.lo} />
-            <stop offset="44%" stopColor={m.deep} />
-            <stop offset="62%" stopColor={m.lo} />
-            <stop offset="80%" stopColor={m.hi} stopOpacity="0.9" />
+            <stop offset="32%" stopColor={m.lo} />
+            <stop offset="66%" stopColor={m.deep} />
+            <stop offset="84%" stopColor={m.lo} />
             <stop offset="100%" stopColor={m.deep} />
           </linearGradient>
 
           <linearGradient id={`${uid}-band`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={m.hi} stopOpacity="0" />
-            <stop offset="38%" stopColor={m.hi} stopOpacity="0.85" />
-            <stop offset="52%" stopColor="oklch(1 0 0)" stopOpacity="0.95" />
-            <stop offset="66%" stopColor={m.hi} stopOpacity="0.7" />
+            <stop offset="38%" stopColor={m.hi} stopOpacity="0.18" />
+            <stop offset="52%" stopColor={m.hi} stopOpacity="0.28" />
+            <stop offset="66%" stopColor={m.hi} stopOpacity="0.16" />
             <stop offset="100%" stopColor={m.hi} stopOpacity="0" />
           </linearGradient>
           <linearGradient id={`${uid}-dark`} x1="0" y1="0" x2="0" y2="1">
@@ -393,9 +390,9 @@ export function Orb({
           </linearGradient>
 
           <radialGradient id={`${uid}-spec`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="oklch(1 0 0)" stopOpacity="0.95" />
-            <stop offset="40%" stopColor="oklch(1 0 0)" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="oklch(1 0 0)" stopOpacity="0" />
+            <stop offset="0%" stopColor={m.hi} stopOpacity="0.26" />
+            <stop offset="40%" stopColor={m.hi} stopOpacity="0.08" />
+            <stop offset="100%" stopColor={m.hi} stopOpacity="0" />
           </radialGradient>
           <radialGradient id={`${uid}-occl`} cx="50%" cy="50%" r="50%">
             <stop offset="62%" stopColor={m.deep} stopOpacity="0" />
@@ -463,8 +460,8 @@ export function Orb({
           d={CIRCLE}
           fill="none"
           stroke={m.rim}
-          strokeOpacity="0.55"
-          strokeWidth="1.6"
+          strokeOpacity="0.38"
+          strokeWidth="2"
         />
       </svg>
     </span>
