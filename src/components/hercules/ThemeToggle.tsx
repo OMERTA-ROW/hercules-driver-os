@@ -69,10 +69,8 @@ export function ThemePicker() {
             onClick={() => setTheme(o.id)}
             aria-pressed={active}
             className={cn(
-              "rounded-lg border p-4 text-left transition-colors",
-              active
-                ? "border-primary/60 bg-primary/12"
-                : "border-border bg-card/50 hover:bg-accent",
+              "bubble-card p-4 text-left",
+              active && "bubble-card-on",
             )}
           >
             <div className="flex items-center gap-2">

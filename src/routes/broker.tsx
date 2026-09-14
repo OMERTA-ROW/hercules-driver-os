@@ -208,10 +208,8 @@ function BrokerView() {
               aria-pressed={equipment === e}
               onClick={() => setEquipment(e)}
               className={cn(
-                "min-h-[48px] rounded-lg border px-3 text-sm transition-colors",
-                equipment === e
-                  ? "border-primary/60 bg-primary/12 text-primary"
-                  : "border-border bg-card/50 hover:bg-accent",
+                "bubble-tab min-h-[48px] normal-case tracking-[0.06em]",
+                equipment === e && "bubble-tab-on",
               )}
             >
               {e}
@@ -438,7 +436,7 @@ function BrokerView() {
                 aria-pressed={facRole === r}
                 onClick={() => setFacRole(r)}
                 className={cn(
-                  "min-h-[48px] rounded-lg border px-3 text-sm capitalize transition-colors",
+                  "bubble-tab min-h-[48px] normal-case tracking-[0.06em] capitalize",
                   facRole === r
                     ? "border-primary/60 bg-primary/12 text-primary"
                     : "border-border bg-card/50",

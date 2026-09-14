@@ -191,10 +191,8 @@ function ZeusOnboarding() {
                           setTrucks(t.id === "tier1" ? 3 : t.id === "tier2" ? 25 : 120)
                         }
                         className={cn(
-                          "min-h-[76px] rounded-lg border p-3 text-left transition-colors",
-                          tier.id === t.id
-                            ? "border-primary/60 bg-primary/12 text-primary"
-                            : "border-border bg-card/50 hover:bg-accent",
+                          "bubble-card min-h-[76px] p-4 text-left",
+                          tier.id === t.id && "bubble-card-on text-primary",
                         )}
                       >
                         <span className="block font-display text-sm uppercase tracking-[0.12em]">

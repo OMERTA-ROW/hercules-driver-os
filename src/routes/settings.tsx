@@ -307,10 +307,8 @@ function OrbPicker() {
             onClick={() => setColorway(o.id)}
             aria-pressed={active}
             className={cn(
-              "flex flex-col items-center gap-3 rounded-xl border p-4 transition-colors",
-              active
-                ? "border-primary/60 bg-primary/10"
-                : "border-border bg-card/50 hover:bg-accent",
+              "bubble-card flex flex-col items-center gap-3 p-4",
+              active && "bubble-card-on",
             )}
           >
             <Orb className="w-24" mode={active ? mode : "idle"} colorway={o.id} />
