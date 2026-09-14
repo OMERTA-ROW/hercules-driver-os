@@ -25,17 +25,20 @@ a URL. ElevenLabs is called directly (`https://api.elevenlabs.io`) with the
 
 Five male, four female, one stock voice each, no cloning:
 
-| Persona | Stock voice |
-| --- | --- |
-| Hercules | George |
-| Zeus | Bill |
-| Ares | Callum |
-| Atlas | Daniel |
-| Apollo | Liam |
-| Athena | Sarah |
-| Medusa | Matilda |
-| Hera | Alice |
-| Artemis | Lily |
+| Persona | Character | Stock voice | Voice id |
+| --- | --- | --- | --- |
+| Hercules | grounded, warm bass | George | `JBFqnCBsd6RMkjVDRZzb` |
+| Zeus | resonant, commanding | Bill | `pqHfZKP75CvOlQylNhV4` |
+| Ares | firm, energetic | Callum | `N2lVS1w4EtoT3dr4eOWO` |
+| Atlas | deep, steady | Daniel | `onwK4e9ZLuTAKqWW03F9` |
+| Apollo | bright, reassuring | Liam | `TX3LPaxmHKxFdv7VOQHJ` |
+| Athena | clear, composed | Sarah | `EXAVITQu4vr4xnSDxMaL` |
+| Medusa | low, smoky, calm | Matilda | `XrExE9yKIg1WjnnlVkGX` |
+| Hera | warm, authoritative | Alice | `Xb7hH8MSUJpSbSDYk0k2` |
+| Artemis | crisp, alert | Lily | `pFZP5JQG7iQjIQuC4Bku` |
+
+Every id above was read from the connected account's own `/v1/voices` library —
+none is invented. No cloning and no imitation of a real person.
 
 Delivery per persona is set with ElevenLabs voice settings (`stability`,
 `style`, `similarity_boost`, `speed` clamped to the provider's 0.7–1.2 window).
@@ -82,3 +85,29 @@ weekly resets; subscriber-only top-ups 10/$3, 50/$15, 100/$30.
 - Still not connected elsewhere in the app, and shown as unavailable rather than
   filled in: payments, commercial truck restriction data, engine diagnostics,
   parts suppliers, delivery partners, load boards.
+
+## Adapter corrections (2026-09-14)
+
+- **Cached premium replies are gated.** `speakLine` calls `ai_gate_check` before
+  serving a cached clip, so a lapsed subscription or an account paused at its
+  daily or weekly cap no longer keeps hearing the paid voice out of the cache.
+  The check reserves nothing, spends nothing, and fails closed on a read error.
+- **Availability, not licence.** `/v1/voices` proves a voice is available on the
+  account; nothing in the app claims it proves commercial licence terms.
+- **No raw provider bodies in the log.** Failures log status and the quota
+  classification only (`[voice] speech failed status=… quota=…`).
+- **Quota wording preserved.** The provider's own explanation (quota exhausted,
+  credentials refused, busy, unable to speak the line) is carried through to the
+  driver instead of being flattened into one generic message.
+- **No unverified refund claims.** When releasing the hold after a provider
+  failure itself fails, the reply says the hold is being reconciled rather than
+  asserting the credits came back; `runMetered` reports `refunded` truthfully.
+- **Preview clips are the real voices.** `public/voice-samples/*.mp3` are
+  rendered by `scripts/build-voice-samples.ts` with the same voice ids, model and
+  settings used live, verified non-empty and decodable (3.5–6.6 s each). They
+  stay static and free to drivers; no earlier-provider clips remain.
+
+Unchanged: 150/600/3000 monthly credits, 10/25/110 daily, 40/150/750 weekly,
+America/New_York midnight and Saturday resets, subscriber-only top-ups at
+$0.30/credit (10/$3, 50/$15, 100/$30), and the stop/cancel generation-token
+fixes in `src/lib/voice.tsx`.
