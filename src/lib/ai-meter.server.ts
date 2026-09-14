@@ -257,6 +257,8 @@ export type MeteredResult<T> =
       message: string;
       needed?: number;
       status?: number;
+      /** Only true when the failed hold was actually recorded and released. */
+      refunded?: boolean;
     };
 
 type ClaimOutcome = {
@@ -425,12 +427,16 @@ export async function runMetered<T>(opts: {
       value = await opts.run();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Provider call failed.";
-      await finishExecution(opts.userId, opts.identity, false, { error: message.slice(0, 300) });
+      // Release the hold. If THIS fails too, we do not claim a refund happened.
+      const released = await finishExecution(opts.userId, opts.identity, false, {
+        error: message.slice(0, 300),
+      });
       return {
         ok: false as const,
         reason: "provider" as const,
         message,
         status: (e as { status?: number }).status ?? 0,
+        refunded: released.status !== "unsettled",
       };
     }
 
