@@ -65,6 +65,7 @@
 /* ---------------------------------------------------------------- NIGHT (default) */
 :root {
   --radius: 0.35rem;
+  --exposure-light: oklch(1 0 0);
 
   --background: oklch(0 0 0);
   --foreground: oklch(0.9 0.004 250);
@@ -80,7 +81,7 @@
   --secondary-foreground: oklch(0.88 0.004 250);
 
   --muted: oklch(0.11 0.018 295);
-  --muted-foreground: oklch(0.6 0.012 250);
+  --muted-foreground: oklch(0.65 0.012 250);
 
   --accent: oklch(0.24 0.12 300);
   --accent-foreground: oklch(0.9 0.004 250);
@@ -157,7 +158,7 @@
   --accent: oklch(0.26 0.13 300);
   --accent-foreground: oklch(0.95 0.004 250);
 
-  --destructive: oklch(0.6 0.2 27);
+  --destructive: oklch(0.54 0.19 27);
   --destructive-foreground: oklch(0.97 0.005 250);
 
   --border: oklch(0.39 0.08 82);
@@ -980,6 +981,7 @@
   background: var(--bubble-bg);
   backdrop-filter: blur(18px);
   transition:
+    transform 0.2s ease,
     color 0.2s ease,
     background-color 0.2s ease,
     border-color 0.2s ease,
@@ -990,22 +992,45 @@
   }
 }
 
+/* Google renders its own controls. Bring those controls into the same bubble
+   language without changing any map behavior. */
+.matte-map .gm-control-active,
+.matte-map .gm-svpc,
+.matte-map .gm-fullscreen-control,
+.matte-map .gm-style-mtc button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--bubble-edge) !important;
+  background: color-mix(in oklab, var(--card) 92%, transparent) !important;
+  box-shadow: 0 10px 24px -18px var(--theme-shadow), 0 0 18px -14px var(--theme-glow) !important;
+  backdrop-filter: blur(14px);
+}
+
+.matte-map .gm-control-active:hover,
+.matte-map .gm-svpc:hover,
+.matte-map .gm-fullscreen-control:hover,
+.matte-map .gm-style-mtc button:hover {
+  border-color: var(--bubble-on-edge) !important;
+  background: var(--bubble-on-bg) !important;
+}
+
 /* ================================================================ MATTE COLORWAYS
  * Colorway controls hue and personality. Night/Gray/Day remain exposure modes.
  */
 :root,
 [data-colorway="black"] {
-  --background: oklch(0.075 0.006 255);
-  --card: oklch(0.13 0.008 255);
-  --popover: oklch(0.145 0.008 255);
+  --matte-background: oklch(0.075 0.006 255);
+  --matte-card: oklch(0.13 0.008 255);
+  --matte-popover: oklch(0.145 0.008 255);
   --steel: oklch(0.105 0.008 255);
   --primary: oklch(0.76 0.14 82);
   --primary-foreground: oklch(0.13 0.025 70);
   --secondary: oklch(0.2 0.025 255);
   --muted: oklch(0.17 0.012 255);
   --accent: oklch(0.25 0.055 82);
-  --border: oklch(0.35 0.065 82);
-  --input: oklch(0.28 0.04 82);
+  --border: oklch(0.5 0.075 82);
+  --input: oklch(0.52 0.07 82);
   --ring: oklch(0.78 0.14 82);
   --violet: oklch(0.68 0.13 82);
   --theme-glow: oklch(0.76 0.14 82 / 0.62);
@@ -1013,9 +1038,9 @@
 }
 
 [data-colorway="pink"] {
-  --background: oklch(0.22 0.055 350);
-  --card: oklch(0.29 0.06 350);
-  --popover: oklch(0.31 0.058 350);
+  --matte-background: oklch(0.22 0.055 350);
+  --matte-card: oklch(0.29 0.06 350);
+  --matte-popover: oklch(0.31 0.058 350);
   --steel: oklch(0.255 0.052 350);
   --primary: oklch(0.84 0.09 205);
   --primary-foreground: oklch(0.2 0.045 210);
@@ -1031,9 +1056,9 @@
 }
 
 [data-colorway="grey"] {
-  --background: oklch(0.2 0.008 250);
-  --card: oklch(0.27 0.009 250);
-  --popover: oklch(0.29 0.009 250);
+  --matte-background: oklch(0.2 0.008 250);
+  --matte-card: oklch(0.27 0.009 250);
+  --matte-popover: oklch(0.29 0.009 250);
   --steel: oklch(0.235 0.008 250);
   --primary: oklch(0.9 0.006 250);
   --primary-foreground: oklch(0.2 0.008 250);
@@ -1049,12 +1074,12 @@
 }
 
 [data-colorway="gold"] {
-  --background: oklch(0.52 0.09 78);
-  --foreground: oklch(0.13 0.018 70);
-  --card: oklch(0.59 0.1 80);
-  --card-foreground: oklch(0.13 0.018 70);
-  --popover: oklch(0.62 0.1 82);
-  --popover-foreground: oklch(0.12 0.018 70);
+  --matte-background: oklch(0.58 0.1 78);
+  --foreground: oklch(0.08 0.012 70);
+  --matte-card: oklch(0.65 0.1 80);
+  --card-foreground: oklch(0.08 0.012 70);
+  --matte-popover: oklch(0.68 0.1 82);
+  --popover-foreground: oklch(0.07 0.01 70);
   --steel: oklch(0.55 0.085 78);
   --steel-foreground: oklch(0.14 0.018 70);
   --primary: oklch(0.12 0.018 70);
@@ -1062,11 +1087,11 @@
   --secondary: oklch(0.68 0.1 82);
   --secondary-foreground: oklch(0.13 0.018 70);
   --muted: oklch(0.63 0.075 80);
-  --muted-foreground: oklch(0.26 0.025 70);
+  --muted-foreground: oklch(0.18 0.02 70);
   --accent: oklch(0.72 0.11 82);
   --accent-foreground: oklch(0.1 0.015 70);
-  --border: oklch(0.25 0.035 70);
-  --input: oklch(0.31 0.04 70);
+  --border: oklch(0.17 0.025 70);
+  --input: oklch(0.18 0.025 70);
   --ring: oklch(0.08 0.01 70);
   --violet: oklch(0.2 0.025 70);
   --theme-glow: oklch(0.04 0.005 70 / 0.7);
@@ -1076,9 +1101,9 @@
 }
 
 [data-colorway="turquoise"] {
-  --background: oklch(0.2 0.055 190);
-  --card: oklch(0.27 0.065 190);
-  --popover: oklch(0.29 0.065 190);
+  --matte-background: oklch(0.2 0.055 190);
+  --matte-card: oklch(0.27 0.065 190);
+  --matte-popover: oklch(0.29 0.065 190);
   --steel: oklch(0.235 0.055 190);
   --primary: oklch(0.76 0.13 28);
   --primary-foreground: oklch(0.2 0.045 25);
@@ -1093,6 +1118,25 @@
   --theme-shadow: oklch(0.08 0.03 190 / 0.84);
 }
 
+/* Exposure changes luminance while preserving each colorway's authored hue. */
+[data-colorway] {
+  --background: var(--matte-background);
+  --card: var(--matte-card);
+  --popover: var(--matte-popover);
+}
+
+[data-colorway][data-theme="gray"] {
+  --background: color-mix(in oklab, var(--matte-background) 96%, var(--exposure-light));
+  --card: color-mix(in oklab, var(--matte-card) 95%, var(--exposure-light));
+  --popover: color-mix(in oklab, var(--matte-popover) 95%, var(--exposure-light));
+}
+
+[data-colorway][data-theme="day"] {
+  --background: color-mix(in oklab, var(--matte-background) 90%, var(--exposure-light));
+  --card: color-mix(in oklab, var(--matte-card) 88%, var(--exposure-light));
+  --popover: color-mix(in oklab, var(--matte-popover) 88%, var(--exposure-light));
+}
+
 /* Exposure stays independent: the brightness controller dims the whole cockpit. */
 [data-theme="gray"] { --grid-line: color-mix(in oklab, var(--primary) 11%, transparent); }
 [data-theme="day"] { --grid-line: color-mix(in oklab, var(--primary) 14%, transparent); }
@@ -1102,7 +1146,10 @@
   [role="button"],
   [role="tab"],
   [role="radio"],
-  [role="switch"] {
+  [role="switch"],
+  select,
+  textarea,
+  input:not([type="checkbox"]):not([type="radio"]) {
     border-radius: 9999px;
   }
 
@@ -1116,6 +1163,20 @@
   [role="button"]:not([aria-disabled="true"]):active {
     transform: translateY(1px) scale(0.985);
   }
+
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover,
+  [role="tab"]:hover,
+  [role="radio"]:hover,
+  [role="switch"]:hover {
+    box-shadow: 0 0 22px -14px var(--theme-glow);
+  }
+}
+
+/* Unlayered so legacy route-local radius utilities cannot flatten controls. */
+:where(button, [role="button"], [role="tab"], [role="radio"], [role="switch"], select,
+  textarea, input:not([type="checkbox"]):not([type="radio"])) {
+  border-radius: 9999px;
 }
 
 @utility matte-control {
@@ -1128,7 +1189,8 @@
 }
 
 @utility matte-popover {
-  background: color-mix(in oklab, var(--popover) 92%, transparent);
+  background: var(--bubble-bg);
+  border-color: var(--bubble-edge);
   backdrop-filter: blur(18px);
   box-shadow: 0 22px 52px -30px var(--theme-shadow), 0 0 26px -20px var(--theme-glow);
 }
@@ -1138,7 +1200,11 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .panel, .glass, .matte-popover { background: var(--card); backdrop-filter: none; }
+  .panel, .glass, .matte-popover, .matte-map .gm-control-active, .matte-map .gm-svpc,
+  .matte-map .gm-fullscreen-control, .matte-map .gm-style-mtc button {
+    background: var(--card) !important;
+    backdrop-filter: none;
+  }
 }
 
 @utility bubble-card-on {

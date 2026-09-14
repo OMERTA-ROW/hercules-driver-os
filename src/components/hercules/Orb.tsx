@@ -195,7 +195,7 @@ export function Orb({
         (0.006 + Math.sin(t * 0.23) * 0.0018 + smooth * 0.004).toFixed(5),
       );
 
-      /* Light on the surface. */
+      /* Broad diffuse tonal fields on the surface. */
       if (specRef.current) {
         const s = specRef.current;
         s.setAttribute("cx", (156 + Math.sin(t * 0.44) * 14 + smooth * 12).toFixed(1));
@@ -334,7 +334,7 @@ export function Orb({
         }
       >
         <defs>
-          {/* Folds: noise displacement on the reflections only, so the
+          {/* Folds: noise displacement on the tonal fields only, so the
               silhouette stays clean while the surface creases. */}
           <filter
             id={`${uid}-fold`}
@@ -409,7 +409,7 @@ export function Orb({
 
         <g clipPath={`url(#${uid}-clip)`}>
           <g filter={`url(#${uid}-fold)`}>
-            {/* Horizontal reflection bands rolling down the body */}
+            {/* Horizontal matte tonal fields rolling down the body */}
             <g ref={bandsRef}>
               <rect x="-140" y="60" width="680" height="120" fill={`url(#${uid}-band)`} />
               <rect x="-140" y="216" width="680" height="86" fill={`url(#${uid}-dark)`} />
@@ -422,14 +422,14 @@ export function Orb({
                 opacity="0.7"
               />
             </g>
-            {/* A second set crossing it, so reflections shear against each other */}
+            {/* A second set crossing it, so the tonal fields shear softly */}
             <g ref={bands2Ref} opacity="0.55">
               <rect x="-140" y="120" width="680" height="64" fill={`url(#${uid}-dark)`} />
               <rect x="-140" y="240" width="680" height="52" fill={`url(#${uid}-tint)`} />
             </g>
           </g>
 
-          {/* Specular light on the moving surface */}
+          {/* Diffuse surface light, deliberately broad and low contrast */}
           <ellipse
             ref={specRef}
             cx="156"
@@ -454,7 +454,7 @@ export function Orb({
           <circle cx={CX} cy={CY} r={R * 1.02} fill={`url(#${uid}-occl)`} />
         </g>
 
-        {/* Meniscus */}
+        {/* Soft edge definition */}
         <path
           ref={rimRef}
           d={CIRCLE}

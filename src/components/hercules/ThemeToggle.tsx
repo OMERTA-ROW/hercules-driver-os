@@ -40,7 +40,7 @@ export function ThemeToggle({
             onClick={() => setTheme(o.id)}
             className={cn(
               "flex items-center justify-center rounded-full transition-colors",
-              size === "sm" ? "h-9 w-9" : "h-11 w-11",
+              "h-11 w-11",
               active
                 ? "bg-primary/20 text-primary"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground",

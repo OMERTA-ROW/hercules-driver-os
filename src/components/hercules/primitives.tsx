@@ -36,7 +36,7 @@ export function Slab({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("surface-1 hairline rounded-[1.5rem] p-3 sm:p-4", className)}>{children}</div>
+    <div className={cn("bubble-card p-3 sm:p-4", className)}>{children}</div>
   );
 }
 
@@ -190,7 +190,7 @@ export function EmptyState({
   return (
     /* An empty screen still has to look finished — grid, edge and a clear next
        step, never a blank hole or invented numbers. */
-    <div className="corner-ticks inner-grid surface-1 hairline relative overflow-hidden rounded-[1.75rem] p-6 text-center sm:p-8">
+    <div className="bubble-card corner-ticks inner-grid relative overflow-hidden p-6 text-center sm:p-8">
       <div aria-hidden className="edge-gold pointer-events-none absolute inset-x-0 top-0 h-px" />
       <div className="tech-label">Nothing here yet</div>
       <div className="mt-1 font-display text-lg font-light uppercase tracking-[0.14em] text-primary sm:text-xl">

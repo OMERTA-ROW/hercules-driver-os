@@ -13,7 +13,7 @@ export function VoiceDock() {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
       <div className="pointer-events-auto mx-auto w-full max-w-[1800px] px-3 pb-3 sm:px-4 sm:pb-4">
-        <div className="glass flex items-center gap-4 p-3">
+        <div className="bubble-bar !rounded-[2rem] flex items-center gap-4 p-3">
           <Orb
             className="w-16 shrink-0 sm:w-20"
             mode={mode}

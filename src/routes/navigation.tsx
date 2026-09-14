@@ -269,7 +269,7 @@ function NavigationScreen() {
           </div>
 
           {/* Next turn heads-up */}
-          <div className="pointer-events-none absolute left-3 top-3 max-w-[70%] rounded-xl border border-border bg-background/85 p-3 backdrop-blur">
+          <div className="bubble-card pointer-events-none absolute left-3 top-3 max-w-[70%] p-3">
             <div className="flex items-center gap-3">
               <RouteShield road={nextStep.road} cls={nextStep.class} />
               <div>
@@ -281,7 +281,7 @@ function NavigationScreen() {
           </div>
 
           {/* GPS status */}
-          <div className="pointer-events-none absolute right-3 top-3 rounded-lg border border-border bg-background/85 px-3 py-2 backdrop-blur">
+          <div className="bubble-card pointer-events-none absolute right-3 top-3 px-3 py-2">
             <Pill tone={offRoute ? "warn" : "go"}>
               <Satellite className="h-3.5 w-3.5" />
               {offRoute ? "Off route — recalculating" : "GPS locked · tracking"}
@@ -290,7 +290,7 @@ function NavigationScreen() {
 
           {/* AUTO-REROUTE NOTICE */}
           {notice ? (
-            <div className="absolute inset-x-3 bottom-3 rounded-xl border border-primary/50 bg-primary/12 p-3 backdrop-blur">
+            <div className="bubble-card bubble-card-on absolute inset-x-3 bottom-3 p-3">
               <div className="flex items-start gap-3">
                 <RefreshCw className="mt-0.5 h-6 w-6 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
@@ -386,7 +386,7 @@ function NavigationScreen() {
             {route.steps.map((s) => (
               <li
                 key={s.id}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card/60 p-2.5"
+                className="bubble-card flex items-center gap-3 p-2.5"
               >
                 <RouteShield road={s.road} cls={s.class} />
                 <div className="min-w-0">

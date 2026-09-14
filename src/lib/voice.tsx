@@ -730,6 +730,16 @@ const VoiceContext = createContext<Ctx | null>(null);
 const COLOR_KEY = "hercules.orb-colorway";
 const VOICE_KEY = "hercules.voice";
 
+function isOrbColorway(value: unknown): value is OrbColorway {
+  return (
+    value === "black" ||
+    value === "pink" ||
+    value === "grey" ||
+    value === "gold" ||
+    value === "turquoise"
+  );
+}
+
 function applyColorway(colorway: OrbColorway) {
   if (typeof document !== "undefined") {
     document.documentElement.setAttribute("data-colorway", colorway);
@@ -787,13 +797,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const c = localStorage.getItem(COLOR_KEY) as OrbColorway | null;
     const migrated = c === ("white" as OrbColorway) ? "grey" : c;
-    if (
-      migrated === "black" ||
-      migrated === "pink" ||
-      migrated === "grey" ||
-      migrated === "gold" ||
-      migrated === "turquoise"
-    ) {
+    if (isOrbColorway(migrated)) {
       setColorwayState(migrated);
       applyColorway(migrated);
     } else {
@@ -801,12 +805,46 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     }
     const v = localStorage.getItem(VOICE_KEY) as VoiceId | null;
     if (v && voiceOptions.some((o) => o.id === v)) setVoiceIdState(v);
+
+    let alive = true;
+    const syncAccountColorway = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+      if (!alive || !session) return;
+      const saved = session.user.user_metadata?.["matte_colorway"];
+      if (isOrbColorway(saved)) {
+        setColorwayState(saved);
+        localStorage.setItem(COLOR_KEY, saved);
+        applyColorway(saved);
+        return;
+      }
+      const local = localStorage.getItem(COLOR_KEY);
+      if (isOrbColorway(local)) {
+        const { error } = await supabase.auth.updateUser({
+          data: { matte_colorway: local },
+        });
+        if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
+      }
+    };
+
+    void supabase.auth.getSession().then(({ data }) => syncAccountColorway(data.session));
+    const authSubscription = supabase.auth.onAuthStateChange?.((event, session) => {
+      if (event === "SIGNED_IN") void syncAccountColorway(session);
+    }).data.subscription;
+
+    return () => {
+      alive = false;
+      authSubscription?.unsubscribe();
+    };
   }, []);
 
   const setColorway = useCallback((c: OrbColorway) => {
     setColorwayState(c);
     localStorage.setItem(COLOR_KEY, c);
     applyColorway(c);
+    void supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) return;
+      const { error } = await supabase.auth.updateUser({ data: { matte_colorway: c } });
+      if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
+    });
   }, []);
 
   const setVoice = useCallback((id: VoiceId) => {

@@ -3,6 +3,10 @@
 - [x] Apply the approved app-wide matte finish and five selectable colorways
 - [x] Convert shared and route-local interactive controls to round glowing bubbles
 - [x] Verify matte colorways and control spacing on phone, tablet, and desktop
+- [x] Persist matte colorway across signed-in devices and sessions
+- [x] Audit every interactive control for matte bubble styling
+- [x] Validate all colorway/exposure contrast combinations
+- [x] Verify orb and bubble motion performance on phone/tablet, including reduced motion
 
 - [x] Apply pure-black theme with gold and violet illumination
 - [x] Convert the three-dot navigation to a compact scrollable panel

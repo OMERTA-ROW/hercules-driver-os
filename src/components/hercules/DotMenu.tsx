@@ -81,7 +81,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
         aria-expanded={open}
         onClick={() => setOpen(true)}
         className={cn(
-          "matte-control glow-control flex h-12 w-12 items-center justify-center gap-[5px] rounded-full border border-primary/30 bg-card/45 transition-all hover:border-primary/60 hover:opacity-100",
+          "matte-control glow-control flex h-12 w-12 items-center justify-center gap-[5px] rounded-full border border-primary/30 bg-card transition-all hover:border-primary/60 hover:opacity-100 supports-[backdrop-filter]:bg-card/45",
           "opacity-70",
           className,
         )}
@@ -117,7 +117,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
                   key={s.to}
                   to={s.to}
                   onClick={() => setOpen(false)}
-                  className="matte-control glow-control flex min-h-[76px] flex-col justify-between rounded-[1.5rem] border border-primary/20 bg-card/55 p-3 transition-all hover:border-primary/60 hover:bg-primary/8"
+                  className="matte-control glow-control flex min-h-[76px] flex-col justify-between rounded-[1.5rem] border border-primary/20 bg-card p-3 transition-all hover:border-primary/60 hover:bg-primary/8 supports-[backdrop-filter]:bg-card/55"
                 >
                   <s.icon className="h-5 w-5 text-primary/80" />
                   <span className="font-display text-sm font-light uppercase tracking-[0.16em]">
