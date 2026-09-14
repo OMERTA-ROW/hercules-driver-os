@@ -2,7 +2,7 @@
 
 - [x] Apply the approved app-wide matte finish and five selectable colorways
 - [x] Convert shared and route-local interactive controls to round glowing bubbles
-- [x] Verify matte colorways and control spacing on phone, tablet, and desktop
+- [ ] Verify matte colorways and control spacing on phone, tablet, and desktop
 
 - [x] Apply pure-black theme with gold and violet illumination
 - [x] Convert the three-dot navigation to a compact scrollable panel
