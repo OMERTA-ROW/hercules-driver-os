@@ -81,8 +81,8 @@ export function DotMenu({ className }: { className?: string | undefined }) {
         aria-expanded={open}
         onClick={() => setOpen(true)}
         className={cn(
-          "flex h-12 w-12 items-center justify-center gap-[5px] rounded-full transition-opacity hover:opacity-100",
-          "opacity-45",
+          "matte-control glow-control flex h-12 w-12 items-center justify-center gap-[5px] rounded-full border border-primary/30 bg-card/45 transition-all hover:border-primary/60 hover:opacity-100",
+          "opacity-70",
           className,
         )}
       >
@@ -99,7 +99,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-[70] cursor-default bg-background/30"
           />
-          <nav className="glass fixed right-4 top-18 z-[80] flex max-h-[min(72vh,640px)] w-[min(calc(100vw-2rem),420px)] flex-col overflow-hidden shadow-[0_0_34px_-12px_color-mix(in_oklab,var(--primary)_55%,var(--violet))]">
+          <nav className="matte-popover fixed right-4 top-18 z-[80] flex max-h-[min(72vh,640px)] w-[min(calc(100vw-2rem),420px)] flex-col overflow-hidden rounded-[2rem] border">
             <div className="flex shrink-0 items-center justify-between border-b border-primary/25 px-4 py-3">
               <p className="tech-label text-primary">Every section · or just ask</p>
               <button
@@ -117,7 +117,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
                   key={s.to}
                   to={s.to}
                   onClick={() => setOpen(false)}
-                  className="flex min-h-[76px] flex-col justify-between rounded-lg border border-primary/20 bg-background p-3 transition-all hover:border-primary/60 hover:bg-primary/8 hover:shadow-[0_0_18px_-8px_var(--primary)]"
+                  className="matte-control glow-control flex min-h-[76px] flex-col justify-between rounded-[1.5rem] border border-primary/20 bg-card/55 p-3 transition-all hover:border-primary/60 hover:bg-primary/8"
                 >
                   <s.icon className="h-5 w-5 text-primary/80" />
                   <span className="font-display text-sm font-light uppercase tracking-[0.16em]">

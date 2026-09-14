@@ -40,7 +40,7 @@ export function VoiceServiceStatus() {
   const checkedAt = status?.checkedAt ? new Date(status.checkedAt) : null;
 
   return (
-    <div className="mt-3 rounded-xl border border-border bg-card/50 p-3">
+    <div className="bubble-card mt-3 border border-border bg-card/50 p-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="tech-label inline-flex items-center gap-1">
           {loading ? (
@@ -63,7 +63,7 @@ export function VoiceServiceStatus() {
           type="button"
           onClick={() => void check()}
           disabled={loading}
-          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+          className="matte-control glow-control ml-auto inline-flex min-h-11 items-center gap-1 rounded-full border border-border px-4 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
         >
           <RefreshCw className={loading ? "h-3 w-3 animate-spin" : "h-3 w-3"} /> Check again
         </button>

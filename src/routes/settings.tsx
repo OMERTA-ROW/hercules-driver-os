@@ -31,7 +31,7 @@ export const Route = createFileRoute("/settings")({
       {
         name: "description",
         content:
-          "Manage your HERCULES subscription tier, trial status, and display theme — Night, Gray, or Day.",
+          "Manage your HERCULES subscription, matte colorway, voice, and display brightness.",
       },
       { property: "og:title", content: "Settings & Subscription — HERCULES" },
       {
@@ -205,9 +205,9 @@ function Settings() {
         </Panel>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary">Voice-first</Pill>}>
+          <PanelTitle right={<Pill tone="primary">Applies app-wide</Pill>}>
             <span className="inline-flex items-center gap-2">
-              <Circle className="h-5 w-5 text-primary" /> Orb look
+              <Circle className="h-5 w-5 text-primary" /> Matte colorway
             </span>
           </PanelTitle>
           <OrbPicker />
@@ -225,13 +225,13 @@ function Settings() {
         <Panel>
           <PanelTitle right={<Pill tone="info">Applies app-wide</Pill>}>
             <span className="inline-flex items-center gap-2">
-              <Monitor className="h-5 w-5 text-primary" /> Display theme
+              <Monitor className="h-5 w-5 text-primary" /> Display exposure
             </span>
           </PanelTitle>
           <ThemePicker />
           <p className="mt-3 text-xs text-muted-foreground">
-            Night is the default and stays genuinely dark for 3am running. Gray suits dusk and dawn.
-            Day is high contrast for direct sun. The theme also switches from the orb screen.
+            Night stays dim for late running, Gray suits dusk and dawn, and Day raises contrast for
+            direct sun. Your selected matte colorway remains active in every exposure.
           </p>
 
           <div className="mt-5 border-t border-border pt-4">
@@ -293,11 +293,11 @@ function HazardToggles() {
   );
 }
 
-/** Orb colorway — black, grey, or white, gold accent in all three. */
+/** App-wide matte colorway, previewed with the same responsive orb used on the road. */
 function OrbPicker() {
   const { colorway, setColorway, mode } = useVoice();
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
+    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
       {orbColorways.map((o) => {
         const active = colorway === o.id;
         return (

@@ -8,7 +8,7 @@ const icons: Record<DisplayTheme, typeof Moon> = {
   day: Sun,
 };
 
-/** Compact 3-way theme switch — used in the header and on the orb screen. */
+/** Compact 3-way exposure switch — used in the header and on the orb screen. */
 export function ThemeToggle({
   className,
   size = "md",
@@ -20,7 +20,7 @@ export function ThemeToggle({
   return (
     <div
       role="radiogroup"
-      aria-label="Display theme"
+      aria-label="Display exposure"
       className={cn(
         "inline-flex items-center gap-1 rounded-full border border-border bg-card/60 p-1",
         className,
@@ -35,7 +35,7 @@ export function ThemeToggle({
             type="button"
             role="radio"
             aria-checked={active}
-            aria-label={`${o.label} theme`}
+            aria-label={`${o.label} exposure`}
             title={`${o.label} — ${o.hint}`}
             onClick={() => setTheme(o.id)}
             className={cn(
@@ -120,7 +120,7 @@ export function BrightnessPicker() {
         aria-checked={autoNight}
         onClick={() => setAutoNight(!autoNight)}
         className={cn(
-          "flex w-full items-center justify-between gap-3 rounded-lg border p-4 text-left transition-colors",
+          "bubble-card matte-control flex min-h-14 w-full items-center justify-between gap-3 border p-4 text-left transition-colors",
           autoNight ? "border-primary/60 bg-primary/12" : "border-border bg-card/50",
         )}
       >

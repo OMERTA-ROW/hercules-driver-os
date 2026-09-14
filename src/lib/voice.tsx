@@ -107,12 +107,14 @@ function rateLine(l: LoadRow) {
 
 /* ------------------------------------------------------------------ ORB LOOK */
 
-export type OrbColorway = "black" | "grey" | "white";
+export type OrbColorway = "black" | "pink" | "grey" | "gold" | "turquoise";
 
 export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = [
-  { id: "black", label: "Black", hint: "Obsidian shell, gold filament — default" },
-  { id: "grey", label: "Grey", hint: "Gunmetal shell, gold filament" },
-  { id: "white", label: "White", hint: "Bone shell, gold filament — brightest in sun" },
+  { id: "black", label: "Matte Black", hint: "Charcoal depth, warm gold trim — flagship" },
+  { id: "pink", label: "Matte Pink", hint: "Muted rose with a cool cyan-white glow" },
+  { id: "grey", label: "Matte Grey", hint: "Graphite with clean silver-white light" },
+  { id: "gold", label: "Matte Gold", hint: "Antique gold with dense black trim" },
+  { id: "turquoise", label: "Matte Turquoise", hint: "Deep teal with a restrained coral glow" },
 ];
 
 /* ---------------------------------------------------------------- VOICE CAST */
@@ -728,6 +730,12 @@ const VoiceContext = createContext<Ctx | null>(null);
 const COLOR_KEY = "hercules.orb-colorway";
 const VOICE_KEY = "hercules.voice";
 
+function applyColorway(colorway: OrbColorway) {
+  if (typeof document !== "undefined") {
+    document.documentElement.setAttribute("data-colorway", colorway);
+  }
+}
+
 let seq = 0;
 const nextId = () => `t${++seq}-${Date.now()}`;
 
@@ -778,7 +786,19 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const c = localStorage.getItem(COLOR_KEY) as OrbColorway | null;
-    if (c === "black" || c === "grey" || c === "white") setColorwayState(c);
+    const migrated = c === ("white" as OrbColorway) ? "grey" : c;
+    if (
+      migrated === "black" ||
+      migrated === "pink" ||
+      migrated === "grey" ||
+      migrated === "gold" ||
+      migrated === "turquoise"
+    ) {
+      setColorwayState(migrated);
+      applyColorway(migrated);
+    } else {
+      applyColorway("black");
+    }
     const v = localStorage.getItem(VOICE_KEY) as VoiceId | null;
     if (v && voiceOptions.some((o) => o.id === v)) setVoiceIdState(v);
   }, []);
@@ -786,6 +806,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const setColorway = useCallback((c: OrbColorway) => {
     setColorwayState(c);
     localStorage.setItem(COLOR_KEY, c);
+    applyColorway(c);
   }, []);
 
   const setVoice = useCallback((id: VoiceId) => {

@@ -11,9 +11,9 @@ import {
 export type DisplayTheme = "night" | "gray" | "day";
 
 export const themeOptions: { id: DisplayTheme; label: string; hint: string }[] = [
-  { id: "night", label: "Night", hint: "Near-black, deep dim, minimal glow" },
-  { id: "gray", label: "Gray", hint: "Mid-dark, low contrast, dusk and dawn" },
-  { id: "day", label: "Day", hint: "Light background, high contrast, bright sun" },
+  { id: "night", label: "Night", hint: "Deep dim exposure with restrained glow" },
+  { id: "gray", label: "Gray", hint: "Balanced exposure for dusk and dawn" },
+  { id: "day", label: "Day", hint: "Maximum contrast for direct sun" },
 ];
 
 /**
