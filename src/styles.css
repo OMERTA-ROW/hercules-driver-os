@@ -1093,9 +1093,30 @@
   --theme-shadow: oklch(0.08 0.03 190 / 0.84);
 }
 
-/* Exposure brightens or lowers each selected palette without replacing it. */
-[data-theme="gray"] { filter: brightness(1.04); }
-[data-theme="day"] { filter: brightness(1.12) contrast(1.02); }
+/* Exposure stays independent: the brightness controller dims the whole cockpit. */
+[data-theme="gray"] { --grid-line: color-mix(in oklab, var(--primary) 11%, transparent); }
+[data-theme="day"] { --grid-line: color-mix(in oklab, var(--primary) 14%, transparent); }
+
+@layer base {
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="radio"],
+  [role="switch"] {
+    border-radius: 9999px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    transition-property: transform, color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 200ms;
+  }
+
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: translateY(1px) scale(0.985);
+  }
+}
 
 @utility matte-control {
   box-shadow: 0 10px 24px -20px var(--theme-shadow);
