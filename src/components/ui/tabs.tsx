@@ -11,10 +11,7 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn(
-      "bubble-bar bubble-scroll inline-flex max-w-full justify-start",
-      className,
-    )}
+    className={cn("bubble-bar bubble-scroll inline-flex max-w-full justify-start", className)}
     {...props}
   />
 ));
