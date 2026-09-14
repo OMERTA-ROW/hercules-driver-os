@@ -244,10 +244,8 @@ function EquipmentScreen() {
                 aria-pressed={kind === f.kind}
                 onClick={() => setKind(f.kind)}
                 className={cn(
-                  "min-h-[64px] rounded-lg border p-3 text-left font-display text-sm uppercase tracking-[0.12em] transition-colors",
-                  kind === f.kind
-                    ? "border-primary/60 bg-primary/12 text-primary"
-                    : "border-border bg-card/50 hover:bg-accent",
+                  "bubble-card min-h-[64px] p-4 text-left font-display text-sm uppercase tracking-[0.12em]",
+                  kind === f.kind && "bubble-card-on text-primary",
                 )}
               >
                 {f.label}
@@ -266,10 +264,8 @@ function EquipmentScreen() {
                     aria-pressed={sub === s.id}
                     onClick={() => setSub(s.id)}
                     className={cn(
-                      "min-h-[60px] rounded-lg border p-2.5 text-left transition-colors",
-                      sub === s.id
-                        ? "border-primary/60 bg-primary/12"
-                        : "border-border bg-card/50 hover:bg-accent",
+                      "bubble-card min-h-[60px] p-3.5 text-left",
+                      sub === s.id && "bubble-card-on",
                     )}
                   >
                     <span className="block font-display text-sm uppercase tracking-[0.12em]">
