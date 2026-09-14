@@ -121,11 +121,10 @@ export function VoicePicker() {
         <p>
           <span className="text-foreground">About the previews:</span> each Play button plays a
           short recorded clip that ships with the app — free, no credits used, the same clip for
-          everyone. Those clips were recorded with an earlier voice service, so they give you the
-          character and pace but are not the exact voice you'll hear on the road. Speaking your own
-          lines aloud during a drive is the part that costs AI credits; without credits, or when the
-          voice service can't be reached, your device's own built-in voice reads them instead and
-          you'll see that said plainly on the row.
+          everyone. Those clips are recorded in the very same voice you'll hear on the road.
+          Speaking your own lines aloud during a drive is the part that costs AI credits; without
+          credits, or when the voice service can't be reached, your device's own built-in voice
+          reads them instead and you'll see that said plainly on the row.
         </p>
 
         <p>
