@@ -826,13 +826,13 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     };
 
     void supabase.auth.getSession().then(({ data }) => syncAccountColorway(data.session));
-    const { data: authSubscription } = supabase.auth.onAuthStateChange((event, session) => {
+    const authSubscription = supabase.auth.onAuthStateChange?.((event, session) => {
       if (event === "SIGNED_IN") void syncAccountColorway(session);
-    });
+    }).data.subscription;
 
     return () => {
       alive = false;
-      authSubscription.subscription.unsubscribe();
+      authSubscription?.unsubscribe();
     };
   }, []);
 
