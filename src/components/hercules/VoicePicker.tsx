@@ -114,14 +114,19 @@ export function VoicePicker() {
         </div>
       </div>
 
+      <VoiceServiceStatus />
+
       <div className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
         <p>
           <span className="text-foreground">About the previews:</span> each Play button plays a
-          short recorded clip of that real neural voice that ships with the app — free, no credits
-          used, the same clip for everyone. Speaking your own lines aloud in that voice during a
-          drive is the part that costs AI credits; without credits your device's own built-in voice
-          reads them instead, and you'll see that said plainly on the row.
+          short recorded clip that ships with the app — free, no credits used, the same clip for
+          everyone. Those clips were recorded with an earlier voice service, so they give you the
+          character and pace but are not the exact voice you'll hear on the road. Speaking your own
+          lines aloud during a drive is the part that costs AI credits; without credits, or when the
+          voice service can't be reached, your device's own built-in voice reads them instead and
+          you'll see that said plainly on the row.
         </p>
+
         <p>
           What the voice understands today is a fixed set of spoken commands — loads, money, the
           map, hours, breakdowns, documents — not open-ended conversation. Whichever character you
