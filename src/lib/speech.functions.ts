@@ -47,7 +47,7 @@ export const speakLine = createServerFn({ method: "POST" })
     );
     type ProviderFailure = InstanceType<typeof ElevenLabsError>["failure"];
     /** The provider's own explanation, kept so quota is never flattened. */
-    let failure: ProviderFailure | null = null;
+    const seen: { failure: ProviderFailure | null } = { failure: null };
 
     if (!elevenLabsConfigured()) {
       return {
@@ -147,7 +147,7 @@ export const speakLine = createServerFn({ method: "POST" })
           if (err instanceof ElevenLabsError) {
             // Keep the provider's own explanation (quota, refusal, busy) so the
             // driver is told the real reason rather than a generic one.
-            failure = err.failure;
+            seen.failure = err.failure;
             throw err;
           }
           throw Object.assign(new Error("tts_failed"), { status: 0 });
@@ -162,7 +162,7 @@ export const speakLine = createServerFn({ method: "POST" })
       if (result.reason === "provider") {
         const status = result.status ?? 0;
         const { describeElevenFailure } = await import("@/lib/elevenlabs.server");
-        const base = failure?.message ?? describeElevenFailure(status, "").message;
+        const base = seen.failure?.message ?? describeElevenFailure(status, "").message;
         // Only say the hold came back when the release was actually recorded.
         const message = result.refunded
           ? base
@@ -172,7 +172,7 @@ export const speakLine = createServerFn({ method: "POST" })
           reason: "provider" as const,
           message,
           status,
-          quota: failure?.quota === true,
+          quota: seen.failure?.quota === true,
           refunded: result.refunded === true,
         };
       }
