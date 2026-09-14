@@ -14,13 +14,25 @@
 export type VoiceId =
   "hercules" | "zeus" | "ares" | "atlas" | "apollo" | "athena" | "medusa" | "hera" | "artemis";
 
-/** The speech model every persona is spoken with. */
-export const TTS_MODEL = "openai/gpt-4o-mini-tts";
+/**
+ * LIVE SPEECH PROVIDER — ElevenLabs, called server-side only.
+ * `eleven_flash_v2_5` is their low-latency model, which is what a cab needs.
+ */
+export const ELEVEN_MODEL = "eleven_flash_v2_5";
 
 /**
- * Neural voices this model actually serves. Each one was called and returned
- * real audio; anything outside this list is rejected by the provider, so the
- * personas below may only use these names.
+ * The provider that rendered the static preview clips in /public/voice-samples.
+ * They were rendered before ElevenLabs was wired in, so they are labelled
+ * truthfully in the picker rather than passed off as the live voices.
+ */
+export const PREVIEW_CLIP_MODEL = "openai/gpt-4o-mini-tts";
+
+/** Legacy alias kept so older callers and tests keep naming the preview clips. */
+export const TTS_MODEL = PREVIEW_CLIP_MODEL;
+
+/**
+ * Voice names the preview-clip model served. Retained only so the shipped
+ * sample clips stay documented; live speech uses the `eleven` ids below.
  */
 export const supportedTtsVoices = [
   "alloy",
@@ -44,16 +56,25 @@ export type VoiceOption = {
   gender: "male" | "female";
   /** Short character descriptor shown in the picker. */
   hint: string;
-  /** Underlying premium neural voice. */
+  /** Voice used for the shipped preview clip (preview-clip model). */
   tts: SupportedTtsVoice;
+  /** Licensed ElevenLabs stock voice id used for live speech. */
+  eleven: string;
+  /** That stock voice's published name, for the status screen. */
+  elevenName: string;
   /** Natural-language delivery steering — this is what makes it a character. */
   direction: string;
-  /** Speaking rate, 0.25–4.0. */
+  /** Speaking rate, 0.7–1.2 at the provider. */
   speed: number;
+  /** ElevenLabs stability: lower is more expressive, higher more consistent. */
+  stability: number;
+  /** ElevenLabs style exaggeration. */
+  style: number;
   /** Spoken in the picker preview. */
   sample: string;
   principal?: boolean;
 };
+
 
 const conversational =
   "Speak like a real person talking to a truck driver over the cab speakers, not like a narrator reading text. Warm, natural, expressive, unhurried breathing, easy contractions. Never robotic or clipped.";
