@@ -162,10 +162,8 @@ export function BrightnessPicker() {
               onClick={() => setBrightness(b.id)}
               aria-pressed={active}
               className={cn(
-                "rounded-lg border p-3 text-left transition-colors",
-                active
-                  ? "border-primary/60 bg-primary/12"
-                  : "border-border bg-card/50 hover:bg-accent",
+                "bubble-card p-4 text-left",
+                active && "bubble-card-on",
               )}
             >
               <div className="font-display text-sm uppercase tracking-[0.12em]">{b.label}</div>

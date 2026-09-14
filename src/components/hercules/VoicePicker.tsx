@@ -18,10 +18,8 @@ function VoiceRow({ v }: { v: VoiceOption }) {
   return (
     <div
       className={cn(
-        "flex min-h-[76px] items-center gap-3 rounded-xl border p-3 transition-colors",
-        active
-          ? "border-primary/60 bg-primary/10 shadow-[0_0_22px_-14px_var(--primary)]"
-          : "border-border bg-card/50",
+        "bubble-card flex min-h-[76px] items-center gap-3 p-3.5",
+        active && "bubble-card-on",
       )}
     >
       <button
