@@ -39,22 +39,26 @@ export const speakLine = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) {
+    const { ELEVEN_MODEL } = await import("@/data/voices");
+    const { elevenLabsConfigured, elevenSpeak, ElevenLabsError } = await import(
+      "@/lib/elevenlabs.server"
+    );
+
+    if (!elevenLabsConfigured()) {
       return {
         ok: false as const,
         reason: "unconfigured" as const,
-        message: "Premium voice is not configured.",
+        message:
+          "The real AI voice service isn't connected to this app yet, so your device spoke this line free.",
       };
     }
 
     // Hard input cap — long lines are trimmed, never sent whole.
     const text = data.text.slice(0, aiLimits.maxSpeechChars);
     const persona = voiceById(data.voiceId as never);
-    const premium = persona.tts !== "alloy";
-    const action = premium ? "speech_premium" : "speech";
+    const action = "speech_premium";
     const cost = creditCost(action, text.length);
-    const model = "openai/gpt-4o-mini-tts";
+    const model = ELEVEN_MODEL;
 
     // Eco: the account has asked for zero-cost speech. Refuse before any spend.
     if ((await walletQuality(context.userId)) === "eco") {
@@ -87,42 +91,23 @@ export const speakLine = createServerFn({ method: "POST" })
       identity,
       model,
       costBasis: "estimated",
-      // The gateway returns no per-call price, so this is our published
+      // The provider returns no per-call price, so this is our published
       // assumption and is labelled estimated everywhere it is shown.
       providerCostUsd: () => estimatedTtsCostUsd(text.length),
       run: async () => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 20_000);
         try {
-          const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model,
-              input: text,
-              voice: persona.tts,
-              instructions: persona.direction,
-              speed: persona.speed,
-              response_format: "mp3",
-            }),
-            signal: controller.signal,
-          });
-          if (!res.ok) {
-            const body = await res.text().catch(() => "");
-            console.error(`TTS failed [${res.status}]: ${body}`);
-            throw Object.assign(new Error("tts_failed"), { status: res.status });
-          }
-          const buf = new Uint8Array(await res.arrayBuffer());
-          let binary = "";
-          for (let i = 0; i < buf.length; i += 0x8000) {
-            binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-          }
-          return `data:audio/mpeg;base64,${btoa(binary)}`;
+          return await elevenSpeak(persona, text, { signal: controller.signal });
+        } catch (err) {
+          if (err instanceof ElevenLabsError) throw err;
+          throw Object.assign(new Error("tts_failed"), { status: 0 });
         } finally {
           clearTimeout(timer);
         }
       },
     });
+
 
     if (!result.ok) {
       if (result.reason === "provider") {
