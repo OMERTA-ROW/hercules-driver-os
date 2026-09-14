@@ -453,7 +453,7 @@ function BaseViewSwitch({ view, onChange }: { view: BaseView; onChange: (v: Base
   return (
     // Top-left corner is reserved for the navigation page's next-turn card, so
     // the imagery switch sits just below it instead of being covered.
-    <div className="absolute left-3 top-28 flex gap-1 rounded-xl border border-foreground/12 bg-background/70 p-1 backdrop-blur-xl">
+    <div className="bubble-bar absolute left-3 top-28">
       {baseViews.map((b) => (
         <button
           key={b.id}
@@ -462,10 +462,8 @@ function BaseViewSwitch({ view, onChange }: { view: BaseView; onChange: (v: Base
           aria-pressed={view === b.id}
           title={b.hint}
           className={cn(
-            "min-h-11 rounded-lg px-4 font-display text-xs font-light uppercase tracking-[0.18em] transition-colors",
-            view === b.id
-              ? "bg-primary/20 text-primary"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            "bubble-tab tracking-[0.18em]",
+            view === b.id && "bubble-tab-on",
           )}
         >
           {b.label}
@@ -502,15 +500,15 @@ function MapViewControls({
   onTraffic: (v: boolean) => void;
 }) {
   const pill =
-    "grid h-10 w-10 place-items-center rounded-xl border border-foreground/12 bg-background/60 text-muted-foreground backdrop-blur-xl transition-colors hover:bg-accent hover:text-foreground";
-  const active = "border-primary/40 bg-primary/15 text-primary";
+    "bubble-card grid h-11 w-11 place-items-center !rounded-full text-muted-foreground hover:text-foreground";
+  const active = "bubble-card-on text-primary";
   return (
     // Horizontal wrapping row on the left, below the imagery switch. The
     // right edge of the map stays clear for Google's own controls (Pegman,
     // zoom), so a tall custom stack can never cover them at tablet heights.
     <div className="absolute left-3 right-20 top-44 flex flex-wrap items-center gap-2">
       {/* camera: tilted 3D navigation view vs flat 2D overhead */}
-      <div className="flex gap-1 rounded-xl border border-foreground/12 bg-background/60 p-1 backdrop-blur-xl">
+      <div className="bubble-bar">
         {[
           {
             id: "nav3d" as const,
