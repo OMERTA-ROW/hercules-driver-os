@@ -60,35 +60,31 @@ export function AppShell({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex w-full max-w-[1800px]">
-        {/* Left rail — primary nav for a cab-mounted landscape tablet */}
-        <aside className="sticky top-0 hidden h-screen w-[112px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-primary/25 bg-background/80 py-4 shadow-[8px_0_28px_-22px_var(--primary)] backdrop-blur-xl lg:flex xl:w-[188px] xl:items-stretch xl:px-3">
-          <Link to="/" className="mb-4 px-1 text-center xl:text-left">
+        {/* Left rail — a floating bubble rail for a cab-mounted landscape tablet */}
+        <aside className="sticky top-0 hidden h-screen w-[124px] shrink-0 flex-col gap-3 overflow-y-auto px-2 py-4 lg:flex xl:w-[204px] xl:px-4">
+          <Link to="/" className="px-2 text-center xl:text-left">
             <div className="font-display text-lg font-bold uppercase tracking-[0.08em] text-primary xl:text-2xl xl:tracking-[0.14em]">
               HERC
               <span className="text-foreground">ULES</span>
             </div>
             <div className="label-cap mt-1">by Zeus</div>
-            <div aria-hidden className="edge-gold mt-3 h-px w-full" />
           </Link>
-          {items.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              activeOptions={{ exact: n.to === "/" }}
-              activeProps={{
-                className:
-                  "border-primary/60 surface-2 text-primary shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_18%,transparent),0_0_20px_-12px_var(--primary)]",
-              }}
-              inactiveProps={{ className: "border-transparent text-muted-foreground" }}
-              className="flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 transition-colors duration-200 hover:surface-1 hover:text-foreground xl:flex-row xl:justify-start xl:gap-3"
-            >
-              <n.icon className="h-6 w-6 shrink-0" />
-              <span className="font-display text-[0.66rem] font-light uppercase tracking-[0.18em] xl:text-[0.8rem]">
-                {n.label}
-              </span>
-            </Link>
-          ))}
+          <div className="bubble-bar !flex-col !items-stretch !rounded-[2rem] !p-2">
+            {items.map((n) => (
+              <Link
+                key={n.to}
+                to={n.to}
+                activeOptions={{ exact: n.to === "/" }}
+                activeProps={{ className: "bubble-tab-on" }}
+                className="bubble-tab min-h-[60px] !flex-col !gap-1 !px-2 xl:!flex-row xl:!justify-start xl:!gap-3 xl:!px-4"
+              >
+                <n.icon className="h-6 w-6 shrink-0" />
+                <span className="text-[0.62rem] xl:text-[0.76rem]">{n.label}</span>
+              </Link>
+            ))}
+          </div>
         </aside>
+
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 border-b border-primary/20 bg-background/95 backdrop-blur-xl shadow-[0_8px_28px_-24px_var(--primary)]">
