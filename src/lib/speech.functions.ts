@@ -208,7 +208,9 @@ export const quoteSpeech = createServerFn({ method: "POST" })
  * VOICE PROVIDER STATUS — what is really connected, said plainly.
  *
  * When the key is present this reads the live voice library and reports, per
- * persona, whether this account is licensed for that stock voice. When it is
+ * persona, whether that stock voice is AVAILABLE on this account. Availability
+ * is what the library proves; it says nothing about commercial licence terms,
+ * which live in the account's own agreement with the provider. When the key is
  * absent it says so; it never guesses and never claims live speech.
  */
 export const voiceProviderStatus = createServerFn({ method: "GET" })
@@ -256,15 +258,15 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
 
     const missing = check.voices.filter((v) => !v.available);
     console.info(
-      `[voice] provider=ElevenLabs connected=true model=${ELEVEN_MODEL} voices=${check.voices.length} unlicensed=${missing.length} at=${checkedAt}`,
+      `[voice] provider=ElevenLabs connected=true model=${ELEVEN_MODEL} voices=${check.voices.length} unavailable=${missing.length} at=${checkedAt}`,
     );
     return {
       ...shared,
       checkedAt,
       connected: true as const,
       message: missing.length
-        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no licensed voice on this account and falls back to your device.`
-        : "Connected. Every character has a licensed voice on this account.",
+        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no available voice on this account and falls back to your device.`
+        : "Connected. Every character has a voice available on this account.",
       voices: check.voices,
     };
   });

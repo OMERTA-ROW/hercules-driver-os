@@ -4,7 +4,7 @@
 
 | Surface | Provider | Cost |
 | --- | --- | --- |
-| Live spoken lines during a drive | ElevenLabs `eleven_flash_v2_5`, licensed stock voices | AI credits, metered |
+| Live spoken lines during a drive | ElevenLabs `eleven_flash_v2_5`, provider stock voices | AI credits, metered |
 | Picker Play buttons | static clips in `public/voice-samples/`, recorded earlier with `openai/gpt-4o-mini-tts` | free, no call |
 | Any failure or gate | the device's own built-in voice | free |
 
@@ -21,7 +21,7 @@ mirrored into a `VITE_` variable, never sent to the browser, and never placed in
 a URL. ElevenLabs is called directly (`https://api.elevenlabs.io`) with the
 `xi-api-key` header — it does not use the connector gateway.
 
-## Persona → licensed stock voice
+## Persona → provider stock voice
 
 Five male, four female, one stock voice each, no cloning:
 
@@ -41,7 +41,8 @@ Delivery per persona is set with ElevenLabs voice settings (`stability`,
 `style`, `similarity_boost`, `speed` clamped to the provider's 0.7–1.2 window).
 
 `voiceProviderStatus` (authenticated) reads the live `/v1/voices` library and
-reports, per persona, whether this account is licensed for that voice. The
+reports, per persona, whether that voice is AVAILABLE on this account. The
+library proves availability, not commercial licence terms. The
 status card in the voice picker shows exactly that — it never claims a live
 connection it has not confirmed.
 
@@ -60,14 +61,14 @@ weekly resets; subscriber-only top-ups 10/$3, 50/$15, 100/$30.
 
 ## Verification status
 
-- Adapter, mapping, error translation, licence validation and encoding are
+- Adapter, mapping, error translation, availability validation and encoding are
   covered by `src/lib/elevenlabs.test.ts` with a stubbed `fetch` — no credentials
   needed.
 - **Live verification: PASSED (2026-09-14).** The ElevenLabs connection is
   linked and `ELEVENLABS_API_KEY` is present server-side only.
   - `GET /v1/voices` returned HTTP 200 with 21 voices; all nine persona voice
     ids (George, Bill, Callum, Daniel, Liam, Sarah, Matilda, Alice, Lily) are
-    licensed on the account.
+    available on the account.
   - Live speech confirmed with a minimal sample line on `eleven_flash_v2_5`:
     one male (George, HTTP 200, 24,703 bytes) and one female (Sarah, HTTP 200,
     19,688 bytes).
@@ -76,7 +77,7 @@ weekly resets; subscriber-only top-ups 10/$3, 50/$15, 100/$30.
     so the picker previews the real character. `PREVIEW_CLIP_MODEL` now equals
     `ELEVEN_MODEL`.
 - `voiceProviderStatus` logs the true state each check
-  (`[voice] provider=ElevenLabs connected=… model=… unlicensed=… at=…`) and
+  (`[voice] provider=ElevenLabs connected=… model=… unavailable=… at=…`) and
   returns `checkedAt`; the status card shows the time and a "Check again" button.
 - Still not connected elsewhere in the app, and shown as unavailable rather than
   filled in: payments, commercial truck restriction data, engine diagnostics,

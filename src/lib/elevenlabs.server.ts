@@ -6,7 +6,7 @@
  * browser and never mirrored into a VITE_ variable.
  *
  * Everything here is a pure-ish function over `fetch`, so the mapping, the
- * error translation and the licence validation can be regression-tested with a
+ * error translation and the availability validation can be regression-tested with a
  * stubbed fetch and no credentials.
  */
 import { ELEVEN_MODEL, type VoiceOption } from "@/data/voices";
@@ -98,7 +98,7 @@ export function elevenSettings(persona: VoiceOption) {
 export type SpeakDeps = { fetch: typeof fetch; key: string };
 
 /**
- * Speaks one line in a persona's licensed stock voice and returns a playable
+ * Speaks one line in a persona's stock provider voice and returns a playable
  * data URL. Throws `ElevenLabsError` on any provider failure so the caller's
  * credit hold is refunded in full.
  */
