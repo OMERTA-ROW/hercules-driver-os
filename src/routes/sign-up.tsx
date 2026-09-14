@@ -183,10 +183,8 @@ function SignUp() {
                   onClick={() => setPlan(p.id)}
                   aria-pressed={plan === p.id}
                   className={cn(
-                    "w-full rounded-lg border p-3 text-left transition-colors",
-                    plan === p.id
-                      ? "border-primary/60 bg-primary/12"
-                      : "border-border bg-card/50 hover:bg-accent",
+                    "bubble-card w-full p-4 text-left",
+                    plan === p.id && "bubble-card-on",
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">

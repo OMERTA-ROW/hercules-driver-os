@@ -225,3 +225,51 @@ export function money2(n: number) {
 export function hm(min: number) {
   return `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, "0")}m`;
 }
+
+/**
+ * BUBBLE TABS — the one tab shape used across the whole app: a floating,
+ * translucent capsule holding fully round tabs, gold on the current one, silver
+ * labels on the rest. Keyboard focus comes from the global focus-visible rule,
+ * touch targets stay 44px+, and the row scrolls rather than wrapping ragged.
+ */
+export function SegTabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+  className,
+  grow = false,
+  label,
+}: {
+  tabs: ReadonlyArray<{ id: T; label: ReactNode; icon?: ReactNode; hint?: string }>;
+  value: T;
+  onChange: (id: T) => void;
+  className?: string | undefined;
+  /** Fill the width, sharing space evenly — good for two or three choices. */
+  grow?: boolean;
+  label?: string;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className={cn("bubble-bar bubble-scroll max-w-full", grow ? "w-full" : "w-fit", className)}
+    >
+      {tabs.map((t) => {
+        const on = t.id === value;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onChange(t.id)}
+            aria-pressed={on}
+            title={t.hint}
+            className={cn("bubble-tab", on && "bubble-tab-on", grow && "flex-1")}
+          >
+            {t.icon}
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

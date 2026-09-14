@@ -208,8 +208,8 @@ function CreditsPage() {
           <Panel>
             <Label>Top-up held for you</Label>
             <p className="mt-2 text-sm">
-              You paid for {allowance.pendingPurchased} credits while no monthly plan was running, so
-              they are being held on your account rather than lost. They land in your balance the
+              You paid for {allowance.pendingPurchased} credits while no monthly plan was running,
+              so they are being held on your account rather than lost. They land in your balance the
               moment a monthly plan is paid, and they are refundable in the meantime.
             </p>
           </Panel>
