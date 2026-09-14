@@ -28,6 +28,17 @@ vi.mock("@/lib/speech.functions", () => ({
   }),
 }));
 
+/* Premium speech is only attempted for a signed-in account, so the fixture
+   provides a session. Without one the code correctly skips the paid call. */
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    auth: {
+      getSession: () =>
+        Promise.resolve({ data: { session: { user: { id: "rb-voice" } } }, error: null }),
+    },
+  },
+}));
+
 const played: string[] = [];
 const paused: string[] = [];
 const spoken: string[] = [];
