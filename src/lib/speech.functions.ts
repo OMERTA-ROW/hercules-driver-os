@@ -148,3 +148,55 @@ export const quoteSpeech = createServerFn({ method: "POST" })
     premium: creditCost("speech_premium", data.chars),
     assumptionsUpdated: providerCostAssumptions.updated,
   }));
+
+/**
+ * VOICE PROVIDER STATUS — what is really connected, said plainly.
+ *
+ * When the key is present this reads the live voice library and reports, per
+ * persona, whether this account is licensed for that stock voice. When it is
+ * absent it says so; it never guesses and never claims live speech.
+ */
+export const voiceProviderStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { voiceOptions: personas, ELEVEN_MODEL, PREVIEW_CLIP_MODEL } = await import(
+      "@/data/voices"
+    );
+    const { elevenLabsConfigured, verifyElevenVoices } = await import("@/lib/elevenlabs.server");
+
+    const shared = {
+      provider: "ElevenLabs" as const,
+      model: ELEVEN_MODEL,
+      previewClipModel: PREVIEW_CLIP_MODEL,
+    };
+
+    if (!elevenLabsConfigured()) {
+      return {
+        ...shared,
+        connected: false as const,
+        message:
+          "The real AI voice service isn't connected yet. Every line is spoken by your device, free, until it is.",
+        voices: [],
+      };
+    }
+
+    const check = await verifyElevenVoices(personas);
+    if (!check.ok) {
+      return {
+        ...shared,
+        connected: false as const,
+        message: check.message,
+        voices: [],
+      };
+    }
+
+    const missing = check.voices.filter((v) => !v.available);
+    return {
+      ...shared,
+      connected: true as const,
+      message: missing.length
+        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no licensed voice on this account and falls back to your device.`
+        : "Connected. Every character has a licensed voice on this account.",
+      voices: check.voices,
+    };
+  });
