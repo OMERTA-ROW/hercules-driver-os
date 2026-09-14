@@ -32,7 +32,6 @@ export function RoleGate({ min, children }: { min: NetworkRole; children: ReactN
         widened.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        <div className="bubble-bar bubble-scroll">
         {roleSpecs.map((r) => (
           <button
             key={r.id}
@@ -40,12 +39,11 @@ export function RoleGate({ min, children }: { min: NetworkRole; children: ReactN
             aria-pressed={role === r.id}
             onClick={() => setRole(r.id)}
             className={cn(
-              "min-h-[76px] rounded-lg border p-3 text-left transition-colors",
-              role === r.id
-                ? "border-primary/60 bg-primary/12"
-                : "border-border bg-card/50 hover:bg-accent",
+              "bubble-card min-h-[76px] p-4 text-left",
+              role === r.id && "bubble-card-on",
             )}
           >
+
             <span className="font-display text-sm uppercase tracking-[0.12em]">{r.label}</span>
             <p className="mt-1 text-xs text-muted-foreground">{r.who}</p>
           </button>
