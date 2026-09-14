@@ -112,14 +112,16 @@ export const speakLine = createServerFn({ method: "POST" })
     if (!result.ok) {
       if (result.reason === "provider") {
         const status = result.status ?? 0;
-        const message =
-          status === 402
-            ? "The voice service is out of credit on this account."
-            : status === 429
-              ? "Voice service is busy — try that again in a moment."
-              : "Voice service could not speak that line.";
-        return { ok: false as const, reason: "provider" as const, message, status };
+        const { describeElevenFailure } = await import("@/lib/elevenlabs.server");
+        // Whatever went wrong at the provider, the hold was returned in full.
+        return {
+          ok: false as const,
+          reason: "provider" as const,
+          message: describeElevenFailure(status, "").message,
+          status,
+        };
       }
+
       return {
         ok: false as const,
         reason: result.reason,
