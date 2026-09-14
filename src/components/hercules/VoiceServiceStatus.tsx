@@ -88,6 +88,12 @@ export function VoiceServiceStatus() {
           ))}
         </ul>
       ) : null}
+
+      {checkedAt && !loading ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Last checked {checkedAt.toLocaleTimeString()}.
+        </p>
+      ) : null}
     </div>
   );
 }
