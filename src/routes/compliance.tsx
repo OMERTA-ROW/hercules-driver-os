@@ -100,7 +100,7 @@ function ComplianceScreen() {
       {/* WHAT NEEDS ATTENTION — spoken as well as shown */}
       <AttentionStrip />
 
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="bubble-bar bubble-scroll mb-3 max-w-full">
         {tabs
           .filter((t) => t.show)
           .map((t) => (
@@ -109,12 +109,7 @@ function ComplianceScreen() {
               type="button"
               aria-pressed={tab === t.id}
               onClick={() => setTab(t.id)}
-              className={cn(
-                "min-h-[52px] rounded-xl border px-4 font-display text-sm uppercase tracking-[0.14em] transition-colors",
-                tab === t.id
-                  ? "border-primary/60 bg-primary/14 text-primary"
-                  : "border-border bg-card/50 hover:bg-accent",
-              )}
+              className={cn("bubble-tab", tab === t.id && "bubble-tab-on")}
             >
               {t.label}
             </button>
