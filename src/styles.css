@@ -980,6 +980,7 @@
   background: var(--bubble-bg);
   backdrop-filter: blur(18px);
   transition:
+    transform 0.2s ease,
     color 0.2s ease,
     background-color 0.2s ease,
     border-color 0.2s ease,
@@ -988,6 +989,29 @@
     transform: translateY(-2px);
     border-color: color-mix(in oklab, var(--primary) 42%, transparent);
   }
+}
+
+/* Google renders its own controls. Bring those controls into the same bubble
+   language without changing any map behavior. */
+.matte-map .gm-control-active,
+.matte-map .gm-svpc,
+.matte-map .gm-fullscreen-control,
+.matte-map .gm-style-mtc button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--bubble-edge) !important;
+  background: color-mix(in oklab, var(--card) 92%, transparent) !important;
+  box-shadow: 0 10px 24px -18px var(--theme-shadow), 0 0 18px -14px var(--theme-glow) !important;
+  backdrop-filter: blur(14px);
+}
+
+.matte-map .gm-control-active:hover,
+.matte-map .gm-svpc:hover,
+.matte-map .gm-fullscreen-control:hover,
+.matte-map .gm-style-mtc button:hover {
+  border-color: var(--bubble-on-edge) !important;
+  background: var(--bubble-on-bg) !important;
 }
 
 /* ================================================================ MATTE COLORWAYS
@@ -1138,7 +1162,11 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .panel, .glass, .matte-popover { background: var(--card); backdrop-filter: none; }
+  .panel, .glass, .matte-popover, .matte-map .gm-control-active, .matte-map .gm-svpc,
+  .matte-map .gm-fullscreen-control, .matte-map .gm-style-mtc button {
+    background: var(--card) !important;
+    backdrop-filter: none;
+  }
 }
 
 @utility bubble-card-on {

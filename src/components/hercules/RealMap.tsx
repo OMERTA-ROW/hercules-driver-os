@@ -206,7 +206,7 @@ export function RealMap(props: RealMapProps) {
   }, [status, tilt, headingDeg]);
 
   return (
-    <div className={cn("relative h-full w-full overflow-hidden rounded-2xl", className)}>
+    <div className={cn("matte-map relative h-full w-full overflow-hidden rounded-[1.75rem]", className)}>
       <div ref={holder} className="h-full w-full" />
       {status !== "ready" ? (
         <div className="absolute inset-0 grid place-items-center bg-background/85 p-6 text-center">
