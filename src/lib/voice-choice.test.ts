@@ -6,6 +6,7 @@ import {
   voiceById,
   voiceOptions,
   TTS_MODEL,
+  ELEVEN_MODEL,
 } from "@/data/voices";
 import { cacheKey } from "@/lib/ai-meter.server";
 import { creditCost } from "@/data/ai-credits";
