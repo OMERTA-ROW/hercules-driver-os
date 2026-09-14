@@ -4,6 +4,7 @@ import { voiceById, voiceOptions } from "@/data/voices";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   aiLimits,
+  allowancePausedLine,
   creditCost,
   estimatedTtsCostUsd,
   providerCostAssumptions,
@@ -12,6 +13,7 @@ import {
   cacheGet,
   cacheKey,
   cacheSet,
+  gateCheck,
   rateLimit,
   requestIdentity,
   runMetered,
@@ -43,6 +45,9 @@ export const speakLine = createServerFn({ method: "POST" })
     const { elevenLabsConfigured, elevenSpeak, ElevenLabsError } = await import(
       "@/lib/elevenlabs.server"
     );
+    type ProviderFailure = InstanceType<typeof ElevenLabsError>["failure"];
+    /** The provider's own explanation, kept so quota is never flattened. */
+    const seen: { failure: ProviderFailure | null } = { failure: null };
 
     if (!elevenLabsConfigured()) {
       return {
@@ -74,6 +79,45 @@ export const speakLine = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "rate_limited" as const, message: limited.message };
     }
 
+    // Even a cached clip is the PAID voice, so the same gate applies: an account
+    // whose plan has lapsed, or which is paused at its daily or weekly cap, does
+    // not keep hearing premium speech for free out of the cache.
+    const gate = await gateCheck(context.userId, cost);
+    if (gate.outcome !== "ok") {
+      if (gate.outcome === "no_subscription") {
+        return {
+          ok: false as const,
+          reason: "no_subscription" as const,
+          message:
+            "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
+        };
+      }
+      if (gate.outcome === "no_allowance_config") {
+        return {
+          ok: false as const,
+          reason: "no_allowance_config" as const,
+          message:
+            "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Your device's own voice is speaking, free.",
+        };
+      }
+      if (gate.outcome === "daily_limit" || gate.outcome === "weekly_limit") {
+        return {
+          ok: false as const,
+          reason: gate.outcome,
+          message: allowancePausedLine(
+            gate.outcome === "daily_limit" ? "daily" : "weekly",
+            gate.resets_at ?? null,
+          ),
+          resetsAt: gate.resets_at ?? null,
+        };
+      }
+      return {
+        ok: false as const,
+        reason: "error" as const,
+        message: "Could not check this account's AI voice allowance, so nothing was charged.",
+      };
+    }
+
     const ck = cacheKey(context.userId, [model, data.voiceId, text]);
 
     // Repeat of a line this same account just heard — free, nothing reserved.
@@ -100,7 +144,12 @@ export const speakLine = createServerFn({ method: "POST" })
         try {
           return await elevenSpeak(persona, text, { signal: controller.signal });
         } catch (err) {
-          if (err instanceof ElevenLabsError) throw err;
+          if (err instanceof ElevenLabsError) {
+            // Keep the provider's own explanation (quota, refusal, busy) so the
+            // driver is told the real reason rather than a generic one.
+            seen.failure = err.failure;
+            throw err;
+          }
           throw Object.assign(new Error("tts_failed"), { status: 0 });
         } finally {
           clearTimeout(timer);
@@ -113,12 +162,18 @@ export const speakLine = createServerFn({ method: "POST" })
       if (result.reason === "provider") {
         const status = result.status ?? 0;
         const { describeElevenFailure } = await import("@/lib/elevenlabs.server");
-        // Whatever went wrong at the provider, the hold was returned in full.
+        const base = seen.failure?.message ?? describeElevenFailure(status, "").message;
+        // Only say the hold came back when the release was actually recorded.
+        const message = result.refunded
+          ? base
+          : `${base.replace(/ You weren't charged\.$/, "")} Your credit hold could not be released just now; it is reconciled automatically and no charge is settled for this line.`;
         return {
           ok: false as const,
           reason: "provider" as const,
-          message: describeElevenFailure(status, "").message,
+          message,
           status,
+          quota: seen.failure?.quota === true,
+          refunded: result.refunded === true,
         };
       }
 
@@ -153,7 +208,9 @@ export const quoteSpeech = createServerFn({ method: "POST" })
  * VOICE PROVIDER STATUS — what is really connected, said plainly.
  *
  * When the key is present this reads the live voice library and reports, per
- * persona, whether this account is licensed for that stock voice. When it is
+ * persona, whether that stock voice is AVAILABLE on this account. Availability
+ * is what the library proves; it says nothing about commercial licence terms,
+ * which live in the account's own agreement with the provider. When the key is
  * absent it says so; it never guesses and never claims live speech.
  */
 export const voiceProviderStatus = createServerFn({ method: "GET" })
@@ -201,15 +258,15 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
 
     const missing = check.voices.filter((v) => !v.available);
     console.info(
-      `[voice] provider=ElevenLabs connected=true model=${ELEVEN_MODEL} voices=${check.voices.length} unlicensed=${missing.length} at=${checkedAt}`,
+      `[voice] provider=ElevenLabs connected=true model=${ELEVEN_MODEL} voices=${check.voices.length} unavailable=${missing.length} at=${checkedAt}`,
     );
     return {
       ...shared,
       checkedAt,
       connected: true as const,
       message: missing.length
-        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no licensed voice on this account and falls back to your device.`
-        : "Connected. Every character has a licensed voice on this account.",
+        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no available voice on this account and falls back to your device.`
+        : "Connected. Every character has a voice available on this account.",
       voices: check.voices,
     };
   });

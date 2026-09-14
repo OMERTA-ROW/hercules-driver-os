@@ -6,7 +6,7 @@
  * browser and never mirrored into a VITE_ variable.
  *
  * Everything here is a pure-ish function over `fetch`, so the mapping, the
- * error translation and the licence validation can be regression-tested with a
+ * error translation and the availability validation can be regression-tested with a
  * stubbed fetch and no credentials.
  */
 import { ELEVEN_MODEL, type VoiceOption } from "@/data/voices";
@@ -98,7 +98,7 @@ export function elevenSettings(persona: VoiceOption) {
 export type SpeakDeps = { fetch: typeof fetch; key: string };
 
 /**
- * Speaks one line in a persona's licensed stock voice and returns a playable
+ * Speaks one line in a persona's stock provider voice and returns a playable
  * data URL. Throws `ElevenLabsError` on any provider failure so the caller's
  * credit hold is refunded in full.
  */
@@ -127,8 +127,11 @@ export async function elevenSpeak(
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    console.error(`ElevenLabs TTS failed [${res.status}]: ${body}`);
-    throw new ElevenLabsError(describeElevenFailure(res.status, body));
+    const failure = describeElevenFailure(res.status, body);
+    // Status and classification only — the provider's raw body can echo request
+    // content and account detail, so it is never written to the log.
+    console.error(`[voice] speech failed status=${res.status} quota=${failure.quota}`);
+    throw new ElevenLabsError(failure);
   }
 
   return audioDataUrl(new Uint8Array(await res.arrayBuffer()));
@@ -144,7 +147,10 @@ export type VoiceCheck = {
 
 /**
  * Reads the live voice library and confirms every persona is mapped to a voice
- * this account is actually licensed to use. Nothing is cloned or created.
+ * this account can actually USE. Availability in the library is what this
+ * proves — it is not a statement about commercial licensing terms, which live
+ * in the account's own agreement with the provider. Nothing is cloned or
+ * created here; only the provider's own stock voices are used.
  */
 export async function verifyElevenVoices(
   personas: VoiceOption[],
@@ -161,6 +167,7 @@ export async function verifyElevenVoices(
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     const failure = describeElevenFailure(res.status, body);
+    console.error(`[voice] voice list failed status=${res.status} quota=${failure.quota}`);
     return { ok: false, status: res.status, message: failure.message };
   }
   const data = (await res.json()) as { voices?: { voice_id?: string; name?: string }[] };

@@ -9,7 +9,7 @@ type Status = Awaited<ReturnType<typeof voiceProviderStatus>>;
  * VOICE SERVICE STATUS — the truth about what is actually speaking.
  *
  * Signed in, this asks the server whether the real voice service is connected
- * and whether every character has a licensed voice on this account. It never
+ * and whether every character has a voice available on this account. It never
  * claims a live connection it has not confirmed, and it never touches the key:
  * the key stays on the server.
  */
@@ -82,7 +82,7 @@ export function VoiceServiceStatus() {
             <li key={v.id} className="flex items-center justify-between gap-2">
               <span className="text-foreground">{v.persona}</span>
               <span className={v.available ? "text-muted-foreground" : "text-warn"}>
-                {v.available ? v.name : "no licensed voice"}
+                {v.available ? v.name : "no voice available"}
               </span>
             </li>
           ))}

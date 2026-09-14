@@ -15,7 +15,7 @@ const deps = (impl: (url: string, init?: RequestInit) => Response) => ({
     impl(String(input), init)) as unknown as typeof fetch,
 });
 
-describe("persona → licensed ElevenLabs voice mapping", () => {
+describe("persona → ElevenLabs stock voice mapping", () => {
   it("maps five male and four female personas to distinct stock voice ids", () => {
     expect(maleVoices).toHaveLength(5);
     expect(femaleVoices).toHaveLength(4);
@@ -105,7 +105,7 @@ describe("speaking a line", () => {
   });
 });
 
-describe("licence verification against the live voice library", () => {
+describe("availability verification against the live voice library", () => {
   it("flags a persona whose voice this account cannot use", async () => {
     const res = await verifyElevenVoices(
       voiceOptions,
