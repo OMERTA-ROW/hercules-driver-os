@@ -735,7 +735,7 @@ const nextId = () => `t${++seq}-${Date.now()}`;
 function fallbackNote(reason: string | undefined, message?: string): string {
   switch (reason) {
     case "unconfigured":
-      return "The neural voices aren't switched on for this app yet, so your device spoke the line free.";
+      return "The real AI voice service isn't connected to this app yet, so your device spoke the line free.";
     case "eco":
       return "Eco quality is on, so your device speaks every line free. Switch to Balanced to hear the real voice.";
     case "no_credits":
@@ -930,9 +930,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       const persona = voiceById(id);
       setPreviewing(id);
 
-      /* Previews play a static clip of the real neural voice that ships with the
-         app — identical for every driver, no account data in it, no paid call,
-         no credits spent. So a brand-new account hears the actual character. */
+      /* Previews play a static clip that ships with the app — identical for
+         every driver, no account data in it, no paid call, no credits spent.
+         The clips were recorded with an earlier voice service, so they show the
+         character and pace, not the exact live voice. Labelled as such in the
+         picker rather than passed off as the live provider. */
       killAudio();
       const sampleGen = speechGen.current;
       const clip = new Audio(`/voice-samples/${id}.mp3`);

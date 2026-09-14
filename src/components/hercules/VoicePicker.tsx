@@ -134,8 +134,13 @@ export function VoicePicker() {
           pick still asks before it books, spends or commits anything, and your choice stays on your
           profile.
         </p>
-        {speechSource === "premium" || speechSource === "sample" ? (
-          <p className="text-primary">You just heard the real neural voice.</p>
+        {speechSource === "premium" ? (
+          <p className="text-primary">That was the live AI voice, spoken just for you.</p>
+        ) : null}
+        {speechSource === "sample" ? (
+          <p className="text-muted-foreground">
+            That was the recorded preview clip, not the live voice service.
+          </p>
         ) : null}
       </div>
     </>
