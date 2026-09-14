@@ -138,24 +138,29 @@ export function AppShell({
             </div>
           </header>
 
-          {/* Mobile / portrait nav */}
-          <nav className="flex gap-1.5 overflow-x-auto border-b border-border px-3 py-2 lg:hidden">
-            {items.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                activeOptions={{ exact: n.to === "/" }}
-                activeProps={{ className: "border-primary/60 surface-2 text-primary" }}
-                inactiveProps={{ className: "border-primary/20 text-muted-foreground" }}
-                className="flex min-h-[46px] shrink-0 items-center gap-2 rounded-lg border px-3.5 py-2 font-display text-xs uppercase tracking-[0.12em] transition-colors"
-              >
-                <n.icon className="h-4 w-4" />
-                {n.label}
-              </Link>
-            ))}
+          {/* Phone / portrait: a floating bubble dock that clears the voice orb */}
+          <nav
+            aria-label="Sections"
+            className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom,0px)+6.75rem)] z-40 px-3 lg:hidden"
+          >
+            <div className="bubble-bar bubble-scroll pointer-events-auto mx-auto w-full max-w-[52rem]">
+              {items.map((n) => (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  activeOptions={{ exact: n.to === "/" }}
+                  activeProps={{ className: "bubble-tab-on" }}
+                  className="bubble-tab"
+                >
+                  <n.icon className="h-4 w-4 shrink-0" />
+                  {n.label}
+                </Link>
+              ))}
+            </div>
           </nav>
 
-          <main className="rise-in px-3 pb-44 pt-4 sm:px-5 lg:pt-6">{children}</main>
+          <main className="rise-in px-3 pb-[16.5rem] pt-4 sm:px-5 lg:pb-44 lg:pt-6">{children}</main>
+
         </div>
       </div>
       <VoiceDock />
