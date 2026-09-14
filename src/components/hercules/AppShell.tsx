@@ -85,7 +85,6 @@ export function AppShell({
           </div>
         </aside>
 
-
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 border-b border-primary/20 bg-background/95 backdrop-blur-xl shadow-[0_8px_28px_-24px_var(--primary)]">
             <div
@@ -159,8 +158,9 @@ export function AppShell({
             </div>
           </nav>
 
-          <main className="rise-in px-3 pb-[16.5rem] pt-4 sm:px-5 lg:pb-44 lg:pt-6">{children}</main>
-
+          <main className="rise-in px-3 pb-[16.5rem] pt-4 sm:px-5 lg:pb-44 lg:pt-6">
+            {children}
+          </main>
         </div>
       </div>
       <VoiceDock />

@@ -74,8 +74,9 @@ export function ScopeStrip() {
           className={cn("bubble-tab", role === r.id && "bubble-tab-on")}
         >
           {r.label}
-        </button>
-      ))}
+          </button>
+        ))}
+      </div>
       <span className="text-xs text-muted-foreground">
         Each layer holds everything the one below it holds.
       </span>
