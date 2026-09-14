@@ -18,8 +18,10 @@ describe("male and female voice choices", () => {
     expect(maleVoices.length + femaleVoices.length).toBe(voiceOptions.length);
   });
 
-  it("uses only voice names the speech model actually serves", () => {
-    expect(TTS_MODEL).toBe("openai/gpt-4o-mini-tts");
+  it("previews the same live voice model, and keeps every legacy voice name valid", () => {
+    // Preview clips are rendered by the live ElevenLabs model, so the picker
+    // previews the real character rather than a different provider.
+    expect(TTS_MODEL).toBe(ELEVEN_MODEL);
     for (const v of voiceOptions) {
       expect(supportedTtsVoices).toContain(v.tts);
     }
