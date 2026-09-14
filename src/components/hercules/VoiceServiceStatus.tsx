@@ -18,25 +18,26 @@ export function VoiceServiceStatus() {
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const check = useCallback(() => {
+    setLoading(true);
+    return voiceProviderStatus()
+      .then((s) => setStatus(s))
+      .catch(() => setStatus(null))
+      .finally(() => setLoading(false));
+  }, []);
+
   useEffect(() => {
     if (!userId) {
       setStatus(null);
       return;
     }
-    let live = true;
-    setLoading(true);
-    voiceProviderStatus()
-      .then((s) => live && setStatus(s))
-      .catch(() => live && setStatus(null))
-      .finally(() => live && setLoading(false));
-    return () => {
-      live = false;
-    };
-  }, [userId]);
+    void check();
+  }, [userId, check]);
 
   if (!userId) return null;
 
   const connected = status?.connected === true;
+  const checkedAt = status?.checkedAt ? new Date(status.checkedAt) : null;
 
   return (
     <div className="mt-3 rounded-xl border border-border bg-card/50 p-3">
