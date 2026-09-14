@@ -32,6 +32,7 @@ export function RoleGate({ min, children }: { min: NetworkRole; children: ReactN
         widened.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <div className="bubble-bar bubble-scroll">
         {roleSpecs.map((r) => (
           <button
             key={r.id}
@@ -63,18 +64,14 @@ export function ScopeStrip() {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2">
       <Label>Scope</Label>
-      {roleSpecs.map((r) => (
+      <div className="bubble-bar bubble-scroll">
+        {roleSpecs.map((r) => (
         <button
           key={r.id}
           type="button"
           aria-pressed={role === r.id}
           onClick={() => setRole(r.id)}
-          className={cn(
-            "rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.1em] transition-colors",
-            role === r.id
-              ? "border-primary/60 bg-primary/15 text-primary"
-              : "border-border text-muted-foreground hover:bg-accent",
-          )}
+          className={cn("bubble-tab", role === r.id && "bubble-tab-on")}
         >
           {r.label}
         </button>

@@ -331,19 +331,14 @@ function CompanyPage() {
               <div className="flex flex-wrap items-end gap-2">
                 <div>
                   <Label>Role</Label>
-                  <div className="mt-1 flex gap-1">
+                  <div className="bubble-bar bubble-scroll mt-1">
                     {(["driver", "leased", "dispatcher"] as const).map((r) => (
                       <button
                         key={r}
                         type="button"
                         aria-pressed={inviteRole === r}
                         onClick={() => setInviteRole(r)}
-                        className={cn(
-                          "rounded-md border px-3 py-2 text-xs uppercase tracking-[0.1em]",
-                          inviteRole === r
-                            ? "border-primary/60 bg-primary/12 text-primary"
-                            : "border-border bg-card/50",
-                        )}
+                        className={cn("bubble-tab", inviteRole === r && "bubble-tab-on")}
                       >
                         {roleLabel[r]}
                       </button>

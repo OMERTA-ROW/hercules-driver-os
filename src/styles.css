@@ -985,3 +985,40 @@
     background: color-mix(in oklab, var(--primary) 22%, var(--background));
   }
 }
+
+/* Larger round choice cards (two lines of text) in the same bubble language. */
+@utility bubble-card {
+  border-radius: 1.75rem;
+  border: 1px solid var(--bubble-edge);
+  background: var(--bubble-bg);
+  backdrop-filter: blur(18px) saturate(130%);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  &:hover {
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent);
+  }
+}
+
+@utility bubble-card-on {
+  border-color: var(--bubble-on-edge);
+  background: var(--bubble-on-bg);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent) inset,
+    0 0 26px -12px color-mix(in oklab, var(--primary) 85%, transparent);
+}
+
+@supports not (backdrop-filter: blur(4px)) {
+  .bubble-card {
+    background: var(--surface-2);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bubble-card {
+    background: var(--surface-2);
+    backdrop-filter: none;
+  }
+}
