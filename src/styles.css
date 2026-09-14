@@ -1126,7 +1126,10 @@
   [role="button"],
   [role="tab"],
   [role="radio"],
-  [role="switch"] {
+  [role="switch"],
+  select,
+  textarea,
+  input:not([type="checkbox"]):not([type="radio"]) {
     border-radius: 9999px;
   }
 
@@ -1140,6 +1143,14 @@
   [role="button"]:not([aria-disabled="true"]):active {
     transform: translateY(1px) scale(0.985);
   }
+
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover,
+  [role="tab"]:hover,
+  [role="radio"]:hover,
+  [role="switch"]:hover {
+    box-shadow: 0 0 22px -14px var(--theme-glow);
+  }
 }
 
 @utility matte-control {
@@ -1152,7 +1163,8 @@
 }
 
 @utility matte-popover {
-  background: color-mix(in oklab, var(--popover) 92%, transparent);
+  background: var(--bubble-bg);
+  border-color: var(--bubble-edge);
   backdrop-filter: blur(18px);
   box-shadow: 0 22px 52px -30px var(--theme-shadow), 0 0 26px -20px var(--theme-glow);
 }
