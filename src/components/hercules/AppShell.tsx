@@ -128,7 +128,7 @@ export function AppShell({
                     </Pill>
                   )
                 ) : (
-                  <Link to="/sign-in">
+                  <Link to="/sign-in" className="inline-flex min-h-11 items-center rounded-full">
                     <Pill tone="primary">Sign in</Pill>
                   </Link>
                 )}
