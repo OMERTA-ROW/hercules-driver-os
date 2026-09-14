@@ -59,6 +59,14 @@ export function VoiceServiceStatus() {
               ? "Connected"
               : "Not connected — your device is speaking"}
         </span>
+        <button
+          type="button"
+          onClick={() => void check()}
+          disabled={loading}
+          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+        >
+          <RefreshCw className={loading ? "h-3 w-3 animate-spin" : "h-3 w-3"} /> Check again
+        </button>
       </div>
 
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
