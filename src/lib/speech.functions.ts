@@ -4,6 +4,7 @@ import { voiceById, voiceOptions } from "@/data/voices";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   aiLimits,
+  allowancePausedLine,
   creditCost,
   estimatedTtsCostUsd,
   providerCostAssumptions,
@@ -44,6 +45,9 @@ export const speakLine = createServerFn({ method: "POST" })
     const { elevenLabsConfigured, elevenSpeak, ElevenLabsError } = await import(
       "@/lib/elevenlabs.server"
     );
+    type ProviderFailure = InstanceType<typeof ElevenLabsError>["failure"];
+    /** The provider's own explanation, kept so quota is never flattened. */
+    let failure: ProviderFailure | null = null;
 
     if (!elevenLabsConfigured()) {
       return {
