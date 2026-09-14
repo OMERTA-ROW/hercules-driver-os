@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, PlugZap } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, Loader2, PlugZap, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { voiceProviderStatus } from "@/lib/speech.functions";
 
@@ -18,25 +18,26 @@ export function VoiceServiceStatus() {
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const check = useCallback(() => {
+    setLoading(true);
+    return voiceProviderStatus()
+      .then((s) => setStatus(s))
+      .catch(() => setStatus(null))
+      .finally(() => setLoading(false));
+  }, []);
+
   useEffect(() => {
     if (!userId) {
       setStatus(null);
       return;
     }
-    let live = true;
-    setLoading(true);
-    voiceProviderStatus()
-      .then((s) => live && setStatus(s))
-      .catch(() => live && setStatus(null))
-      .finally(() => live && setLoading(false));
-    return () => {
-      live = false;
-    };
-  }, [userId]);
+    void check();
+  }, [userId, check]);
 
   if (!userId) return null;
 
   const connected = status?.connected === true;
+  const checkedAt = status?.checkedAt ? new Date(status.checkedAt) : null;
 
   return (
     <div className="mt-3 rounded-xl border border-border bg-card/50 p-3">
@@ -58,6 +59,14 @@ export function VoiceServiceStatus() {
               ? "Connected"
               : "Not connected — your device is speaking"}
         </span>
+        <button
+          type="button"
+          onClick={() => void check()}
+          disabled={loading}
+          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+        >
+          <RefreshCw className={loading ? "h-3 w-3 animate-spin" : "h-3 w-3"} /> Check again
+        </button>
       </div>
 
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -78,6 +87,12 @@ export function VoiceServiceStatus() {
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {checkedAt && !loading ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Last checked {checkedAt.toLocaleTimeString()}.
+        </p>
       ) : null}
     </div>
   );

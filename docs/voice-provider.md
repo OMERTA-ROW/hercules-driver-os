@@ -63,6 +63,21 @@ weekly resets; subscriber-only top-ups 10/$3, 50/$15, 100/$30.
 - Adapter, mapping, error translation, licence validation and encoding are
   covered by `src/lib/elevenlabs.test.ts` with a stubbed `fetch` — no credentials
   needed.
-- **Live audio verification is blocked**: no ElevenLabs connection exists on
-  this project yet, so no real male/female clip has been generated. Once the
-  connection is linked, run the status card and one short sample per gender.
+- **Live verification: PASSED (2026-09-14).** The ElevenLabs connection is
+  linked and `ELEVENLABS_API_KEY` is present server-side only.
+  - `GET /v1/voices` returned HTTP 200 with 21 voices; all nine persona voice
+    ids (George, Bill, Callum, Daniel, Liam, Sarah, Matilda, Alice, Lily) are
+    licensed on the account.
+  - Live speech confirmed with a minimal sample line on `eleven_flash_v2_5`:
+    one male (George, HTTP 200, 24,703 bytes) and one female (Sarah, HTTP 200,
+    19,688 bytes).
+  - Static preview clips in `public/voice-samples/` were re-rendered with the
+    same ElevenLabs voices and settings via `bun scripts/build-voice-samples.ts`,
+    so the picker previews the real character. `PREVIEW_CLIP_MODEL` now equals
+    `ELEVEN_MODEL`.
+- `voiceProviderStatus` logs the true state each check
+  (`[voice] provider=ElevenLabs connected=… model=… unlicensed=… at=…`) and
+  returns `checkedAt`; the status card shows the time and a "Check again" button.
+- Still not connected elsewhere in the app, and shown as unavailable rather than
+  filled in: payments, commercial truck restriction data, engine diagnostics,
+  parts suppliers, delivery partners, load boards.

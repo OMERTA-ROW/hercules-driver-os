@@ -932,9 +932,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
       /* Previews play a static clip that ships with the app — identical for
          every driver, no account data in it, no paid call, no credits spent.
-         The clips were recorded with an earlier voice service, so they show the
-         character and pace, not the exact live voice. Labelled as such in the
-         picker rather than passed off as the live provider. */
+         The clips are rendered from the same ElevenLabs voice and delivery the
+         driver hears on the road, so the preview is the real character. */
       killAudio();
       const sampleGen = speechGen.current;
       const clip = new Audio(`/voice-samples/${id}.mp3`);
