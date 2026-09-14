@@ -884,3 +884,104 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ================================================================ BUBBLE TABS
+ * One rounded, floating, translucent tab language for the whole app: the shell
+ * rail, the phone dock and every local segmented control. Dark glass, warm gold
+ * on the current tab, silver labels, soft depth, fully round geometry.
+ */
+:root {
+  --bubble-bg: color-mix(in oklab, var(--background) 62%, transparent);
+  --bubble-edge: color-mix(in oklab, var(--primary) 26%, transparent);
+  --bubble-on-bg: color-mix(in oklab, var(--primary) 16%, var(--background));
+  --bubble-on-edge: color-mix(in oklab, var(--primary) 62%, transparent);
+}
+
+[data-theme="day"] {
+  /* Direct sun: less transparency, more contrast, same shape. */
+  --bubble-bg: color-mix(in oklab, var(--background) 88%, transparent);
+  --bubble-on-bg: color-mix(in oklab, var(--primary) 20%, var(--background));
+}
+
+/* The floating capsule a group of tabs sits in. */
+@utility bubble-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.3125rem;
+  background: var(--bubble-bg);
+  border: 1px solid var(--bubble-edge);
+  backdrop-filter: blur(20px) saturate(135%);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 6%, transparent) inset,
+    0 10px 30px -18px color-mix(in oklab, var(--primary) 60%, transparent),
+    0 18px 44px -30px oklch(0 0 0 / 0.9);
+}
+
+/* One tab inside the capsule. 44px+ tall everywhere, always fully round. */
+@utility bubble-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  &:hover {
+    color: var(--color-foreground);
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+  }
+}
+
+/* The current tab: warm gold edge and glow, never a colour-only cue. */
+@utility bubble-tab-on {
+  color: var(--color-primary);
+  background: var(--bubble-on-bg);
+  border-color: var(--bubble-on-edge);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent) inset,
+    0 0 22px -10px color-mix(in oklab, var(--primary) 85%, transparent);
+}
+
+/* A row of bubbles that can outrun the screen — scrolls, never wraps ragged. */
+@utility bubble-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* No blur available, or a driver who asked for less transparency: go solid. */
+@supports not (backdrop-filter: blur(4px)) {
+  .bubble-bar {
+    background: var(--surface-2);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bubble-bar {
+    background: var(--surface-2);
+    backdrop-filter: none;
+  }
+  .bubble-tab-on {
+    background: color-mix(in oklab, var(--primary) 22%, var(--background));
+  }
+}
