@@ -187,6 +187,41 @@ export async function walletQuality(userId: string): Promise<"eco" | "balanced">
   return data?.quality_pref === "eco" ? "eco" : "balanced";
 }
 
+/* ---- gate check (no hold, no spend) ------------------------------------- */
+
+export type GateOutcome = {
+  outcome:
+    | "ok"
+    | "error"
+    | "no_subscription"
+    | "no_allowance_config"
+    | "daily_limit"
+    | "weekly_limit";
+  resets_at?: string | null;
+};
+
+/**
+ * Asks the SAME database routine the paid path uses whether this account may
+ * receive premium speech right now — active paid subscription, configured
+ * allowance, and not paused at a daily or weekly cap. Reserves nothing and
+ * spends nothing, so it is safe to run before serving an already-paid cached
+ * clip: a paused or lapsed account must not keep hearing the paid voice for
+ * free out of the cache. Fails CLOSED: a read error denies.
+ */
+export async function gateCheck(userId: string, amount = 0): Promise<GateOutcome> {
+  const db = await admin();
+  const { data, error } = await db.rpc("ai_gate_check", {
+    _user: userId,
+    _amount: amount,
+    _new_hold: true,
+  });
+  if (error) {
+    console.error(`[credits] gate check failed: ${error.message}`);
+    return { outcome: "error" };
+  }
+  return (data as GateOutcome | null) ?? { outcome: "error" };
+}
+
 /* ---- durable request identity ------------------------------------------- */
 
 /** Stable across server instances and process restarts: the same request in the
