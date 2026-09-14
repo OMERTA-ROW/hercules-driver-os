@@ -65,6 +65,7 @@
 /* ---------------------------------------------------------------- NIGHT (default) */
 :root {
   --radius: 0.35rem;
+  --exposure-light: oklch(1 0 0);
 
   --background: oklch(0 0 0);
   --foreground: oklch(0.9 0.004 250);
@@ -1125,15 +1126,15 @@
 }
 
 [data-colorway][data-theme="gray"] {
-  --background: color-mix(in oklab, var(--matte-background) 96%, white);
-  --card: color-mix(in oklab, var(--matte-card) 95%, white);
-  --popover: color-mix(in oklab, var(--matte-popover) 95%, white);
+  --background: color-mix(in oklab, var(--matte-background) 96%, var(--exposure-light));
+  --card: color-mix(in oklab, var(--matte-card) 95%, var(--exposure-light));
+  --popover: color-mix(in oklab, var(--matte-popover) 95%, var(--exposure-light));
 }
 
 [data-colorway][data-theme="day"] {
-  --background: color-mix(in oklab, var(--matte-background) 90%, white);
-  --card: color-mix(in oklab, var(--matte-card) 88%, white);
-  --popover: color-mix(in oklab, var(--matte-popover) 88%, white);
+  --background: color-mix(in oklab, var(--matte-background) 90%, var(--exposure-light));
+  --card: color-mix(in oklab, var(--matte-card) 88%, var(--exposure-light));
+  --popover: color-mix(in oklab, var(--matte-popover) 88%, var(--exposure-light));
 }
 
 /* Exposure stays independent: the brightness controller dims the whole cockpit. */
