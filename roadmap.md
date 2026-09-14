@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Apply the approved app-wide matte finish and five selectable colorways
+- [ ] Convert shared and route-local interactive controls to round glowing bubbles
+- [ ] Verify matte colorways and control spacing on phone, tablet, and desktop
+
 - [x] Apply pure-black theme with gold and violet illumination
 - [x] Convert the three-dot navigation to a compact scrollable panel
 - [x] Verify theme and menu across desktop and mobile
