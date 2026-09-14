@@ -363,7 +363,7 @@ export function Orb({
           </filter>
 
           {/* Low-contrast matte body shading. */}
-          <linearGradient id={`${uid}-chrome`} x1="0" y1="0" x2="0.25" y2="1">
+          <linearGradient id={`${uid}-matte`} x1="0" y1="0" x2="0.25" y2="1">
             <stop offset="0%" stopColor={m.hi} />
             <stop offset="32%" stopColor={m.lo} />
             <stop offset="66%" stopColor={m.deep} />
@@ -405,7 +405,7 @@ export function Orb({
         </defs>
 
         {/* The mass */}
-        <path ref={bodyRef} d={CIRCLE} fill={`url(#${uid}-chrome)`} />
+        <path ref={bodyRef} d={CIRCLE} fill={`url(#${uid}-matte)`} />
 
         <g clipPath={`url(#${uid}-clip)`}>
           <g filter={`url(#${uid}-fold)`}>
