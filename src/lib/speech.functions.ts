@@ -39,22 +39,26 @@ export const speakLine = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) {
+    const { ELEVEN_MODEL } = await import("@/data/voices");
+    const { elevenLabsConfigured, elevenSpeak, ElevenLabsError } = await import(
+      "@/lib/elevenlabs.server"
+    );
+
+    if (!elevenLabsConfigured()) {
       return {
         ok: false as const,
         reason: "unconfigured" as const,
-        message: "Premium voice is not configured.",
+        message:
+          "The real AI voice service isn't connected to this app yet, so your device spoke this line free.",
       };
     }
 
     // Hard input cap — long lines are trimmed, never sent whole.
     const text = data.text.slice(0, aiLimits.maxSpeechChars);
     const persona = voiceById(data.voiceId as never);
-    const premium = persona.tts !== "alloy";
-    const action = premium ? "speech_premium" : "speech";
+    const action = "speech_premium";
     const cost = creditCost(action, text.length);
-    const model = "openai/gpt-4o-mini-tts";
+    const model = ELEVEN_MODEL;
 
     // Eco: the account has asked for zero-cost speech. Refuse before any spend.
     if ((await walletQuality(context.userId)) === "eco") {
@@ -87,54 +91,37 @@ export const speakLine = createServerFn({ method: "POST" })
       identity,
       model,
       costBasis: "estimated",
-      // The gateway returns no per-call price, so this is our published
+      // The provider returns no per-call price, so this is our published
       // assumption and is labelled estimated everywhere it is shown.
       providerCostUsd: () => estimatedTtsCostUsd(text.length),
       run: async () => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 20_000);
         try {
-          const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model,
-              input: text,
-              voice: persona.tts,
-              instructions: persona.direction,
-              speed: persona.speed,
-              response_format: "mp3",
-            }),
-            signal: controller.signal,
-          });
-          if (!res.ok) {
-            const body = await res.text().catch(() => "");
-            console.error(`TTS failed [${res.status}]: ${body}`);
-            throw Object.assign(new Error("tts_failed"), { status: res.status });
-          }
-          const buf = new Uint8Array(await res.arrayBuffer());
-          let binary = "";
-          for (let i = 0; i < buf.length; i += 0x8000) {
-            binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-          }
-          return `data:audio/mpeg;base64,${btoa(binary)}`;
+          return await elevenSpeak(persona, text, { signal: controller.signal });
+        } catch (err) {
+          if (err instanceof ElevenLabsError) throw err;
+          throw Object.assign(new Error("tts_failed"), { status: 0 });
         } finally {
           clearTimeout(timer);
         }
       },
     });
 
+
     if (!result.ok) {
       if (result.reason === "provider") {
         const status = result.status ?? 0;
-        const message =
-          status === 402
-            ? "The voice service is out of credit on this account."
-            : status === 429
-              ? "Voice service is busy — try that again in a moment."
-              : "Voice service could not speak that line.";
-        return { ok: false as const, reason: "provider" as const, message, status };
+        const { describeElevenFailure } = await import("@/lib/elevenlabs.server");
+        // Whatever went wrong at the provider, the hold was returned in full.
+        return {
+          ok: false as const,
+          reason: "provider" as const,
+          message: describeElevenFailure(status, "").message,
+          status,
+        };
       }
+
       return {
         ok: false as const,
         reason: result.reason,
@@ -161,3 +148,55 @@ export const quoteSpeech = createServerFn({ method: "POST" })
     premium: creditCost("speech_premium", data.chars),
     assumptionsUpdated: providerCostAssumptions.updated,
   }));
+
+/**
+ * VOICE PROVIDER STATUS — what is really connected, said plainly.
+ *
+ * When the key is present this reads the live voice library and reports, per
+ * persona, whether this account is licensed for that stock voice. When it is
+ * absent it says so; it never guesses and never claims live speech.
+ */
+export const voiceProviderStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { voiceOptions: personas, ELEVEN_MODEL, PREVIEW_CLIP_MODEL } = await import(
+      "@/data/voices"
+    );
+    const { elevenLabsConfigured, verifyElevenVoices } = await import("@/lib/elevenlabs.server");
+
+    const shared = {
+      provider: "ElevenLabs" as const,
+      model: ELEVEN_MODEL,
+      previewClipModel: PREVIEW_CLIP_MODEL,
+    };
+
+    if (!elevenLabsConfigured()) {
+      return {
+        ...shared,
+        connected: false as const,
+        message:
+          "The real AI voice service isn't connected yet. Every line is spoken by your device, free, until it is.",
+        voices: [],
+      };
+    }
+
+    const check = await verifyElevenVoices(personas);
+    if (!check.ok) {
+      return {
+        ...shared,
+        connected: false as const,
+        message: check.message,
+        voices: [],
+      };
+    }
+
+    const missing = check.voices.filter((v) => !v.available);
+    return {
+      ...shared,
+      connected: true as const,
+      message: missing.length
+        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no licensed voice on this account and falls back to your device.`
+        : "Connected. Every character has a licensed voice on this account.",
+      voices: check.voices,
+    };
+  });

@@ -1,0 +1,84 @@
+import { useEffect, useState } from "react";
+import { CheckCircle2, Loader2, PlugZap } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { voiceProviderStatus } from "@/lib/speech.functions";
+
+type Status = Awaited<ReturnType<typeof voiceProviderStatus>>;
+
+/**
+ * VOICE SERVICE STATUS — the truth about what is actually speaking.
+ *
+ * Signed in, this asks the server whether the real voice service is connected
+ * and whether every character has a licensed voice on this account. It never
+ * claims a live connection it has not confirmed, and it never touches the key:
+ * the key stays on the server.
+ */
+export function VoiceServiceStatus() {
+  const { userId } = useAuth();
+  const [status, setStatus] = useState<Status | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!userId) {
+      setStatus(null);
+      return;
+    }
+    let live = true;
+    setLoading(true);
+    voiceProviderStatus()
+      .then((s) => live && setStatus(s))
+      .catch(() => live && setStatus(null))
+      .finally(() => live && setLoading(false));
+    return () => {
+      live = false;
+    };
+  }, [userId]);
+
+  if (!userId) return null;
+
+  const connected = status?.connected === true;
+
+  return (
+    <div className="mt-3 rounded-xl border border-border bg-card/50 p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="tech-label inline-flex items-center gap-1">
+          {loading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : connected ? (
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+          ) : (
+            <PlugZap className="h-3.5 w-3.5 text-warn" />
+          )}
+          Real AI voice service
+        </span>
+        <span className={connected ? "text-xs text-primary" : "text-xs text-warn"}>
+          {loading
+            ? "Checking…"
+            : connected
+              ? "Connected"
+              : "Not connected — your device is speaking"}
+        </span>
+      </div>
+
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        {loading
+          ? "Asking the server what is connected."
+          : (status?.message ??
+            "The real AI voice service isn't connected yet, so every line is spoken by your device, free.")}
+      </p>
+
+      {status && status.voices.length > 0 ? (
+        <ul className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+          {status.voices.map((v) => (
+            <li key={v.id} className="flex items-center justify-between gap-2">
+              <span className="text-foreground">{v.persona}</span>
+              <span className={v.available ? "text-muted-foreground" : "text-warn"}>
+                {v.available ? v.name : "no licensed voice"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
