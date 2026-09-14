@@ -1,6 +1,7 @@
 import { Check, Crown, Loader2, Play, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVoice, femaleVoices, maleVoices, type VoiceOption } from "@/lib/voice";
+import { VoiceServiceStatus } from "@/components/hercules/VoiceServiceStatus";
 
 /**
  * THE VOICE PICKER
