@@ -21,11 +21,11 @@ export type VoiceId =
 export const ELEVEN_MODEL = "eleven_flash_v2_5";
 
 /**
- * The provider that rendered the static preview clips in /public/voice-samples.
- * They were rendered before ElevenLabs was wired in, so they are labelled
- * truthfully in the picker rather than passed off as the live voices.
+ * The model that rendered the static preview clips in /public/voice-samples.
+ * They are now rendered by the SAME ElevenLabs voice and model used live, via
+ * scripts/build-voice-samples.ts, so the picker previews the real character.
  */
-export const PREVIEW_CLIP_MODEL = "openai/gpt-4o-mini-tts";
+export const PREVIEW_CLIP_MODEL = ELEVEN_MODEL;
 
 /** Legacy alias kept so older callers and tests keep naming the preview clips. */
 export const TTS_MODEL = PREVIEW_CLIP_MODEL;

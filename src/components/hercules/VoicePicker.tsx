@@ -138,7 +138,7 @@ export function VoicePicker() {
         ) : null}
         {speechSource === "sample" ? (
           <p className="text-muted-foreground">
-            That was the recorded preview clip, not the live voice service.
+            That was the free recorded preview clip, in the same voice used on the road.
           </p>
         ) : null}
       </div>
