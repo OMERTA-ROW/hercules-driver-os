@@ -809,7 +809,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     let alive = true;
     const syncAccountColorway = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
       if (!alive || !session) return;
-      const saved = session.user.user_metadata?.matte_colorway;
+      const saved = session.user.user_metadata?.["matte_colorway"];
       if (isOrbColorway(saved)) {
         setColorwayState(saved);
         localStorage.setItem(COLOR_KEY, saved);
