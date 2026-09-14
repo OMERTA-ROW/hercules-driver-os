@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, PlugZap } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, Loader2, PlugZap, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { voiceProviderStatus } from "@/lib/speech.functions";
 
