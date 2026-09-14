@@ -43,7 +43,6 @@ export function RoleGate({ min, children }: { min: NetworkRole; children: ReactN
               role === r.id && "bubble-card-on",
             )}
           >
-
             <span className="font-display text-sm uppercase tracking-[0.12em]">{r.label}</span>
             <p className="mt-1 text-xs text-muted-foreground">{r.who}</p>
           </button>
@@ -64,14 +63,14 @@ export function ScopeStrip() {
       <Label>Scope</Label>
       <div className="bubble-bar bubble-scroll">
         {roleSpecs.map((r) => (
-        <button
-          key={r.id}
-          type="button"
-          aria-pressed={role === r.id}
-          onClick={() => setRole(r.id)}
-          className={cn("bubble-tab", role === r.id && "bubble-tab-on")}
-        >
-          {r.label}
+          <button
+            key={r.id}
+            type="button"
+            aria-pressed={role === r.id}
+            onClick={() => setRole(r.id)}
+            className={cn("bubble-tab", role === r.id && "bubble-tab-on")}
+          >
+            {r.label}
           </button>
         ))}
       </div>

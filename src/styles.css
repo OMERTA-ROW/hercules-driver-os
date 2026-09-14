@@ -118,7 +118,8 @@
   --gradient-steel: oklch(0 0 0);
   --gradient-hazard: linear-gradient(100deg, var(--hazard) 0%, var(--primary) 100%);
   --shadow-panel: 0 1px 0 0 oklch(1 0 0 / 4%) inset, 0 18px 40px -24px oklch(0 0 0 / 90%);
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 58%, transparent),
+  --shadow-glow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 58%, transparent),
     0 0 18px -4px color-mix(in oklab, var(--primary) 52%, transparent),
     0 0 40px -16px color-mix(in oklab, var(--violet) 72%, transparent);
 
@@ -243,7 +244,8 @@
 
   --gradient-steel: oklch(0 0 0);
   --shadow-panel: 0 1px 0 0 oklch(1 0 0 / 80%) inset, 0 12px 28px -22px oklch(0 0 0 / 35%);
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
+  --shadow-glow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
     0 0 20px -8px color-mix(in oklab, var(--primary) 40%, transparent);
 
   --orb-core: oklch(0.62 0.16 62);
@@ -378,7 +380,11 @@
       color-mix(in oklab, var(--orb-core) 10%, transparent) 48%,
       transparent 74%
     ),
-    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--orb-halo) 12%, transparent), transparent 72%);
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--orb-halo) 12%, transparent),
+      transparent 72%
+    );
   border: 1px solid color-mix(in oklab, var(--orb-core) 22%, transparent);
   backdrop-filter: blur(6px) saturate(120%);
 }
@@ -402,7 +408,6 @@
 @utility route-flow {
   animation: route-flow 9s linear infinite;
 }
-
 
 /* ---------------------------------------------------------------- VOICE (night-safe) */
 @utility voice-surface {
@@ -596,7 +601,6 @@
   }
 }
 
-
 @keyframes orb-bloom-pulse {
   0%,
   100% {
@@ -616,11 +620,9 @@
   animation: orb-breathe-fast 5.5s ease-in-out infinite;
 }
 
-
 .orb-bloom {
   animation: orb-bloom-pulse 7.5s ease-in-out infinite;
-  filter:
-    drop-shadow(0 0 28px color-mix(in oklab, var(--primary) 54%, transparent))
+  filter: drop-shadow(0 0 28px color-mix(in oklab, var(--primary) 54%, transparent))
     drop-shadow(0 0 48px color-mix(in oklab, var(--violet) 48%, transparent));
 }
 
@@ -709,11 +711,9 @@
   animation-duration: 30s;
 }
 
-
 .orb-gloss {
   opacity: 0.9;
 }
-
 
 /* Quiet fade-in for conversation turns. */
 @keyframes turn-in {
