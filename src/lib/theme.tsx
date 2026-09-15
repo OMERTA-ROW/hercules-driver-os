@@ -113,6 +113,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<DisplayTheme>("night");
   const [autoNight, setAutoNightState] = useState(true);
   const [brightness, setBrightnessState] = useState<BrightnessLevel>("dim");
+  const [motion, setMotionState] = useState<MotionPreference>("system");
   // Restored-from-storage gate: the clock must not overwrite the driver's saved choice.
   const [ready, setReady] = useState(false);
 
@@ -214,6 +215,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(AUTO_KEY, v ? "1" : "0");
   }, []);
 
+  /** Motion is saved the instant it is tapped, and restored on every session. */
+  const setMotion = useCallback((m: MotionPreference) => {
+    setMotionState(m);
+    localStorage.setItem(MOTION_KEY, m);
+    applyMotion(m);
+  }, []);
+
+  // Restore the saved motion choice, and keep tabs on this device in step.
+  useEffect(() => {
+    const stored = localStorage.getItem(MOTION_KEY);
+    const pref = isMotionPreference(stored) ? stored : "system";
+    setMotionState(pref);
+    applyMotion(pref);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== MOTION_KEY) return;
+      const next = isMotionPreference(e.newValue) ? e.newValue : "system";
+      setMotionState(next);
+      applyMotion(next);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   return (
     <ThemeContext.Provider
       value={{
@@ -226,6 +251,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setBrightness,
         cycleBrightness,
         dim,
+        motion,
+        setMotion,
       }}
     >
       {children}
