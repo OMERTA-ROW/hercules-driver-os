@@ -862,16 +862,27 @@
   animation: rise-in 0.34s cubic-bezier(0.22, 0.8, 0.3, 1) both;
 }
 
-/* A driver asked for calm gets calm: every decorative animation stops. */
+/* A driver asked for calm gets calm: every decorative animation stops.
+   The device setting is honoured unless the driver explicitly chose full
+   motion in settings; choosing calm in settings stops motion on any device. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-motion="full"]) *,
+  :root:not([data-motion="full"]) *::before,
+  :root:not([data-motion="full"]) *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* ================================================================ BUBBLE TABS
