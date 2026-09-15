@@ -37,6 +37,29 @@ export const brightnessOptions: {
 const THEME_KEY = "hercules.display-theme";
 const AUTO_KEY = "hercules.auto-night";
 const BRIGHT_KEY = "hercules.brightness";
+const MOTION_KEY = "hercules.motion";
+
+/**
+ * MOTION — "system" follows the device setting. "full" and "reduced" are the
+ * driver overriding the device, saved the instant they tap.
+ */
+export type MotionPreference = "system" | "full" | "reduced";
+
+export const motionOptions: { id: MotionPreference; label: string; hint: string }[] = [
+  { id: "system", label: "Match device", hint: "Follows this phone or tablet's motion setting" },
+  { id: "full", label: "Full motion", hint: "Bubble lift, glow and section transitions" },
+  { id: "reduced", label: "Calm", hint: "No animation, whatever the device says" },
+];
+
+function isMotionPreference(value: unknown): value is MotionPreference {
+  return value === "system" || value === "full" || value === "reduced";
+}
+
+function applyMotion(pref: MotionPreference) {
+  const root = document.documentElement;
+  if (pref === "system") root.removeAttribute("data-motion");
+  else root.setAttribute("data-motion", pref);
+}
 
 /** Time-of-day model: what the screen should be doing at this hour. */
 export function themeForHour(hour: number): { theme: DisplayTheme; brightness: BrightnessLevel } {
