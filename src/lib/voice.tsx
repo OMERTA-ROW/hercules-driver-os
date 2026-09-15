@@ -728,6 +728,8 @@ export type SpeechSource = "premium" | "sample" | "device" | "unavailable" | nul
 const VoiceContext = createContext<Ctx | null>(null);
 
 const COLOR_KEY = "hercules.orb-colorway";
+/** When this device last changed the colorway — the tie-breaker between tabs. */
+const COLOR_AT_KEY = "hercules.orb-colorway.at";
 const VOICE_KEY = "hercules.voice";
 
 function isOrbColorway(value: unknown): value is OrbColorway {
@@ -744,6 +746,11 @@ function applyColorway(colorway: OrbColorway) {
   if (typeof document !== "undefined") {
     document.documentElement.setAttribute("data-colorway", colorway);
   }
+}
+
+function storedColorwayAt(): number {
+  const raw = Number(localStorage.getItem(COLOR_AT_KEY));
+  return Number.isFinite(raw) ? raw : 0;
 }
 
 let seq = 0;

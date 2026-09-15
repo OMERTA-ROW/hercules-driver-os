@@ -37,6 +37,29 @@ export const brightnessOptions: {
 const THEME_KEY = "hercules.display-theme";
 const AUTO_KEY = "hercules.auto-night";
 const BRIGHT_KEY = "hercules.brightness";
+const MOTION_KEY = "hercules.motion";
+
+/**
+ * MOTION — "system" follows the device setting. "full" and "reduced" are the
+ * driver overriding the device, saved the instant they tap.
+ */
+export type MotionPreference = "system" | "full" | "reduced";
+
+export const motionOptions: { id: MotionPreference; label: string; hint: string }[] = [
+  { id: "system", label: "Match device", hint: "Follows this phone or tablet's motion setting" },
+  { id: "full", label: "Full motion", hint: "Bubble lift, glow and section transitions" },
+  { id: "reduced", label: "Calm", hint: "No animation, whatever the device says" },
+];
+
+function isMotionPreference(value: unknown): value is MotionPreference {
+  return value === "system" || value === "full" || value === "reduced";
+}
+
+function applyMotion(pref: MotionPreference) {
+  const root = document.documentElement;
+  if (pref === "system") root.removeAttribute("data-motion");
+  else root.setAttribute("data-motion", pref);
+}
 
 /** Time-of-day model: what the screen should be doing at this hour. */
 export function themeForHour(hour: number): { theme: DisplayTheme; brightness: BrightnessLevel } {
@@ -57,6 +80,8 @@ type Ctx = {
   setBrightness: (b: BrightnessLevel) => void;
   cycleBrightness: () => void;
   dim: number;
+  motion: MotionPreference;
+  setMotion: (m: MotionPreference) => void;
 };
 
 const ThemeContext = createContext<Ctx>({
@@ -69,6 +94,8 @@ const ThemeContext = createContext<Ctx>({
   setBrightness: () => {},
   cycleBrightness: () => {},
   dim: 0.42,
+  motion: "system",
+  setMotion: () => {},
 });
 
 function applyTheme(theme: DisplayTheme) {
@@ -86,6 +113,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<DisplayTheme>("night");
   const [autoNight, setAutoNightState] = useState(true);
   const [brightness, setBrightnessState] = useState<BrightnessLevel>("dim");
+  const [motion, setMotionState] = useState<MotionPreference>("system");
   // Restored-from-storage gate: the clock must not overwrite the driver's saved choice.
   const [ready, setReady] = useState(false);
 
@@ -187,6 +215,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(AUTO_KEY, v ? "1" : "0");
   }, []);
 
+  /** Motion is saved the instant it is tapped, and restored on every session. */
+  const setMotion = useCallback((m: MotionPreference) => {
+    setMotionState(m);
+    localStorage.setItem(MOTION_KEY, m);
+    applyMotion(m);
+  }, []);
+
+  // Restore the saved motion choice, and keep tabs on this device in step.
+  useEffect(() => {
+    const stored = localStorage.getItem(MOTION_KEY);
+    const pref = isMotionPreference(stored) ? stored : "system";
+    setMotionState(pref);
+    applyMotion(pref);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== MOTION_KEY) return;
+      const next = isMotionPreference(e.newValue) ? e.newValue : "system";
+      setMotionState(next);
+      applyMotion(next);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   return (
     <ThemeContext.Provider
       value={{
@@ -199,6 +251,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setBrightness,
         cycleBrightness,
         dim,
+        motion,
+        setMotion,
       }}
     >
       {children}
