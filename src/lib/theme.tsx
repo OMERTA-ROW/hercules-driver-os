@@ -80,6 +80,8 @@ type Ctx = {
   setBrightness: (b: BrightnessLevel) => void;
   cycleBrightness: () => void;
   dim: number;
+  motion: MotionPreference;
+  setMotion: (m: MotionPreference) => void;
 };
 
 const ThemeContext = createContext<Ctx>({
@@ -92,6 +94,8 @@ const ThemeContext = createContext<Ctx>({
   setBrightness: () => {},
   cycleBrightness: () => {},
   dim: 0.42,
+  motion: "system",
+  setMotion: () => {},
 });
 
 function applyTheme(theme: DisplayTheme) {
