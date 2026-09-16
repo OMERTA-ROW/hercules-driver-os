@@ -329,7 +329,7 @@ function SupplyScreen() {
                   key={m}
                   type="button"
                   onClick={() => setMeetNote(m)}
-                  className={`flex min-h-[56px] w-full items-center gap-2 rounded-lg border p-3 text-left text-sm transition-all ${
+                  className={`flex min-h-[56px] w-full items-center gap-2 rounded-[1.75rem] border p-3 text-left text-sm transition-all ${
                     meetNote === m
                       ? "border-primary/70 bg-primary/10 text-primary shadow-[0_0_18px_-8px_var(--primary)]"
                       : "border-primary/20 bg-background text-foreground/85 hover:border-primary/50"
@@ -443,7 +443,7 @@ function SupplyScreen() {
                     key={f.id}
                     type="button"
                     onClick={() => reorder(f.id)}
-                    className="flex min-h-[76px] w-full items-start gap-3 rounded-lg border border-primary/20 bg-background p-3 text-left transition-all hover:border-primary/60"
+                    className="flex min-h-[76px] w-full items-start gap-3 rounded-[1.75rem] border border-primary/20 bg-background p-3 text-left transition-all hover:border-primary/60"
                   >
                     <Star className="mt-0.5 h-5 w-5 shrink-0 text-primary/80" />
                     <div className="min-w-0 flex-1">

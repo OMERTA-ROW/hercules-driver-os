@@ -73,7 +73,7 @@ function Card({ r }: { r: PickupRun }) {
           </p>
           <button
             onClick={() => decline(r.id)}
-            className="mt-2 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 text-muted-foreground"
+            className="mt-2 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground"
             aria-label="Dismiss pickup route"
           >
             <X className="h-4 w-4" />

@@ -7,6 +7,10 @@
 - [x] Audit every interactive control for matte bubble styling
 - [x] Validate all colorway/exposure contrast combinations
 - [x] Verify orb and bubble motion performance on phone/tablet, including reduced motion
+- [x] Newest-choice-wins colorway sync across tabs, devices and sessions
+- [x] Automated visual regression tests for bubble styling, glow and contrast
+- [x] Settings motion control that overrides the device setting and saves instantly
+- [x] Colorway preview gallery in settings
 
 - [x] Apply pure-black theme with gold and violet illumination
 - [x] Convert the three-dot navigation to a compact scrollable panel

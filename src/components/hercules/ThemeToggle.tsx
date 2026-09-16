@@ -1,5 +1,11 @@
-import { Moon, CloudSun, Sun, SunDim } from "lucide-react";
-import { useTheme, themeOptions, brightnessOptions, type DisplayTheme } from "@/lib/theme";
+import { Moon, CloudSun, Sun, SunDim, Waves } from "lucide-react";
+import {
+  useTheme,
+  themeOptions,
+  brightnessOptions,
+  motionOptions,
+  type DisplayTheme,
+} from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 const icons: Record<DisplayTheme, typeof Moon> = {
@@ -166,6 +172,41 @@ export function BrightnessPicker() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/**
+ * MOTION — a driver's own call, overriding the device setting either way, saved
+ * the moment they tap so it survives the next start-up.
+ */
+export function MotionPicker() {
+  const { motion, setMotion } = useTheme();
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Motion"
+      className="grid gap-2 sm:grid-cols-3"
+    >
+      {motionOptions.map((o) => {
+        const active = motion === o.id;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => setMotion(o.id)}
+            className={cn("bubble-card min-h-14 p-4 text-left", active && "bubble-card-on")}
+          >
+            <div className="flex items-center gap-2">
+              <Waves className={cn("h-5 w-5", active ? "text-primary" : "text-muted-foreground")} />
+              <span className="font-display text-sm uppercase tracking-[0.12em]">{o.label}</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{o.hint}</p>
+          </button>
+        );
+      })}
     </div>
   );
 }

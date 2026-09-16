@@ -1,5 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CreditCard, Monitor, LogOut, Check, TriangleAlert, Volume2, Circle } from "lucide-react";
+import {
+  CreditCard,
+  Monitor,
+  LogOut,
+  Check,
+  TriangleAlert,
+  Volume2,
+  Circle,
+  Waves,
+} from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/hercules/AppShell";
@@ -10,7 +19,7 @@ import {
   Pill,
   DriverApprovedNote,
 } from "@/components/hercules/primitives";
-import { ThemePicker, BrightnessPicker } from "@/components/hercules/ThemeToggle";
+import { ThemePicker, BrightnessPicker, MotionPicker } from "@/components/hercules/ThemeToggle";
 import { Orb } from "@/components/hercules/Orb";
 import { useVoice, orbColorways } from "@/lib/voice";
 import { VoicePicker } from "@/components/hercules/VoicePicker";
@@ -104,7 +113,7 @@ function Settings() {
                         });
                       }}
                       className={cn(
-                        "rounded-lg border p-3 text-left transition-colors",
+                        "rounded-[1.75rem] border p-3 text-left transition-colors",
                         active
                           ? "border-primary/60 bg-primary/12"
                           : "border-border bg-card/50 hover:bg-accent",
@@ -210,7 +219,22 @@ function Settings() {
               <Circle className="h-5 w-5 text-primary" /> Matte colorway
             </span>
           </PanelTitle>
+          <ColorwayGallery />
           <OrbPicker />
+        </Panel>
+
+        <Panel>
+          <PanelTitle right={<Pill tone="info">Saved instantly</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <Waves className="h-5 w-5 text-primary" /> Motion
+            </span>
+          </PanelTitle>
+          <MotionPicker />
+          <p className="mt-3 text-xs text-muted-foreground">
+            Choose Calm and every bubble lift, glow and screen transition stops, even if this device
+            asks for full motion. Choose Full motion and it stays on even if the device asks for
+            less. Your pick is kept for next time you start up.
+          </p>
         </Panel>
 
         <Panel>
@@ -288,6 +312,62 @@ function HazardToggles() {
         <Button variant="outline" size="lg" className="flex-1" onClick={() => setAll(false)}>
           All off
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * QUICK GALLERY — the five matte themes as small swatches, each showing its own
+ * base, trim and glow, so a driver can flick through them right here.
+ */
+function ColorwayGallery() {
+  const { colorway, setColorway } = useVoice();
+  return (
+    <div className="mb-4">
+      <Label>Quick preview</Label>
+      <div className="mt-1 flex gap-2 overflow-x-auto pb-2">
+        {orbColorways.map((o) => {
+          const active = colorway === o.id;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              data-colorway={o.id}
+              aria-pressed={active}
+              aria-label={`${o.label} — ${o.hint}`}
+              title={o.label}
+              onClick={() => setColorway(o.id)}
+              className={cn(
+                "matte-control flex min-h-14 shrink-0 items-center gap-2 rounded-full border px-3 py-2 transition-transform hover:-translate-y-0.5",
+                active ? "border-primary/70" : "border-border",
+              )}
+              style={{
+                background: "var(--matte-card)",
+                boxShadow: active
+                  ? "0 0 0 1px var(--primary), 0 12px 28px -18px var(--theme-shadow), 0 0 22px -8px var(--theme-glow)"
+                  : "0 10px 24px -20px var(--theme-shadow)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="h-8 w-8 shrink-0 rounded-full border"
+                style={{
+                  background: "var(--matte-background)",
+                  borderColor: "var(--border)",
+                  boxShadow: "0 0 14px -4px var(--theme-glow)",
+                }}
+              />
+              <span
+                className="font-display text-xs uppercase tracking-[0.14em] whitespace-nowrap"
+                style={{ color: "var(--foreground)" }}
+              >
+                {o.label.replace("Matte ", "")}
+              </span>
+              {active ? <Check className="h-4 w-4" style={{ color: "var(--primary)" }} /> : null}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

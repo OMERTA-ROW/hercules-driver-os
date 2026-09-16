@@ -450,7 +450,7 @@ function BrokerView() {
               aria-pressed={facOpen24}
               onClick={() => setFacOpen24((v) => !v)}
               className={cn(
-                "min-h-[48px] rounded-lg border px-3 text-sm transition-colors",
+                "min-h-[48px] rounded-[1.75rem] border px-3 text-sm transition-colors",
                 facOpen24 ? "border-go/60 bg-go/12 text-go" : "border-border bg-card/50",
               )}
             >
@@ -461,7 +461,7 @@ function BrokerView() {
               aria-pressed={facParking}
               onClick={() => setFacParking((v) => !v)}
               className={cn(
-                "min-h-[48px] rounded-lg border px-3 text-sm transition-colors",
+                "min-h-[48px] rounded-[1.75rem] border px-3 text-sm transition-colors",
                 facParking ? "border-go/60 bg-go/12 text-go" : "border-border bg-card/50",
               )}
             >

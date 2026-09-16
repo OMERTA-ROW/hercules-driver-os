@@ -425,7 +425,7 @@ function Documents() {
                   type="button"
                   onClick={() => setType(t.id)}
                   className={cn(
-                    "min-h-[44px] rounded-lg border px-3 py-2 font-display text-xs uppercase tracking-[0.1em] transition-colors",
+                    "min-h-[44px] rounded-[1.75rem] border px-3 py-2 font-display text-xs uppercase tracking-[0.1em] transition-colors",
                     t.id === type
                       ? "border-primary/60 bg-primary/15 text-primary"
                       : "border-border text-muted-foreground hover:bg-accent",
@@ -445,7 +445,7 @@ function Documents() {
                   type="button"
                   onClick={() => setLoad(l)}
                   className={cn(
-                    "min-h-[44px] rounded-lg border px-3 py-2 font-display text-xs uppercase tracking-[0.1em] transition-colors",
+                    "min-h-[44px] rounded-[1.75rem] border px-3 py-2 font-display text-xs uppercase tracking-[0.1em] transition-colors",
                     l === load
                       ? "border-primary/60 bg-primary/15 text-primary"
                       : "border-border text-muted-foreground hover:bg-accent",
@@ -562,7 +562,7 @@ function Documents() {
                     type="button"
                     onClick={() => setTarget(t.id)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors",
+                      "flex w-full items-center gap-3 rounded-[1.75rem] border p-3 text-left transition-colors",
                       t.id === target
                         ? "border-primary/60 bg-primary/12"
                         : "border-border hover:bg-accent",

@@ -801,10 +801,24 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
+  /* ---- COLORWAY, KEPT IN STEP -------------------------------------------
+     The same account can be open in two tabs and on two devices. Every change
+     carries the moment it was made, and the most recent choice wins — so a tab
+     left open overnight never silently undoes what the driver just picked. */
+  const colorwayAt = useRef(0);
+
+  const adoptColorway = useCallback((next: OrbColorway, at: number) => {
+    if (at < colorwayAt.current) return;
+    colorwayAt.current = at;
+    setColorwayState(next);
+    applyColorway(next);
+  }, []);
+
   useEffect(() => {
     const c = localStorage.getItem(COLOR_KEY) as OrbColorway | null;
     const migrated = c === ("white" as OrbColorway) ? "grey" : c;
     if (isOrbColorway(migrated)) {
+      colorwayAt.current = storedColorwayAt();
       setColorwayState(migrated);
       applyColorway(migrated);
     } else {
@@ -814,42 +828,72 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     if (v && voiceOptions.some((o) => o.id === v)) setVoiceIdState(v);
 
     let alive = true;
-    const syncAccountColorway = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
-      if (!alive || !session) return;
-      const saved = session.user.user_metadata?.["matte_colorway"];
-      if (isOrbColorway(saved)) {
-        setColorwayState(saved);
-        localStorage.setItem(COLOR_KEY, saved);
-        applyColorway(saved);
-        return;
-      }
-      const local = localStorage.getItem(COLOR_KEY);
-      if (isOrbColorway(local)) {
-        const { error } = await supabase.auth.updateUser({
-          data: { matte_colorway: local },
-        });
-        if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
-      }
+    type Session = Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"];
+
+    const pushAccountColorway = async (value: OrbColorway, at: number) => {
+      const { error } = await supabase.auth.updateUser({
+        data: { matte_colorway: value, matte_colorway_at: at },
+      });
+      if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
     };
 
-    void supabase.auth.getSession().then(({ data }) => syncAccountColorway(data.session));
+    /** Newest wins in both directions: account -> device and device -> account. */
+    const syncAccountColorway = async (session: Session) => {
+      if (!alive || !session) return;
+      const meta = session.user.user_metadata ?? {};
+      const remote = meta["matte_colorway"];
+      const remoteAt = Number(meta["matte_colorway_at"]) || 0;
+      const localAt = storedColorwayAt();
+      const local = localStorage.getItem(COLOR_KEY);
+
+      if (isOrbColorway(remote) && remoteAt >= localAt) {
+        localStorage.setItem(COLOR_KEY, remote);
+        localStorage.setItem(COLOR_AT_KEY, String(remoteAt));
+        adoptColorway(remote, remoteAt);
+        return;
+      }
+      if (isOrbColorway(local)) await pushAccountColorway(local, localAt || Date.now());
+    };
+
+    const refresh = () => void supabase.auth.getSession().then(({ data }) => syncAccountColorway(data.session));
+    refresh();
+
     const authSubscription = supabase.auth.onAuthStateChange?.((event, session) => {
       if (event === "SIGNED_IN") void syncAccountColorway(session);
     }).data.subscription;
 
+    // Another tab on this device changed it: follow along, no refresh needed.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== COLOR_KEY || !isOrbColorway(e.newValue)) return;
+      adoptColorway(e.newValue, storedColorwayAt() || Date.now());
+    };
+    // Coming back to this tab re-checks the account, so another device lands here.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       alive = false;
       authSubscription?.unsubscribe();
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [adoptColorway]);
 
   const setColorway = useCallback((c: OrbColorway) => {
+    const at = Date.now();
+    colorwayAt.current = at;
     setColorwayState(c);
     localStorage.setItem(COLOR_KEY, c);
+    localStorage.setItem(COLOR_AT_KEY, String(at));
     applyColorway(c);
     void supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) return;
-      const { error } = await supabase.auth.updateUser({ data: { matte_colorway: c } });
+      const { error } = await supabase.auth.updateUser({
+        data: { matte_colorway: c, matte_colorway_at: at },
+      });
       if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
     });
   }, []);

@@ -80,22 +80,62 @@ export function mixOklch(base: Oklch, pct: number, other: Oklch): Oklch {
 
 export type Block = { selector: string; vars: Record<string, string> };
 
-/** Every top-level rule in the stylesheet, in source order. */
+function declarations(body: string): Record<string, string> {
+  const vars: Record<string, string> = {};
+  for (const decl of body.split(";")) {
+    const i = decl.indexOf(":");
+    if (i < 0) continue;
+    const name = decl.slice(0, i).trim();
+    if (!name.startsWith("--")) continue;
+    vars[name] = decl.slice(i + 1).trim();
+  }
+  return vars;
+}
+
+/**
+ * Every rule that declares custom properties, in source order. Brace-aware so
+ * at-rules (`@theme`, `@media`, `@supports`) and nested rules stay separate.
+ */
 export function parseBlocks(css: string): Block[] {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const blocks: Block[] = [];
-  const re = /([^{}@][^{}]*)\{([^{}]*)\}/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(css))) {
-    const selector = m[1]!.trim().replace(/\s+/g, " ");
-    const vars: Record<string, string> = {};
-    for (const decl of m[2]!.split(";")) {
-      const i = decl.indexOf(":");
-      if (i < 0) continue;
-      const name = decl.slice(0, i).trim();
-      if (!name.startsWith("--")) continue;
-      vars[name] = decl.slice(i + 1).trim();
+  let selector = "";
+  let i = 0;
+  while (i < clean.length) {
+    const ch = clean[i]!;
+    if (ch === "{") {
+      let depth = 1;
+      let j = i + 1;
+      for (; j < clean.length && depth > 0; j++) {
+        if (clean[j] === "{") depth++;
+        else if (clean[j] === "}") depth--;
+      }
+      const body = clean.slice(i + 1, j - 1);
+      const sel = selector.trim().replace(/\s+/g, " ");
+      if (sel.startsWith("@")) {
+        // Recurse so nested rules inside at-rules are still visible.
+        blocks.push(...parseBlocks(body));
+      } else {
+        const vars = declarations(body.replace(/\{[\s\S]*?\}/g, ""));
+        if (Object.keys(vars).length) blocks.push({ selector: sel, vars });
+        if (body.includes("{")) blocks.push(...parseBlocks(body));
+      }
+      selector = "";
+      i = j;
+      continue;
     }
-    if (Object.keys(vars).length) blocks.push({ selector, vars });
+    if (ch === "}") {
+      selector = "";
+      i++;
+      continue;
+    }
+    if (ch === ";" && !selector.includes("{")) {
+      selector = "";
+      i++;
+      continue;
+    }
+    selector += ch;
+    i++;
   }
   return blocks;
 }
