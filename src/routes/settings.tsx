@@ -210,7 +210,22 @@ function Settings() {
               <Circle className="h-5 w-5 text-primary" /> Matte colorway
             </span>
           </PanelTitle>
+          <ColorwayGallery />
           <OrbPicker />
+        </Panel>
+
+        <Panel>
+          <PanelTitle right={<Pill tone="info">Saved instantly</Pill>}>
+            <span className="inline-flex items-center gap-2">
+              <Waves className="h-5 w-5 text-primary" /> Motion
+            </span>
+          </PanelTitle>
+          <MotionPicker />
+          <p className="mt-3 text-xs text-muted-foreground">
+            Choose Calm and every bubble lift, glow and screen transition stops, even if this device
+            asks for full motion. Choose Full motion and it stays on even if the device asks for
+            less. Your pick is kept for next time you start up.
+          </p>
         </Panel>
 
         <Panel>
