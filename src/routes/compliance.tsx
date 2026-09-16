@@ -402,7 +402,7 @@ function FmcsaPanel() {
               aria-pressed={driverId === d.id}
               onClick={() => setDriverId(d.id)}
               className={cn(
-                "min-h-[56px] rounded-lg border p-2.5 text-left text-sm transition-colors",
+                "min-h-[56px] rounded-[1.75rem] border p-2.5 text-left text-sm transition-colors",
                 driverId === d.id
                   ? "border-primary/60 bg-primary/12 text-primary"
                   : "border-border bg-card/50 hover:bg-accent",
@@ -686,7 +686,7 @@ function MyDocuments() {
               aria-pressed={kind === k.id}
               onClick={() => setKind(k.id)}
               className={cn(
-                "min-h-[56px] rounded-lg border p-2.5 text-left text-sm transition-colors",
+                "min-h-[56px] rounded-[1.75rem] border p-2.5 text-left text-sm transition-colors",
                 kind === k.id
                   ? "border-primary/60 bg-primary/12 text-primary"
                   : "border-border bg-card/50 hover:bg-accent",

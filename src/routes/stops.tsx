@@ -291,7 +291,7 @@ function StopsScreen() {
                 <button
                   key={s.id}
                   onClick={() => setSelectedId(s.id)}
-                  className={`w-full rounded-xl border p-3 text-left transition-colors ${
+                  className={`w-full rounded-[1.75rem] border p-3 text-left transition-colors ${
                     selected?.id === s.id
                       ? "border-primary/60 bg-primary/8"
                       : "border-border bg-secondary/40 hover:bg-secondary"

@@ -104,7 +104,7 @@ function Settings() {
                         });
                       }}
                       className={cn(
-                        "rounded-lg border p-3 text-left transition-colors",
+                        "rounded-[1.75rem] border p-3 text-left transition-colors",
                         active
                           ? "border-primary/60 bg-primary/12"
                           : "border-border bg-card/50 hover:bg-accent",

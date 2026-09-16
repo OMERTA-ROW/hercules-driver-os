@@ -188,7 +188,7 @@ function DispatchView() {
                   onClick={() => setSelected(t.id)}
                   style={{ left: `${x}%`, top: `${y}%` }}
                   className={cn(
-                    "absolute -translate-x-1/2 -translate-y-1/2 rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-all",
+                    "absolute -translate-x-1/2 -translate-y-1/2 rounded-[1.75rem] border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-all",
                     active
                       ? "z-10 border-primary bg-primary/25 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)]"
                       : "border-border/80 bg-black/80 text-foreground/85 hover:border-primary/50",
@@ -248,7 +248,7 @@ function DispatchView() {
                   type="button"
                   onClick={() => setSelected(t.id)}
                   className={cn(
-                    "flex min-h-[52px] w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-colors",
+                    "flex min-h-[52px] w-full items-center justify-between gap-2 rounded-[1.75rem] border px-3 py-2 text-left text-xs transition-colors",
                     t.id === selected
                       ? "border-primary/50 bg-primary/10"
                       : "border-border bg-card/50 hover:bg-accent",

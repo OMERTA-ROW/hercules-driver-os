@@ -48,7 +48,7 @@ export function TripVehiclePrompt() {
                 key={p.id}
                 type="button"
                 onClick={() => chooseForTrip(p.id)}
-                className="flex min-h-[68px] w-full items-center gap-3 rounded-xl border border-primary/25 bg-background p-3 text-left transition-all hover:border-primary/60 hover:bg-primary/8"
+                className="flex min-h-[68px] w-full items-center gap-3 rounded-[1.75rem] border border-primary/25 bg-background p-3 text-left transition-all hover:border-primary/60 hover:bg-primary/8"
               >
                 <Truck className="h-6 w-6 shrink-0 text-primary" />
                 <span className="min-w-0">
