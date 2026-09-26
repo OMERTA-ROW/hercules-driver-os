@@ -302,11 +302,10 @@ describe("free static previews", () => {
     sampleMode = "pending";
     const h = await mountVoice();
     await act(async () => void h.api.preview("zeus"));
+    const zeus = instances[instances.length - 1]!;
     await act(async () => void h.api.preview("hera"));
-    const [zeus, hera] = [
-      instances.find((a) => a.src.includes("zeus"))!,
-      instances.find((a) => a.src.includes("hera"))!,
-    ];
+    const hera = instances[instances.length - 1]!;
+    expect(zeus.src).toBe(""); // disposed the moment the newer preview began
     await act(async () => samplePlays[1]!());
     await act(async () => samplePlays[0]!());
     await flush();
