@@ -934,20 +934,46 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
    */
   const speechGen = useRef(0);
 
-  /** The last line that couldn't be spoken, so the driver can tap Retry. */
-  const [retryable, setRetryable] = useState<{ id: VoiceId; text: string } | null>(null);
+  /** The last line that couldn't be spoken (or the sample clip that couldn't
+   *  load), so the driver can tap Retry. A sample retry re-tries only the free
+   *  static clip — it never becomes a paid call. */
+  const [retryable, setRetryable] = useState<
+    { kind: "live"; id: VoiceId; text: string } | { kind: "sample"; id: VoiceId } | null
+  >(null);
+  /** True while a live line is being fetched/started, so read-time timers
+   *  don't flip the orb to idle underneath real audio. */
+  const speechPending = useRef(false);
+
+  const disposeEl = (el: HTMLAudioElement) => {
+    el.onended = null;
+    el.onerror = null;
+    el.pause();
+    el.src = "";
+  };
 
   const killAudio = useCallback(() => {
     // Anything still in flight is now stale and must not be heard.
     speechGen.current += 1;
+    speechPending.current = false;
     detachLevel.current?.();
     detachLevel.current = null;
     if (audio.current) {
-      audio.current.onended = null;
-      audio.current.pause();
-      audio.current.src = "";
+      disposeEl(audio.current);
       audio.current = null;
     }
+  }, []);
+
+  /** Stop audio AND forget any stale Retry/notes — Stop, Clear, voice change. */
+  const resetSpeech = useCallback(() => {
+    killAudio();
+    setRetryable(null);
+    setSpeechNote(null);
+    setSpeechSource(null);
+  }, [killAudio]);
+
+  /** Read-time fallback timers only end "speaking" when no real audio owns it. */
+  const idleIfSilent = useCallback(() => {
+    if (!audio.current && !speechPending.current) setMode("idle");
   }, []);
 
   /* There is deliberately NO device/browser speech-synthesis fallback: it
@@ -961,58 +987,85 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       killAudio();
       const gen = speechGen.current;
       const stale = () => gen !== speechGen.current;
+      speechPending.current = true;
+      setRetryable(null);
 
       const onScreen = (reason: string, note: string): SpeechSource => {
         if (stale()) return null;
+        speechPending.current = false;
         setSpeechSource("unavailable");
         setSpeechNote(note);
-        setRetryable(RETRYABLE.has(reason) ? { id, text } : null);
+        setRetryable(RETRYABLE.has(reason) ? { kind: "live", id, text } : null);
+        setMode("idle");
         return "unavailable";
       };
 
-      // Premium speech is an account feature. Signed out, never call it: the
-      // server would refuse and that refusal surfaces as an app error.
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (stale()) return null;
-      if (!sessionData.session) return onScreen("not_signed_in", fallbackNote("not_signed_in"));
-
+      let el: HTMLAudioElement | null = null;
       try {
+        // Premium speech is an account feature. Signed out, never call it.
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (stale()) return null;
+        if (sessionError) {
+          return onScreen(
+            "network",
+            "Couldn't confirm your sign-in for the voice. The reply is on screen — tap Retry to hear it.",
+          );
+        }
+        if (!sessionData?.session) return onScreen("not_signed_in", fallbackNote("not_signed_in"));
+
         const res = await speakLine({ data: { voiceId: id, text } });
         // Cancelled or superseded while the provider was working: drop it.
         if (stale()) return null;
         if (!res.ok) return onScreen(res.reason, fallbackNote(res.reason, res.message));
-        const el = new Audio(res.audio);
-        el.crossOrigin = "anonymous";
-        audio.current = el;
+        const clip = new Audio(res.audio);
+        el = clip;
+        clip.crossOrigin = "anonymous";
+        audio.current = clip; // owned immediately, so Stop can reach it
         // The orb's ripples ride the real loudness of the line.
-        detachLevel.current = attachAudioLevel(el);
-        const played = await el.play().then(
+        detachLevel.current = attachAudioLevel(clip);
+        const finish = () => {
+          if (audio.current !== clip) return;
+          detachLevel.current?.();
+          detachLevel.current = null;
+          disposeEl(clip);
+          audio.current = null;
+          setMode("idle");
+        };
+        clip.onended = finish;
+        clip.onerror = finish;
+        const played = await clip.play().then(
           () => true,
           () => false,
         );
         // Stopped during the play() handshake: make sure nothing keeps sounding.
         if (stale()) {
-          el.onended = null;
-          el.pause();
-          el.src = "";
-          if (audio.current === el) audio.current = null;
+          disposeEl(clip);
+          if (audio.current === clip) audio.current = null;
           return null;
         }
+        speechPending.current = false;
         if (!played) {
           detachLevel.current?.();
           detachLevel.current = null;
-          el.src = "";
-          if (audio.current === el) audio.current = null;
+          disposeEl(clip);
+          if (audio.current === clip) audio.current = null;
           return onScreen(
             "playback",
             "This device blocked audio playback. The reply is on screen — tap Retry to hear it.",
           );
         }
+        if (audio.current !== clip) return null; // ended/errored already
+        setMode("speaking"); // for the real lifetime of the audio
         setSpeechSource("premium");
         setSpeechNote(null);
-        setRetryable(null);
         return "premium";
       } catch {
+        if (el && !stale()) {
+          detachLevel.current?.();
+          detachLevel.current = null;
+          disposeEl(el);
+          if (audio.current === el) audio.current = null;
+        }
         return onScreen(
           "network",
           "The voice service couldn't be reached. The reply is on screen — tap Retry to hear it.",
@@ -1022,28 +1075,32 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     [killAudio],
   );
 
-  /** Speak the last failed line again, once, on the driver's tap. */
+  const previewRef = useRef<(id: VoiceId) => Promise<void>>(async () => {});
+
+  /** Speak the last failed line (or reload the failed sample) once, on tap. */
   const retrySpeech = useCallback(() => {
     const r = retryable;
     if (!r) return;
     setRetryable(null);
     setSpeechNote(null);
     setSpeechSource(null);
-    void playAs(r.id, r.text);
+    if (r.kind === "sample") void previewRef.current(r.id);
+    else void playAs(r.id, r.text);
   }, [retryable, playAs]);
 
   const preview = useCallback(
     async (id: VoiceId) => {
-      const persona = voiceById(id);
       setPreviewing(id);
 
-      /* Previews play a static clip that ships with the app — identical for
-         every driver, no account data in it, no paid call, no credits spent.
-         The clip URL carries the voice-settings version, so a stale clip from
-         older settings is never served from cache. */
+      /* Previews play ONLY the static clip that ships with the app — no paid
+         call, no credits, ever. If the clip can't load the driver sees that
+         and may retry the clip; it never falls through to metered speech. */
       killAudio();
+      setRetryable(null);
       const sampleGen = speechGen.current;
+      const stale = () => sampleGen !== speechGen.current;
       const clip = new Audio(`/voice-samples/${id}.mp3?v=${VOICE_SETTINGS_VERSION}`);
+      audio.current = clip; // owned at once: Stop during a pending play() reaches it
       const heard = await new Promise<boolean>((resolve) => {
         let settled = false;
         const done = (ok: boolean) => {
@@ -1053,35 +1110,55 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
         clip.onerror = () => done(false);
         void clip.play().then(
-          () => done(true),
+          () => {
+            // A play() that succeeds after timeout/Stop must not resurrect.
+            if (settled || stale()) clip.pause();
+            done(true);
+          },
           () => done(false),
         );
         setTimeout(() => done(false), 4000);
       });
-      if (sampleGen !== speechGen.current) return; // stopped or superseded
-      if (heard) {
-        audio.current = clip;
+      if (stale()) {
+        disposeEl(clip); // stopped or superseded: the old clip goes silent
+        return;
+      }
+      if (heard && audio.current === clip) {
         detachLevel.current = attachAudioLevel(clip);
         setSpeechSource("sample");
         setSpeechNote("Sample clip of the real voice — no credits used.");
-        setRetryable(null);
-        clip.onended = () => setPreviewing(null);
+        const end = () => {
+          if (audio.current !== clip) return;
+          detachLevel.current?.();
+          detachLevel.current = null;
+          disposeEl(clip);
+          audio.current = null;
+          setPreviewing(null);
+        };
+        clip.onended = end;
+        clip.onerror = end;
         return;
       }
-      clip.pause();
-      clip.src = "";
-
-      // No clip available in this build: use the live metered voice (same gates).
-      const gen = speechGen.current + 1; // playAs claims this generation
-      const source = await playAs(id, persona.sample);
-      // A newer preview or a Stop owns the UI now — leave its state alone.
-      if (gen !== speechGen.current) return;
-      const el = audio.current;
-      if (source === "premium" && el) el.onended = () => setPreviewing(null);
-      else setPreviewing(null);
+      disposeEl(clip);
+      if (audio.current === clip) audio.current = null;
+      setPreviewing(null);
+      setSpeechSource("unavailable");
+      setSpeechNote("The sample clip couldn't load. No credits were used — tap Retry to try the clip again.");
+      setRetryable({ kind: "sample", id });
     },
-    [playAs, killAudio],
+    [killAudio],
   );
+  previewRef.current = preview;
+
+  /* A voice change makes any pending line/Retry belong to the old voice. */
+  const firstVoice = useRef(true);
+  useEffect(() => {
+    if (firstVoice.current) {
+      firstVoice.current = false;
+      return;
+    }
+    resetSpeech();
+  }, [voiceId, resetSpeech]);
 
   const push = useCallback((turn: Turn) => setTurns((prev) => [...prev, turn]), []);
 
@@ -1099,6 +1176,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const say = useCallback(
     (text: string) => {
       clearTimers();
+      resetSpeech(); // a new line: old audio and any stale Retry are gone
       push({ id: nextId(), from: "driver", text });
       setMode("speaking");
 
@@ -1120,7 +1198,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         timers.current.push(
           setTimeout(() => {
             push({ id: nextId(), from: "hercules", text: line });
-            timers.current.push(setTimeout(() => setMode("idle"), 2600));
+            timers.current.push(setTimeout(idleIfSilent, 2600));
           }, 600),
         );
         return;
@@ -1138,11 +1216,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           });
           // Speaking time roughly tracks the length of the line.
           const readMs = Math.min(9000, 1800 + reply.text.length * 28);
-          timers.current.push(setTimeout(() => setMode("idle"), readMs));
+          timers.current.push(setTimeout(idleIfSilent, readMs));
         }, 650),
       );
     },
-    [clearTimers, push, topic],
+    [clearTimers, push, topic, resetSpeech, idleIfSilent],
   );
 
   const listen = useCallback(() => {
@@ -1160,10 +1238,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     clearTimers();
-    killAudio();
+    resetSpeech();
     setPreviewing(null);
     setMode("idle");
-  }, [clearTimers, killAudio]);
+  }, [clearTimers, resetSpeech]);
 
   const settle = useCallback(
     (turnId: string, status: "approved" | "declined", line: string) => {
@@ -1171,9 +1249,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       clearTimers();
       setMode("speaking");
       push({ id: nextId(), from: "hercules", text: line });
-      timers.current.push(setTimeout(() => setMode("idle"), 3200));
+      timers.current.push(setTimeout(idleIfSilent, 3200));
     },
-    [clearTimers, push],
+    [clearTimers, push, idleIfSilent],
   );
 
   const approve = useCallback(
@@ -1194,10 +1272,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => {
     clearTimers();
+    resetSpeech();
+    setPreviewing(null);
     setTurns([]);
     setTopic("none");
     setMode("idle");
-  }, [clearTimers]);
+  }, [clearTimers, resetSpeech]);
 
   /* Unprompted HERCULES speech: arrival countdowns, timers, warnings. */
   const announce = useCallback(
@@ -1206,9 +1286,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       setMode("speaking");
       push({ id: nextId(), from: "hercules", text });
       const readMs = Math.min(9000, 1800 + text.length * 28);
-      timers.current.push(setTimeout(() => setMode("idle"), readMs));
+      timers.current.push(setTimeout(idleIfSilent, readMs));
     },
-    [clearTimers, push],
+    [clearTimers, push, idleIfSilent],
   );
 
   /* Speak each new HERCULES line aloud in the chosen persona. */

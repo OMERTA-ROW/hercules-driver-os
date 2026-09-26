@@ -234,11 +234,18 @@ export const aiLimits = {
  * labelled "estimated" in the app.
  */
 export const providerCostAssumptions = {
-  /** USD per 1,000 characters of text-to-speech. */
-  ttsPerKChar: 0.015,
+  /**
+   * USD per 1,000 characters of text-to-speech on `eleven_multilingual_v2`.
+   * Multilingual v2 bills 1 ElevenLabs character credit per character — twice
+   * the Flash/Turbo rate the old 0.015 figure was based on. The real USD rate
+   * depends on the ElevenLabs subscription tier and overage pricing, which is
+   * NOT visible to the app, so this is a deliberately conservative estimate
+   * (roughly mid-tier overage) and must be replaced with the invoice rate.
+   */
+  ttsPerKChar: 0.1,
   /** What one credit is sold for, averaged across the catalogue. */
   creditPriceUsd: 0.019,
-  updated: "2026-09-13",
+  updated: "2026-09-26",
 };
 
 /** Cost in credits for an action of a given input size. Server is the truth. */
