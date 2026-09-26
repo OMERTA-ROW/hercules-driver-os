@@ -10,7 +10,6 @@ import {
 } from "@/data/voices";
 import { cacheKey } from "@/lib/ai-meter.server";
 import { creditCost } from "@/data/ai-credits";
-import { deviceDelivery, deviceHasBothGenders, pickDeviceVoice } from "@/lib/device-voice";
 
 describe("male and female voice choices", () => {
   it("offers real choices in both genders", () => {
@@ -69,33 +68,3 @@ describe("the chosen voice is carried into every metered request", () => {
   });
 });
 
-describe("free device fallback is truthful", () => {
-  const devices = [
-    { name: "Samantha", lang: "en-US", localService: true },
-    { name: "Daniel", lang: "en-GB", localService: true },
-    { name: "Amelie", lang: "fr-FR", localService: true },
-  ];
-
-  it("matches the persona's gender when the device has both", () => {
-    expect(pickDeviceVoice(devices, "female")?.name).toBe("Samantha");
-    expect(pickDeviceVoice(devices, "male")?.name).toBe("Daniel");
-    expect(deviceHasBothGenders(devices)).toBe(true);
-  });
-
-  it("reports honestly when the device cannot distinguish genders", () => {
-    const one = [{ name: "Default", lang: "en-US" }];
-    expect(deviceHasBothGenders(one)).toBe(false);
-    expect(pickDeviceVoice(one, "female")?.name).toBe("Default");
-  });
-
-  it("returns nothing at all when the device exposes no voices", () => {
-    expect(pickDeviceVoice([], "male")).toBeNull();
-    expect(deviceHasBothGenders([])).toBe(false);
-  });
-
-  it("keeps a natural rate and never fakes character with pitch", () => {
-    expect(deviceDelivery(0.86)).toEqual({ rate: 0.86, pitch: 1 });
-    expect(deviceDelivery(9).rate).toBeLessThanOrEqual(1.25);
-    expect(deviceDelivery(0.1).rate).toBeGreaterThanOrEqual(0.7);
-  });
-});

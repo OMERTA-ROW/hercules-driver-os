@@ -45,7 +45,13 @@ import {
   spokenLocation,
   spokenService,
 } from "@/lib/breakdown";
-import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
+import {
+  VOICE_SETTINGS_VERSION,
+  voiceById,
+  voiceOptions,
+  type VoiceId,
+  type VoiceOption,
+} from "@/data/voices";
 import { speakLine } from "@/lib/speech.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
