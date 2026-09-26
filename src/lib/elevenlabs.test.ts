@@ -28,7 +28,7 @@ describe("persona → ElevenLabs stock voice mapping", () => {
   });
 
   it("uses the low-latency model and provider-legal voice settings", () => {
-    expect(ELEVEN_MODEL).toBe("eleven_flash_v2_5");
+    expect(ELEVEN_MODEL).toBe("eleven_multilingual_v2");
     for (const v of voiceOptions) {
       const s = elevenSettings(v);
       expect(s.speed).toBeGreaterThanOrEqual(0.7);
@@ -42,7 +42,7 @@ describe("persona → ElevenLabs stock voice mapping", () => {
 });
 
 describe("speaking a line", () => {
-  it("calls the persona's voice with the flash model and returns playable audio", async () => {
+  it("calls the persona's voice with the natural model and returns playable audio", async () => {
     let seen = { url: "", body: "" };
     const audio = await elevenSpeak(voiceOptions[0]!, "Test line", {
       deps: deps((url, init) => {
@@ -52,7 +52,7 @@ describe("speaking a line", () => {
     });
     expect(seen.url).toContain(`/v1/text-to-speech/${voiceOptions[0]!.eleven}`);
     expect(seen.url).toContain("output_format=mp3_44100_128");
-    expect(JSON.parse(seen.body).model_id).toBe("eleven_flash_v2_5");
+    expect(JSON.parse(seen.body).model_id).toBe("eleven_multilingual_v2");
     expect(audio.startsWith("data:audio/mpeg;base64,")).toBe(true);
   });
 
@@ -157,8 +157,8 @@ describe("natural-voice payload", () => {
       }),
     });
     expect(sent!.url).toContain(voiceOptions[6]!.eleven);
-    expect(sent!.body.model_id).toBe("eleven_multilingual_v2");
-    expect(sent!.body.text).toBe("Heads up: fuel stop in 20 miles");
+    expect(sent!.body["model_id"]).toBe("eleven_multilingual_v2");
+    expect(sent!.body["text"]).toBe("Heads up: fuel stop in 20 miles");
     expect(sent!.body).toEqual(elevenRequestBody(voiceOptions[6]!, "**Heads up:** fuel stop in 20 miles"));
     for (const v of voiceOptions) {
       const vs = elevenRequestBody(v, "x").voice_settings;
