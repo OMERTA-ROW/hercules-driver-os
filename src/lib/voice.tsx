@@ -46,7 +46,6 @@ import {
   spokenService,
 } from "@/lib/breakdown";
 import { voiceById, voiceOptions, type VoiceId, type VoiceOption } from "@/data/voices";
-import { deviceDelivery, pickDeviceVoice } from "@/lib/device-voice";
 import { speakLine } from "@/lib/speech.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -343,7 +342,7 @@ function followUp(topic: Topic, text: string): Reply | null {
       const best = rank(lastProblem ? filterByProblem(services, lastProblem) : services)[0]!;
       return {
         topic: "breakdown",
-        text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I am not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
+        text: `Before I connect you: ${spokenService(best)} Say yes and I'll place the call. I'm not dispatching anyone and nothing is authorized until you tell them so on the phone.`,
         proposal: {
           summary: `Place a call to ${best.name} — ${best.phone}. No dispatch or charge is authorized by HERCULES.`,
         },
@@ -758,34 +757,37 @@ function storedColorwayAt(): number {
 let seq = 0;
 const nextId = () => `t${++seq}-${Date.now()}`;
 
-/** Plain-language reason the free device voice spoke instead of the persona. */
+/** Plain-language reason a reply is on screen only. Nothing robotic is spoken instead. */
 function fallbackNote(reason: string | undefined, message?: string): string {
   switch (reason) {
     case "unconfigured":
-      return "The real AI voice service isn't connected to this app yet, so your device spoke the line free.";
+      return "The AI voice service isn't connected to this app yet, so the reply is on screen only.";
     case "eco":
-      return "Eco quality is on, so your device speaks every line free. Switch to Balanced to hear the real voice.";
+      return "Eco is on, so replies are shown on screen with no credit cost. Switch to Balanced to hear the voice.";
     case "no_credits":
     case "insufficient":
-      return "You have no AI credits, so your device spoke the line free. The real voice costs credits.";
+      return "You're out of AI credits, so the reply is on screen only. Nothing was charged.";
     case "not_signed_in":
-      return "Sign in to hear the real voice — your device spoke this line free.";
+      return "Sign in to hear replies spoken. This one's on screen.";
     case "rate_limited":
-      return "Too many spoken lines just now, so your device spoke this one free.";
+      return "Lots of spoken lines just now — the reply is on screen. Tap Retry in a moment to hear it.";
     case "no_allowance_config":
-      return "Paid voice is held back on this plan until its allowance is set up. Your device spoke this line free.";
+      return "Paid voice is held back on this plan until its allowance is set up. The reply is on screen.";
     case "no_subscription":
-      return "The real AI voice needs a monthly AI plan. Your device spoke this line free.";
+      return "The AI voice needs a monthly AI plan. Replies stay on screen, free.";
     case "daily_limit":
     case "weekly_limit":
       // The server's message names the exact reset time.
-      return message || "Your AI voice allowance is used up for now — your device spoke this free.";
+      return message || "Your AI voice allowance is used up for now — replies stay on screen, free.";
     case "provider":
-      return "The voice service didn't answer, so your device spoke the line free. You weren't charged.";
+      return message || "The voice service didn't answer. The reply is on screen — tap Retry to hear it. You weren't charged.";
     default:
-      return message || "Your device spoke the line free instead of the neural voice.";
+      return message || "The reply couldn't be spoken, so it's on screen instead.";
   }
 }
+
+/** Failures worth a Retry button: temporary, not a plan or setting decision. */
+const RETRYABLE = new Set(["provider", "rate_limited", "network", "playback", "error"]);
 
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<VoiceMode>("idle");
