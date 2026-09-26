@@ -45,7 +45,7 @@ function VoicePage() {
                   : "Tap the orb or say “Hercules”"}
             </p>
             <p className="mt-3 max-w-[42ch] text-[0.98rem] font-light leading-relaxed text-muted-foreground">
-              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask me anything."}
+              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask about loads, hours, the map or money."}
             </p>
           </div>
         </div>

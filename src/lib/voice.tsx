@@ -668,7 +668,7 @@ export function respond(text: string, topic: Topic): Reply {
   if (/(hello|hey|hi|you there|hercules)$/.test(t) || t.length < 4) {
     return {
       topic: "none",
-      text: "I'm here. Ask me anything about the truck, the clock, the money, or the road ahead.",
+      text: "I'm here. Ask about loads, your hours, the map or the money.",
     };
   }
   return {
