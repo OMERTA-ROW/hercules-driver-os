@@ -1176,6 +1176,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const say = useCallback(
     (text: string) => {
       clearTimers();
+      resetSpeech(); // a new line: old audio and any stale Retry are gone
       push({ id: nextId(), from: "driver", text });
       setMode("speaking");
 
@@ -1197,7 +1198,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         timers.current.push(
           setTimeout(() => {
             push({ id: nextId(), from: "hercules", text: line });
-            timers.current.push(setTimeout(() => setMode("idle"), 2600));
+            timers.current.push(setTimeout(idleIfSilent, 2600));
           }, 600),
         );
         return;
@@ -1215,11 +1216,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           });
           // Speaking time roughly tracks the length of the line.
           const readMs = Math.min(9000, 1800 + reply.text.length * 28);
-          timers.current.push(setTimeout(() => setMode("idle"), readMs));
+          timers.current.push(setTimeout(idleIfSilent, readMs));
         }, 650),
       );
     },
-    [clearTimers, push, topic],
+    [clearTimers, push, topic, resetSpeech, idleIfSilent],
   );
 
   const listen = useCallback(() => {
@@ -1237,10 +1238,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     clearTimers();
-    killAudio();
+    resetSpeech();
     setPreviewing(null);
     setMode("idle");
-  }, [clearTimers, killAudio]);
+  }, [clearTimers, resetSpeech]);
 
   const settle = useCallback(
     (turnId: string, status: "approved" | "declined", line: string) => {
@@ -1248,9 +1249,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       clearTimers();
       setMode("speaking");
       push({ id: nextId(), from: "hercules", text: line });
-      timers.current.push(setTimeout(() => setMode("idle"), 3200));
+      timers.current.push(setTimeout(idleIfSilent, 3200));
     },
-    [clearTimers, push],
+    [clearTimers, push, idleIfSilent],
   );
 
   const approve = useCallback(
@@ -1271,10 +1272,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => {
     clearTimers();
+    resetSpeech();
+    setPreviewing(null);
     setTurns([]);
     setTopic("none");
     setMode("idle");
-  }, [clearTimers]);
+  }, [clearTimers, resetSpeech]);
 
   /* Unprompted HERCULES speech: arrival countdowns, timers, warnings. */
   const announce = useCallback(
@@ -1283,9 +1286,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       setMode("speaking");
       push({ id: nextId(), from: "hercules", text });
       const readMs = Math.min(9000, 1800 + text.length * 28);
-      timers.current.push(setTimeout(() => setMode("idle"), readMs));
+      timers.current.push(setTimeout(idleIfSilent, readMs));
     },
-    [clearTimers, push],
+    [clearTimers, push, idleIfSilent],
   );
 
   /* Speak each new HERCULES line aloud in the chosen persona. */
