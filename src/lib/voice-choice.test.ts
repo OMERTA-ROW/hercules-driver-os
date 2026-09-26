@@ -68,3 +68,32 @@ describe("the chosen voice is carried into every metered request", () => {
   });
 });
 
+
+describe("audio cache versioning", () => {
+  it("never reuses audio rendered with older model/settings", async () => {
+    const { ELEVEN_MODEL, VOICE_SETTINGS_VERSION } = await import("@/data/voices");
+    const line = "Fuel stop in twenty miles.";
+    const now = cacheKey("d1", [ELEVEN_MODEL, VOICE_SETTINGS_VERSION, "hercules", line]);
+    expect(now).not.toBe(cacheKey("d1", ["eleven_flash_v2_5", "hercules", line]));
+    expect(now).not.toBe(cacheKey("d1", [ELEVEN_MODEL, "older-settings", "hercules", line]));
+  });
+
+  it("speech server keys cache and billing identity on the settings version, with gates intact", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync("src/lib/speech.functions.ts", "utf8");
+    expect(src).toMatch(/cacheKey\(context\.userId, \[model, VOICE_SETTINGS_VERSION/);
+    expect(src).toMatch(/requestIdentity\(context\.userId, \[model, VOICE_SETTINGS_VERSION/);
+    // Billing gates still run before any provider call or cache hit.
+    const gate = src.indexOf("gateCheck(context.userId");
+    expect(src.indexOf('walletQuality(context.userId)) === "eco"')).toBeLessThan(gate);
+    expect(gate).toBeLessThan(src.indexOf("cacheGet(ck)"));
+    expect(gate).toBeLessThan(src.indexOf("runMetered<string>"));
+    expect(src).toContain("middleware([requireSupabaseAuth])");
+  });
+
+  it("the app contains no device speech synthesis", async () => {
+    const { readFileSync, existsSync } = await import("node:fs");
+    expect(existsSync("src/lib/device-voice.ts")).toBe(false);
+    expect(readFileSync("src/lib/voice.tsx", "utf8")).not.toMatch(/speechSynthesis|SpeechSynthesisUtterance/);
+  });
+});
