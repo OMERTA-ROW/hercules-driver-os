@@ -265,7 +265,7 @@ export const freeForever = [
   "Clock, loads, money and health screens",
   "Every safety and breakdown action, including calling for help",
   'Fixed commands the app answers itself ("where am I", "how many hours")',
-  "Your device's own built-in voice, when premium speech is off or unavailable",
+  "On-screen replies, when premium speech is off or unavailable",
 ];
 
 /* ------------------------------------------------------------------------ */
@@ -297,6 +297,6 @@ export function allowancePausedLine(scope: "daily" | "weekly", resetsAt: string 
       }) + " ET"
     : "the next reset";
   return scope === "daily"
-    ? `That is today's spoken-line allowance used. The real voice comes back ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift today's cap.`
-    : `That is this week's spoken-line allowance used. The real voice comes back ${ALLOWANCE_WEEK_RESET_DAY}, ${when} — until then your device's own voice speaks every line, free. Nothing extra was charged, and a top-up will not lift the weekly cap.`;
+    ? `That is today's spoken-line allowance used. The real voice comes back ${when} — until then replies are shown on screen, free. Nothing extra was charged, and a top-up will not lift today's cap.`
+    : `That is this week's spoken-line allowance used. The real voice comes back ${ALLOWANCE_WEEK_RESET_DAY}, ${when} — until then replies are shown on screen, free. Nothing extra was charged, and a top-up will not lift the weekly cap.`;
 }

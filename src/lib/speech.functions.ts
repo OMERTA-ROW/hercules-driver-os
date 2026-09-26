@@ -237,7 +237,7 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
         checkedAt,
         connected: false as const,
         message:
-          "The real AI voice service isn't connected yet. Every line is spoken by your device, free, until it is.",
+          "The real AI voice service isn't connected yet. Replies are shown on screen until it is.",
         voices: [],
       };
     }
@@ -265,7 +265,7 @@ export const voiceProviderStatus = createServerFn({ method: "GET" })
       checkedAt,
       connected: true as const,
       message: missing.length
-        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no available voice on this account and falls back to your device.`
+        ? `Connected, but ${missing.length} character${missing.length === 1 ? "" : "s"} has no available voice on this account and shows replies on screen only.`
         : "Connected. Every character has a voice available on this account.",
       voices: check.voices,
     };
