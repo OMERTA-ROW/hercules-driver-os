@@ -10,6 +10,7 @@
  * stubbed fetch and no credentials.
  */
 import { ELEVEN_MODEL, type VoiceOption } from "@/data/voices";
+import { speakable } from "@/lib/speakable";
 
 export const ELEVEN_API = "https://api.elevenlabs.io";
 
@@ -39,8 +40,8 @@ export function describeElevenFailure(status: number, body: string): ProviderFai
       status,
       quota,
       message: quota
-        ? "The voice service has no character quota left on this account, so your device spoke the line free. You weren't charged."
-        : "The voice service refused this app's credentials, so your device spoke the line free. You weren't charged.",
+        ? "The voice service has no character quota left on this account. The reply is on screen — tap Retry once it's topped up. You weren't charged."
+        : "The voice service refused this app's credentials. The reply is on screen. You weren't charged.",
     };
   }
   if (status === 429) {
@@ -54,13 +55,13 @@ export function describeElevenFailure(status: number, body: string): ProviderFai
     return {
       status,
       quota: false,
-      message: "The voice service could not speak that line, so your device spoke it free.",
+      message: "The voice service couldn't speak that line. It's on screen instead. You weren't charged.",
     };
   }
   return {
     status,
     quota: false,
-    message: "The voice service didn't answer, so your device spoke the line free. You weren't charged.",
+    message: "The voice service didn't answer. The reply is on screen — tap Retry to hear it. You weren't charged.",
   };
 }
 
@@ -87,11 +88,20 @@ export function audioDataUrl(bytes: Uint8Array): string {
 export function elevenSettings(persona: VoiceOption) {
   return {
     stability: persona.stability,
-    similarity_boost: 0.75,
+    similarity_boost: 0.8,
     style: persona.style,
     use_speaker_boost: true,
     // ElevenLabs accepts 0.7–1.2; the persona speeds sit inside that window.
     speed: Math.min(1.2, Math.max(0.7, persona.speed)),
+  };
+}
+
+/** Exact JSON sent to the provider — shared by live speech and preview rendering. */
+export function elevenRequestBody(persona: VoiceOption, text: string) {
+  return {
+    text: speakable(text),
+    model_id: ELEVEN_MODEL,
+    voice_settings: elevenSettings(persona),
   };
 }
 
@@ -116,11 +126,7 @@ export async function elevenSpeak(
     {
       method: "POST",
       headers: { "xi-api-key": key, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text,
-        model_id: ELEVEN_MODEL,
-        voice_settings: elevenSettings(persona),
-      }),
+      body: JSON.stringify(elevenRequestBody(persona, text)),
       ...(opts.signal ? { signal: opts.signal } : {}),
     },
   );

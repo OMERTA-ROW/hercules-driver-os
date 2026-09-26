@@ -27,8 +27,8 @@ import {
  * operation (`runMetered`), so two identical concurrent requests produce one
  * provider call and one debit. Eco quality is enforced here on the server: no
  * paid call happens at all, whatever the caller sends. If the provider fails,
- * the hold is returned in full and the caller falls back to the device's own
- * free voice, so the driver always hears the line.
+ * the hold is returned in full and the reply stays on screen with a Retry —
+ * there is no robotic device-voice fallback.
  */
 export const speakLine = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -41,7 +41,7 @@ export const speakLine = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { ELEVEN_MODEL } = await import("@/data/voices");
+    const { ELEVEN_MODEL, VOICE_SETTINGS_VERSION } = await import("@/data/voices");
     const { elevenLabsConfigured, elevenSpeak, ElevenLabsError } = await import(
       "@/lib/elevenlabs.server"
     );
@@ -54,7 +54,7 @@ export const speakLine = createServerFn({ method: "POST" })
         ok: false as const,
         reason: "unconfigured" as const,
         message:
-          "The real AI voice service isn't connected to this app yet, so your device spoke this line free.",
+          "The AI voice service isn't connected to this app yet, so the reply is on screen only.",
       };
     }
 
@@ -70,7 +70,7 @@ export const speakLine = createServerFn({ method: "POST" })
       return {
         ok: false as const,
         reason: "eco" as const,
-        message: "Eco voice is on — this line is spoken by your device at no credit cost.",
+        message: "Eco is on, so replies are shown on screen with no credit cost. Switch to Balanced to hear the voice.",
       };
     }
 
@@ -89,7 +89,7 @@ export const speakLine = createServerFn({ method: "POST" })
           ok: false as const,
           reason: "no_subscription" as const,
           message:
-            "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
+            "The AI voice needs a monthly AI plan on this account. Replies stay on screen, free.",
         };
       }
       if (gate.outcome === "no_allowance_config") {
@@ -97,7 +97,7 @@ export const speakLine = createServerFn({ method: "POST" })
           ok: false as const,
           reason: "no_allowance_config" as const,
           message:
-            "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Your device's own voice is speaking, free.",
+            "This plan's daily and weekly allowance isn't set up, so paid voice is held back rather than run without a limit. Replies stay on screen, free.",
         };
       }
       if (gate.outcome === "daily_limit" || gate.outcome === "weekly_limit") {
@@ -118,7 +118,7 @@ export const speakLine = createServerFn({ method: "POST" })
       };
     }
 
-    const ck = cacheKey(context.userId, [model, data.voiceId, text]);
+    const ck = cacheKey(context.userId, [model, VOICE_SETTINGS_VERSION, data.voiceId, text]);
 
     // Repeat of a line this same account just heard — free, nothing reserved.
     const cached = cacheGet(ck);
@@ -126,7 +126,7 @@ export const speakLine = createServerFn({ method: "POST" })
       return { ok: true as const, audio: cached, charged: 0, cached: true, saved: cost };
     }
 
-    const identity = await requestIdentity(context.userId, [model, data.voiceId, text]);
+    const identity = await requestIdentity(context.userId, [model, VOICE_SETTINGS_VERSION, data.voiceId, text]);
 
     const result = await runMetered<string>({
       userId: context.userId,
