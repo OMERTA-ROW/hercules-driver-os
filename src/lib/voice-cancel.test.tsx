@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  * A provider reply that arrives late must never be heard.
  *
  * Covers the two real failure modes: pressing Stop (or previewing another
- * persona) while the paid request is still in flight, and the free device
- * fallback starting while a premium clip is already sounding.
+ * persona) while the paid request is still in flight, and a failure while a
+ * premium clip is sounding. Device speech synthesis must never be used.
  */
 
 type Deferred = {
@@ -42,6 +42,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 const played: string[] = [];
 const paused: string[] = [];
 const spoken: string[] = [];
+const clipUrls: string[] = [];
 let synthCancels = 0;
 
 class AudioStub {
@@ -50,6 +51,7 @@ class AudioStub {
   onended: (() => void) | null = null;
   constructor(src?: string) {
     this.src = src ?? "";
+    if (this.src.includes("/voice-samples/")) clipUrls.push(this.src);
   }
   play() {
     // The bundled sample clips are not available in this environment, which is
@@ -165,7 +167,7 @@ describe("stale premium speech is never heard", () => {
     h.unmount();
   });
 
-  it("does not fall back to the device voice after Stop", async () => {
+  it("never uses device speech synthesis after Stop", async () => {
     const h = await mountVoice();
     await act(async () => {
       void h.api.preview("zeus");
@@ -182,7 +184,7 @@ describe("stale premium speech is never heard", () => {
     h.unmount();
   });
 
-  it("stops the premium clip before the free device voice speaks", async () => {
+  it("stops the premium clip and shows text — no robotic device voice", async () => {
     const h = await mountVoice();
     await act(async () => {
       void h.api.preview("zeus");
@@ -193,7 +195,6 @@ describe("stale premium speech is never heard", () => {
     expect(played).toEqual(["paid-clip"]);
     expect(h.api.speechSource).toBe("premium");
 
-    // Next line has no credits: the device speaks, and the paid clip must stop.
     await act(async () => {
       void h.api.preview("hera");
     });
@@ -202,10 +203,64 @@ describe("stale premium speech is never heard", () => {
     });
 
     expect(paused).toContain("paid-clip");
-    expect(spoken.length).toBe(1);
-    expect(h.api.speechSource).toBe("device");
-    expect(h.api.speechNote).toMatch(/device/i);
-    expect(synthCancels).toBeGreaterThan(0);
+    expect(spoken).toEqual([]);
+    expect(synthCancels).toBe(0);
+    expect(h.api.speechSource).toBe("unavailable");
+    expect(h.api.speechNote).toMatch(/screen/i);
+    expect(h.api.speechNote).not.toMatch(/device spoke/i);
+    // A plan/credit decision is not a temporary fault: no Retry offered.
+    expect(h.api.canRetrySpeech).toBe(false);
+    h.unmount();
+  });
+
+  it("offers one Retry after a provider failure and plays the line on retry", async () => {
+    const h = await mountVoice();
+    await act(async () => {
+      void h.api.preview("athena");
+    });
+    await act(async () => {
+      pending[0]!.resolve({ ok: false, reason: "provider", message: "The voice service didn't answer." });
+    });
+    expect(spoken).toEqual([]);
+    expect(h.api.canRetrySpeech).toBe(true);
+    expect(pending.length).toBe(1); // nothing retried automatically
+
+    await act(async () => {
+      h.api.retrySpeech();
+    });
+    expect(pending.length).toBe(2);
+    expect(h.api.canRetrySpeech).toBe(false);
+    await act(async () => {
+      pending[1]!.resolve({ ok: true, audio: "retry-clip", charged: 1 });
+    });
+    expect(played).toEqual(["retry-clip"]);
+    expect(h.api.speechSource).toBe("premium");
+    h.unmount();
+  });
+
+  it("cleans up and shows text when the request itself throws", async () => {
+    const h = await mountVoice();
+    await act(async () => {
+      void h.api.preview("ares");
+    });
+    await act(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (pending[0] as any).resolve(Promise.reject(new Error("offline")));
+    });
+    expect(spoken).toEqual([]);
+    expect(played).toEqual([]);
+    expect(h.api.speechSource).toBe("unavailable");
+    expect(h.api.canRetrySpeech).toBe(true);
+    h.unmount();
+  });
+
+  it("requests preview clips with the current voice-settings version", async () => {
+    const { VOICE_SETTINGS_VERSION } = await import("@/data/voices");
+    const h = await mountVoice();
+    await act(async () => {
+      void h.api.preview("hercules");
+    });
+    expect(clipUrls.some((u) => u.endsWith(`/voice-samples/hercules.mp3?v=${VOICE_SETTINGS_VERSION}`))).toBe(true);
     h.unmount();
   });
 });

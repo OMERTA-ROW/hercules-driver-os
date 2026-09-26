@@ -28,7 +28,7 @@ describe("persona → ElevenLabs stock voice mapping", () => {
   });
 
   it("uses the low-latency model and provider-legal voice settings", () => {
-    expect(ELEVEN_MODEL).toBe("eleven_flash_v2_5");
+    expect(ELEVEN_MODEL).toBe("eleven_multilingual_v2");
     for (const v of voiceOptions) {
       const s = elevenSettings(v);
       expect(s.speed).toBeGreaterThanOrEqual(0.7);
@@ -42,7 +42,7 @@ describe("persona → ElevenLabs stock voice mapping", () => {
 });
 
 describe("speaking a line", () => {
-  it("calls the persona's voice with the flash model and returns playable audio", async () => {
+  it("calls the persona's voice with the natural model and returns playable audio", async () => {
     let seen = { url: "", body: "" };
     const audio = await elevenSpeak(voiceOptions[0]!, "Test line", {
       deps: deps((url, init) => {
@@ -52,7 +52,7 @@ describe("speaking a line", () => {
     });
     expect(seen.url).toContain(`/v1/text-to-speech/${voiceOptions[0]!.eleven}`);
     expect(seen.url).toContain("output_format=mp3_44100_128");
-    expect(JSON.parse(seen.body).model_id).toBe("eleven_flash_v2_5");
+    expect(JSON.parse(seen.body).model_id).toBe("eleven_multilingual_v2");
     expect(audio.startsWith("data:audio/mpeg;base64,")).toBe(true);
   });
 
@@ -82,11 +82,12 @@ describe("speaking a line", () => {
     }
   });
 
-  it("tells the driver they were not charged and their device spoke instead", () => {
+  it("keeps the reply on screen and never promises a device voice", () => {
     expect(describeElevenFailure(401, "quota_exceeded").quota).toBe(true);
-    for (const status of [401, 403, 429, 500, 0]) {
+    for (const status of [400, 401, 403, 429, 500, 0]) {
       const f = describeElevenFailure(status, "");
-      expect(f.message).toMatch(/device|moment/i);
+      expect(f.message).toMatch(/screen|moment/i);
+      expect(f.message).not.toMatch(/device/i);
     }
     expect(describeElevenFailure(429, "").message).toMatch(/moment/i);
   });
@@ -140,5 +141,31 @@ describe("audio encoding", () => {
     const url = audioDataUrl(new Uint8Array(300_000).fill(7));
     expect(url.startsWith("data:audio/mpeg;base64,")).toBe(true);
     expect(url.length).toBeGreaterThan(100_000);
+  });
+});
+
+describe("natural-voice payload", () => {
+  it("sends the quality model, persona voice and tuned conversational settings", async () => {
+    const { ELEVEN_MODEL } = await import("@/data/voices");
+    const { elevenRequestBody } = await import("@/lib/elevenlabs.server");
+    expect(ELEVEN_MODEL).toBe("eleven_multilingual_v2");
+    let sent: { url: string; body: Record<string, unknown> } | null = null;
+    await elevenSpeak(voiceOptions[6]!, "**Heads up:** fuel stop in 20 miles", {
+      deps: deps((u, init) => {
+        sent = { url: u, body: JSON.parse(String(init?.body)) };
+        return new Response(new Uint8Array([1]), { status: 200 });
+      }),
+    });
+    expect(sent!.url).toContain(voiceOptions[6]!.eleven);
+    expect(sent!.body["model_id"]).toBe("eleven_multilingual_v2");
+    expect(sent!.body["text"]).toBe("Heads up: fuel stop in 20 miles");
+    expect(sent!.body).toEqual(elevenRequestBody(voiceOptions[6]!, "**Heads up:** fuel stop in 20 miles"));
+    for (const v of voiceOptions) {
+      const vs = elevenRequestBody(v, "x").voice_settings;
+      // Everyday conversational pace and restrained style — no slow, theatrical delivery.
+      expect(vs.speed).toBeGreaterThanOrEqual(0.95);
+      expect(vs.speed).toBeLessThanOrEqual(1.05);
+      expect(vs.style).toBeLessThanOrEqual(0.3);
+    }
   });
 });

@@ -10,7 +10,6 @@ import {
 } from "@/data/voices";
 import { cacheKey } from "@/lib/ai-meter.server";
 import { creditCost } from "@/data/ai-credits";
-import { deviceDelivery, deviceHasBothGenders, pickDeviceVoice } from "@/lib/device-voice";
 
 describe("male and female voice choices", () => {
   it("offers real choices in both genders", () => {
@@ -69,33 +68,32 @@ describe("the chosen voice is carried into every metered request", () => {
   });
 });
 
-describe("free device fallback is truthful", () => {
-  const devices = [
-    { name: "Samantha", lang: "en-US", localService: true },
-    { name: "Daniel", lang: "en-GB", localService: true },
-    { name: "Amelie", lang: "fr-FR", localService: true },
-  ];
 
-  it("matches the persona's gender when the device has both", () => {
-    expect(pickDeviceVoice(devices, "female")?.name).toBe("Samantha");
-    expect(pickDeviceVoice(devices, "male")?.name).toBe("Daniel");
-    expect(deviceHasBothGenders(devices)).toBe(true);
+describe("audio cache versioning", () => {
+  it("never reuses audio rendered with older model/settings", async () => {
+    const { ELEVEN_MODEL, VOICE_SETTINGS_VERSION } = await import("@/data/voices");
+    const line = "Fuel stop in twenty miles.";
+    const now = cacheKey("d1", [ELEVEN_MODEL, VOICE_SETTINGS_VERSION, "hercules", line]);
+    expect(now).not.toBe(cacheKey("d1", ["eleven_flash_v2_5", "hercules", line]));
+    expect(now).not.toBe(cacheKey("d1", [ELEVEN_MODEL, "older-settings", "hercules", line]));
   });
 
-  it("reports honestly when the device cannot distinguish genders", () => {
-    const one = [{ name: "Default", lang: "en-US" }];
-    expect(deviceHasBothGenders(one)).toBe(false);
-    expect(pickDeviceVoice(one, "female")?.name).toBe("Default");
+  it("speech server keys cache and billing identity on the settings version, with gates intact", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync("src/lib/speech.functions.ts", "utf8");
+    expect(src).toMatch(/cacheKey\(context\.userId, \[model, VOICE_SETTINGS_VERSION/);
+    expect(src).toMatch(/requestIdentity\(context\.userId, \[model, VOICE_SETTINGS_VERSION/);
+    // Billing gates still run before any provider call or cache hit.
+    const gate = src.indexOf("gateCheck(context.userId");
+    expect(src.indexOf('walletQuality(context.userId)) === "eco"')).toBeLessThan(gate);
+    expect(gate).toBeLessThan(src.indexOf("cacheGet(ck)"));
+    expect(gate).toBeLessThan(src.indexOf("runMetered<string>"));
+    expect(src).toContain("middleware([requireSupabaseAuth])");
   });
 
-  it("returns nothing at all when the device exposes no voices", () => {
-    expect(pickDeviceVoice([], "male")).toBeNull();
-    expect(deviceHasBothGenders([])).toBe(false);
-  });
-
-  it("keeps a natural rate and never fakes character with pitch", () => {
-    expect(deviceDelivery(0.86)).toEqual({ rate: 0.86, pitch: 1 });
-    expect(deviceDelivery(9).rate).toBeLessThanOrEqual(1.25);
-    expect(deviceDelivery(0.1).rate).toBeGreaterThanOrEqual(0.7);
+  it("the app contains no device speech synthesis", async () => {
+    const { readFileSync, existsSync } = await import("node:fs");
+    expect(existsSync("src/lib/device-voice.ts")).toBe(false);
+    expect(readFileSync("src/lib/voice.tsx", "utf8")).not.toMatch(/speechSynthesis|SpeechSynthesisUtterance/);
   });
 });

@@ -16,9 +16,18 @@ export type VoiceId =
 
 /**
  * LIVE SPEECH PROVIDER — ElevenLabs, called server-side only.
- * `eleven_flash_v2_5` is their low-latency model, which is what a cab needs.
+ * `eleven_multilingual_v2` is ElevenLabs' most natural, human-sounding stable
+ * model on the text-to-speech endpoint. It replaced the low-latency
+ * `eleven_flash_v2_5`, which sounded flatter and more synthetic.
  */
-export const ELEVEN_MODEL = "eleven_flash_v2_5";
+export const ELEVEN_MODEL = "eleven_multilingual_v2";
+
+/**
+ * Bump whenever the model, a voice or any delivery setting changes. It is part
+ * of every audio cache key and every preview clip URL, so nobody keeps hearing
+ * audio rendered with old settings.
+ */
+export const VOICE_SETTINGS_VERSION = "natural-2026-09-v1";
 
 /**
  * The model that rendered the static preview clips in /public/voice-samples.
@@ -77,7 +86,7 @@ export type VoiceOption = {
 
 
 const conversational =
-  "Speak like a real person talking to a truck driver over the cab speakers, not like a narrator reading text. Warm, natural, expressive, unhurried breathing, easy contractions. Never robotic or clipped.";
+  "Talk like a real person in the cab, not a narrator reading text. Warm, relaxed, everyday conversational pace, easy contractions. Never robotic, never theatrical.";
 
 export const voiceOptions: VoiceOption[] = [
   {
@@ -88,12 +97,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "onyx",
     eleven: "JBFqnCBsd6RMkjVDRZzb",
     elevenName: "George",
-    stability: 0.45,
-    style: 0.35,
-    direction: `${conversational} Deep chest voice, strong and commanding but genuinely warm — a big man who has your back and takes his time.`,
-    speed: 0.95,
-    sample:
-      "I'm Hercules. I'll ride with you the whole way — and nothing gets booked until you say so.",
+    stability: 0.5,
+    style: 0.2,
+    direction: `${conversational} Deep, steady and warm — a big, easygoing guy who has your back.`,
+    speed: 1.0,
+    sample: "Hey, I'm Hercules. I'll ride along with you, and nothing gets booked till you say so.",
     principal: true,
   },
   {
@@ -105,10 +113,10 @@ export const voiceOptions: VoiceOption[] = [
     eleven: "pqHfZKP75CvOlQylNhV4",
     elevenName: "Bill",
     stability: 0.55,
-    style: 0.3,
-    direction: `${conversational} Older, authoritative, measured. Deliberate pauses, absolute certainty, no hurry. Commanding without shouting.`,
-    speed: 0.92,
-    sample: "Zeus here. Give me the road and I'll tell you exactly what's coming.",
+    style: 0.15,
+    direction: `${conversational} Older and assured. Calm, confident, plain-spoken — never preachy.`,
+    speed: 0.98,
+    sample: "Zeus here. Tell me where you're headed and I'll let you know what's coming up.",
   },
   {
     id: "ares",
@@ -118,11 +126,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "echo",
     eleven: "N2lVS1w4EtoT3dr4eOWO",
     elevenName: "Callum",
-    stability: 0.35,
-    style: 0.5,
-    direction: `${conversational} Blunt, hard-edged, no softening. Short punchy phrasing, quick and slightly gravelly. Direct, but still human.`,
-    speed: 1.08,
-    sample: "Ares. No padding, no speeches. You ask, I answer straight.",
+    stability: 0.45,
+    style: 0.25,
+    direction: `${conversational} Direct and to the point, a little gravelly, but still friendly.`,
+    speed: 1.04,
+    sample: "Ares. Straight answers, no fluff. What do you need?",
   },
   {
     id: "atlas",
@@ -132,11 +140,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "verse",
     eleven: "onwK4e9ZLuTAKqWW03F9",
     elevenName: "Daniel",
-    stability: 0.65,
-    style: 0.25,
-    direction: `${conversational} Slow, steady, heavy and grounded. Long even cadence, unshakeable calm — the voice you want at three in the morning.`,
-    speed: 0.85,
-    sample: "Atlas. Take it easy. I'll keep everything steady while you drive.",
+    stability: 0.55,
+    style: 0.15,
+    direction: `${conversational} Calm, grounded and reassuring — the voice you want at three in the morning.`,
+    speed: 0.97,
+    sample: "Atlas here. Take it easy — I'll keep an eye on things while you drive.",
   },
   {
     id: "apollo",
@@ -146,11 +154,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "fable",
     eleven: "TX3LPaxmHKxFdv7VOQHJ",
     elevenName: "Liam",
-    stability: 0.4,
-    style: 0.45,
-    direction: `${conversational} Bright, easygoing, friendly and a little playful. Light lift at the end of phrases, sunny company on a long haul.`,
-    speed: 1.03,
-    sample: "Apollo, riding shotgun. Long day? Talk to me, I'll keep it light.",
+    stability: 0.45,
+    style: 0.25,
+    direction: `${conversational} Bright, friendly and easygoing, like good company on a long haul.`,
+    speed: 1.02,
+    sample: "Apollo, riding shotgun. Long day? Talk to me, we'll keep it easy.",
   },
   {
     id: "athena",
@@ -161,10 +169,10 @@ export const voiceOptions: VoiceOption[] = [
     eleven: "EXAVITQu4vr4xnSDxMaL",
     elevenName: "Sarah",
     stability: 0.55,
-    style: 0.3,
-    direction: `${conversational} Calm, precise, intelligent. Clean articulation, exact numbers, never flustered. Warm underneath the precision.`,
-    speed: 0.98,
-    sample: "Athena. I'll give you the numbers exactly as they are, every time.",
+    style: 0.15,
+    direction: `${conversational} Clear, calm and precise, with real warmth underneath.`,
+    speed: 1.0,
+    sample: "Hi, I'm Athena. I'll give you the numbers straight, every time.",
   },
   {
     id: "medusa",
@@ -174,11 +182,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "coral",
     eleven: "XrExE9yKIg1WjnnlVkGX",
     elevenName: "Matilda",
-    stability: 0.3,
-    style: 0.6,
-    direction: `${conversational} Low, smooth, hypnotic. Slow sultry cadence, breathy warmth, long unhurried lines. Never sharp, never bright.`,
-    speed: 0.86,
-    sample: "Medusa. Stay with me… I'll talk you all the way through the dark.",
+    stability: 0.5,
+    style: 0.25,
+    direction: `${conversational} Low, smooth and relaxed — soft warmth for night runs, never breathy or theatrical.`,
+    speed: 0.97,
+    sample: "Hey, it's Medusa. Late run? I'll keep you company the whole way.",
   },
   {
     id: "hera",
@@ -189,10 +197,10 @@ export const voiceOptions: VoiceOption[] = [
     eleven: "Xb7hH8MSUJpSbSDYk0k2",
     elevenName: "Alice",
     stability: 0.55,
-    style: 0.35,
-    direction: `${conversational} Regal, composed, quietly in command. Poised phrasing, gracious warmth, complete authority without raising her voice.`,
-    speed: 0.95,
-    sample: "Hera. Everything is in order — and it stays that way until you decide otherwise.",
+    style: 0.2,
+    direction: `${conversational} Composed and gracious, quietly confident.`,
+    speed: 0.99,
+    sample: "Hera here. Everything's in order, and it stays that way till you decide otherwise.",
   },
   {
     id: "artemis",
@@ -202,11 +210,11 @@ export const voiceOptions: VoiceOption[] = [
     tts: "nova",
     eleven: "pFZP5JQG7iQjIQuC4Bku",
     elevenName: "Lily",
-    stability: 0.4,
-    style: 0.4,
-    direction: `${conversational} Quick, alert, energetic. Crisp forward momentum, sharp eyes on the road ahead, friendly and a little wry.`,
-    speed: 1.06,
-    sample: "Artemis. Eyes up ahead — I'll call it out before you get to it.",
+    stability: 0.45,
+    style: 0.25,
+    direction: `${conversational} Quick, alert and friendly, a little wry.`,
+    speed: 1.03,
+    sample: "Artemis here. I'll call things out before you get to them.",
   },
 ];
 

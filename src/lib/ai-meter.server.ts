@@ -371,7 +371,7 @@ export async function runMetered<T>(opts: {
         ok: false as const,
         reason: "no_subscription" as const,
         message:
-          "The real AI voice needs a monthly AI plan on this account. Your device's own voice keeps working, free.",
+          "The real AI voice needs a monthly AI plan on this account. Replies stay on screen, free.",
       };
     }
     if (claim.outcome === "no_allowance_config") {
@@ -379,7 +379,7 @@ export async function runMetered<T>(opts: {
         ok: false as const,
         reason: "no_allowance_config" as const,
         message:
-          "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Your device's own voice is speaking, free.",
+          "This plan's daily and weekly allowance is not set up, so paid voice is held back rather than run without a limit. Replies stay on screen, free.",
       };
     }
     if (claim.outcome === "daily_limit" || claim.outcome === "weekly_limit") {

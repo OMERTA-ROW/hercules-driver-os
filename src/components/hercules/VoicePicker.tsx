@@ -62,15 +62,8 @@ function VoiceRow({ v }: { v: VoiceOption }) {
           ) : null}
         </span>
         <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{v.hint}</span>
-        {playing && speechSource === "device" ? (
-          <span className="mt-1 block text-xs leading-relaxed text-warn">
-            You're hearing your device's own voice, not {v.name}. {speechNote}
-          </span>
-        ) : null}
         {playing && speechSource === "unavailable" ? (
-          <span className="mt-1 block text-xs leading-relaxed text-warn">
-            Nothing could be played on this device. The line is on screen instead.
-          </span>
+          <span className="mt-1 block text-xs leading-relaxed text-warn">{speechNote}</span>
         ) : null}
       </button>
     </div>
@@ -121,8 +114,8 @@ export function VoicePicker() {
           short recorded clip that ships with the app — free, no credits used, the same clip for
           everyone. Those clips are recorded in the very same voice you'll hear on the road.
           Speaking your own lines aloud during a drive is the part that costs AI credits; without
-          credits, or when the voice service can't be reached, your device's own built-in voice
-          reads them instead and you'll see that said plainly on the row.
+          credits, or when the voice service can't be reached, replies stay on screen with a plain
+          note and a Retry — there's no robotic stand-in voice.
         </p>
 
         <p>
