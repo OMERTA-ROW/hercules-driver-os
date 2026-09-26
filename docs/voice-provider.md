@@ -4,9 +4,9 @@
 
 | Surface | Provider | Cost |
 | --- | --- | --- |
-| Live spoken lines during a drive | ElevenLabs `eleven_flash_v2_5`, provider stock voices | AI credits, metered |
+| Live spoken lines during a drive | ElevenLabs `eleven_multilingual_v2`, provider stock voices | AI credits, metered |
 | Picker Play buttons | static clips in `public/voice-samples/`, recorded earlier with `openai/gpt-4o-mini-tts` | free, no call |
-| Any failure or gate | the device's own built-in voice | free |
+| Any failure or gate | reply stays on screen with a plain note; Retry for temporary faults | free |
 
 The preview clips are labelled in the picker as recorded previews from an
 earlier voice service, not as the live voice. They are only re-rendered with
@@ -56,7 +56,7 @@ atomic credit hold → provider call → commit or refund. Eco quality, no
 subscription, missing allowance config, daily and weekly caps are all decided
 server-side before any paid call. On a provider failure — 401 credentials, 401
 quota, 429, 4xx or timeout — the hold is refunded in full and the driver hears
-the device voice with a line that says they were not charged.
+an on-screen reply with a note that says they were not charged, plus a Retry button when the fault is temporary.
 
 Catalogue is unchanged: Assist $9/150, Pro $29/600, Max $100/3000; caps 10/25/110
 per day and 40/150/750 per week; America/New_York midnight daily and Saturday
@@ -111,3 +111,13 @@ Unchanged: 150/600/3000 monthly credits, 10/25/110 daily, 40/150/750 weekly,
 America/New_York midnight and Saturday resets, subscriber-only top-ups at
 $0.30/credit (10/$3, 50/$15, 100/$30), and the stop/cancel generation-token
 fixes in `src/lib/voice.tsx`.
+
+
+## Natural voice update (settings version `natural-2026-09-v1`)
+
+- Model: `eleven_multilingual_v2` (ElevenLabs' most natural stable TTS model), replacing `eleven_flash_v2_5`. `eleven_v3` / `eleven_v3_conversational` are listed on the account but were not adopted: v3 is aimed at expressive/agent use and is not the stable choice for this endpoint.
+- Delivery retuned for warm everyday conversation: speeds 0.97–1.04, style ≤ 0.25, stability 0.45–0.55, similarity 0.8. All nine personas and their stock voices unchanged; saved selections keep working.
+- Markdown, bullets and links are stripped from text before it is spoken (on-screen text unchanged).
+- **No device/browser speech synthesis anywhere.** Signed out, Eco, no plan, caps, rate limits, provider or playback failures: the reply stays on screen with a note. Temporary faults show one Retry; nothing retries or speaks automatically.
+- `VOICE_SETTINGS_VERSION` is part of the server audio cache key, the billing request identity and the preview clip URL, so old audio is never replayed after a settings change. Bump it and re-run `bun scripts/build-voice-samples.ts` on any change.
+- Preview clips regenerated with the new model/settings (all nine decode; 0.75–1.05 s per clip, first call 3.3 s). Subscription, daily/weekly/monthly caps, refunds and credit accounting are unchanged.
