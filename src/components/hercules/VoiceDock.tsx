@@ -8,7 +8,8 @@ import { useVoice } from "@/lib/voice";
  * No transcript panel: the orb and one spoken line of state, nothing more.
  */
 export function VoiceDock() {
-  const { mode, colorway, listen, stop, voice, lastLine } = useVoice();
+  const { mode, colorway, listen, stop, voice, lastLine, speechSource, speechNote, canRetrySpeech, retrySpeech } =
+    useVoice();
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
@@ -35,8 +36,22 @@ export function VoiceDock() {
                 mode === "listening" ? "text-voice-accent/70" : "text-voice-text-dim",
               )}
             >
-              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask me anything."}
+              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask about loads, hours, the map or money."}
             </p>
+            {speechSource === "unavailable" && speechNote ? (
+              <p role="status" className="mt-1 flex flex-wrap items-center gap-2 text-xs text-warn">
+                <span className="min-w-0">{speechNote}</span>
+                {canRetrySpeech ? (
+                  <button
+                    type="button"
+                    onClick={retrySpeech}
+                    className="bubble min-h-[44px] rounded-full border border-primary/50 px-4 text-xs text-primary"
+                  >
+                    Retry
+                  </button>
+                ) : null}
+              </p>
+            ) : null}
           </div>
 
           <BrightnessButton />
