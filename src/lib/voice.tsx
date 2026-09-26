@@ -182,9 +182,11 @@ function spokenVehicle(t: string): VehicleSpec | null {
   if (/(sprinter|cargo van)/.test(t)) return specFor("cargoVan");
   if (/(box truck|straight truck|twenty ?six)/.test(t)) return specFor("boxTruck");
   if (/(minivan|passenger van|crew van)/.test(t)) return specFor("passengerVan");
-  if (/(\bcar\b|pickup|pick ?up truck)/.test(t)) return specFor("car");
+  // Multi-word equipment names must match before the bare "car" check —
+  // "car haul" contains the word "car" and would otherwise shadow it.
+  if (/(car ?haul|car ?carrier)/.test(t)) return specFor("carHaul");
   if (/(heavy haul)/.test(t)) return specFor("heavyHaul");
-  if (/(car haul)/.test(t)) return specFor("carHaul");
+  if (/(\bcar\b|pickup|pick ?up truck)/.test(t)) return specFor("car");
   if (/(intermodal)/.test(t)) return specFor("eighteen", "intermodal");
   if (/(line ?haul)/.test(t)) return specFor("eighteen", "lineHaul");
   if (/(dry van)/.test(t)) return specFor("eighteen", "dryVan");
