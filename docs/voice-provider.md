@@ -121,3 +121,14 @@ fixes in `src/lib/voice.tsx`.
 - **No device/browser speech synthesis anywhere.** Signed out, Eco, no plan, caps, rate limits, provider or playback failures: the reply stays on screen with a note. Temporary faults show one Retry; nothing retries or speaks automatically.
 - `VOICE_SETTINGS_VERSION` is part of the server audio cache key, the billing request identity and the preview clip URL, so old audio is never replayed after a settings change. Bump it and re-run `bun scripts/build-voice-samples.ts` on any change.
 - Preview clips regenerated with the new model/settings (all nine decode; 0.75–1.05 s per clip, first call 3.3 s). Subscription, daily/weekly/monthly caps, refunds and credit accounting are unchanged.
+
+## Lifecycle review (2026-09-26)
+
+- The orb shows speaking/Stop for the real lifetime of the audio; `ended`/`error` return it to idle and detach the level meter. Read-time timers only idle when no audio is playing or pending.
+- Sign-in lookup failures (rejected or error result) show the reply on screen with Retry; no unhandled errors.
+- Stop, Clear, voice change and a new line clear stale Retry and invalidate in-flight audio.
+- Previews own the clip immediately; Stop, a newer preview, the 4 s timeout or a late `play()` success cannot resurrect an old clip.
+- Previews are static-only. A missing clip shows "sample unavailable" with a Retry that reloads the clip — it never calls paid speech.
+- `speakable()` keeps comparisons (read as over/under/at least/at most), negatives, decimals, dollar amounts and part IDs.
+- Cost estimate: `ttsPerKChar` raised to $0.10/1k chars for `eleven_multilingual_v2` (1 ElevenLabs character credit per character, 2x Flash). The true rate depends on the ElevenLabs plan tier and is an assumption until checked against the invoice. Retail prices unchanged.
+- No custom voice was created; the nine licensed stock voices remain.
