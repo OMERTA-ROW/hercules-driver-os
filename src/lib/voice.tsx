@@ -868,7 +868,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       if (isOrbColorway(local)) await pushAccountColorway(local, localAt || Date.now());
     };
 
-    const refresh = () => void supabase.auth.getSession().then(({ data }) => syncAccountColorway(data.session));
+    const refresh = () =>
+      void supabase.auth
+        .getSession()
+        .then(({ data }) => syncAccountColorway(data.session))
+        .catch(() => undefined);
     refresh();
 
     const authSubscription = supabase.auth.onAuthStateChange?.((event, session) => {
@@ -902,13 +906,16 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(COLOR_KEY, c);
     localStorage.setItem(COLOR_AT_KEY, String(at));
     applyColorway(c);
-    void supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) return;
-      const { error } = await supabase.auth.updateUser({
-        data: { matte_colorway: c, matte_colorway_at: at },
-      });
-      if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
-    });
+    void supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (!data.session) return;
+        const { error } = await supabase.auth.updateUser({
+          data: { matte_colorway: c, matte_colorway_at: at },
+        });
+        if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
+      })
+      .catch(() => undefined);
   }, []);
 
   const setVoice = useCallback((id: VoiceId) => {
