@@ -35,8 +35,11 @@ import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AuthenticatedLoadsIndexRouteImport } from './routes/_authenticated/loads.index'
+import { Route as AuthenticatedLoadsNewRouteImport } from './routes/_authenticated/loads.new'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -168,6 +171,11 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -177,6 +185,16 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedLoadsIndexRoute = AuthenticatedLoadsIndexRouteImport.update({
+  id: '/loads/',
+  path: '/loads/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLoadsNewRoute = AuthenticatedLoadsNewRouteImport.update({
+  id: '/loads/new',
+  path: '/loads/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
@@ -210,9 +228,12 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/loads/': typeof AuthenticatedLoadsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,9 +261,12 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/loads': typeof AuthenticatedLoadsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -272,9 +296,12 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/_authenticated/loads/': typeof AuthenticatedLoadsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -304,9 +331,12 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/dashboard'
     | '/onboarding'
     | '/auth/callback'
+    | '/loads/new'
     | '/api/public/stripe-webhook'
+    | '/loads/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -334,9 +364,12 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/dashboard'
     | '/onboarding'
     | '/auth/callback'
+    | '/loads/new'
     | '/api/public/stripe-webhook'
+    | '/loads'
   id:
     | '__root__'
     | '/'
@@ -365,9 +398,12 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/auth/callback'
+    | '/_authenticated/loads/new'
     | '/api/public/stripe-webhook'
+    | '/_authenticated/loads/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -585,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -599,6 +642,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/loads/': {
+      id: '/_authenticated/loads/'
+      path: '/loads'
+      fullPath: '/loads/'
+      preLoaderRoute: typeof AuthenticatedLoadsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/loads/new': {
+      id: '/_authenticated/loads/new'
+      path: '/loads/new'
+      fullPath: '/loads/new'
+      preLoaderRoute: typeof AuthenticatedLoadsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -610,11 +667,17 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedLoadsNewRoute: typeof AuthenticatedLoadsNewRoute
+  AuthenticatedLoadsIndexRoute: typeof AuthenticatedLoadsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedLoadsNewRoute: AuthenticatedLoadsNewRoute,
+  AuthenticatedLoadsIndexRoute: AuthenticatedLoadsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
