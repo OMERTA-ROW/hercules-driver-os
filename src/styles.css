@@ -1261,3 +1261,207 @@
     backdrop-filter: none;
   }
 }
+
+/* ================================================================ FLAT HERCULES
+ * One opaque page color per selected appearance. Structure comes from spacing
+ * and a single thin line; color never carries status by itself.
+ */
+:root,
+[data-colorway="black"] {
+  color-scheme: dark;
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.78 0.13 82);
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--background);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--background);
+  --muted-foreground: oklch(0.7 0.09 82);
+  --accent: var(--background);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.55 0.09 82);
+  --input: var(--border);
+  --ring: var(--foreground);
+  --steel: var(--background);
+  --steel-foreground: var(--foreground);
+  --hazard: var(--foreground);
+  --hazard-foreground: var(--background);
+  --go: var(--foreground);
+  --go-foreground: var(--background);
+  --warn: var(--foreground);
+  --warn-foreground: var(--background);
+  --info: var(--foreground);
+  --info-foreground: var(--background);
+  --voice-surface: var(--background);
+  --voice-line: var(--border);
+  --voice-text: var(--foreground);
+  --voice-text-dim: var(--muted-foreground);
+  --voice-accent: var(--foreground);
+  --voice-accent-soft: var(--border);
+  --orb-fill: var(--foreground);
+  --orb-ink: var(--background);
+}
+
+[data-colorway="white"] {
+  color-scheme: light;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--background);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--background);
+  --muted-foreground: oklch(0.28 0 0);
+  --accent: var(--background);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.25 0 0);
+  --input: var(--border);
+  --ring: var(--foreground);
+  --steel: var(--background);
+  --steel-foreground: var(--foreground);
+  --hazard: var(--foreground);
+  --hazard-foreground: var(--background);
+  --go: var(--foreground);
+  --go-foreground: var(--background);
+  --warn: var(--foreground);
+  --warn-foreground: var(--background);
+  --info: var(--foreground);
+  --info-foreground: var(--background);
+  --voice-surface: var(--background);
+  --voice-line: var(--border);
+  --voice-text: var(--foreground);
+  --voice-text-dim: var(--muted-foreground);
+  --voice-accent: var(--foreground);
+  --voice-accent-soft: var(--border);
+  --orb-fill: var(--foreground);
+  --orb-ink: var(--background);
+}
+
+[data-colorway="grey"] {
+  color-scheme: light;
+  --background: oklch(0.78 0 0);
+  --foreground: oklch(0 0 0);
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--background);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--background);
+  --muted-foreground: oklch(0.22 0 0);
+  --accent: var(--background);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.22 0 0);
+  --input: var(--border);
+  --ring: var(--foreground);
+  --steel: var(--background);
+  --steel-foreground: var(--foreground);
+  --hazard: var(--foreground);
+  --hazard-foreground: var(--background);
+  --go: var(--foreground);
+  --go-foreground: var(--background);
+  --warn: var(--foreground);
+  --warn-foreground: var(--background);
+  --info: var(--foreground);
+  --info-foreground: var(--background);
+  --voice-surface: var(--background);
+  --voice-line: var(--border);
+  --voice-text: var(--foreground);
+  --voice-text-dim: var(--muted-foreground);
+  --voice-accent: var(--foreground);
+  --voice-accent-soft: var(--border);
+  --orb-fill: var(--foreground);
+  --orb-ink: var(--background);
+}
+
+/* Neutralize legacy exposure attributes and all glossy/translucent surfaces. */
+[data-colorway] {
+  --screen-dim: 0 !important;
+}
+.panel,
+.glass,
+.bubble-bar,
+.bubble-card,
+.matte-control,
+.matte-popover,
+.voice-surface {
+  background: var(--background) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  border-color: var(--border) !important;
+}
+
+.hercules-solid-orb {
+  container-type: inline-size;
+  isolation: isolate;
+}
+
+.orb-solid-core {
+  position: absolute;
+  inset: 8%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--orb-fill);
+  color: var(--orb-ink);
+}
+
+.orb-ripple-ring {
+  position: absolute;
+  inset: 8%;
+  z-index: 1;
+  display: none;
+  border: 2px solid var(--foreground);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.orb-state-speaking .orb-ripple-ring {
+  display: block;
+  animation: hercules-speaking-ripple 1.5s ease-out infinite;
+}
+
+.orb-state-speaking .orb-ripple-ring-two {
+  animation-delay: 0.75s;
+}
+
+@keyframes hercules-speaking-ripple {
+  from { transform: scale(0.95); opacity: 0.72; }
+  to { transform: scale(1.55); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-state-speaking .orb-ripple-ring,
+  [data-motion="reduced"] .orb-state-speaking .orb-ripple-ring {
+    animation: none !important;
+  }
+  .orb-state-speaking .orb-ripple-ring-one { display: block; inset: 1%; opacity: 1; }
+  .orb-state-speaking .orb-ripple-ring-two { display: none; }
+}
+
+[data-motion="reduced"] .orb-state-speaking .orb-ripple-ring {
+  animation: none !important;
+}
+[data-motion="reduced"] .orb-state-speaking .orb-ripple-ring-one { display: block; inset: 1%; opacity: 1; }
+[data-motion="reduced"] .orb-state-speaking .orb-ripple-ring-two { display: none; }
+
+@media print {
+  #hercules-bol-print {
+    background: white !important;
+    color: black !important;
+    border-color: black !important;
+  }
+}
