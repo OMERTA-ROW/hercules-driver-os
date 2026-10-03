@@ -961,6 +961,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       disposeEl(audio.current);
       audio.current = null;
     }
+    // A killed clip's onended never fires, so nothing else clears this:
+    // whatever was previewing is no longer playing.
+    setPreviewing(null);
   }, []);
 
   /** Stop audio AND forget any stale Retry/notes — Stop, Clear, voice change. */
@@ -1090,12 +1093,11 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const preview = useCallback(
     async (id: VoiceId) => {
-      setPreviewing(id);
-
       /* Previews play ONLY the static clip that ships with the app — no paid
          call, no credits, ever. If the clip can't load the driver sees that
          and may retry the clip; it never falls through to metered speech. */
-      killAudio();
+      killAudio(); // first: it clears any previous previewing state
+      setPreviewing(id);
       setRetryable(null);
       const sampleGen = speechGen.current;
       const stale = () => sampleGen !== speechGen.current;

@@ -341,4 +341,23 @@ describe("free static previews", () => {
     expect(clipUrls.some((u) => u.endsWith(`/voice-samples/hercules.mp3?v=${VOICE_SETTINGS_VERSION}`))).toBe(true);
     h.unmount();
   });
+
+  it.each(["voice", "line", "stop"] as const)(
+    "a playing preview interrupted by %s never leaves the picker stuck on Previewing",
+    async (how) => {
+      // sampleMode "resolve": the clip is audibly playing when interrupted.
+      sampleMode = "resolve";
+      const h = await mountVoice();
+      await act(async () => void h.api.preview("zeus"));
+      expect(h.api.previewing).toBe("zeus");
+      await act(async () => {
+        if (how === "voice") h.api.setVoice("hera");
+        if (how === "line") h.api.announce("Scale ahead.");
+        if (how === "stop") h.api.stop();
+      });
+      await flush();
+      expect(h.api.previewing).toBe(null);
+      h.unmount();
+    },
+  );
 });
