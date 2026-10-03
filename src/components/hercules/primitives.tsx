@@ -44,7 +44,7 @@ export function PanelTitle({ children, right }: { children: ReactNode; right?: R
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
-        <span aria-hidden className="h-6 w-px bg-primary/70 shadow-[0_0_10px_var(--primary)]" />
+        <span aria-hidden className="h-6 w-px bg-foreground" />
         <h2 className="truncate font-display text-lg font-light uppercase tracking-[0.14em] sm:text-xl">
           {children}
         </h2>

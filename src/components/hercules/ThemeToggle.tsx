@@ -9,7 +9,7 @@ export function ThemeToggle({ className, size = "md" }: { className?: string; si
   return (
     <div role="radiogroup" aria-label="Appearance" className={cn("inline-flex items-center gap-1 rounded-full border border-border bg-background p-1", className)}>
       {orbColorways.map((option) => (
-        <button key={option.id} type="button" role="radio" aria-checked={colorway === option.id} aria-label={option.label} title={option.hint} onClick={() => setColorway(option.id)} className={cn("flex h-11 w-11 items-center justify-center rounded-full border transition-colors", colorway === option.id ? "border-foreground bg-foreground text-background" : "border-transparent text-foreground hover:border-border")}>
+        <button key={option.id} type="button" role="radio" aria-checked={colorway === option.id} aria-label={option.label} title={option.hint} onClick={() => setColorway(option.id)} className={cn("flex h-11 w-11 items-center justify-center rounded-full bg-background text-foreground transition-colors", colorway === option.id ? "border-2 border-foreground" : "border border-transparent hover:border-foreground")}>
           <Circle className={size === "sm" ? "h-4 w-4" : "h-5 w-5"} fill="currentColor" />
         </button>
       ))}

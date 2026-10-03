@@ -1245,8 +1245,8 @@
   --voice-text-dim: var(--muted-foreground);
   --voice-accent: var(--foreground);
   --voice-accent-soft: var(--border);
-  --orb-fill: var(--foreground);
-  --orb-ink: var(--background);
+  --orb-fill: var(--background);
+  --orb-ink: var(--foreground);
 }
 
 [data-colorway="white"] {
@@ -1284,8 +1284,8 @@
   --voice-text-dim: var(--muted-foreground);
   --voice-accent: var(--foreground);
   --voice-accent-soft: var(--border);
-  --orb-fill: var(--foreground);
-  --orb-ink: var(--background);
+  --orb-fill: var(--background);
+  --orb-ink: var(--foreground);
 }
 
 [data-colorway="grey"] {
@@ -1323,8 +1323,8 @@
   --voice-text-dim: var(--muted-foreground);
   --voice-accent: var(--foreground);
   --voice-accent-soft: var(--border);
-  --orb-fill: var(--foreground);
-  --orb-ink: var(--background);
+  --orb-fill: var(--background);
+  --orb-ink: var(--foreground);
 }
 
 /* Neutralize legacy exposure attributes and all glossy/translucent surfaces. */
@@ -1345,6 +1345,44 @@
   border-color: var(--border) !important;
 }
 
+/* Every application surface uses the selected page color. Thin foreground
+   lines and spacing provide hierarchy without introducing another fill. */
+:where(header, nav, aside, section, article, dialog, form, input, textarea, select),
+:where([role="dialog"], [role="listbox"], [role="menu"], [data-slot="input-group"]) {
+  background-color: var(--background);
+  background-image: none;
+}
+
+:where(button, [role="button"], [role="tab"], [role="radio"], [role="switch"]) {
+  background-color: var(--background) !important;
+  background-image: none !important;
+  color: var(--foreground) !important;
+  box-shadow: none !important;
+}
+
+.bubble-tab,
+.bubble-tab:hover,
+.bubble-tab-on,
+.bubble-card-on,
+.glow-ring,
+.glow-control,
+.matte-control {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  box-shadow: none !important;
+}
+
+.bubble-tab-on,
+.bubble-card-on {
+  border-color: var(--foreground) !important;
+}
+
+.edge-gold {
+  background: var(--foreground) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 .hercules-solid-orb {
   container-type: inline-size;
   isolation: isolate;
@@ -1356,7 +1394,7 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  border: 1px solid var(--border);
+  border: 2px solid var(--foreground);
   border-radius: 9999px;
   background: var(--orb-fill);
   color: var(--orb-ink);
