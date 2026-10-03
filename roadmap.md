@@ -201,3 +201,7 @@ telemetry, parts suppliers, delivery partners, load boards.
 - [x] Verify signed-out authorization, desktop/mobile controls, tests, typecheck, and build
 - [ ] Verify authenticated save/reload when a test account exists (currently no auth users)
 - [x] Harden account-switch races, new-vs-open behavior, item/address validation, load-link RLS, print isolation, and email wording
+
+- [x] Replace legacy colorways/exposure with Flat White, Flat Grey, and Flat Black
+- [x] Make the single Hercules bubble solid with ripples only during real audio playback
+- [x] Verify theme migration, persistence, speaking lifecycle, reduced motion, and desktop/mobile controls

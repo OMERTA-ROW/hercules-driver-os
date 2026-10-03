@@ -1,6 +1,6 @@
 /**
- * VISUAL REGRESSION — bubble styling, glow colors and readable contrast across
- * every screen and every colorway, checked from the real stylesheet and the
+ * VISUAL REGRESSION — flat bubble styling and readable contrast across
+ * every screen and every theme, checked from the real stylesheet and the
  * real component source instead of blessed screenshots.
  */
 import { describe, expect, it } from "vitest";
@@ -10,8 +10,6 @@ import {
   contrastRatio,
   exposures,
   findSquareControls,
-  parseBlocks,
-  parseOklch,
   resolveTokens,
 } from "./theme-audit";
 
@@ -52,40 +50,28 @@ describe("bubble styling", () => {
   });
 });
 
-describe("colorway glow and trim", () => {
+describe("three flat themes", () => {
   const required = [
-    "--matte-background",
-    "--matte-card",
-    "--matte-popover",
+    "--background",
+    "--card",
+    "--popover",
+    "--foreground",
     "--primary",
     "--border",
     "--ring",
-    "--theme-glow",
-    "--theme-shadow",
   ];
 
-  it.each(colorwayIds)("%s defines a complete matte token set", (id) => {
+  it.each(colorwayIds)("%s defines a complete flat token set", (id) => {
     const tokens = resolveTokens(css, id);
     for (const name of required) expect(tokens[name], name).toBeTruthy();
   });
 
-  it("gives every colorway its own glow, not a hue swap of one palette", () => {
-    const blocks = parseBlocks(css);
-    const glows = colorwayIds.map((id) => {
-      const block = blocks.find((b) => b.selector.includes(`[data-colorway="${id}"]`));
-      return block?.vars["--theme-glow"];
-    });
-    expect(glows.every(Boolean)).toBe(true);
-    expect(new Set(glows).size).toBe(colorwayIds.length);
-    for (const glow of glows) expect(parseOklch(glow!)).toBeTruthy();
-  });
-
-  it("keeps each glow lit against its own base", () => {
-    for (const id of colorwayIds) {
-      const t = resolveTokens(css, id);
-      // A glow either lifts off the base or sits deliberately darker (matte gold).
-      expect(contrastRatio(t["--theme-glow"]!, t["--matte-background"]!), id).toBeGreaterThan(1.6);
-    }
+  it("removes legacy color choices and animates ripples only while speaking", () => {
+    expect(css).not.toContain('[data-colorway="pink"]');
+    expect(css).not.toContain('[data-colorway="turquoise"]');
+    expect(css).toContain(".orb-state-speaking .orb-ripple-ring");
+    const baseRing = css.match(/\.orb-ripple-ring\s*\{([^}]*)\}/s)?.[1] ?? "";
+    expect(baseRing).not.toContain("animation:");
   });
 });
 

@@ -148,14 +148,14 @@ function varsFor(blocks: Block[], test: (selector: string) => boolean) {
   return out;
 }
 
-export const colorwayIds = ["black", "pink", "grey", "gold", "turquoise"] as const;
+export const colorwayIds = ["white", "grey", "black"] as const;
 export type ColorwayId = (typeof colorwayIds)[number];
-export const exposures = ["night", "gray", "day"] as const;
+export const exposures = ["flat"] as const;
 export type Exposure = (typeof exposures)[number];
 
 /** Exposure lightens each colorway; the percentages live in the stylesheet. */
 function exposureMix(blocks: Block[], exposure: Exposure) {
-  if (exposure === "night") return {};
+  if (exposure === "flat") return {};
   const vars = varsFor(blocks, (s) => s === `[data-colorway][data-theme="${exposure}"]`);
   const out: Record<string, number> = {};
   for (const [name, value] of Object.entries(vars)) {
@@ -173,22 +173,29 @@ function exposureMix(blocks: Block[], exposure: Exposure) {
 export function resolveTokens(
   css: string,
   colorway: ColorwayId,
-  exposure: Exposure = "night",
+  exposure: Exposure = "flat",
 ): Record<string, Oklch> {
   const blocks = parseBlocks(css);
   const raw: Record<string, string> = {
     ...varsFor(blocks, (s) => s === ":root"),
     ...varsFor(blocks, (s) => s === `[data-colorway="${colorway}"]`),
   };
-  raw["--background"] = raw["--matte-background"] ?? raw["--background"]!;
-  raw["--card"] = raw["--matte-card"] ?? raw["--card"]!;
-  raw["--popover"] = raw["--matte-popover"] ?? raw["--popover"]!;
-
   const resolved: Record<string, Oklch> = {};
-  for (const [name, value] of Object.entries(raw)) {
-    const c = parseOklch(value);
-    if (c) resolved[name] = c;
-  }
+  const resolving = new Set<string>();
+  const resolve = (name: string): Oklch | null => {
+    if (resolved[name]) return resolved[name];
+    if (resolving.has(name)) return null;
+    const value = raw[name];
+    if (!value) return null;
+    resolving.add(name);
+    const direct = parseOklch(value);
+    const ref = /^var\((--[^)]+)\)$/.exec(value)?.[1];
+    const color = direct ?? (ref ? resolve(ref) : null);
+    resolving.delete(name);
+    if (color) resolved[name] = color;
+    return color;
+  };
+  for (const name of Object.keys(raw)) resolve(name);
 
   const light = resolved["--exposure-light"] ?? { l: 1, c: 0, h: 0, alpha: 1 };
   for (const [name, pct] of Object.entries(exposureMix(blocks, exposure))) {

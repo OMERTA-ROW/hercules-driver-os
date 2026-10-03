@@ -19,3 +19,4 @@
 - BOL drafts stay in the owner-scoped documents model; print and email actions require explicit local confirmation because no external provider is assumed.
 
 <!-- HERCULES:END -->
+- Use one account-scoped Flat White, Flat Grey, or Flat Black appearance across Hercules; no separate exposure or legacy colorway controls, because uniform contrast is safety-critical.

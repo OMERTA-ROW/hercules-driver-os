@@ -124,49 +124,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Restore the driver's choices.
   useEffect(() => {
-    const storedTheme = localStorage.getItem(THEME_KEY) as DisplayTheme | null;
-    const storedAuto = localStorage.getItem(AUTO_KEY);
-    const storedBright = localStorage.getItem(BRIGHT_KEY) as BrightnessLevel | null;
-    const auto = storedAuto === null ? true : storedAuto === "1";
-    setAutoNightState(auto);
-
-    if (auto) {
-      const now = themeForHour(new Date().getHours());
-      setThemeState(now.theme);
-      setBrightnessState(now.brightness);
-      applyTheme(now.theme);
-      applyDim(brightnessOptions.find((b) => b.id === now.brightness)!.dim);
-      setReady(true);
-      return;
-    }
-    const next =
-      storedTheme === "night" || storedTheme === "gray" || storedTheme === "day"
-        ? storedTheme
-        : "night";
-    const b = brightnessOptions.some((o) => o.id === storedBright)
-      ? (storedBright as BrightnessLevel)
-      : "dim";
-    setThemeState(next);
-    setBrightnessState(b);
-    applyTheme(next);
-    applyDim(brightnessOptions.find((o) => o.id === b)!.dim);
+    // The unified Flat appearance owns contrast. Legacy exposure and dimming
+    // preferences are retained in storage for compatibility but no longer alter it.
+    setAutoNightState(false);
+    setBrightnessState("full");
+    applyDim(0);
     setReady(true);
   }, []);
 
   // AUTOMATIC NIGHT MODE — re-checks the clock while the truck rolls.
   useEffect(() => {
-    if (!autoNight || !ready) return;
-    const tick = () => {
-      const now = themeForHour(new Date().getHours());
-      setThemeState(now.theme);
-      applyTheme(now.theme);
-      setBrightnessState(now.brightness);
-      applyDim(brightnessOptions.find((b) => b.id === now.brightness)!.dim);
-    };
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => clearInterval(id);
-  }, [autoNight, ready]);
+    if (ready) applyDim(0);
+  }, [ready]);
 
   /** Any manual pick is the driver overriding the clock — auto steps aside. */
   const setTheme = useCallback((t: DisplayTheme) => {
@@ -269,13 +238,5 @@ export function useTheme() {
  * whole cab dims together instead of the map staying bright.
  */
 export function ScreenDim() {
-  const { dim } = useTheme();
-  if (dim <= 0) return null;
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed inset-0 z-[90] bg-background"
-      style={{ opacity: dim }}
-    />
-  );
+  return null;
 }

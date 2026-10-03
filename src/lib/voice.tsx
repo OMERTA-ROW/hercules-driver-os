@@ -114,14 +114,12 @@ function rateLine(l: LoadRow) {
 
 /* ------------------------------------------------------------------ ORB LOOK */
 
-export type OrbColorway = "black" | "pink" | "grey" | "gold" | "turquoise";
+export type OrbColorway = "white" | "grey" | "black";
 
 export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = [
-  { id: "black", label: "Matte Black", hint: "Charcoal depth, warm gold trim — flagship" },
-  { id: "pink", label: "Matte Pink", hint: "Muted rose with a cool cyan-white glow" },
-  { id: "grey", label: "Matte Grey", hint: "Graphite with clean silver-white light" },
-  { id: "gold", label: "Matte Gold", hint: "Antique gold with dense black trim" },
-  { id: "turquoise", label: "Matte Turquoise", hint: "Deep teal with a restrained coral glow" },
+  { id: "white", label: "Flat White", hint: "White surface with black lettering" },
+  { id: "grey", label: "Flat Grey", hint: "Neutral grey surface with black lettering" },
+  { id: "black", label: "Flat Black", hint: "Black surface with gold lettering" },
 ];
 
 /* ---------------------------------------------------------------- VOICE CAST */
@@ -744,14 +742,11 @@ const COLOR_KEY = "hercules.orb-colorway";
 const COLOR_AT_KEY = "hercules.orb-colorway.at";
 const VOICE_KEY = "hercules.voice";
 
-function isOrbColorway(value: unknown): value is OrbColorway {
-  return (
-    value === "black" ||
-    value === "pink" ||
-    value === "grey" ||
-    value === "gold" ||
-    value === "turquoise"
-  );
+export function migrateColorway(value: unknown): OrbColorway | null {
+  if (value === "white" || value === "day") return "white";
+  if (value === "grey" || value === "gray" || value === "pink" || value === "turquoise") return "grey";
+  if (value === "black" || value === "gold" || value === "night") return "black";
+  return null;
 }
 
 function applyColorway(colorway: OrbColorway) {
@@ -831,11 +826,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const c = localStorage.getItem(COLOR_KEY) as OrbColorway | null;
-    const migrated = c === ("white" as OrbColorway) ? "grey" : c;
-    if (isOrbColorway(migrated)) {
+    const c = localStorage.getItem(COLOR_KEY);
+    const migrated = migrateColorway(c) ?? migrateColorway(localStorage.getItem("hercules.display-theme"));
+    if (migrated) {
       colorwayAt.current = storedColorwayAt();
       setColorwayState(migrated);
+      localStorage.setItem(COLOR_KEY, migrated);
       applyColorway(migrated);
     } else {
       applyColorway("black");
@@ -862,13 +858,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       const localAt = storedColorwayAt();
       const local = localStorage.getItem(COLOR_KEY);
 
-      if (isOrbColorway(remote) && remoteAt >= localAt) {
-        localStorage.setItem(COLOR_KEY, remote);
+      const migratedRemote = migrateColorway(remote);
+      const migratedLocal = migrateColorway(local);
+      if (migratedRemote && remoteAt >= localAt) {
+        localStorage.setItem(COLOR_KEY, migratedRemote);
         localStorage.setItem(COLOR_AT_KEY, String(remoteAt));
-        adoptColorway(remote, remoteAt);
+        adoptColorway(migratedRemote, remoteAt);
         return;
       }
-      if (isOrbColorway(local)) await pushAccountColorway(local, localAt || Date.now());
+      if (migratedLocal) await pushAccountColorway(migratedLocal, localAt || Date.now());
     };
 
     const refresh = () =>
@@ -884,8 +882,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
     // Another tab on this device changed it: follow along, no refresh needed.
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== COLOR_KEY || !isOrbColorway(e.newValue)) return;
-      adoptColorway(e.newValue, storedColorwayAt() || Date.now());
+      const next = migrateColorway(e.newValue);
+      if (e.key !== COLOR_KEY || !next) return;
+      adoptColorway(next, storedColorwayAt() || Date.now());
     };
     // Coming back to this tab re-checks the account, so another device lands here.
     const onVisible = () => {
@@ -907,7 +906,6 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     colorwayAt.current = at;
     setColorwayState(c);
     localStorage.setItem(COLOR_KEY, c);
-    localStorage.setItem(COLOR_AT_KEY, String(at));
     applyColorway(c);
     void supabase.auth
       .getSession()

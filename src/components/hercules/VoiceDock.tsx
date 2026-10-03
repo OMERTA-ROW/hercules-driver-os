@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Orb } from "./Orb";
-import { BrightnessButton } from "./ThemeToggle";
 import { useVoice } from "@/lib/voice";
 import { useBol } from "@/lib/bol";
 import { toast } from "sonner";
@@ -278,7 +277,6 @@ export function VoiceDock() {
           >
             {open ? <ChevronDown /> : <MessageCircle />}
           </Button>
-          <BrightnessButton />
         </div>
       </div>
     </div>
