@@ -170,3 +170,9 @@ Blocked — live verification not done:
 
 Still not connected (unchanged): payments/Stripe, commercial truck routing data, OBD-II
 telemetry, parts suppliers, delivery partners, load boards.
+
+## Current correction — simple Hercules setup bubble
+- [ ] Restore the existing Hercules frontend and navigation from the pre-Freight baseline
+- [ ] Add one-at-a-time setup bubble using existing account, equipment, voice, and theme capabilities
+- [ ] Verify close/reopen/back/skip/save on desktop and mobile; typecheck, tests, and build
+- [ ] Leave additive Freight backend tables isolated and document exactly what remains
