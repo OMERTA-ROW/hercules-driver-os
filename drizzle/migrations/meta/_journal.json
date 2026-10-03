@@ -8,6 +8,13 @@
       "when": 1791057851927,
       "tag": "0000_freight_os_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791058440395,
+      "tag": "0001_freight_os_routines",
+      "breakpoints": true
     }
   ]
 }
