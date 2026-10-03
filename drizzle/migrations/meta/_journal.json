@@ -29,6 +29,13 @@
       "when": 1791070098951,
       "tag": "0003_add_bol_draft_data",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791070744421,
+      "tag": "0004_secure_bol_load_references",
+      "breakpoints": true
     }
   ]
 }
