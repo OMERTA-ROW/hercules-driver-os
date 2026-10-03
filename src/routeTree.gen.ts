@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
 import { Route as CompanyRouteImport } from './routes/company'
@@ -17,23 +18,34 @@ import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as FinancialsRouteImport } from './routes/financials'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as NavigationRouteImport } from './routes/navigation'
 import { Route as PartsRouteImport } from './routes/parts'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlertsRoute = AlertsRouteImport.update({
@@ -71,9 +83,24 @@ const FinancialsRoute = FinancialsRouteImport.update({
   path: '/financials',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigationRoute = NavigationRouteImport.update({
@@ -91,6 +118,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -99,6 +131,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StopsRoute = StopsRouteImport.update({
@@ -131,6 +168,16 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -146,18 +193,25 @@ export interface FileRoutesByFullPath {
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/financials': typeof FinancialsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/signup': typeof SignupRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -169,23 +223,31 @@ export interface FileRoutesByTo {
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/financials': typeof FinancialsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/signup': typeof SignupRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
   '/company': typeof CompanyRoute
@@ -193,18 +255,25 @@ export interface FileRoutesById {
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/financials': typeof FinancialsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/signup': typeof SignupRoute
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -218,18 +287,25 @@ export interface FileRouteTypes {
     | '/confirm-email'
     | '/credits'
     | '/financials'
+    | '/forgot-password'
     | '/health'
+    | '/login'
+    | '/logout'
     | '/navigation'
     | '/parts'
     | '/pricing'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/signup'
     | '/stops'
     | '/store'
     | '/supply'
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/onboarding'
+    | '/auth/callback'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,22 +317,30 @@ export interface FileRouteTypes {
     | '/confirm-email'
     | '/credits'
     | '/financials'
+    | '/forgot-password'
     | '/health'
+    | '/login'
+    | '/logout'
     | '/navigation'
     | '/parts'
     | '/pricing'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/signup'
     | '/stops'
     | '/store'
     | '/supply'
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/onboarding'
+    | '/auth/callback'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/alerts'
     | '/breakdown'
     | '/company'
@@ -264,23 +348,31 @@ export interface FileRouteTypes {
     | '/confirm-email'
     | '/credits'
     | '/financials'
+    | '/forgot-password'
     | '/health'
+    | '/login'
+    | '/logout'
     | '/navigation'
     | '/parts'
     | '/pricing'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/signup'
     | '/stops'
     | '/store'
     | '/supply'
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/_authenticated/onboarding'
+    | '/auth/callback'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AlertsRoute: typeof AlertsRoute
   BreakdownRoute: typeof BreakdownRoute
   CompanyRoute: typeof CompanyRoute
@@ -288,18 +380,24 @@ export interface RootRouteChildren {
   ConfirmEmailRoute: typeof ConfirmEmailRoute
   CreditsRoute: typeof CreditsRoute
   FinancialsRoute: typeof FinancialsRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   HealthRoute: typeof HealthRoute
+  LoginRoute: typeof LoginRoute
+  LogoutRoute: typeof LogoutRoute
   NavigationRoute: typeof NavigationRoute
   PartsRoute: typeof PartsRoute
   PricingRoute: typeof PricingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  SignupRoute: typeof SignupRoute
   StopsRoute: typeof StopsRoute
   StoreRoute: typeof StoreRoute
   SupplyRoute: typeof SupplyRoute
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -310,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alerts': {
@@ -361,11 +466,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinancialsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health': {
       id: '/health'
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigation': {
@@ -389,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -401,6 +534,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stops': {
@@ -445,6 +585,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -455,8 +609,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AlertsRoute: AlertsRoute,
   BreakdownRoute: BreakdownRoute,
   CompanyRoute: CompanyRoute,
@@ -464,18 +630,24 @@ const rootRouteChildren: RootRouteChildren = {
   ConfirmEmailRoute: ConfirmEmailRoute,
   CreditsRoute: CreditsRoute,
   FinancialsRoute: FinancialsRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   HealthRoute: HealthRoute,
+  LoginRoute: LoginRoute,
+  LogoutRoute: LogoutRoute,
   NavigationRoute: NavigationRoute,
   PartsRoute: PartsRoute,
   PricingRoute: PricingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  SignupRoute: SignupRoute,
   StopsRoute: StopsRoute,
   StoreRoute: StoreRoute,
   SupplyRoute: SupplyRoute,
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
