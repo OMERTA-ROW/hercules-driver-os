@@ -8,9 +8,9 @@ export function LoadList({ loads, emptyBody, action }: { loads: LoadRow[]; empty
   return (
     <Table head={["Reference", "Lane", "Pickup", "Delivery", "Status"]}>
       {loads.map((l) => (
-        <tr key={l.id} className="border-t border-border hover:bg-surface">
+        <tr key={l.id} className="border-t border-border hover:bg-secondary/30">
           <Td>
-            <Link to="/loads/$id" params={{ id: l.id }} className="font-semibold text-primary underline-offset-2 hover:underline">{l.reference}</Link>
+            <Link to="/freight-loads/$id" params={{ id: l.id }} className="font-semibold text-primary underline-offset-2 hover:underline">{l.reference}</Link>
           </Td>
           <Td>{l.origin ?? "—"} → {l.destination ?? "—"}</Td>
           <Td>{when(l.pickup_at)}</Td>

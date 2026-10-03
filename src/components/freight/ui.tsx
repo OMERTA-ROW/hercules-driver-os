@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type BtnVariant = "primary" | "success" | "outline" | "ghost" | "danger" | "ink";
 const btn: Record<BtnVariant, string> = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
-  success: "bg-ok text-primary-foreground hover:bg-ok/90 shadow-sm",
+  success: "bg-go text-primary-foreground hover:bg-go/90 shadow-sm",
   outline: "border border-input bg-card text-foreground hover:bg-accent",
   ghost: "text-foreground hover:bg-accent",
   danger: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
@@ -22,7 +22,7 @@ export const FButton = forwardRef<
       {...p}
       disabled={disabled || busy}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-4",
+        "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-4",
         size === "sm" && "h-9 px-3 text-xs",
         size === "md" && "h-11 px-4 text-sm",
         size === "lg" && "h-14 px-6 text-base",
@@ -37,7 +37,7 @@ export const FButton = forwardRef<
 });
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("hfo-card p-5", className)}>{children}</section>;
+  return <section className={cn("panel p-5", className)}>{children}</section>;
 }
 
 export function PageHeader({ title, sub, actions }: { title: string; sub?: string | undefined; actions?: ReactNode }) {
@@ -54,11 +54,11 @@ export function PageHeader({ title, sub, actions }: { title: string; sub?: strin
 
 const tone = {
   neutral: "bg-muted text-foreground border-border",
-  ok: "bg-ok-soft text-ok border-ok/30",
+  ok: "bg-go/10 text-go border-go/30",
   warn: "bg-warn-soft text-warn border-warn/30",
-  danger: "bg-danger-soft text-destructive border-destructive/30",
-  info: "bg-info-soft text-info border-info/30",
-  gold: "bg-gold-soft text-foreground border-gold/50",
+  danger: "bg-destructive/10 text-destructive border-destructive/30",
+  info: "bg-info/10 text-info border-info/30",
+  gold: "bg-primary/10 text-foreground border-primary/50",
 };
 export type Tone = keyof typeof tone;
 export function Badge({ tone: t = "neutral", children }: { tone?: Tone; children: ReactNode }) {
@@ -121,7 +121,7 @@ export function Loading({ label = "Loading" }: { label?: string }) {
 
 export function ErrorNote({ children }: { children: ReactNode }) {
   return (
-    <p role="alert" className="rounded-lg border border-destructive/30 bg-danger-soft px-3 py-2 text-sm text-destructive">
+    <p role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {children}
     </p>
   );
@@ -139,7 +139,7 @@ export function Field({ label, hint, children, required }: { label: string; hint
     </label>
   );
 }
-const ctl = "w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring";
+const ctl = "w-full rounded-2xl border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring";
 export const FInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function FInput({ className, ...p }, ref) {
   return <input ref={ref} {...p} className={cn(ctl, "h-11", className)} />;
 });
@@ -156,9 +156,9 @@ export function FTextarea({ className, ...p }: TextareaHTMLAttributes<HTMLTextAr
 
 export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
   return (
-    <div className="hfo-card p-4">
+    <div className="bubble-card p-4">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-2 font-serif text-3xl font-semibold">{value}</p>
+      <p className="mt-2 font-display text-3xl font-semibold">{value}</p>
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
@@ -166,9 +166,9 @@ export function Stat({ label, value, hint }: { label: string; value: ReactNode; 
 
 export function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="hfo-card overflow-x-auto p-0">
+    <div className="panel overflow-x-auto p-0">
       <table className="w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface text-xs uppercase tracking-wider text-muted-foreground">
+        <thead className="border-b border-border bg-secondary/40 text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
             {head.map((h) => (
               <th key={h} scope="col" className="px-4 py-3 font-semibold">
@@ -189,17 +189,12 @@ export function Td({ children, className }: { children: ReactNode; className?: s
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <svg viewBox="0 0 32 36" className="h-8 w-7" aria-hidden>
-        <path d="M16 1 30 6v11c0 9-6 15-14 18C8 32 2 26 2 17V6z" fill="var(--ink)" stroke="var(--gold)" strokeWidth="1.5" />
-        <path d="M16 9v19" stroke="var(--gold)" strokeWidth="1.2" strokeDasharray="2.4 2.4" />
-        <path d="M10 28 14 9M22 28 18 9" stroke="var(--ink-foreground)" strokeWidth="1.4" strokeLinecap="round" />
-        <rect x="11.5" y="13" width="9" height="5" rx="0.8" fill="var(--gold)" />
-      </svg>
+      <svg viewBox="0 0 32 36" className="h-8 w-7" aria-hidden><path d="M16 1 30 6v11c0 9-6 15-14 18C8 32 2 26 2 17V6z" fill="var(--card)" stroke="var(--primary)" strokeWidth="1.5" /><path d="M16 9v19M10 28 14 9M22 28 18 9" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" /><rect x="11.5" y="13" width="9" height="5" rx="0.8" fill="var(--primary)" /></svg>
       <span className="leading-none">
-        <span className={cn("block font-serif text-lg font-semibold tracking-tight", light ? "text-ink-foreground" : "text-foreground")}>
+        <span className={cn("block font-display text-lg font-semibold tracking-tight", light ? "text-foreground" : "text-foreground")}>
           Hercules
         </span>
-        <span className="block text-[10px] font-semibold uppercase tracking-[0.25em] text-gold">Freight OS</span>
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">Freight OS</span>
       </span>
     </span>
   );

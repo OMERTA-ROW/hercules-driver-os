@@ -41,7 +41,7 @@ function Invoices() {
             return (
               <tr key={i.id} className="border-t border-border">
                 <Td>{i.number}</Td>
-                <Td>{l ? <Link to="/loads/$id" params={{ id: l.id }} className="text-primary underline">{l.reference}</Link> : "—"}</Td>
+                <Td>{l ? <Link to="/freight-loads/$id" params={{ id: l.id }} className="text-primary underline">{l.reference}</Link> : "—"}</Td>
                 <Td>{money(i.amount_cents)}</Td><Td>{i.due_on ?? when(i.created_at)}</Td>
                 <Td><Badge tone={statusTone(i.status)}>{i.status}</Badge></Td>
                 <Td>{fin && i.status === "draft" && <FButton size="sm" variant="outline" onClick={() => ask(i, "invoice")}>Request approval</FButton>}{fin && ["approved", "sent"].includes(i.status) && <FButton size="sm" variant="outline" onClick={() => ask(i, "payment")}>Record payment</FButton>}</Td>
