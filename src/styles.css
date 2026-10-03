@@ -985,6 +985,28 @@
   }
 }
 
+@media print {
+  @page { margin: 0.45in; }
+  body * { visibility: hidden !important; }
+  #hercules-bol-print,
+  #hercules-bol-print * { visibility: visible !important; }
+  #hercules-bol-print {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-height: 100%;
+    overflow: visible;
+    background: white !important;
+    color: black !important;
+    font-family: Arial, sans-serif;
+    break-inside: avoid;
+  }
+  #hercules-bol-print section,
+  #hercules-bol-print tr,
+  #hercules-bol-print div { break-inside: avoid; }
+  #hercules-bol-print table { break-inside: auto; }
+}
+
 /* Larger round choice cards (two lines of text) in the same bubble language. */
 @utility bubble-card {
   border-radius: 1.75rem;

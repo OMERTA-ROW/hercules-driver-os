@@ -60,6 +60,8 @@ import {
   setVoiceLevel,
   startSynthLevel,
 } from "@/lib/voice-level";
+import { bolIntent } from "@/lib/bol-intents";
+import { useBol } from "@/lib/bol";
 
 /**
  * LIVE SNAPSHOT
@@ -799,6 +801,7 @@ function fallbackNote(reason: string | undefined, message?: string): string {
 const RETRYABLE = new Set(["provider", "rate_limited", "network", "playback", "error"]);
 
 export function VoiceProvider({ children }: { children: ReactNode }) {
+  const bol = useBol();
   const [mode, setMode] = useState<VoiceMode>("idle");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [topic, setTopic] = useState<Topic>("none");
@@ -1213,6 +1216,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const documentIntent = bolIntent(t);
+      if (documentIntent !== "none") {
+        void bol.handleCommand(documentIntent).then((result) => {
+          push({ id: nextId(), from: "hercules", text: result.message });
+          timers.current.push(setTimeout(idleIfSilent, Math.min(9000, 1800 + result.message.length * 28)));
+        });
+        return;
+      }
+
       const reply = respond(text, topic);
       setTopic(reply.topic);
       timers.current.push(
@@ -1229,7 +1241,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         }, 650),
       );
     },
-    [clearTimers, push, topic, resetSpeech, idleIfSilent],
+    [bol, clearTimers, push, topic, resetSpeech, idleIfSilent],
   );
 
   const listen = useCallback(() => {

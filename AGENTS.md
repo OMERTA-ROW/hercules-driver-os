@@ -16,5 +16,6 @@
 - Keep the original Hercules template and enhance its single conversation dock in place; do not add competing setup or freight interfaces.
 - Freight roles and approval authority must come from authenticated server/database checks, never client-selected or browser storage.
 - Freight tenant data must remain company-scoped through database constraints and row-level policies.
+- BOL drafts stay in the owner-scoped documents model; print and email actions require explicit local confirmation because no external provider is assumed.
 
 <!-- HERCULES:END -->
