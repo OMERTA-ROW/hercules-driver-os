@@ -86,10 +86,10 @@ export function AppShell({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-primary/20 bg-background/95 backdrop-blur-xl shadow-[0_8px_28px_-24px_var(--primary)]">
+          <header className="sticky top-0 z-30 border-b border-border bg-background">
             <div
               aria-hidden
-              className="edge-gold h-px w-full shadow-[0_0_14px_-4px_var(--primary)]"
+              className="edge-gold h-px w-full"
             />
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
               <div className="min-w-0">

@@ -69,7 +69,7 @@ export function VoiceDock() {
           <section
             ref={panelRef}
             aria-label="Hercules conversation"
-            className="panel mb-2 flex h-[min(68vh,560px)] min-h-[360px] flex-col overflow-hidden !rounded-[1.75rem] border-primary/35 shadow-2xl"
+            className="panel mb-2 flex h-[min(68vh,560px)] min-h-[360px] flex-col overflow-hidden !rounded-[1.75rem] border-border"
           >
             <header className="flex min-h-16 items-center gap-3 border-b border-border/70 px-3 py-2">
               <Orb
@@ -129,7 +129,7 @@ export function VoiceDock() {
                       <MessageContent
                         className={cn(
                           "leading-relaxed",
-                          turn.from === "driver" && "bg-primary text-primary-foreground",
+                          turn.from === "driver" && "border border-foreground bg-background text-foreground",
                         )}
                       >
                         {turn.from === "hercules" ? (
@@ -139,7 +139,7 @@ export function VoiceDock() {
                         )}
                       </MessageContent>
                       {turn.proposal ? (
-                        <div className="ml-0 max-w-sm rounded-2xl border border-primary/35 bg-secondary/55 p-3 text-sm">
+                        <div className="ml-0 max-w-sm rounded-2xl border border-foreground bg-background p-3 text-sm">
                           <p className="font-medium">{turn.proposal.summary}</p>
                           {turn.proposal.total ? (
                             <p className="mt-1 text-primary">{turn.proposal.total}</p>
@@ -204,7 +204,7 @@ export function VoiceDock() {
                   {bol.draft ? "Open BOL" : "Create BOL"}
                 </Button>
               </div>
-              <PromptInput onSubmit={submit} className="rounded-2xl border-border bg-secondary/45">
+              <PromptInput onSubmit={submit} className="rounded-2xl border-border bg-background">
                 <PromptInputTextarea
                   aria-label="Message Hercules"
                   placeholder="Message Hercules…"
