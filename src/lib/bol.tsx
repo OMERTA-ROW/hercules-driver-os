@@ -127,12 +127,15 @@ export function BolProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [emailTo, setEmailTo] = useState("");
   const [emailSubject, setEmailSubject] = useState("Bill of Lading draft");
-  const [emailBody, setEmailBody] = useState("Please review the attached Bill of Lading draft. Unknown fields require confirmation.");
+  const [emailBody, setEmailBody] = useState("Please review this Bill of Lading draft. Unknown fields require confirmation.");
 
   useEffect(() => {
     setDraft(null);
     setView(null);
     setError(null);
+    setEmailTo("");
+    setEmailSubject("Bill of Lading draft");
+    setEmailBody("Please review this Bill of Lading draft. Unknown fields require confirmation.");
   }, [userId]);
 
   const loadLatest = useCallback(async (): Promise<BolDraft | null> => {
@@ -193,7 +196,7 @@ export function BolProvider({ children }: { children: ReactNode }) {
       if (!existing) return { ok: false, message: "You do not have a saved BOL draft yet. Say “create a BOL” to start one." };
       setDraft(existing);
       if (intent === "open") setView("review");
-      if (intent === "print") setView("print");
+      if (intent === "print") setView("review");
       if (intent === "email") {
         setEmailSubject(`BOL draft${existing.loadReference ? ` — ${existing.loadReference}` : ""}`);
         setView("email");
@@ -201,7 +204,7 @@ export function BolProvider({ children }: { children: ReactNode }) {
       return {
         ok: true,
         message: intent === "print"
-          ? "I opened the print preview. Review it, then choose Print to open your device’s system print dialog."
+          ? "I opened your BOL for review. Choose Print preview when you are ready; I will not open the system print dialog without your tap."
           : intent === "email"
             ? "I opened an email draft. No mail provider is connected, so nothing can be sent from Hercules."
             : "I opened your latest BOL draft for review. Unknown fields stay marked, and signature lines remain unsigned.",
@@ -269,4 +272,9 @@ export function useBol() {
   const context = useContext(BolContext);
   if (!context) throw new Error("useBol must be used inside BolProvider");
   return context;
+}
+
+/** Voice lifecycle tests and isolated embeds may render without the document layer. */
+export function useOptionalBol() {
+  return useContext(BolContext);
 }

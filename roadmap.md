@@ -192,3 +192,11 @@ telemetry, parts suppliers, delivery partners, load boards.
 - [x] Upgrade the original voice dock with one compact text-and-voice conversation panel
 - [x] Verify send, voice stop, approve/decline, clear, minimize/reopen, desktop/mobile, tests, typecheck, and build
 - [x] Leave additive Freight backend tables isolated; do not remove data or migrations
+
+## Focused BOL extension
+
+- [x] Add owner-scoped structured BOL drafts using existing load, vehicle, and profile data
+- [x] Handle exact create/open/print/email BOL commands through the single voice/text pipeline
+- [x] Add compact edit, review, print-preview, and honest email-app fallback controls
+- [x] Verify signed-out authorization, desktop/mobile controls, tests, typecheck, and build
+- [ ] Verify authenticated save/reload when a test account exists (currently no auth users)

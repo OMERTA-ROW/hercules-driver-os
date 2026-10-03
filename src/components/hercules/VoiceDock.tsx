@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, MessageCircle, Mic, RotateCcw, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, FileText, MessageCircle, Mic, RotateCcw, Trash2, X } from "lucide-react";
 import type { ChatStatus } from "ai";
 import {
   Conversation,
@@ -19,12 +19,15 @@ import { cn } from "@/lib/utils";
 import { Orb } from "./Orb";
 import { BrightnessButton } from "./ThemeToggle";
 import { useVoice } from "@/lib/voice";
+import { useBol } from "@/lib/bol";
+import { toast } from "sonner";
 
 /**
  * VOICE DOCK — the original traveling orb, now opening the same real
  * conversation in a compact text-and-voice panel.
  */
 export function VoiceDock() {
+  const bol = useBol();
   const {
     mode,
     turns,
@@ -187,6 +190,21 @@ export function VoiceDock() {
             ) : null}
 
             <div className="border-t border-border/70 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">Paperwork</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={bol.busy}
+                  onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
+                    if (!result.ok) toast.error(result.message);
+                  })}
+                >
+                  <FileText />
+                  {bol.draft ? "Open BOL" : "Create BOL"}
+                </Button>
+              </div>
               <PromptInput onSubmit={submit} className="rounded-2xl border-border bg-secondary/45">
                 <PromptInputTextarea
                   aria-label="Message Hercules"

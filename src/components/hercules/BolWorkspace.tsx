@@ -11,6 +11,10 @@ function field(value: string) {
   return value.trim() || "Unknown — confirm before use";
 }
 
+export function isSafeEmailRecipient(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && !/[\r\n]/.test(value);
+}
+
 function BolPaper({ draft }: { draft: BolDraft }) {
   return (
     <article id="hercules-bol-print" className="bol-paper bg-card p-5 text-foreground sm:p-7">
@@ -52,13 +56,18 @@ export function BolWorkspace() {
   const emailing = bol.view === "email";
   const printing = bol.view === "print";
   const openEmailApp = () => {
+    if (!isSafeEmailRecipient(bol.emailTo)) {
+      toast.error("Enter one valid recipient email address.");
+      return;
+    }
     const params = new URLSearchParams({ subject: bol.emailSubject, body: `${bol.emailBody}\n\nThe BOL file cannot be attached automatically. Download or print the reviewed BOL, then attach it in your email app.` });
-    window.location.href = `mailto:${encodeURIComponent(bol.emailTo)}?${params.toString()}`;
+    window.location.href = `mailto:${bol.emailTo.trim()}?${params.toString()}`;
   };
   return <Dialog open onOpenChange={(open) => { if (!open) bol.close(); }}><DialogContent className="max-h-[94vh] max-w-3xl overflow-y-auto print:static print:max-h-none print:w-full print:max-w-none print:translate-x-0 print:translate-y-0 print:border-0 print:p-0">
     <DialogHeader className="print:hidden"><DialogTitle className="flex items-center gap-2"><FileText /> {editing ? "Edit BOL draft" : emailing ? "Email BOL draft" : printing ? "Print BOL preview" : "Review BOL draft"}</DialogTitle><DialogDescription>{missing.length ? `${missing.length} required field${missing.length === 1 ? " is" : "s are"} still unknown.` : "All core shipment fields are filled. Review every value before use."}</DialogDescription></DialogHeader>
-    {editing ? <EditFields draft={bol.draft} update={bol.setDraft} /> : emailing ? <div className="space-y-3 print:hidden"><label className="space-y-1 text-sm"><span>Recipient</span><Input type="email" value={bol.emailTo} onChange={(event) => bol.setEmailTo(event.target.value)} placeholder="recipient@example.com" /></label><label className="space-y-1 text-sm"><span>Subject</span><Input value={bol.emailSubject} onChange={(event) => bol.setEmailSubject(event.target.value)} /></label><label className="space-y-1 text-sm"><span>Message</span><Textarea value={bol.emailBody} onChange={(event) => bol.setEmailBody(event.target.value)} /></label><BolPaper draft={bol.draft} /><p className="text-xs text-muted-foreground">No Gmail or Outlook account is connected. “Open email app” creates a compose window only; it cannot attach this BOL or confirm delivery.</p></div> : <BolPaper draft={bol.draft} />}
+    {editing ? <EditFields draft={bol.draft} update={bol.setDraft} /> : emailing ? <div className="space-y-3 print:hidden"><label className="space-y-1 text-sm"><span>Recipient</span><Input type="email" value={bol.emailTo} onChange={(event) => bol.setEmailTo(event.target.value)} placeholder="recipient@example.com" aria-invalid={bol.emailTo.length > 0 && !isSafeEmailRecipient(bol.emailTo)} /></label><label className="space-y-1 text-sm"><span>Subject</span><Input value={bol.emailSubject} onChange={(event) => bol.setEmailSubject(event.target.value)} /></label><label className="space-y-1 text-sm"><span>Message</span><Textarea value={bol.emailBody} onChange={(event) => bol.setEmailBody(event.target.value)} /></label><BolPaper draft={bol.draft} /><p className="text-xs text-muted-foreground">Email is not connected. “Open email app” creates a compose window only; it does not attach this BOL, send it, or confirm delivery.</p></div> : <BolPaper draft={bol.draft} />}
     {bol.error ? <p role="alert" className="text-sm text-destructive print:hidden">{bol.error}</p> : null}
-    <DialogFooter className="gap-2 print:hidden"><Button variant="ghost" onClick={bol.close}>Cancel</Button>{editing ? <Button disabled={bol.busy} onClick={async () => { const result = await bol.save(); result.ok ? toast.success(result.message) : toast.error(result.message); if (result.ok) bol.setView("review"); }}><Save />Save draft</Button> : printing ? <Button onClick={() => window.print()}><Printer />Open system print dialog</Button> : emailing ? <Button disabled={!bol.emailTo.trim()} onClick={openEmailApp}><Mail />Open email app</Button> : <Button onClick={() => bol.setView("edit")}>Edit draft</Button>}</DialogFooter>
+    {printing ? <p className="text-xs text-muted-foreground print:hidden">To save a PDF, choose “Save as PDF” in your device’s print dialog. Hercules will not select a printer or start a job automatically.</p> : null}
+    <DialogFooter className="gap-2 print:hidden"><Button variant="ghost" onClick={bol.close}>Cancel</Button>{editing ? <Button disabled={bol.busy} onClick={async () => { const result = await bol.save(); result.ok ? toast.success(result.message) : toast.error(result.message); if (result.ok) bol.setView("review"); }}><Save />Save draft</Button> : printing ? <Button onClick={() => window.print()}><Printer />Open system print dialog</Button> : emailing ? <Button disabled={!isSafeEmailRecipient(bol.emailTo)} onClick={openEmailApp}><Mail />Open email app</Button> : <><Button variant="outline" onClick={() => bol.setView("email")}><Mail />Email draft</Button><Button variant="outline" onClick={() => bol.setView("print")}><Printer />Print preview</Button><Button onClick={() => bol.setView("edit")}>Edit draft</Button></>}</DialogFooter>
   </DialogContent></Dialog>;
 }

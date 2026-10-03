@@ -34,6 +34,8 @@ import { ComplianceProvider } from "@/lib/compliance";
 import { ComplianceBridge } from "@/components/hercules/ComplianceBridge";
 import { LiveVoiceBridge } from "@/components/hercules/LiveVoiceBridge";
 import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
+import { BolProvider } from "@/lib/bol";
+import { BolWorkspace } from "@/components/hercules/BolWorkspace";
 
 function NotFoundComponent() {
   return (
@@ -159,19 +161,22 @@ function RootComponent() {
                           <PickupProvider>
                             <ArrivalsProvider>
                               <ComplianceProvider>
-                                <VoiceProvider>
-                                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                                  <Outlet />
-                                  <TripVehiclePrompt />
-                                  <LiveVoiceBridge />
-                                  <ArrivalBridge />
-                                  <ComplianceBridge />
-                                  <PickupBridge />
-                                  <ArrivalStack />
-                                  <PickupStack />
-                                  <ScreenDim />
-                                  <Toaster />
-                                </VoiceProvider>
+                                <BolProvider>
+                                  <VoiceProvider>
+                                    {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                                    <Outlet />
+                                    <TripVehiclePrompt />
+                                    <LiveVoiceBridge />
+                                    <ArrivalBridge />
+                                    <ComplianceBridge />
+                                    <PickupBridge />
+                                    <ArrivalStack />
+                                    <PickupStack />
+                                    <BolWorkspace />
+                                    <ScreenDim />
+                                    <Toaster />
+                                  </VoiceProvider>
+                                </BolProvider>
                               </ComplianceProvider>
                             </ArrivalsProvider>
                           </PickupProvider>
