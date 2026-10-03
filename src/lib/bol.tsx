@@ -270,3 +270,8 @@ export function useBol() {
   if (!context) throw new Error("useBol must be used inside BolProvider");
   return context;
 }
+
+/** Voice lifecycle tests and isolated embeds may render without the document layer. */
+export function useOptionalBol() {
+  return useContext(BolContext);
+}
