@@ -5,7 +5,7 @@ import { money, rpc, useFreight, useLoads, when } from "@/lib/freight";
 import { useInvalidate, useRows } from "@/lib/freight-data";
 import { Badge, Empty, ErrorNote, FButton, Loading, PageHeader, statusTone, Table, Td } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/invoices")({
+export const Route = createFileRoute("/freight-invoices")({
   head: () => ({ meta: [{ title: "Invoices — Hercules Freight OS" }, { name: "description", content: "Customer invoices and payment records." }] }),
   component: Invoices,
 });

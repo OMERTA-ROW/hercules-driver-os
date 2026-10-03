@@ -4,7 +4,7 @@ import { Building2, KeyRound } from "lucide-react";
 import { rpc, useFreight } from "@/lib/freight";
 import { ErrorNote, Field, FButton, FInput, FSelect, Logo } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/onboarding")({
+export const Route = createFileRoute("/freight-workspace")({
   head: () => ({ meta: [{ title: "Set up your company — Hercules Freight OS" }, { name: "description", content: "Create a company or join one with an invitation." }] }),
   component: Onboarding,
 });

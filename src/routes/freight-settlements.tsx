@@ -6,7 +6,7 @@ import { money, rpc, useFreight, useTeam } from "@/lib/freight";
 import { useInvalidate, useRows } from "@/lib/freight-data";
 import { Badge, Card, Empty, ErrorNote, Field, FButton, FInput, FSelect, Loading, PageHeader, statusTone, Table, Td } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/settlements")({
+export const Route = createFileRoute("/freight-settlements")({
   head: () => ({ meta: [{ title: "Settlements — Hercules Freight OS" }, { name: "description", content: "Driver and carrier settlements." }] }),
   component: Settlements,
 });

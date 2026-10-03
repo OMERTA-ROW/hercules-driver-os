@@ -6,7 +6,7 @@ import { money, rpc, useFreight, useLoads, when } from "@/lib/freight";
 import { useInvalidate, useRows } from "@/lib/freight-data";
 import { Badge, Card, Empty, FButton, Loading, PageHeader, statusTone } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/automation")({
+export const Route = createFileRoute("/freight-control")({
   head: () => ({ meta: [{ title: "Automation & approvals — Hercules Freight OS" }, { name: "description", content: "Assistive reminders and human approvals." }] }),
   component: Automation,
 });

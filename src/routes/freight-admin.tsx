@@ -6,7 +6,7 @@ import { ROLE_LABEL, rpc, useFreight, useTeam, when, type FreightRole } from "@/
 import { useInvalidate, useRows } from "@/lib/freight-data";
 import { Badge, Card, ErrorNote, Field, FButton, FInput, FSelect, Loading, PageHeader, Table, Td } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/freight-admin")({
   head: () => ({ meta: [{ title: "Admin — Hercules Freight OS" }, { name: "description", content: "Team, invitations, roles and audit log." }] }),
   component: Admin,
 });

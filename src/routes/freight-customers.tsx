@@ -3,7 +3,7 @@ import { Building2 } from "lucide-react";
 import { useFreight } from "@/lib/freight";
 import { Directory } from "@/components/freight/Directory";
 
-export const Route = createFileRoute("/_authenticated/customers")({
+export const Route = createFileRoute("/freight-customers")({
   head: () => ({ meta: [{ title: "Customers — Hercules Freight OS" }, { name: "description", content: "Shippers, consignees and broker customers." }] }),
   component: () => {
     const { has } = useFreight();

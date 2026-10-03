@@ -7,7 +7,7 @@ import { rpc, useFreight, useLoads, useTeam, type TeamMember } from "@/lib/freig
 import { useInvalidate } from "@/lib/freight-data";
 import { Badge, Empty, ErrorNote, FButton, FInput, Loading, PageHeader, Table, Td } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/drivers")({
+export const Route = createFileRoute("/freight-drivers")({
   head: () => ({ meta: [{ title: "Drivers — Hercules Freight OS" }, { name: "description", content: "Driver availability, licenses and history." }] }),
   component: Drivers,
 });

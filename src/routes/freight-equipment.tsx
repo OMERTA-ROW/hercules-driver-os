@@ -8,7 +8,7 @@ import { useInvalidate, useRows } from "@/lib/freight-data";
 import { Directory } from "@/components/freight/Directory";
 import { Card, Field, FButton, FInput, FSelect } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/equipment")({
+export const Route = createFileRoute("/freight-equipment")({
   head: () => ({ meta: [{ title: "Equipment — Hercules Freight OS" }, { name: "description", content: "Trucks, trailers, documents and maintenance." }] }),
   component: Equipment,
 });

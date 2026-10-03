@@ -7,7 +7,7 @@ import { useInvalidate } from "@/lib/freight-data";
 import { Directory } from "@/components/freight/Directory";
 import { FButton } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/carriers")({
+export const Route = createFileRoute("/freight-carriers")({
   head: () => ({ meta: [{ title: "Carriers — Hercules Freight OS" }, { name: "description", content: "Carrier directory and verification." }] }),
   component: Carriers,
 });
