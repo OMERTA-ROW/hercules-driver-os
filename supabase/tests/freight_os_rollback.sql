@@ -5,6 +5,8 @@ BEGIN;
 
 CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
 GRANT ALL ON t_ids TO authenticated;
+CREATE TEMP TABLE t_tok (k text, v text);
+GRANT ALL ON t_tok TO authenticated;
 
 INSERT INTO auth.users (id, email, email_confirmed_at, aud, role, instance_id)
 SELECT gen_random_uuid(), e, now(), 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000'
@@ -41,7 +43,6 @@ SELECT pg_temp.as_user('fx-admin');
 DO $$ DECLARE r jsonb; r2 jsonb; BEGIN
   r := public.freight_invite_create((SELECT v FROM t_ids WHERE k='co'), 'fx-driver@test.invalid', 'driver', 24);
   PERFORM pg_temp.ok((r->>'ok')::boolean, 'invite created');
-  CREATE TEMP TABLE IF NOT EXISTS t_tok(k text, v text); GRANT ALL ON t_tok TO authenticated;
   INSERT INTO t_tok VALUES ('drv', r->>'token');
   r2 := public.freight_invite_create((SELECT v FROM t_ids WHERE k='co'), 'fx-disp@test.invalid', 'dispatcher', 24);
   INSERT INTO t_tok VALUES ('disp', r2->>'token');
