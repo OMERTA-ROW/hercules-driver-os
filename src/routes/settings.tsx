@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   CreditCard,
-  Monitor,
   LogOut,
   Check,
   TriangleAlert,
@@ -19,7 +18,7 @@ import {
   Pill,
   DriverApprovedNote,
 } from "@/components/hercules/primitives";
-import { ThemePicker, BrightnessPicker, MotionPicker } from "@/components/hercules/ThemeToggle";
+import { MotionPicker } from "@/components/hercules/ThemeToggle";
 import { Orb } from "@/components/hercules/Orb";
 import { useVoice, orbColorways } from "@/lib/voice";
 import { VoicePicker } from "@/components/hercules/VoicePicker";
@@ -216,10 +215,9 @@ function Settings() {
         <Panel>
           <PanelTitle right={<Pill tone="primary">Applies app-wide</Pill>}>
             <span className="inline-flex items-center gap-2">
-              <Circle className="h-5 w-5 text-primary" /> Matte colorway
+              <Circle className="h-5 w-5 text-primary" /> Appearance
             </span>
           </PanelTitle>
-          <ColorwayGallery />
           <OrbPicker />
         </Panel>
 
@@ -246,26 +244,6 @@ function Settings() {
           <VoicePicker />
         </Panel>
 
-        <Panel>
-          <PanelTitle right={<Pill tone="info">Applies app-wide</Pill>}>
-            <span className="inline-flex items-center gap-2">
-              <Monitor className="h-5 w-5 text-primary" /> Display exposure
-            </span>
-          </PanelTitle>
-          <ThemePicker />
-          <p className="mt-3 text-xs text-muted-foreground">
-            Night stays dim for late running, Gray suits dusk and dawn, and Day raises contrast for
-            direct sun. Your selected matte colorway remains active in every exposure.
-          </p>
-
-          <div className="mt-5 border-t border-border pt-4">
-            <BrightnessPicker />
-            <p className="mt-3 text-xs text-muted-foreground">
-              The brightness step also lives one tap away on the voice bar and the orb screen, so
-              you never have to dig through settings at 3am. HERCULES suggests a level — you decide.
-            </p>
-          </div>
-        </Panel>
       </div>
     </AppShell>
   );
@@ -317,67 +295,11 @@ function HazardToggles() {
   );
 }
 
-/**
- * QUICK GALLERY — the five matte themes as small swatches, each showing its own
- * base, trim and glow, so a driver can flick through them right here.
- */
-function ColorwayGallery() {
-  const { colorway, setColorway } = useVoice();
-  return (
-    <div className="mb-4">
-      <Label>Quick preview</Label>
-      <div className="mt-1 flex gap-2 overflow-x-auto pb-2">
-        {orbColorways.map((o) => {
-          const active = colorway === o.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              data-colorway={o.id}
-              aria-pressed={active}
-              aria-label={`${o.label} — ${o.hint}`}
-              title={o.label}
-              onClick={() => setColorway(o.id)}
-              className={cn(
-                "matte-control flex min-h-14 shrink-0 items-center gap-2 rounded-full border px-3 py-2 transition-transform hover:-translate-y-0.5",
-                active ? "border-primary/70" : "border-border",
-              )}
-              style={{
-                background: "var(--matte-card)",
-                boxShadow: active
-                  ? "0 0 0 1px var(--primary), 0 12px 28px -18px var(--theme-shadow), 0 0 22px -8px var(--theme-glow)"
-                  : "0 10px 24px -20px var(--theme-shadow)",
-              }}
-            >
-              <span
-                aria-hidden
-                className="h-8 w-8 shrink-0 rounded-full border"
-                style={{
-                  background: "var(--matte-background)",
-                  borderColor: "var(--border)",
-                  boxShadow: "0 0 14px -4px var(--theme-glow)",
-                }}
-              />
-              <span
-                className="font-display text-xs uppercase tracking-[0.14em] whitespace-nowrap"
-                style={{ color: "var(--foreground)" }}
-              >
-                {o.label.replace("Matte ", "")}
-              </span>
-              {active ? <Check className="h-4 w-4" style={{ color: "var(--primary)" }} /> : null}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/** App-wide matte colorway, previewed with the same responsive orb used on the road. */
+/** App-wide flat theme, previewed with the same solid orb used on the road. */
 function OrbPicker() {
   const { colorway, setColorway, mode } = useVoice();
   return (
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-2 sm:grid-cols-3">
       {orbColorways.map((o) => {
         const active = colorway === o.id;
         return (
