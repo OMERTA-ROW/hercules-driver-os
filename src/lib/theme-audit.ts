@@ -181,10 +181,21 @@ export function resolveTokens(
     ...varsFor(blocks, (s) => s === `[data-colorway="${colorway}"]`),
   };
   const resolved: Record<string, Oklch> = {};
-  for (const [name, value] of Object.entries(raw)) {
-    const c = parseOklch(value);
-    if (c) resolved[name] = c;
-  }
+  const resolving = new Set<string>();
+  const resolve = (name: string): Oklch | null => {
+    if (resolved[name]) return resolved[name];
+    if (resolving.has(name)) return null;
+    const value = raw[name];
+    if (!value) return null;
+    resolving.add(name);
+    const direct = parseOklch(value);
+    const ref = /^var\((--[^)]+)\)$/.exec(value)?.[1];
+    const color = direct ?? (ref ? resolve(ref) : null);
+    resolving.delete(name);
+    if (color) resolved[name] = color;
+    return color;
+  };
+  for (const name of Object.keys(raw)) resolve(name);
 
   const light = resolved["--exposure-light"] ?? { l: 1, c: 0, h: 0, alpha: 1 };
   for (const [name, pct] of Object.entries(exposureMix(blocks, exposure))) {

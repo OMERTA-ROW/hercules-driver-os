@@ -10,8 +10,6 @@ import {
   contrastRatio,
   exposures,
   findSquareControls,
-  parseBlocks,
-  parseOklch,
   resolveTokens,
 } from "./theme-audit";
 
@@ -72,7 +70,8 @@ describe("three flat themes", () => {
     expect(css).not.toContain('[data-colorway="pink"]');
     expect(css).not.toContain('[data-colorway="turquoise"]');
     expect(css).toContain(".orb-state-speaking .orb-ripple-ring");
-    expect(css).not.toMatch(/\.orb-ripple-ring\s*\{[^}]*animation:/s);
+    const baseRing = css.match(/\.orb-ripple-ring\s*\{([^}]*)\}/s)?.[1] ?? "";
+    expect(baseRing).not.toContain("animation:");
   });
 });
 
