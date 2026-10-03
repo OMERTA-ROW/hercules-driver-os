@@ -171,12 +171,9 @@ Blocked — live verification not done:
 Still not connected (unchanged): payments/Stripe, commercial truck routing data, OBD-II
 telemetry, parts suppliers, delivery partners, load boards.
 
-## Current correction — simple Hercules setup bubble
-- [ ] Restore the existing Hercules frontend and navigation from the pre-Freight baseline
-- [ ] Add one-at-a-time setup bubble using existing account, equipment, voice, and theme capabilities
-- [ ] Verify close/reopen/back/skip/save on desktop and mobile; typecheck, tests, and build
-- [ ] Leave additive Freight backend tables isolated and document exactly what remains
-- [ ] Continue Freight OS in the existing simple Hercules base: restore operational screens without a redesign
-- [ ] Verify real auth, server-granted roles, tenant separation, approval gates, and backend grants/RLS
-- [ ] Add unique metadata for every content route
-- [ ] Run browser workflows, tests, typecheck, and confirm automatic build
+## Current correction — original Hercules conversation bubble
+- [x] Keep the original Hercules frontend and navigation from the pre-Freight baseline
+- [x] Remove the separate setup bubble and cancelled Freight OS screens from active use
+- [ ] Upgrade the original voice dock with one compact text-and-voice conversation panel
+- [ ] Verify send, voice stop, approve/decline, clear, minimize/reopen, desktop/mobile, tests, typecheck, and build
+- [x] Leave additive Freight backend tables isolated; do not remove data or migrations
