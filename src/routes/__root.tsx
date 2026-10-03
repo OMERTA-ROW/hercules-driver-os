@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -99,11 +100,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "HERCULES — Voice-First AI Dispatch for Drivers" },
+      { title: "Hercules Freight OS" },
       {
         name: "description",
         content:
-          "HERCULES is a voice-first AI dispatch and driver operating system for lease owner-operators. The AI proposes, the driver decides.",
+          "Hercules Freight OS — move freight with strength, clarity, and control.",
       },
       { name: "author", content: "ZEUS" },
       { property: "og:type", content: "website" },
