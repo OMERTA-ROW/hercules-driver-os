@@ -39,6 +39,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedLoadsIndexRouteImport } from './routes/_authenticated/loads.index'
+import { Route as AuthenticatedLoadsIdRouteImport } from './routes/_authenticated/loads.$id'
 import { Route as AuthenticatedLoadsNewRouteImport } from './routes/_authenticated/loads.new'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
@@ -191,6 +192,11 @@ const AuthenticatedLoadsIndexRoute = AuthenticatedLoadsIndexRouteImport.update({
   path: '/loads/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLoadsIdRoute = AuthenticatedLoadsIdRouteImport.update({
+  id: '/loads/$id',
+  path: '/loads/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLoadsNewRoute = AuthenticatedLoadsNewRouteImport.update({
   id: '/loads/new',
   path: '/loads/new',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/loads/': typeof AuthenticatedLoadsIndexRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/loads': typeof AuthenticatedLoadsIndexRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/_authenticated/loads/new': typeof AuthenticatedLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/_authenticated/loads/': typeof AuthenticatedLoadsIndexRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/auth/callback'
+    | '/loads/$id'
     | '/loads/new'
     | '/api/public/stripe-webhook'
     | '/loads/'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/auth/callback'
+    | '/loads/$id'
     | '/loads/new'
     | '/api/public/stripe-webhook'
     | '/loads'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/auth/callback'
+    | '/_authenticated/loads/$id'
     | '/_authenticated/loads/new'
     | '/api/public/stripe-webhook'
     | '/_authenticated/loads/'
@@ -649,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLoadsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/loads/$id': {
+      id: '/_authenticated/loads/$id'
+      path: '/loads/$id'
+      fullPath: '/loads/$id'
+      preLoaderRoute: typeof AuthenticatedLoadsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/loads/new': {
       id: '/_authenticated/loads/new'
       path: '/loads/new'
@@ -669,6 +688,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedLoadsIdRoute: typeof AuthenticatedLoadsIdRoute
   AuthenticatedLoadsNewRoute: typeof AuthenticatedLoadsNewRoute
   AuthenticatedLoadsIndexRoute: typeof AuthenticatedLoadsIndexRoute
 }
@@ -676,6 +696,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedLoadsIdRoute: AuthenticatedLoadsIdRoute,
   AuthenticatedLoadsNewRoute: AuthenticatedLoadsNewRoute,
   AuthenticatedLoadsIndexRoute: AuthenticatedLoadsIndexRoute,
 }
