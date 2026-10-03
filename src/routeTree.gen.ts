@@ -35,8 +35,14 @@ import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as AuthenticatedBrokerRouteImport } from './routes/_authenticated/broker'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDispatchRouteImport } from './routes/_authenticated/dispatch'
+import { Route as AuthenticatedDriverRouteImport } from './routes/_authenticated/driver'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedShipperRouteImport } from './routes/_authenticated/shipper'
+import { Route as AuthenticatedTrackingRouteImport } from './routes/_authenticated/tracking'
+import { Route as AuthenticatedTripsRouteImport } from './routes/_authenticated/trips'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedLoadsIndexRouteImport } from './routes/_authenticated/loads.index'
 import { Route as AuthenticatedLoadsIdRouteImport } from './routes/_authenticated/loads.$id'
@@ -172,14 +178,44 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBrokerRoute = AuthenticatedBrokerRouteImport.update({
+  id: '/broker',
+  path: '/broker',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDispatchRoute = AuthenticatedDispatchRouteImport.update({
+  id: '/dispatch',
+  path: '/dispatch',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDriverRoute = AuthenticatedDriverRouteImport.update({
+  id: '/driver',
+  path: '/driver',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedShipperRoute = AuthenticatedShipperRouteImport.update({
+  id: '/shipper',
+  path: '/shipper',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTrackingRoute = AuthenticatedTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTripsRoute = AuthenticatedTripsRouteImport.update({
+  id: '/trips',
+  path: '/trips',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -234,8 +270,14 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/broker': typeof AuthenticatedBrokerRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dispatch': typeof AuthenticatedDispatchRoute
+  '/driver': typeof AuthenticatedDriverRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/shipper': typeof AuthenticatedShipperRoute
+  '/tracking': typeof AuthenticatedTrackingRoute
+  '/trips': typeof AuthenticatedTripsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/loads/new': typeof AuthenticatedLoadsNewRoute
@@ -268,8 +310,14 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/broker': typeof AuthenticatedBrokerRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dispatch': typeof AuthenticatedDispatchRoute
+  '/driver': typeof AuthenticatedDriverRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/shipper': typeof AuthenticatedShipperRoute
+  '/tracking': typeof AuthenticatedTrackingRoute
+  '/trips': typeof AuthenticatedTripsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/loads/new': typeof AuthenticatedLoadsNewRoute
@@ -304,8 +352,14 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/_authenticated/broker': typeof AuthenticatedBrokerRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/dispatch': typeof AuthenticatedDispatchRoute
+  '/_authenticated/driver': typeof AuthenticatedDriverRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/shipper': typeof AuthenticatedShipperRoute
+  '/_authenticated/tracking': typeof AuthenticatedTrackingRoute
+  '/_authenticated/trips': typeof AuthenticatedTripsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/loads/$id': typeof AuthenticatedLoadsIdRoute
   '/_authenticated/loads/new': typeof AuthenticatedLoadsNewRoute
@@ -340,8 +394,14 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/broker'
     | '/dashboard'
+    | '/dispatch'
+    | '/driver'
     | '/onboarding'
+    | '/shipper'
+    | '/tracking'
+    | '/trips'
     | '/auth/callback'
     | '/loads/$id'
     | '/loads/new'
@@ -374,8 +434,14 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/broker'
     | '/dashboard'
+    | '/dispatch'
+    | '/driver'
     | '/onboarding'
+    | '/shipper'
+    | '/tracking'
+    | '/trips'
     | '/auth/callback'
     | '/loads/$id'
     | '/loads/new'
@@ -409,8 +475,14 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/_authenticated/broker'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dispatch'
+    | '/_authenticated/driver'
     | '/_authenticated/onboarding'
+    | '/_authenticated/shipper'
+    | '/_authenticated/tracking'
+    | '/_authenticated/trips'
     | '/auth/callback'
     | '/_authenticated/loads/$id'
     | '/_authenticated/loads/new'
@@ -633,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/broker': {
+      id: '/_authenticated/broker'
+      path: '/broker'
+      fullPath: '/broker'
+      preLoaderRoute: typeof AuthenticatedBrokerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -640,11 +719,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dispatch': {
+      id: '/_authenticated/dispatch'
+      path: '/dispatch'
+      fullPath: '/dispatch'
+      preLoaderRoute: typeof AuthenticatedDispatchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/driver': {
+      id: '/_authenticated/driver'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof AuthenticatedDriverRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/shipper': {
+      id: '/_authenticated/shipper'
+      path: '/shipper'
+      fullPath: '/shipper'
+      preLoaderRoute: typeof AuthenticatedShipperRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tracking': {
+      id: '/_authenticated/tracking'
+      path: '/tracking'
+      fullPath: '/tracking'
+      preLoaderRoute: typeof AuthenticatedTrackingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/trips': {
+      id: '/_authenticated/trips'
+      path: '/trips'
+      fullPath: '/trips'
+      preLoaderRoute: typeof AuthenticatedTripsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/auth/callback': {
@@ -686,16 +800,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBrokerRoute: typeof AuthenticatedBrokerRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDispatchRoute: typeof AuthenticatedDispatchRoute
+  AuthenticatedDriverRoute: typeof AuthenticatedDriverRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedShipperRoute: typeof AuthenticatedShipperRoute
+  AuthenticatedTrackingRoute: typeof AuthenticatedTrackingRoute
+  AuthenticatedTripsRoute: typeof AuthenticatedTripsRoute
   AuthenticatedLoadsIdRoute: typeof AuthenticatedLoadsIdRoute
   AuthenticatedLoadsNewRoute: typeof AuthenticatedLoadsNewRoute
   AuthenticatedLoadsIndexRoute: typeof AuthenticatedLoadsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBrokerRoute: AuthenticatedBrokerRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDispatchRoute: AuthenticatedDispatchRoute,
+  AuthenticatedDriverRoute: AuthenticatedDriverRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedShipperRoute: AuthenticatedShipperRoute,
+  AuthenticatedTrackingRoute: AuthenticatedTrackingRoute,
+  AuthenticatedTripsRoute: AuthenticatedTripsRoute,
   AuthenticatedLoadsIdRoute: AuthenticatedLoadsIdRoute,
   AuthenticatedLoadsNewRoute: AuthenticatedLoadsNewRoute,
   AuthenticatedLoadsIndexRoute: AuthenticatedLoadsIndexRoute,
