@@ -47,6 +47,7 @@ import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as FreightLoadsIdRouteImport } from './routes/freight-loads.$id'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -239,6 +240,11 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FreightLoadsIdRoute = FreightLoadsIdRouteImport.update({
+  id: '/freight-loads/$id',
+  path: '/freight-loads/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -410,6 +419,7 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -492,6 +503,7 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -534,6 +546,7 @@ export interface RootRouteChildren {
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
+  FreightLoadsIdRoute: typeof FreightLoadsIdRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -805,6 +818,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/freight-loads/$id': {
+      id: '/freight-loads/$id'
+      path: '/freight-loads/$id'
+      fullPath: '/freight-loads/$id'
+      preLoaderRoute: typeof FreightLoadsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -854,6 +874,7 @@ const rootRouteChildren: RootRouteChildren = {
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
+  FreightLoadsIdRoute: FreightLoadsIdRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

@@ -7,7 +7,7 @@ import { LoadForm } from "@/components/freight/LoadForm";
 import { LoadDocs } from "@/components/freight/LoadDocs";
 import { Badge, Card, ErrorNote, Field, FButton, FInput, FSelect, Loading, PageHeader, statusTone } from "@/components/freight/ui";
 
-export const Route = createFileRoute("/_authenticated/loads/$id")({
+export const Route = createFileRoute("/freight-loads/$id")({
   head: () => ({ meta: [{ title: "Load — Hercules Freight OS" }, { name: "description", content: "Load details, assignment, documents and timeline." }] }),
   component: LoadPage,
 });

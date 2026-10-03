@@ -51,15 +51,27 @@ export function FreightProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let alive = true;
-    void supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getUser()
+      .then(({ data }) => {
+        if (!alive) return;
+        setUserId(data.user?.id ?? null);
+        setEmail(data.user?.email ?? null);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setUserId(null);
+        setEmail(null);
+      });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!alive) return;
-      setUserId(data.user?.id ?? null);
-      setEmail(data.user?.email ?? null);
+      setUserId(session?.user.id ?? null);
+      setEmail(session?.user.email ?? null);
     });
     setCoId(localStorage.getItem(CO_KEY));
     setRoleSel(localStorage.getItem(ROLE_KEY) as FreightRole | null);
     return () => {
       alive = false;
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
@@ -107,7 +119,7 @@ export function FreightProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(
     () => ({
-      ready: !!userId && !ctxQ.isLoading,
+      ready: !userId || (!ctxQ.isLoading && !ctxQ.isFetching),
       userId,
       email,
       companies,
