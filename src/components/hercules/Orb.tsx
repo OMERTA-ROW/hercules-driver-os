@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { OrbColorway, VoiceMode } from "@/lib/voice";
+import { useVoice, type OrbColorway, type VoiceMode } from "@/lib/voice";
 
 /** Solid Hercules control. Ripples exist only while real audio owns speaking mode. */
 export function Orb({
@@ -50,5 +50,18 @@ export function Orb({
     >
       {body}
     </button>
+  );
+}
+
+/** Convenience wrapper bound to the real voice lifecycle. */
+export function LiveOrb({ className }: { className?: string | undefined }) {
+  const { mode, colorway, listen, stop } = useVoice();
+  return (
+    <Orb
+      className={className}
+      mode={mode}
+      colorway={colorway}
+      onActivate={mode === "idle" ? listen : stop}
+    />
   );
 }
