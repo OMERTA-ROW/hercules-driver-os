@@ -4,15 +4,18 @@ import { toast } from "sonner";
 import { Copy } from "lucide-react";
 import { ROLE_LABEL, rpc, useFreight, useTeam, when, type FreightRole } from "@/lib/freight";
 import { useInvalidate, useRows } from "@/lib/freight-data";
+import { FreightRoute } from "@/components/freight/FreightWorkspace";
 import { Badge, Card, ErrorNote, Field, FButton, FInput, FSelect, Loading, PageHeader, Table, Td } from "@/components/freight/ui";
 
 export const Route = createFileRoute("/freight-admin")({
   head: () => ({ meta: [{ title: "Admin — Hercules Freight OS" }, { name: "description", content: "Team, invitations, roles and audit log." }] }),
-  component: Admin,
+  component: Page,
 });
 
 type Invite = { id: string; email: string; role: string; expires_at: string; used_at: string | null; revoked: boolean; created_at: string };
 type Audit = { id: string; action: string; entity: string; created_at: string; detail: Record<string, unknown> | null };
+
+function Page() { return <FreightRoute title="Freight admin"><Admin /></FreightRoute>; }
 
 function Admin() {
   const { company, has, userId } = useFreight();

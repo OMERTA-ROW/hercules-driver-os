@@ -2,11 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Building2, KeyRound } from "lucide-react";
 import { rpc, useFreight } from "@/lib/freight";
+import { FreightRoute } from "@/components/freight/FreightWorkspace";
 import { ErrorNote, Field, FButton, FInput, FSelect, Logo } from "@/components/freight/ui";
 
 export const Route = createFileRoute("/freight-workspace")({
   head: () => ({ meta: [{ title: "Set up your company — Hercules Freight OS" }, { name: "description", content: "Create a company or join one with an invitation." }] }),
-  component: Onboarding,
+  component: Page,
 });
 
 const TYPES = [
@@ -16,6 +17,8 @@ const TYPES = [
   { v: "broker", l: "Freight broker" },
   { v: "shipper", l: "Shipper" },
 ];
+
+function Page() { return <FreightRoute title="Freight workspace"><Onboarding /></FreightRoute>; }
 
 function Onboarding() {
   const { refresh, companies, email } = useFreight();
@@ -29,7 +32,7 @@ function Onboarding() {
 
   const done = async () => {
     await refresh();
-    void navigate({ to: "/dashboard" });
+    void navigate({ to: "/freight" });
   };
   const create = async (e: FormEvent) => {
     e.preventDefault();
@@ -87,7 +90,7 @@ function Onboarding() {
           </form>
         )}
       </div>
-      {companies.length > 0 && <FButton variant="ghost" className="mt-4" onClick={() => navigate({ to: "/dashboard" })}>Back to workspace</FButton>}
+      {companies.length > 0 && <FButton variant="ghost" className="mt-4" onClick={() => navigate({ to: "/freight" })}>Back to workspace</FButton>}
     </div>
   );
 }

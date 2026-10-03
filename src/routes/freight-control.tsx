@@ -4,11 +4,12 @@ import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { money, rpc, useFreight, useLoads, when } from "@/lib/freight";
 import { useInvalidate, useRows } from "@/lib/freight-data";
+import { FreightRoute } from "@/components/freight/FreightWorkspace";
 import { Badge, Card, Empty, FButton, Loading, PageHeader, statusTone } from "@/components/freight/ui";
 
 export const Route = createFileRoute("/freight-control")({
   head: () => ({ meta: [{ title: "Automation & approvals — Hercules Freight OS" }, { name: "description", content: "Assistive reminders and human approvals." }] }),
-  component: Automation,
+  component: Page,
 });
 
 const RULES: Record<string, { name: string; trigger: string; action: string }> = {
@@ -24,6 +25,8 @@ const ACTION: Record<string, string> = { reassign: "Reassign driver/equipment", 
 type Rule = { id: string; kind: string; enabled: boolean; approval_required: boolean };
 type Run = { id: string; title: string; why: string; status: string; load_id: string | null; created_at: string; error: string | null; rule_id: string | null };
 type Appr = { id: string; action: string; status: string; reason: string | null; why: string | null; payload: Record<string, unknown>; load_id: string | null; requested_by: string; created_at: string; error: string | null; target_version: number | null };
+
+function Page() { return <FreightRoute title="Approvals"><Automation /></FreightRoute>; }
 
 function Automation() {
   const { company, has, userId } = useFreight();
@@ -77,7 +80,7 @@ function Automation() {
               return (
                 <Card key={a.id}>
                   <div className="flex justify-between"><p className="font-semibold">{ACTION[a.action]}</p><Badge tone="warn">Pending</Badge></div>
-                  {a.load_id && <p className="text-sm">Load <Link to="/loads/$id" params={{ id: a.load_id }} className="text-primary underline">{ref(a.load_id)?.reference ?? "open"}</Link>{a.target_version != null && ` · version ${a.target_version}`}</p>}
+                  {a.load_id && <p className="text-sm">Load <Link to="/freight-loads/$id" params={{ id: a.load_id }} className="text-primary underline">{ref(a.load_id)?.reference ?? "open"}</Link>{a.target_version != null && ` · version ${a.target_version}`}</p>}
                   {a.reason && <p className="mt-1 text-sm">{a.reason}</p>}
                   {typeof a.payload["customer_rate_cents"] === "number" && <p className="text-sm">New rate {money(a.payload["customer_rate_cents"] as number)}</p>}
                   {typeof a.payload["body"] === "string" && <p className="mt-1 rounded bg-surface p-2 text-sm">“{a.payload["body"] as string}”</p>}
@@ -100,7 +103,7 @@ function Automation() {
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{r.title}</p>
                   <p className="text-sm text-muted-foreground"><strong>Why this was suggested:</strong> {r.why}</p>
-                  {r.load_id && <Link to="/loads/$id" params={{ id: r.load_id }} className="text-sm text-primary underline">Open load {ref(r.load_id)?.reference}</Link>}
+                  {r.load_id && <Link to="/freight-loads/$id" params={{ id: r.load_id }} className="text-sm text-primary underline">Open load {ref(r.load_id)?.reference}</Link>}
                 </div>
                 <FButton size="sm" variant="outline" onClick={() => review(r.id, "done")}>Mark done</FButton>
                 <FButton size="sm" variant="ghost" onClick={() => review(r.id, "dismissed")}>Dismiss</FButton>

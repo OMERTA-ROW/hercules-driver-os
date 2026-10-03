@@ -5,15 +5,18 @@ import { OP_LABEL, OP_STEPS, STATUS_LABEL, money, rpc, useFreight, useLoads, use
 import { useInvalidate, useRows } from "@/lib/freight-data";
 import { LoadForm } from "@/components/freight/LoadForm";
 import { LoadDocs } from "@/components/freight/LoadDocs";
+import { FreightRoute } from "@/components/freight/FreightWorkspace";
 import { Badge, Card, ErrorNote, Field, FButton, FInput, FSelect, Loading, PageHeader, statusTone } from "@/components/freight/ui";
 
 export const Route = createFileRoute("/freight-loads/$id")({
   head: () => ({ meta: [{ title: "Load — Hercules Freight OS" }, { name: "description", content: "Load details, assignment, documents and timeline." }] }),
-  component: LoadPage,
+  component: Page,
 });
 
 type Ev = { id: string; kind: string; from_value: string | null; to_value: string | null; reason: string | null; created_at: string; version: number };
 type Fin = { load_id: string; customer_rate_cents: number | null; carrier_pay_cents: number | null; driver_pay_cents: number | null; rate_confirmed: boolean };
+
+function Page() { return <FreightRoute title="Load details"><LoadPage /></FreightRoute>; }
 
 function LoadPage() {
   const { id } = Route.useParams();
@@ -23,7 +26,7 @@ function LoadPage() {
   const [edit, setEdit] = useState(false);
   const inv = useInvalidate();
   if (loads.isLoading) return <Loading />;
-  if (!l) return <ErrorNote>This load doesn't exist or isn't visible to your role. <Link to="/loads" className="underline">Back to loads</Link></ErrorNote>;
+  if (!l) return <ErrorNote>This load doesn't exist or isn't visible to your role. <Link to="/freight" className="underline">Back to loads</Link></ErrorNote>;
   const mgr = has("admin", "dispatcher", "broker");
   const isDriver = l.driver_id === userId;
 
