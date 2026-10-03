@@ -249,6 +249,17 @@ export function VoiceDock() {
             </p>
           </button>
 
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={() => setOpen((current) => !current)}
+            aria-label={open ? "Minimize Hercules conversation" : "Open Hercules conversation"}
+            aria-expanded={open}
+            title={open ? "Minimize conversation" : "Open conversation"}
+          >
+            {open ? <ChevronDown /> : <MessageCircle />}
+          </Button>
           <BrightnessButton />
         </div>
       </div>
