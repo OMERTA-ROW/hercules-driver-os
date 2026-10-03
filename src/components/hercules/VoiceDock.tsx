@@ -228,7 +228,7 @@ export function VoiceDock() {
             className="min-w-0 flex-1 text-left"
             onClick={() => setOpen(true)}
             aria-expanded={open}
-            aria-label="Open Hercules conversation"
+            aria-label="Open Hercules chat from latest reply"
           >
             <span className="tech-label text-voice-accent">
               {mode === "listening"
