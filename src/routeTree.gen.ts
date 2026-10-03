@@ -35,6 +35,9 @@ import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedAutomationRouteImport } from './routes/_authenticated/automation'
 import { Route as AuthenticatedBrokerRouteImport } from './routes/_authenticated/broker'
 import { Route as AuthenticatedCarriersRouteImport } from './routes/_authenticated/carriers'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
@@ -45,9 +48,11 @@ import { Route as AuthenticatedDriverRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedDriversRouteImport } from './routes/_authenticated/drivers'
 import { Route as AuthenticatedEquipmentRouteImport } from './routes/_authenticated/equipment'
 import { Route as AuthenticatedFleetRouteImport } from './routes/_authenticated/fleet'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSettlementsRouteImport } from './routes/_authenticated/settlements'
 import { Route as AuthenticatedShipperRouteImport } from './routes/_authenticated/shipper'
 import { Route as AuthenticatedTrackingRouteImport } from './routes/_authenticated/tracking'
@@ -187,6 +192,21 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAutomationRoute = AuthenticatedAutomationRouteImport.update({
+  id: '/automation',
+  path: '/automation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedBrokerRoute = AuthenticatedBrokerRouteImport.update({
   id: '/broker',
   path: '/broker',
@@ -237,6 +257,12 @@ const AuthenticatedFleetRoute = AuthenticatedFleetRouteImport.update({
   path: '/fleet',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -250,6 +276,11 @@ const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettlementsRoute =
@@ -325,6 +356,9 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/automation': typeof AuthenticatedAutomationRoute
   '/broker': typeof AuthenticatedBrokerRoute
   '/carriers': typeof AuthenticatedCarriersRoute
   '/customers': typeof AuthenticatedCustomersRoute
@@ -335,9 +369,11 @@ export interface FileRoutesByFullPath {
   '/drivers': typeof AuthenticatedDriversRoute
   '/equipment': typeof AuthenticatedEquipmentRoute
   '/fleet': typeof AuthenticatedFleetRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/settlements': typeof AuthenticatedSettlementsRoute
   '/shipper': typeof AuthenticatedShipperRoute
   '/tracking': typeof AuthenticatedTrackingRoute
@@ -374,6 +410,9 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/automation': typeof AuthenticatedAutomationRoute
   '/broker': typeof AuthenticatedBrokerRoute
   '/carriers': typeof AuthenticatedCarriersRoute
   '/customers': typeof AuthenticatedCustomersRoute
@@ -384,9 +423,11 @@ export interface FileRoutesByTo {
   '/drivers': typeof AuthenticatedDriversRoute
   '/equipment': typeof AuthenticatedEquipmentRoute
   '/fleet': typeof AuthenticatedFleetRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/settlements': typeof AuthenticatedSettlementsRoute
   '/shipper': typeof AuthenticatedShipperRoute
   '/tracking': typeof AuthenticatedTrackingRoute
@@ -425,6 +466,9 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/automation': typeof AuthenticatedAutomationRoute
   '/_authenticated/broker': typeof AuthenticatedBrokerRoute
   '/_authenticated/carriers': typeof AuthenticatedCarriersRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
@@ -435,9 +479,11 @@ export interface FileRoutesById {
   '/_authenticated/drivers': typeof AuthenticatedDriversRoute
   '/_authenticated/equipment': typeof AuthenticatedEquipmentRoute
   '/_authenticated/fleet': typeof AuthenticatedFleetRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/settlements': typeof AuthenticatedSettlementsRoute
   '/_authenticated/shipper': typeof AuthenticatedShipperRoute
   '/_authenticated/tracking': typeof AuthenticatedTrackingRoute
@@ -476,6 +522,9 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/admin'
+    | '/analytics'
+    | '/automation'
     | '/broker'
     | '/carriers'
     | '/customers'
@@ -486,9 +535,11 @@ export interface FileRouteTypes {
     | '/drivers'
     | '/equipment'
     | '/fleet'
+    | '/integrations'
     | '/invoices'
     | '/messages'
     | '/onboarding'
+    | '/settings'
     | '/settlements'
     | '/shipper'
     | '/tracking'
@@ -525,6 +576,9 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/admin'
+    | '/analytics'
+    | '/automation'
     | '/broker'
     | '/carriers'
     | '/customers'
@@ -535,9 +589,11 @@ export interface FileRouteTypes {
     | '/drivers'
     | '/equipment'
     | '/fleet'
+    | '/integrations'
     | '/invoices'
     | '/messages'
     | '/onboarding'
+    | '/settings'
     | '/settlements'
     | '/shipper'
     | '/tracking'
@@ -575,6 +631,9 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/_authenticated/admin'
+    | '/_authenticated/analytics'
+    | '/_authenticated/automation'
     | '/_authenticated/broker'
     | '/_authenticated/carriers'
     | '/_authenticated/customers'
@@ -585,9 +644,11 @@ export interface FileRouteTypes {
     | '/_authenticated/drivers'
     | '/_authenticated/equipment'
     | '/_authenticated/fleet'
+    | '/_authenticated/integrations'
     | '/_authenticated/invoices'
     | '/_authenticated/messages'
     | '/_authenticated/onboarding'
+    | '/_authenticated/settings'
     | '/_authenticated/settlements'
     | '/_authenticated/shipper'
     | '/_authenticated/tracking'
@@ -814,6 +875,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/automation': {
+      id: '/_authenticated/automation'
+      path: '/automation'
+      fullPath: '/automation'
+      preLoaderRoute: typeof AuthenticatedAutomationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/broker': {
       id: '/_authenticated/broker'
       path: '/broker'
@@ -884,6 +966,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFleetRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/invoices': {
       id: '/_authenticated/invoices'
       path: '/invoices'
@@ -903,6 +992,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settlements': {
@@ -972,6 +1068,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedAutomationRoute: typeof AuthenticatedAutomationRoute
   AuthenticatedBrokerRoute: typeof AuthenticatedBrokerRoute
   AuthenticatedCarriersRoute: typeof AuthenticatedCarriersRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
@@ -982,9 +1081,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDriversRoute: typeof AuthenticatedDriversRoute
   AuthenticatedEquipmentRoute: typeof AuthenticatedEquipmentRoute
   AuthenticatedFleetRoute: typeof AuthenticatedFleetRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSettlementsRoute: typeof AuthenticatedSettlementsRoute
   AuthenticatedShipperRoute: typeof AuthenticatedShipperRoute
   AuthenticatedTrackingRoute: typeof AuthenticatedTrackingRoute
@@ -995,6 +1096,9 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedAutomationRoute: AuthenticatedAutomationRoute,
   AuthenticatedBrokerRoute: AuthenticatedBrokerRoute,
   AuthenticatedCarriersRoute: AuthenticatedCarriersRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
@@ -1005,9 +1109,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDriversRoute: AuthenticatedDriversRoute,
   AuthenticatedEquipmentRoute: AuthenticatedEquipmentRoute,
   AuthenticatedFleetRoute: AuthenticatedFleetRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSettlementsRoute: AuthenticatedSettlementsRoute,
   AuthenticatedShipperRoute: AuthenticatedShipperRoute,
   AuthenticatedTrackingRoute: AuthenticatedTrackingRoute,
