@@ -24,6 +24,7 @@ import { Route as DriverRouteImport } from './routes/driver'
 import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
+import { Route as FreightRouteImport } from './routes/freight'
 import { Route as FreightAdminRouteImport } from './routes/freight-admin'
 import { Route as FreightCarriersRouteImport } from './routes/freight-carriers'
 import { Route as FreightControlRouteImport } from './routes/freight-control'
@@ -48,6 +49,7 @@ import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
 import { Route as FreightLoadsIdRouteImport } from './routes/freight-loads.$id'
+import { Route as FreightLoadsNewRouteImport } from './routes/freight-loads.new'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -123,6 +125,11 @@ const FinancialsRoute = FinancialsRouteImport.update({
 const FleetRoute = FleetRouteImport.update({
   id: '/fleet',
   path: '/fleet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightRoute = FreightRouteImport.update({
+  id: '/freight',
+  path: '/freight',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FreightAdminRoute = FreightAdminRouteImport.update({
@@ -245,6 +252,11 @@ const FreightLoadsIdRoute = FreightLoadsIdRouteImport.update({
   path: '/freight-loads/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FreightLoadsNewRoute = FreightLoadsNewRouteImport.update({
+  id: '/freight-loads/new',
+  path: '/freight-loads/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -267,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
   '/freight-admin': typeof FreightAdminRoute
   '/freight-carriers': typeof FreightCarriersRoute
   '/freight-control': typeof FreightControlRoute
@@ -291,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +323,7 @@ export interface FileRoutesByTo {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
   '/freight-admin': typeof FreightAdminRoute
   '/freight-carriers': typeof FreightCarriersRoute
   '/freight-control': typeof FreightControlRoute
@@ -333,6 +348,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -352,6 +368,7 @@ export interface FileRoutesById {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
   '/freight-admin': typeof FreightAdminRoute
   '/freight-carriers': typeof FreightCarriersRoute
   '/freight-control': typeof FreightControlRoute
@@ -376,6 +393,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
   '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -396,6 +414,7 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
     | '/freight-admin'
     | '/freight-carriers'
     | '/freight-control'
@@ -420,6 +439,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/zeus'
     | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -438,6 +458,7 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
     | '/freight-admin'
     | '/freight-carriers'
     | '/freight-control'
@@ -462,6 +483,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/zeus'
     | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -480,6 +502,7 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
     | '/freight-admin'
     | '/freight-carriers'
     | '/freight-control'
@@ -504,6 +527,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/zeus'
     | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -523,6 +547,7 @@ export interface RootRouteChildren {
   EquipmentRoute: typeof EquipmentRoute
   FinancialsRoute: typeof FinancialsRoute
   FleetRoute: typeof FleetRoute
+  FreightRoute: typeof FreightRoute
   FreightAdminRoute: typeof FreightAdminRoute
   FreightCarriersRoute: typeof FreightCarriersRoute
   FreightControlRoute: typeof FreightControlRoute
@@ -547,6 +572,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
   FreightLoadsIdRoute: typeof FreightLoadsIdRoute
+  FreightLoadsNewRoute: typeof FreightLoadsNewRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -655,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/fleet'
       fullPath: '/fleet'
       preLoaderRoute: typeof FleetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight': {
+      id: '/freight'
+      path: '/freight'
+      fullPath: '/freight'
+      preLoaderRoute: typeof FreightRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/freight-admin': {
@@ -825,6 +858,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreightLoadsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/freight-loads/new': {
+      id: '/freight-loads/new'
+      path: '/freight-loads/new'
+      fullPath: '/freight-loads/new'
+      preLoaderRoute: typeof FreightLoadsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -851,6 +891,7 @@ const rootRouteChildren: RootRouteChildren = {
   EquipmentRoute: EquipmentRoute,
   FinancialsRoute: FinancialsRoute,
   FleetRoute: FleetRoute,
+  FreightRoute: FreightRoute,
   FreightAdminRoute: FreightAdminRoute,
   FreightCarriersRoute: FreightCarriersRoute,
   FreightControlRoute: FreightControlRoute,
@@ -875,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
   FreightLoadsIdRoute: FreightLoadsIdRoute,
+  FreightLoadsNewRoute: FreightLoadsNewRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
