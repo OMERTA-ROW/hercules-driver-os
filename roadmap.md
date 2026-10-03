@@ -176,3 +176,7 @@ telemetry, parts suppliers, delivery partners, load boards.
 - [ ] Add one-at-a-time setup bubble using existing account, equipment, voice, and theme capabilities
 - [ ] Verify close/reopen/back/skip/save on desktop and mobile; typecheck, tests, and build
 - [ ] Leave additive Freight backend tables isolated and document exactly what remains
+- [ ] Continue Freight OS in the existing simple Hercules base: restore operational screens without a redesign
+- [ ] Verify real auth, server-granted roles, tenant separation, approval gates, and backend grants/RLS
+- [ ] Add unique metadata for every content route
+- [ ] Run browser workflows, tests, typecheck, and confirm automatic build
