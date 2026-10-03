@@ -198,4 +198,5 @@ telemetry, parts suppliers, delivery partners, load boards.
 - [x] Add owner-scoped structured BOL drafts using existing load, vehicle, and profile data
 - [x] Handle exact create/open/print/email BOL commands through the single voice/text pipeline
 - [x] Add compact edit, review, print-preview, and honest email-app fallback controls
-- [ ] Verify authenticated persistence, desktop/mobile controls, tests, typecheck, and build
+- [x] Verify signed-out authorization, desktop/mobile controls, tests, typecheck, and build
+- [ ] Verify authenticated save/reload when a test account exists (currently no auth users)
