@@ -644,6 +644,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          bol_data: Json | null
           created_at: string
           expires_at: string | null
           id: string
@@ -659,6 +660,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bol_data?: Json | null
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -674,6 +676,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bol_data?: Json | null
           created_at?: string
           expires_at?: string | null
           id?: string
