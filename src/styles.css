@@ -1071,23 +1071,7 @@
   --theme-shadow: oklch(0.015 0 0 / 0.9);
 }
 
-[data-colorway="pink"] {
-  --matte-background: oklch(0.22 0.055 350);
-  --matte-card: oklch(0.29 0.06 350);
-  --matte-popover: oklch(0.31 0.058 350);
-  --steel: oklch(0.255 0.052 350);
-  --primary: oklch(0.84 0.09 205);
-  --primary-foreground: oklch(0.2 0.045 210);
-  --secondary: oklch(0.37 0.07 350);
-  --muted: oklch(0.33 0.045 350);
-  --accent: oklch(0.38 0.065 205);
-  --border: oklch(0.64 0.075 205);
-  --input: oklch(0.45 0.055 205);
-  --ring: oklch(0.86 0.08 205);
-  --violet: oklch(0.75 0.1 205);
-  --theme-glow: oklch(0.84 0.09 205 / 0.58);
-  --theme-shadow: oklch(0.12 0.04 350 / 0.82);
-}
+
 
 [data-colorway="grey"] {
   --matte-background: oklch(0.2 0.008 250);
@@ -1107,50 +1091,9 @@
   --theme-shadow: oklch(0.08 0.005 250 / 0.82);
 }
 
-[data-colorway="gold"] {
-  --matte-background: oklch(0.58 0.1 78);
-  --foreground: oklch(0.08 0.012 70);
-  --matte-card: oklch(0.65 0.1 80);
-  --card-foreground: oklch(0.08 0.012 70);
-  --matte-popover: oklch(0.68 0.1 82);
-  --popover-foreground: oklch(0.07 0.01 70);
-  --steel: oklch(0.55 0.085 78);
-  --steel-foreground: oklch(0.14 0.018 70);
-  --primary: oklch(0.12 0.018 70);
-  --primary-foreground: oklch(0.78 0.12 82);
-  --secondary: oklch(0.68 0.1 82);
-  --secondary-foreground: oklch(0.13 0.018 70);
-  --muted: oklch(0.63 0.075 80);
-  --muted-foreground: oklch(0.18 0.02 70);
-  --accent: oklch(0.72 0.11 82);
-  --accent-foreground: oklch(0.1 0.015 70);
-  --border: oklch(0.17 0.025 70);
-  --input: oklch(0.18 0.025 70);
-  --ring: oklch(0.08 0.01 70);
-  --violet: oklch(0.2 0.025 70);
-  --theme-glow: oklch(0.04 0.005 70 / 0.7);
-  --theme-shadow: oklch(0.04 0.005 70 / 0.76);
-  --voice-text: oklch(0.16 0.02 70);
-  --voice-text-dim: oklch(0.28 0.025 70);
-}
 
-[data-colorway="turquoise"] {
-  --matte-background: oklch(0.2 0.055 190);
-  --matte-card: oklch(0.27 0.065 190);
-  --matte-popover: oklch(0.29 0.065 190);
-  --steel: oklch(0.235 0.055 190);
-  --primary: oklch(0.76 0.13 28);
-  --primary-foreground: oklch(0.2 0.045 25);
-  --secondary: oklch(0.35 0.07 190);
-  --muted: oklch(0.31 0.05 190);
-  --accent: oklch(0.38 0.075 28);
-  --border: oklch(0.62 0.11 28);
-  --input: oklch(0.43 0.075 28);
-  --ring: oklch(0.78 0.13 28);
-  --violet: oklch(0.68 0.12 28);
-  --theme-glow: oklch(0.76 0.13 28 / 0.58);
-  --theme-shadow: oklch(0.08 0.03 190 / 0.84);
-}
+
+
 
 /* Exposure changes luminance while preserving each colorway's authored hue. */
 [data-colorway] {
