@@ -8,6 +8,20 @@
       "when": 1791057851927,
       "tag": "0000_freight_os_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791058440395,
+      "tag": "0001_freight_os_routines",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791058607034,
+      "tag": "0002_freight_revoke_direct_writes",
+      "breakpoints": true
     }
   ]
 }

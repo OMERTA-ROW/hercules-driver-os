@@ -2709,6 +2709,130 @@ export type Database = {
       company_member_remove: { Args: { _member: string }; Returns: Json }
       company_my_memberships: { Args: never; Returns: Json }
       company_roster: { Args: { _company: string }; Returns: Json }
+      freight_approval_decide: {
+        Args: { _approval: string; _approve: boolean; _note: string }
+        Returns: Json
+      }
+      freight_approval_request: {
+        Args: {
+          _action: string
+          _company: string
+          _load: string
+          _payload: Json
+          _reason: string
+          _why: string
+        }
+        Returns: Json
+      }
+      freight_automation_scan: { Args: { _company: string }; Returns: Json }
+      freight_commercial_status: {
+        Args: {
+          _expected_version: number
+          _load: string
+          _reason: string
+          _to: string
+        }
+        Returns: Json
+      }
+      freight_company_create: {
+        Args: { _business_type: string; _name: string }
+        Returns: Json
+      }
+      freight_doc_abort: { Args: { _doc: string }; Returns: Json }
+      freight_doc_finalize: { Args: { _doc: string }; Returns: Json }
+      freight_doc_register: {
+        Args: {
+          _company: string
+          _driver: string
+          _equipment: string
+          _file_name: string
+          _kind: string
+          _load: string
+          _mime: string
+          _size: number
+        }
+        Returns: Json
+      }
+      freight_doc_review: {
+        Args: { _approve: boolean; _doc: string; _note: string }
+        Returns: Json
+      }
+      freight_driver_profile_upsert: {
+        Args: { _company: string; _user: string }
+        Returns: Json
+      }
+      freight_driver_respond: {
+        Args: { _accept: boolean; _load: string; _reason: string }
+        Returns: Json
+      }
+      freight_exception_resolve: {
+        Args: { _exception: string; _resolution: string }
+        Returns: Json
+      }
+      freight_invite_accept: { Args: { _token: string }; Returns: Json }
+      freight_invite_create: {
+        Args: {
+          _company: string
+          _email: string
+          _hours: number
+          _role: string
+        }
+        Returns: Json
+      }
+      freight_invite_revoke: { Args: { _invite: string }; Returns: Json }
+      freight_invoice_draft: { Args: { _load: string }; Returns: Json }
+      freight_load_assign: {
+        Args: {
+          _driver: string
+          _expected_version: number
+          _load: string
+          _trailer: string
+          _truck: string
+        }
+        Returns: Json
+      }
+      freight_load_save: {
+        Args: {
+          _company: string
+          _expected_version: number
+          _f: Json
+          _load: string
+        }
+        Returns: Json
+      }
+      freight_load_status: {
+        Args: {
+          _expected_version: number
+          _load: string
+          _reason: string
+          _to: string
+        }
+        Returns: Json
+      }
+      freight_my_context: { Args: never; Returns: Json }
+      freight_role_revoke: {
+        Args: { _company: string; _role: string; _user: string }
+        Returns: Json
+      }
+      freight_rule_set: {
+        Args: { _company: string; _enabled: boolean; _kind: string }
+        Returns: Json
+      }
+      freight_run_review: {
+        Args: { _run: string; _status: string }
+        Returns: Json
+      }
+      freight_settlement_draft: {
+        Args: {
+          _amount_cents: number
+          _company: string
+          _driver: string
+          _end: string
+          _start: string
+        }
+        Returns: Json
+      }
+      freight_team: { Args: { _company: string }; Returns: Json }
       load_book: { Args: { _load: string; _vehicle?: string }; Returns: Json }
     }
     Enums: {
