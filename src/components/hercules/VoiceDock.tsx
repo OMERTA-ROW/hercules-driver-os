@@ -20,6 +20,7 @@ import { Orb } from "./Orb";
 import { BrightnessButton } from "./ThemeToggle";
 import { useVoice } from "@/lib/voice";
 import { useBol } from "@/lib/bol";
+import { toast } from "sonner";
 
 /**
  * VOICE DOCK — the original traveling orb, now opening the same real
@@ -196,7 +197,9 @@ export function VoiceDock() {
                   size="sm"
                   variant="outline"
                   disabled={bol.busy}
-                  onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => say(result.message))}
+                  onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
+                    if (!result.ok) toast.error(result.message);
+                  })}
                 >
                   <FileText />
                   {bol.draft ? "Open BOL" : "Create BOL"}

@@ -167,12 +167,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     void (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!alive) return;
-      const id = data.session?.user?.id ?? null;
-      setUserId(id);
-      if (id) await loadProfile(id);
-      setReady(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!alive) return;
+        const id = data.session?.user?.id ?? null;
+        setUserId(id);
+        if (id) await loadProfile(id);
+      } catch {
+        if (!alive) return;
+        setUserId(null);
+        setAccount(null);
+      } finally {
+        if (alive) setReady(true);
+      }
     })();
 
     return () => {
