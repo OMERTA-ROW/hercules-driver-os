@@ -189,6 +189,6 @@ telemetry, parts suppliers, delivery partners, load boards.
 
 - [x] Keep the original Hercules frontend and navigation from the pre-Freight baseline
 - [x] Remove the separate setup bubble and cancelled Freight OS screens from active use
-- [ ] Upgrade the original voice dock with one compact text-and-voice conversation panel
-- [ ] Verify send, voice stop, approve/decline, clear, minimize/reopen, desktop/mobile, tests, typecheck, and build
+- [x] Upgrade the original voice dock with one compact text-and-voice conversation panel
+- [x] Verify send, voice stop, approve/decline, clear, minimize/reopen, desktop/mobile, tests, typecheck, and build
 - [x] Leave additive Freight backend tables isolated; do not remove data or migrations
