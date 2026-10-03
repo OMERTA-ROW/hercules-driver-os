@@ -43,8 +43,12 @@ import { Route as AuthenticatedDispatchRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDriverRouteImport } from './routes/_authenticated/driver'
 import { Route as AuthenticatedDriversRouteImport } from './routes/_authenticated/drivers'
+import { Route as AuthenticatedEquipmentRouteImport } from './routes/_authenticated/equipment'
+import { Route as AuthenticatedFleetRouteImport } from './routes/_authenticated/fleet'
+import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedSettlementsRouteImport } from './routes/_authenticated/settlements'
 import { Route as AuthenticatedShipperRouteImport } from './routes/_authenticated/shipper'
 import { Route as AuthenticatedTrackingRouteImport } from './routes/_authenticated/tracking'
 import { Route as AuthenticatedTripsRouteImport } from './routes/_authenticated/trips'
@@ -223,6 +227,21 @@ const AuthenticatedDriversRoute = AuthenticatedDriversRouteImport.update({
   path: '/drivers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEquipmentRoute = AuthenticatedEquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFleetRoute = AuthenticatedFleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -233,6 +252,12 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettlementsRoute =
+  AuthenticatedSettlementsRouteImport.update({
+    id: '/settlements',
+    path: '/settlements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedShipperRoute = AuthenticatedShipperRouteImport.update({
   id: '/shipper',
   path: '/shipper',
@@ -308,8 +333,12 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/driver': typeof AuthenticatedDriverRoute
   '/drivers': typeof AuthenticatedDriversRoute
+  '/equipment': typeof AuthenticatedEquipmentRoute
+  '/fleet': typeof AuthenticatedFleetRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settlements': typeof AuthenticatedSettlementsRoute
   '/shipper': typeof AuthenticatedShipperRoute
   '/tracking': typeof AuthenticatedTrackingRoute
   '/trips': typeof AuthenticatedTripsRoute
@@ -353,8 +382,12 @@ export interface FileRoutesByTo {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/driver': typeof AuthenticatedDriverRoute
   '/drivers': typeof AuthenticatedDriversRoute
+  '/equipment': typeof AuthenticatedEquipmentRoute
+  '/fleet': typeof AuthenticatedFleetRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settlements': typeof AuthenticatedSettlementsRoute
   '/shipper': typeof AuthenticatedShipperRoute
   '/tracking': typeof AuthenticatedTrackingRoute
   '/trips': typeof AuthenticatedTripsRoute
@@ -400,8 +433,12 @@ export interface FileRoutesById {
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/driver': typeof AuthenticatedDriverRoute
   '/_authenticated/drivers': typeof AuthenticatedDriversRoute
+  '/_authenticated/equipment': typeof AuthenticatedEquipmentRoute
+  '/_authenticated/fleet': typeof AuthenticatedFleetRoute
+  '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/settlements': typeof AuthenticatedSettlementsRoute
   '/_authenticated/shipper': typeof AuthenticatedShipperRoute
   '/_authenticated/tracking': typeof AuthenticatedTrackingRoute
   '/_authenticated/trips': typeof AuthenticatedTripsRoute
@@ -447,8 +484,12 @@ export interface FileRouteTypes {
     | '/documents'
     | '/driver'
     | '/drivers'
+    | '/equipment'
+    | '/fleet'
+    | '/invoices'
     | '/messages'
     | '/onboarding'
+    | '/settlements'
     | '/shipper'
     | '/tracking'
     | '/trips'
@@ -492,8 +533,12 @@ export interface FileRouteTypes {
     | '/documents'
     | '/driver'
     | '/drivers'
+    | '/equipment'
+    | '/fleet'
+    | '/invoices'
     | '/messages'
     | '/onboarding'
+    | '/settlements'
     | '/shipper'
     | '/tracking'
     | '/trips'
@@ -538,8 +583,12 @@ export interface FileRouteTypes {
     | '/_authenticated/documents'
     | '/_authenticated/driver'
     | '/_authenticated/drivers'
+    | '/_authenticated/equipment'
+    | '/_authenticated/fleet'
+    | '/_authenticated/invoices'
     | '/_authenticated/messages'
     | '/_authenticated/onboarding'
+    | '/_authenticated/settlements'
     | '/_authenticated/shipper'
     | '/_authenticated/tracking'
     | '/_authenticated/trips'
@@ -821,6 +870,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDriversRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipment': {
+      id: '/_authenticated/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof AuthenticatedEquipmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fleet': {
+      id: '/_authenticated/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof AuthenticatedFleetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices': {
+      id: '/_authenticated/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages': {
       id: '/_authenticated/messages'
       path: '/messages'
@@ -833,6 +903,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settlements': {
+      id: '/_authenticated/settlements'
+      path: '/settlements'
+      fullPath: '/settlements'
+      preLoaderRoute: typeof AuthenticatedSettlementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/shipper': {
@@ -903,8 +980,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedDriverRoute: typeof AuthenticatedDriverRoute
   AuthenticatedDriversRoute: typeof AuthenticatedDriversRoute
+  AuthenticatedEquipmentRoute: typeof AuthenticatedEquipmentRoute
+  AuthenticatedFleetRoute: typeof AuthenticatedFleetRoute
+  AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedSettlementsRoute: typeof AuthenticatedSettlementsRoute
   AuthenticatedShipperRoute: typeof AuthenticatedShipperRoute
   AuthenticatedTrackingRoute: typeof AuthenticatedTrackingRoute
   AuthenticatedTripsRoute: typeof AuthenticatedTripsRoute
@@ -922,8 +1003,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedDriverRoute: AuthenticatedDriverRoute,
   AuthenticatedDriversRoute: AuthenticatedDriversRoute,
+  AuthenticatedEquipmentRoute: AuthenticatedEquipmentRoute,
+  AuthenticatedFleetRoute: AuthenticatedFleetRoute,
+  AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedSettlementsRoute: AuthenticatedSettlementsRoute,
   AuthenticatedShipperRoute: AuthenticatedShipperRoute,
   AuthenticatedTrackingRoute: AuthenticatedTrackingRoute,
   AuthenticatedTripsRoute: AuthenticatedTripsRoute,
