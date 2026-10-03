@@ -1445,4 +1445,10 @@
     color: black !important;
     border-color: black !important;
   }
+  #hercules-bol-print * {
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
 }
