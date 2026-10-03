@@ -24,6 +24,16 @@ import { Route as DriverRouteImport } from './routes/driver'
 import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
+import { Route as FreightRouteImport } from './routes/freight'
+import { Route as FreightAdminRouteImport } from './routes/freight-admin'
+import { Route as FreightCarriersRouteImport } from './routes/freight-carriers'
+import { Route as FreightControlRouteImport } from './routes/freight-control'
+import { Route as FreightCustomersRouteImport } from './routes/freight-customers'
+import { Route as FreightDriversRouteImport } from './routes/freight-drivers'
+import { Route as FreightEquipmentRouteImport } from './routes/freight-equipment'
+import { Route as FreightInvoicesRouteImport } from './routes/freight-invoices'
+import { Route as FreightSettlementsRouteImport } from './routes/freight-settlements'
+import { Route as FreightWorkspaceRouteImport } from './routes/freight-workspace'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
 import { Route as NavigationRouteImport } from './routes/navigation'
@@ -38,6 +48,8 @@ import { Route as SupplyRouteImport } from './routes/supply'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as FreightLoadsIdRouteImport } from './routes/freight-loads.$id'
+import { Route as FreightLoadsNewRouteImport } from './routes/freight-loads.new'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -115,6 +127,56 @@ const FleetRoute = FleetRouteImport.update({
   path: '/fleet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FreightRoute = FreightRouteImport.update({
+  id: '/freight',
+  path: '/freight',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightAdminRoute = FreightAdminRouteImport.update({
+  id: '/freight-admin',
+  path: '/freight-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightCarriersRoute = FreightCarriersRouteImport.update({
+  id: '/freight-carriers',
+  path: '/freight-carriers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightControlRoute = FreightControlRouteImport.update({
+  id: '/freight-control',
+  path: '/freight-control',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightCustomersRoute = FreightCustomersRouteImport.update({
+  id: '/freight-customers',
+  path: '/freight-customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightDriversRoute = FreightDriversRouteImport.update({
+  id: '/freight-drivers',
+  path: '/freight-drivers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightEquipmentRoute = FreightEquipmentRouteImport.update({
+  id: '/freight-equipment',
+  path: '/freight-equipment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightInvoicesRoute = FreightInvoicesRouteImport.update({
+  id: '/freight-invoices',
+  path: '/freight-invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightSettlementsRoute = FreightSettlementsRouteImport.update({
+  id: '/freight-settlements',
+  path: '/freight-settlements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightWorkspaceRoute = FreightWorkspaceRouteImport.update({
+  id: '/freight-workspace',
+  path: '/freight-workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
@@ -185,6 +247,16 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FreightLoadsIdRoute = FreightLoadsIdRouteImport.update({
+  id: '/freight-loads/$id',
+  path: '/freight-loads/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreightLoadsNewRoute = FreightLoadsNewRouteImport.update({
+  id: '/freight-loads/new',
+  path: '/freight-loads/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -207,6 +279,16 @@ export interface FileRoutesByFullPath {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
+  '/freight-admin': typeof FreightAdminRoute
+  '/freight-carriers': typeof FreightCarriersRoute
+  '/freight-control': typeof FreightControlRoute
+  '/freight-customers': typeof FreightCustomersRoute
+  '/freight-drivers': typeof FreightDriversRoute
+  '/freight-equipment': typeof FreightEquipmentRoute
+  '/freight-invoices': typeof FreightInvoicesRoute
+  '/freight-settlements': typeof FreightSettlementsRoute
+  '/freight-workspace': typeof FreightWorkspaceRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
@@ -221,6 +303,8 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -239,6 +323,16 @@ export interface FileRoutesByTo {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
+  '/freight-admin': typeof FreightAdminRoute
+  '/freight-carriers': typeof FreightCarriersRoute
+  '/freight-control': typeof FreightControlRoute
+  '/freight-customers': typeof FreightCustomersRoute
+  '/freight-drivers': typeof FreightDriversRoute
+  '/freight-equipment': typeof FreightEquipmentRoute
+  '/freight-invoices': typeof FreightInvoicesRoute
+  '/freight-settlements': typeof FreightSettlementsRoute
+  '/freight-workspace': typeof FreightWorkspaceRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
@@ -253,6 +347,8 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -272,6 +368,16 @@ export interface FileRoutesById {
   '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
   '/fleet': typeof FleetRoute
+  '/freight': typeof FreightRoute
+  '/freight-admin': typeof FreightAdminRoute
+  '/freight-carriers': typeof FreightCarriersRoute
+  '/freight-control': typeof FreightControlRoute
+  '/freight-customers': typeof FreightCustomersRoute
+  '/freight-drivers': typeof FreightDriversRoute
+  '/freight-equipment': typeof FreightEquipmentRoute
+  '/freight-invoices': typeof FreightInvoicesRoute
+  '/freight-settlements': typeof FreightSettlementsRoute
+  '/freight-workspace': typeof FreightWorkspaceRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
@@ -286,6 +392,8 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/freight-loads/$id': typeof FreightLoadsIdRoute
+  '/freight-loads/new': typeof FreightLoadsNewRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -306,6 +414,16 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
+    | '/freight-admin'
+    | '/freight-carriers'
+    | '/freight-control'
+    | '/freight-customers'
+    | '/freight-drivers'
+    | '/freight-equipment'
+    | '/freight-invoices'
+    | '/freight-settlements'
+    | '/freight-workspace'
     | '/health'
     | '/loads'
     | '/navigation'
@@ -320,6 +438,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -338,6 +458,16 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
+    | '/freight-admin'
+    | '/freight-carriers'
+    | '/freight-control'
+    | '/freight-customers'
+    | '/freight-drivers'
+    | '/freight-equipment'
+    | '/freight-invoices'
+    | '/freight-settlements'
+    | '/freight-workspace'
     | '/health'
     | '/loads'
     | '/navigation'
@@ -352,6 +482,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -370,6 +502,16 @@ export interface FileRouteTypes {
     | '/equipment'
     | '/financials'
     | '/fleet'
+    | '/freight'
+    | '/freight-admin'
+    | '/freight-carriers'
+    | '/freight-control'
+    | '/freight-customers'
+    | '/freight-drivers'
+    | '/freight-equipment'
+    | '/freight-invoices'
+    | '/freight-settlements'
+    | '/freight-workspace'
     | '/health'
     | '/loads'
     | '/navigation'
@@ -384,6 +526,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/freight-loads/$id'
+    | '/freight-loads/new'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -403,6 +547,16 @@ export interface RootRouteChildren {
   EquipmentRoute: typeof EquipmentRoute
   FinancialsRoute: typeof FinancialsRoute
   FleetRoute: typeof FleetRoute
+  FreightRoute: typeof FreightRoute
+  FreightAdminRoute: typeof FreightAdminRoute
+  FreightCarriersRoute: typeof FreightCarriersRoute
+  FreightControlRoute: typeof FreightControlRoute
+  FreightCustomersRoute: typeof FreightCustomersRoute
+  FreightDriversRoute: typeof FreightDriversRoute
+  FreightEquipmentRoute: typeof FreightEquipmentRoute
+  FreightInvoicesRoute: typeof FreightInvoicesRoute
+  FreightSettlementsRoute: typeof FreightSettlementsRoute
+  FreightWorkspaceRoute: typeof FreightWorkspaceRoute
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
   NavigationRoute: typeof NavigationRoute
@@ -417,6 +571,8 @@ export interface RootRouteChildren {
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
+  FreightLoadsIdRoute: typeof FreightLoadsIdRoute
+  FreightLoadsNewRoute: typeof FreightLoadsNewRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -527,6 +683,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FleetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/freight': {
+      id: '/freight'
+      path: '/freight'
+      fullPath: '/freight'
+      preLoaderRoute: typeof FreightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-admin': {
+      id: '/freight-admin'
+      path: '/freight-admin'
+      fullPath: '/freight-admin'
+      preLoaderRoute: typeof FreightAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-carriers': {
+      id: '/freight-carriers'
+      path: '/freight-carriers'
+      fullPath: '/freight-carriers'
+      preLoaderRoute: typeof FreightCarriersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-control': {
+      id: '/freight-control'
+      path: '/freight-control'
+      fullPath: '/freight-control'
+      preLoaderRoute: typeof FreightControlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-customers': {
+      id: '/freight-customers'
+      path: '/freight-customers'
+      fullPath: '/freight-customers'
+      preLoaderRoute: typeof FreightCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-drivers': {
+      id: '/freight-drivers'
+      path: '/freight-drivers'
+      fullPath: '/freight-drivers'
+      preLoaderRoute: typeof FreightDriversRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-equipment': {
+      id: '/freight-equipment'
+      path: '/freight-equipment'
+      fullPath: '/freight-equipment'
+      preLoaderRoute: typeof FreightEquipmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-invoices': {
+      id: '/freight-invoices'
+      path: '/freight-invoices'
+      fullPath: '/freight-invoices'
+      preLoaderRoute: typeof FreightInvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-settlements': {
+      id: '/freight-settlements'
+      path: '/freight-settlements'
+      fullPath: '/freight-settlements'
+      preLoaderRoute: typeof FreightSettlementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-workspace': {
+      id: '/freight-workspace'
+      path: '/freight-workspace'
+      fullPath: '/freight-workspace'
+      preLoaderRoute: typeof FreightWorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health': {
       id: '/health'
       path: '/health'
@@ -625,6 +851,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/freight-loads/$id': {
+      id: '/freight-loads/$id'
+      path: '/freight-loads/$id'
+      fullPath: '/freight-loads/$id'
+      preLoaderRoute: typeof FreightLoadsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freight-loads/new': {
+      id: '/freight-loads/new'
+      path: '/freight-loads/new'
+      fullPath: '/freight-loads/new'
+      preLoaderRoute: typeof FreightLoadsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -651,6 +891,16 @@ const rootRouteChildren: RootRouteChildren = {
   EquipmentRoute: EquipmentRoute,
   FinancialsRoute: FinancialsRoute,
   FleetRoute: FleetRoute,
+  FreightRoute: FreightRoute,
+  FreightAdminRoute: FreightAdminRoute,
+  FreightCarriersRoute: FreightCarriersRoute,
+  FreightControlRoute: FreightControlRoute,
+  FreightCustomersRoute: FreightCustomersRoute,
+  FreightDriversRoute: FreightDriversRoute,
+  FreightEquipmentRoute: FreightEquipmentRoute,
+  FreightInvoicesRoute: FreightInvoicesRoute,
+  FreightSettlementsRoute: FreightSettlementsRoute,
+  FreightWorkspaceRoute: FreightWorkspaceRoute,
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
   NavigationRoute: NavigationRoute,
@@ -665,6 +915,8 @@ const rootRouteChildren: RootRouteChildren = {
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
+  FreightLoadsIdRoute: FreightLoadsIdRoute,
+  FreightLoadsNewRoute: FreightLoadsNewRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
