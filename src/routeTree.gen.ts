@@ -12,24 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as BreakdownRouteImport } from './routes/breakdown'
-import { Route as BrokerRouteImport } from './routes/broker'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as CreditsRouteImport } from './routes/credits'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as DispatchRouteImport } from './routes/dispatch'
-import { Route as DocumentsRouteImport } from './routes/documents'
-import { Route as DriverRouteImport } from './routes/driver'
-import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FinancialsRouteImport } from './routes/financials'
-import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
-import { Route as LoadsRouteImport } from './routes/loads'
 import { Route as NavigationRouteImport } from './routes/navigation'
 import { Route as PartsRouteImport } from './routes/parts'
 import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as StopsRouteImport } from './routes/stops'
@@ -55,11 +46,6 @@ const BreakdownRoute = BreakdownRouteImport.update({
   path: '/breakdown',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BrokerRoute = BrokerRouteImport.update({
-  id: '/broker',
-  path: '/broker',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CompanyRoute = CompanyRouteImport.update({
   id: '/company',
   path: '/company',
@@ -80,49 +66,14 @@ const CreditsRoute = CreditsRouteImport.update({
   path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DispatchRoute = DispatchRouteImport.update({
-  id: '/dispatch',
-  path: '/dispatch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentsRoute = DocumentsRouteImport.update({
-  id: '/documents',
-  path: '/documents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverRoute = DriverRouteImport.update({
-  id: '/driver',
-  path: '/driver',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EquipmentRoute = EquipmentRouteImport.update({
-  id: '/equipment',
-  path: '/equipment',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FinancialsRoute = FinancialsRouteImport.update({
   id: '/financials',
   path: '/financials',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FleetRoute = FleetRouteImport.update({
-  id: '/fleet',
-  path: '/fleet',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoadsRoute = LoadsRouteImport.update({
-  id: '/loads',
-  path: '/loads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigationRoute = NavigationRouteImport.update({
@@ -138,11 +89,6 @@ const PartsRoute = PartsRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -195,24 +141,15 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
-  '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
-  '/dashboard': typeof DashboardRoute
-  '/dispatch': typeof DispatchRoute
-  '/documents': typeof DocumentsRoute
-  '/driver': typeof DriverRoute
-  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
-  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
-  '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
@@ -227,24 +164,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
-  '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
-  '/dashboard': typeof DashboardRoute
-  '/dispatch': typeof DispatchRoute
-  '/documents': typeof DocumentsRoute
-  '/driver': typeof DriverRoute
-  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
-  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
-  '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
@@ -260,24 +188,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
   '/breakdown': typeof BreakdownRoute
-  '/broker': typeof BrokerRoute
   '/company': typeof CompanyRoute
   '/compliance': typeof ComplianceRoute
   '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
-  '/dashboard': typeof DashboardRoute
-  '/dispatch': typeof DispatchRoute
-  '/documents': typeof DocumentsRoute
-  '/driver': typeof DriverRoute
-  '/equipment': typeof EquipmentRoute
   '/financials': typeof FinancialsRoute
-  '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
-  '/loads': typeof LoadsRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/stops': typeof StopsRoute
@@ -294,24 +213,15 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
-    | '/broker'
     | '/company'
     | '/compliance'
     | '/confirm-email'
     | '/credits'
-    | '/dashboard'
-    | '/dispatch'
-    | '/documents'
-    | '/driver'
-    | '/equipment'
     | '/financials'
-    | '/fleet'
     | '/health'
-    | '/loads'
     | '/navigation'
     | '/parts'
     | '/pricing'
-    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/stops'
@@ -326,24 +236,15 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
-    | '/broker'
     | '/company'
     | '/compliance'
     | '/confirm-email'
     | '/credits'
-    | '/dashboard'
-    | '/dispatch'
-    | '/documents'
-    | '/driver'
-    | '/equipment'
     | '/financials'
-    | '/fleet'
     | '/health'
-    | '/loads'
     | '/navigation'
     | '/parts'
     | '/pricing'
-    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/stops'
@@ -358,24 +259,15 @@ export interface FileRouteTypes {
     | '/'
     | '/alerts'
     | '/breakdown'
-    | '/broker'
     | '/company'
     | '/compliance'
     | '/confirm-email'
     | '/credits'
-    | '/dashboard'
-    | '/dispatch'
-    | '/documents'
-    | '/driver'
-    | '/equipment'
     | '/financials'
-    | '/fleet'
     | '/health'
-    | '/loads'
     | '/navigation'
     | '/parts'
     | '/pricing'
-    | '/settings'
     | '/sign-in'
     | '/sign-up'
     | '/stops'
@@ -391,24 +283,15 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
   BreakdownRoute: typeof BreakdownRoute
-  BrokerRoute: typeof BrokerRoute
   CompanyRoute: typeof CompanyRoute
   ComplianceRoute: typeof ComplianceRoute
   ConfirmEmailRoute: typeof ConfirmEmailRoute
   CreditsRoute: typeof CreditsRoute
-  DashboardRoute: typeof DashboardRoute
-  DispatchRoute: typeof DispatchRoute
-  DocumentsRoute: typeof DocumentsRoute
-  DriverRoute: typeof DriverRoute
-  EquipmentRoute: typeof EquipmentRoute
   FinancialsRoute: typeof FinancialsRoute
-  FleetRoute: typeof FleetRoute
   HealthRoute: typeof HealthRoute
-  LoadsRoute: typeof LoadsRoute
   NavigationRoute: typeof NavigationRoute
   PartsRoute: typeof PartsRoute
   PricingRoute: typeof PricingRoute
-  SettingsRoute: typeof SettingsRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   StopsRoute: typeof StopsRoute
@@ -443,13 +326,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BreakdownRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/broker': {
-      id: '/broker'
-      path: '/broker'
-      fullPath: '/broker'
-      preLoaderRoute: typeof BrokerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/company': {
       id: '/company'
       path: '/company'
@@ -478,41 +354,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dispatch': {
-      id: '/dispatch'
-      path: '/dispatch'
-      fullPath: '/dispatch'
-      preLoaderRoute: typeof DispatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/documents': {
-      id: '/documents'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof DocumentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver': {
-      id: '/driver'
-      path: '/driver'
-      fullPath: '/driver'
-      preLoaderRoute: typeof DriverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/equipment': {
-      id: '/equipment'
-      path: '/equipment'
-      fullPath: '/equipment'
-      preLoaderRoute: typeof EquipmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/financials': {
       id: '/financials'
       path: '/financials'
@@ -520,25 +361,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinancialsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/fleet': {
-      id: '/fleet'
-      path: '/fleet'
-      fullPath: '/fleet'
-      preLoaderRoute: typeof FleetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/health': {
       id: '/health'
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loads': {
-      id: '/loads'
-      path: '/loads'
-      fullPath: '/loads'
-      preLoaderRoute: typeof LoadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigation': {
@@ -560,13 +387,6 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -639,24 +459,15 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
   BreakdownRoute: BreakdownRoute,
-  BrokerRoute: BrokerRoute,
   CompanyRoute: CompanyRoute,
   ComplianceRoute: ComplianceRoute,
   ConfirmEmailRoute: ConfirmEmailRoute,
   CreditsRoute: CreditsRoute,
-  DashboardRoute: DashboardRoute,
-  DispatchRoute: DispatchRoute,
-  DocumentsRoute: DocumentsRoute,
-  DriverRoute: DriverRoute,
-  EquipmentRoute: EquipmentRoute,
   FinancialsRoute: FinancialsRoute,
-  FleetRoute: FleetRoute,
   HealthRoute: HealthRoute,
-  LoadsRoute: LoadsRoute,
   NavigationRoute: NavigationRoute,
   PartsRoute: PartsRoute,
   PricingRoute: PricingRoute,
-  SettingsRoute: SettingsRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   StopsRoute: StopsRoute,
