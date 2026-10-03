@@ -6,8 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const filled: BolDraft = {
   id: null, loadId: null, loadReference: "LD-1", carrierName: "Carrier", vehicleUnit: "12",
-  shipperName: "Shipper", shipperAddress: "1 Main", consigneeName: "Receiver",
-  consigneeAddress: "2 Main", pickupDetails: "Oct 3", deliveryDetails: "Oct 4",
+  shipperName: "Shipper", shipperAddress: "1 Main Street", consigneeName: "Receiver",
+  consigneeAddress: "2 Main Street", pickupDetails: "Oct 3", deliveryDetails: "Oct 4",
   items: [{ description: "Pallets", handlingUnits: "2", weight: "1200", weightUnit: "lb" }],
   freightInstructions: "", status: "draft", updatedAt: null,
 };
@@ -25,7 +25,7 @@ describe("BOL deterministic commands", () => {
 
 describe("BOL validation", () => {
   it("reports no missing core fields for a filled draft", () => expect(missingBolFields(filled)).toEqual([]));
-  it("names unknown shipment facts", () => expect(missingBolFields({ ...filled, shipperName: "", items: [{ ...filled.items[0]!, weight: "" }] })).toEqual(["shipper name", "freight weight"]));
+  it("names unknown shipment facts", () => expect(missingBolFields({ ...filled, shipperName: "", items: [{ ...filled.items[0]!, weight: "" }] })).toEqual(["shipper name", "positive freight weight"]));
   it("requires a full street address instead of treating city/state as complete", () => {
     expect(missingBolFields({ ...filled, shipperAddress: "Chicago, IL" })).toContain("full shipper street address");
   });

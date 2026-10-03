@@ -120,6 +120,7 @@ export function hasUnsavedBolWork(draft: BolDraft | null) {
 
 type BolContextValue = {
   draft: BolDraft | null;
+  dirty: boolean;
   view: BolView;
   busy: boolean;
   error: string | null;
@@ -143,7 +144,8 @@ export function BolProvider({ children }: { children: ReactNode }) {
   const { account, userId, ready } = useAuth();
   const { load } = useCurrentLoad();
   const vehicles = useVehicles();
-  const [draft, setDraft] = useState<BolDraft | null>(null);
+  const [draft, setDraftState] = useState<BolDraft | null>(null);
+  const [dirty, setDirty] = useState(false);
   const [view, setView] = useState<BolView>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,11 +154,14 @@ export function BolProvider({ children }: { children: ReactNode }) {
   const [emailBody, setEmailBody] = useState("Please review this Bill of Lading draft. Unknown fields require confirmation.");
   const generationRef = useRef(0);
   const operationRef = useRef(0);
+  const activeUserRef = useRef(userId);
+  activeUserRef.current = userId;
 
   useEffect(() => {
     generationRef.current += 1;
     operationRef.current += 1;
-    setDraft(null);
+    setDraftState(null);
+    setDirty(false);
     setView(null);
     setError(null);
     setEmailTo("");
@@ -177,7 +182,7 @@ export function BolProvider({ children }: { children: ReactNode }) {
       .limit(1)
       .maybeSingle();
     if (readError) throw readError;
-    return generation === generationRef.current && userId ? (data ? parseDraft(data) : null) : null;
+    return generation === generationRef.current && activeUserRef.current === userId ? (data ? parseDraft(data) : null) : null;
   }, [userId]);
 
   const createDraft = useCallback((): BolDraft => {
@@ -217,18 +222,20 @@ export function BolProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       if (intent === "create") {
-        if (hasUnsavedBolWork(draft)) return { ok: false, message: "You have an unsaved BOL draft open. Review it and choose Start new BOL to discard it explicitly." };
+        if (dirty || hasUnsavedBolWork(draft)) return { ok: false, message: "You have unsaved BOL changes open. Review them and choose Start new BOL to discard them explicitly." };
         const next = createDraft();
-        if (generation !== generationRef.current || operation !== operationRef.current) return { ok: false, message: "Your account changed before the BOL could open. Nothing was changed." };
-        setDraft(next);
+        if (generation !== generationRef.current || activeUserRef.current !== userId || operation !== operationRef.current) return { ok: false, message: "Your account changed before the BOL could open. Nothing was changed." };
+        setDraftState(next);
+        setDirty(true);
         setView("edit");
         const missing = missingBolFields(next);
         return { ok: true, message: missing.length ? `I opened a BOL draft using only your saved load and equipment. I still need ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", and a few more fields" : ""}.` : "Your BOL draft is ready to review. Nothing has been signed, sent, or printed." };
       }
       const existing = draft ?? await loadLatest();
-      if (generation !== generationRef.current || operation !== operationRef.current) return { ok: false, message: "Your account changed before the BOL could open. Nothing was changed." };
+      if (generation !== generationRef.current || activeUserRef.current !== userId || operation !== operationRef.current) return { ok: false, message: "Your account changed before the BOL could open. Nothing was changed." };
       if (!existing) return { ok: false, message: "You do not have a saved BOL draft yet. Say “create a BOL” to start one." };
-      setDraft(existing);
+      setDraftState(existing);
+      if (!draft) setDirty(false);
       if (intent === "open") setView("review");
       if (intent === "print") setView("review");
       if (intent === "email") {
@@ -245,12 +252,12 @@ export function BolProvider({ children }: { children: ReactNode }) {
       };
     } catch (caught) {
       console.error("[bol] command failed", caught);
-      if (generation === generationRef.current && operation === operationRef.current) setError("Your BOL draft could not be read. Nothing was changed.");
+      if (generation === generationRef.current && activeUserRef.current === userId && operation === operationRef.current) setError("Your BOL draft could not be read. Nothing was changed.");
       return { ok: false, message: "Your BOL draft could not be read. Nothing was changed." };
     } finally {
-      if (generation === generationRef.current && operation === operationRef.current) setBusy(false);
+      if (generation === generationRef.current && activeUserRef.current === userId && operation === operationRef.current) setBusy(false);
     }
-  }, [createDraft, draft, loadLatest, ready, userId]);
+  }, [createDraft, dirty, draft, loadLatest, ready, userId]);
 
   const save = useCallback(async (): Promise<BolResult> => {
     if (!userId || !draft) return { ok: false, message: "Sign in and open a BOL draft first." };
@@ -285,31 +292,33 @@ export function BolProvider({ children }: { children: ReactNode }) {
       ? supabase.from("documents").update(base).eq("id", draft.id).eq("owner_id", userId).select("id, load_id, load_reference, status, updated_at, bol_data").single()
       : supabase.from("documents").insert(base).select("id, load_id, load_reference, status, updated_at, bol_data").single();
       const { data, error: saveError } = await request;
-      if (generation !== generationRef.current || operation !== operationRef.current) return { ok: false, message: "Your account changed before the save finished. The open draft was not replaced." };
+      if (generation !== generationRef.current || activeUserRef.current !== userId || operation !== operationRef.current) return { ok: false, message: "Your account changed before the save finished. The open draft was not replaced." };
       if (saveError || !data) throw saveError ?? new Error("No saved BOL returned");
-      setDraft(parseDraft(data));
+      setDraftState(parseDraft(data));
+      setDirty(false);
       return { ok: true, message: "BOL draft saved to your documents. It is still unsigned and has not been sent or printed." };
     } catch (caught) {
       console.error("[bol] save failed", caught);
-      if (generation === generationRef.current && operation === operationRef.current) setError("The BOL draft did not save. Your unsaved fields are still open; nothing was finalized or sent.");
+      if (generation === generationRef.current && activeUserRef.current === userId && operation === operationRef.current) setError("The BOL draft did not save. Your unsaved fields are still open; nothing was finalized or sent.");
       return { ok: false, message: "The BOL draft did not save. Your unsaved fields are still open; nothing was finalized or sent." };
     } finally {
-      if (generation === generationRef.current && operation === operationRef.current) setBusy(false);
+      if (generation === generationRef.current && activeUserRef.current === userId && operation === operationRef.current) setBusy(false);
     }
   }, [draft, userId]);
 
   const value = useMemo<BolContextValue>(() => ({
-    draft, view, busy, error, emailTo, emailSubject, emailBody,
-    setDraft, setView, setEmailTo, setEmailSubject, setEmailBody,
+    draft, dirty, view, busy, error, emailTo, emailSubject, emailBody,
+    setDraft: (next) => { setDraftState(next); setDirty(true); }, setView, setEmailTo, setEmailSubject, setEmailBody,
     handleCommand, save,
     startNew: () => {
       operationRef.current += 1;
-      setDraft(createDraft());
+      setDraftState(createDraft());
+      setDirty(true);
       setError(null);
       setView("edit");
     },
     close: () => setView(null),
-  }), [draft, view, busy, error, emailTo, emailSubject, emailBody, createDraft, handleCommand, save]);
+  }), [draft, dirty, view, busy, error, emailTo, emailSubject, emailBody, createDraft, handleCommand, save]);
 
   return <BolContext.Provider value={value}>{children}</BolContext.Provider>;
 }

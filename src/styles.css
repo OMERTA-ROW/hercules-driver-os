@@ -988,12 +988,10 @@
 @media print {
   @page { margin: 0.45in; }
   body > * { display: none !important; }
-  body > [data-radix-portal] { display: block !important; }
-  body > [data-radix-portal] > * { display: none !important; }
-  body > [data-radix-portal] > [role="dialog"] { display: block !important; }
+  body > [role="dialog"] { display: block !important; position: static !important; transform: none !important; width: 100% !important; max-width: none !important; max-height: none !important; overflow: visible !important; border: 0 !important; padding: 0 !important; }
   body { overflow: visible !important; padding: 0 !important; background: white !important; }
   [role="dialog"] > * { display: none !important; }
-  [role="dialog"] > #hercules-bol-print { display: block !important; }
+  body > [role="dialog"] > #hercules-bol-print { display: block !important; }
   #hercules-bol-print {
     position: static;
     width: 100%;
