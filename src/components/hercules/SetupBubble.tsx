@@ -102,7 +102,7 @@ export function SetupBubble() {
         <DialogFooter className="gap-2 sm:space-x-0">
           {i > 0 && step !== "done" ? <Button variant="ghost" onClick={back}><ChevronLeft />Back</Button> : null}
           {step !== "review" && step !== "done" ? <Button variant="ghost" onClick={next}>Skip</Button> : null}
-          {step === "review" ? <Button onClick={finish}>Save & finish</Button> : step === "done" ? <Button onClick={() => setOpen(false)}>Done</Button> : <Button onClick={next}>Continue</Button>}
+          {step === "review" ? <Button onClick={finish}>Save & finish</Button> : step === "done" ? <Button onClick={() => { setStep("review"); setOpen(false); }}>Close setup</Button> : <Button onClick={next}>Continue</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
