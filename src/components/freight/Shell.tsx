@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, type LinkProps } from "@tanstack/react-router";
 import {
   BarChart3, Bell, Boxes, Building2, ClipboardList, FileText, Gauge, Handshake, LayoutDashboard, LogOut, Map, Menu,
   MessageSquare, Plug, Receipt, Route as RouteIcon, Settings, ShieldCheck, Sparkles, Truck, Users, Wallet, Warehouse, X,
@@ -11,7 +11,7 @@ import { ROLE_LABEL, useFreight, type FreightRole } from "@/lib/freight";
 import { Empty, Logo } from "./ui";
 import { cn } from "@/lib/utils";
 
-type Nav = { to: string; label: string; icon: LucideIcon; roles: FreightRole[] | null; group: string };
+type Nav = { to: NonNullable<LinkProps["to"]>; label: string; icon: LucideIcon; roles: FreightRole[] | null; group: string };
 const ALL: FreightRole[] | null = null;
 export const NAV: Nav[] = [
   { to: "/dashboard", label: "Command center", icon: LayoutDashboard, roles: ["admin", "dispatcher", "broker", "fleet_owner", "finance", "shipper"], group: "Operate" },
