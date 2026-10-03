@@ -26,6 +26,7 @@
 - [x] Vehicle/vocation profiles drive routing and hazard filtering; multi-unit drivers asked "What are you in today?" by voice each trip; hazards at real corridor coordinates on the map layer
 
 ## Compliance documentation bot — done
+
 - Shared DocRecord model (src/data/compliance.ts): one record per document, permission-filtered to HERCULES / ZEUS / broker, never copied per side.
 - Provider (src/lib/compliance.tsx): filing, bulk import, review queue, approvals, exports, spoken expiry queue.
 - /compliance: attention strip, my documents, approval queue (approve / reject with reason / request specific doc), folder-drop bulk import with classify + read + match, human review queue, driver/vehicle/fleet export with CSV manifest.
@@ -35,11 +36,13 @@
 - Broker carrier verification: request insurance + authority, verified against FMCSA authority and the carrier's shared vault records. Compliance docs stay part of the account; the $5 unlock remains only for load paperwork.
 
 ## Voice personas (done)
+
 - Named ZEUS/HERCULES cast in src/data/voices.ts: Hercules (principal), Zeus, Ares, Atlas, Apollo, Athena, Medusa, Hera, Artemis.
 - Real premium speech via src/lib/speech.functions.ts (Lovable AI TTS, per-persona delivery direction + speed).
 - Compact scrollable picker with descriptors and per-voice preview: src/components/hercules/VoicePicker.tsx; selection persists in the driver profile.
 
 ## Supply & Parts module (done)
+
 - src/data/fees.ts: fee logic now per-category and fully tunable (feeConfig: ladder + floor + ceiling per category). Parts scale $2 → $100; tires/roadside/permits/securement lower ceilings; fuel/showers/laundry/tools flat small. Food/grocery/retail delivery stays $0 (platforms transact, not HERCULES).
 - src/data/parts.ts: dealer + aftermarket supplier network (Freightliner, Rush, Navistar/International, Peterbilt, Kenworth, Volvo, Mack, FleetPride, TruckPro, NAPA HD, Amazon, Love's, TA/Petro, Pilot, permit desk); part catalog with fault-code → part mapping, route-aware listings (miles ahead, off-route, stock, ready-by, comes-to-you), and supply items for tires/roadside/fuel & DEF/showers & parking/laundry/securement/tools & PPE/permits, scales & tolling.
 - src/lib/parts.tsx: provider seam (real supplier API drops in), identify by speech or fault code, quoting with the HERCULES fee, approval-only order placement, order history + cancel, fees-paid total; persisted locally.
@@ -47,6 +50,7 @@
 - Voice: "parts" topic with part/fault-code identification, cheaper-option follow-up, mechanic follow-up, and a DRIVER APPROVED read-back proposal carrying the fee. Diagnostics and Breakdown both offer to source the part.
 
 ## Part pickup routing — done
+
 - `src/data/pickup.ts`: supplier site templates (hours, will-call counter, truck parking, phone), route-corridor coordinates, readiness parsing, drive-time estimate.
 - `src/lib/pickup.tsx`: pickup runs (held/offered/routed/collected/declined), auto-offer on pickup orders, truck-legal route via `truckRouting.route()` with the active vehicle profile, hazard filtering, spoken reminders (ready, 15/5 min out, passing the supplier, counter closing, overdue).
 - `PickupBridge` speaks announcements and accepts voice dispatch/decline/status ("send it to my map", "where's my part"); `PickupStack` shows the global offer card.
@@ -54,6 +58,7 @@
 - DRIVER APPROVED: route is only offered; nothing dispatched without explicit confirmation.
 
 ## Fleet size tiers → how the vehicle profile is resolved — done
+
 - `src/data/accounts.ts`: `FleetTier` (Tier 1 1–5, Tier 2 5–50, Tier 3 50–100+, open ended), `tierForTrucks`, `fleetTierSpec`, `asksVehiclePerTrip` with a ~10 truck ask ceiling. No seat/driver ceiling at any tier.
 - `src/data/fleet-assignments.ts`: company truck/trailer assignment per driver, with a default assignment for a freshly onboarded carrier.
 - `src/lib/vehicles.tsx`: resolution is `asked` (solo + ≤10 trucks) or `inherited` (Tier 2/3, silent, from the fleet record); exposes `resolution`, `assignment`, `fleetTier`; `askForTrip` never fires for larger fleets.
@@ -61,6 +66,7 @@
 - `/zeus`: truck-count tier picker, recorded tier, per-tier trip-question behaviour; `/equipment`: shows assigned-by-company vs asked-out-loud.
 
 ## Two adapter families + Vehicle Health — done
+
 - `src/data/bolt.ts`: `adapters` record for THE BOLT (J1939 nine-pin, $149, heavy Class 7–8) and THE BOLT LT (OBD-II sixteen-pin, $99, cars/vans/Sprinters/hotshot Class 3–5/light-medium). Each declares `reports` (live-value keys), `hasTires`, `hasReadiness`, pairing steps, compatibility. Separate fault sets (SPN/FMI vs P-codes), baselines, predictions, auto alerts, OBD emissions readiness monitors. `adapterForSpec()` maps a vehicle profile to its bus.
 - `src/lib/bolt.tsx`: active bus follows the resolved vehicle profile (VehicleProvider now wraps BoltProvider); pairing state keyed per family; snapshot filtered to what the bus reports; `activeFaults()/activePredictions()/activeAdapter()` for non-React callers (voice).
 - `/health`: renamed Vehicle Health; adapter recommendation + reason + pairing card; capability-filtered metric grid; TPMS only on J1939; emissions readiness only on OBD-II.
@@ -68,6 +74,7 @@
 - Breakdown Assist and `/parts` read faults from the live adapter; menu/dashboard labels renamed.
 
 ## AI assistance credits — done
+
 - `src/data/ai-credits.ts`: single editable catalogue — monthly tiers (Assist 500/$9, Pro 2,000/$29, Max 5,000/$59), buy-once packs (250/$6, 1,000/$20, 3,000/$49), per-action credit costs, hard input caps, rate limits, provider cost assumptions, always-free list.
 - Database: `ai_credit_wallets`, `ai_credit_ledger`, `ai_credit_reservations`, `ai_usage_events`, `billing_events` with RLS (own rows readable only) and server-only grant/revoke routines; monthly credits expire at period end and are consumed before bought-once credits.
 - `src/lib/credits.functions.ts`: authenticated wallet/ledger/usage read, quality preference, hosted Checkout (subscription vs payment) with server-side allowlisted price env mapping, customer portal. Honest unavailable state while payment secrets are absent.
@@ -77,6 +84,7 @@
 - Remaining setup + known limits: `docs/ai-credits.md`.
 
 ## Final honesty & entitlement pass — done
+
 - /credits is public: monthly tiers, buy-once packs and Enterprise pricing show signed out (public `getPurchaseAvailability`); wallet, usage/credit history, quality choice, checkout and the quote form require sign-in.
 - Fake purchases removed: `src/lib/purchases.tsx` and `src/lib/addons.tsx` no longer grant or remember paid access in the browser; store/documents/settings/supply now report the honest payment-unavailable outcome instead of "purchased/added".
 - `/pricing` awaits `changePlan`, blocks double submit and reports real errors; `auth.changePlan` returns `{ok,message}` and surfaces the database error.
@@ -85,6 +93,7 @@
 - 37 tests pass (added: profile self-upgrade + billing-table privilege regressions); typecheck and production build clean.
 
 ## Driver onboarding (ready)
+
 - Sign-up → /welcome → /equipment → voice pick → returning sign-in verified end to end in browser.
 - Trial length is server-set (7 days) in handle_new_user; client cannot extend it.
 - Equipment is saved per account in the vehicles table with honest load/save errors and empty states.
@@ -92,12 +101,13 @@
 - Still unavailable and labelled as such on /welcome: payments/purchases, commercial truck-legal routing provider, engine telemetry adapter, partner ordering.
 
 ## Company onboarding (done)
+
 - Real companies/memberships/invites in the database; three paths: company driver, leased operator, fleet owner.
 - /company route + setup step; mock carrier directory removed from src/data/accounts.ts.
 - Open: payments not live (no card credentials); email confirmation on sign-up still required (awaiting decision); no outside load-board/dispatch integration.
 
-
 ## Release pass — vehicles, top-ups, allowances (done, unpublished)
+
 - Vehicle onboarding covers cars/pickups, passenger vans, cargo/Sprinter vans and box trucks alongside trailers; straight trucks keep clearance and weight checks but are not routed like a car. OBD-II adapter is recommended for all of them.
 - Subscriber-only one-time top-ups at $0.30 per credit (50/100/250/500). No purchase and no paid credit use without an active monthly plan, enforced in the database.
 - Server-enforced daily and weekly allowances per monthly plan; weeks reset Saturday 00:00 UTC. Paid voice pauses at the limit and names the reset; nothing extra is charged.
@@ -127,6 +137,7 @@
 
 Verified by authenticated rollback-only fixture (throwaway owner/driver/outsider accounts,
 all rolled back; residue re-checked as zero):
+
 - Pending application survives: `company_my_memberships()` returns the pending row with the
   carrier's name, so the summary does not vanish on reload.
 - Roster identity: owner sees the applicant's confirmed email; pending driver, active ordinary
@@ -139,6 +150,7 @@ all rolled back; residue re-checked as zero):
   later paid month does not release refunded value.
 
 Not connected (no integration, shown as unavailable, never simulated):
+
 - Payments/Stripe (no credentials) — no live billing.
 - Commercial truck routing/restriction data — Google Maps base map only; posted signs govern.
 - OBD-II / THE BOLT telemetry, parts suppliers, delivery partners, load boards.
@@ -146,6 +158,7 @@ Not connected (no integration, shown as unavailable, never simulated):
 ## Release report — ElevenLabs live voice provider
 
 Implemented (test evidence, no credentials required):
+
 - `src/lib/elevenlabs.server.ts`: server-only adapter. `ELEVENLABS_API_KEY` read inside
   handlers, sent as `xi-api-key`, never in a URL, never exposed to the browser or a VITE var.
   Model `eleven_flash_v2_5` (low latency), MP3 44.1kHz/128kbps.
@@ -164,6 +177,7 @@ Implemented (test evidence, no credentials required):
   refusal and long-clip encoding. Full suite: 95 tests pass; typecheck and build pass.
 
 Blocked — live verification not done:
+
 - No ElevenLabs connection exists on this project, so no real male/female audio has been
   generated and the sample clips have not been re-rendered. The app truthfully reports
   "not connected" and speaks every line with the device voice, free.
@@ -172,6 +186,7 @@ Still not connected (unchanged): payments/Stripe, commercial truck routing data,
 telemetry, parts suppliers, delivery partners, load boards.
 
 ## Current correction — original Hercules conversation bubble
+
 - [x] Keep the original Hercules frontend and navigation from the pre-Freight baseline
 - [x] Remove the separate setup bubble and cancelled Freight OS screens from active use
 - [ ] Upgrade the original voice dock with one compact text-and-voice conversation panel

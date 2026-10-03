@@ -77,17 +77,37 @@ export function VoiceDock() {
                 onActivate={mode === "idle" ? listen : stop}
               />
               <div className="min-w-0 flex-1">
-                <h2 className="font-display text-base font-medium uppercase tracking-[0.12em]">Hercules</h2>
+                <h2 className="font-display text-base font-medium uppercase tracking-[0.12em]">
+                  Hercules
+                </h2>
                 <p className="truncate text-xs text-muted-foreground">
-                  {mode === "listening" ? "Listening…" : mode === "speaking" ? `${voice.name} speaking…` : "Ready by voice or text"}
+                  {mode === "listening"
+                    ? "Listening…"
+                    : mode === "speaking"
+                      ? `${voice.name} speaking…`
+                      : "Ready by voice or text"}
                 </p>
               </div>
               {turns.length ? (
-                <Button type="button" size="icon" variant="ghost" onClick={clear} aria-label="Clear conversation" title="Clear conversation">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={clear}
+                  aria-label="Clear conversation"
+                  title="Clear conversation"
+                >
                   <Trash2 />
                 </Button>
               ) : null}
-              <Button type="button" size="icon" variant="ghost" onClick={() => setOpen(false)} aria-label="Minimize conversation" title="Minimize">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={() => setOpen(false)}
+                aria-label="Minimize conversation"
+                title="Minimize"
+              >
                 <ChevronDown />
               </Button>
             </header>
@@ -110,18 +130,36 @@ export function VoiceDock() {
                           turn.from === "driver" && "bg-primary text-primary-foreground",
                         )}
                       >
-                        {turn.from === "hercules" ? <MessageResponse>{turn.text}</MessageResponse> : turn.text}
+                        {turn.from === "hercules" ? (
+                          <MessageResponse>{turn.text}</MessageResponse>
+                        ) : (
+                          turn.text
+                        )}
                       </MessageContent>
                       {turn.proposal ? (
                         <div className="ml-0 max-w-sm rounded-2xl border border-primary/35 bg-secondary/55 p-3 text-sm">
                           <p className="font-medium">{turn.proposal.summary}</p>
-                          {turn.proposal.total ? <p className="mt-1 text-primary">{turn.proposal.total}</p> : null}
+                          {turn.proposal.total ? (
+                            <p className="mt-1 text-primary">{turn.proposal.total}</p>
+                          ) : null}
                           {turn.status ? (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5" />{turn.status === "approved" ? "Approved by you" : "Declined"}</p>
+                            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Check className="h-3.5 w-3.5" />
+                              {turn.status === "approved" ? "Approved by you" : "Declined"}
+                            </p>
                           ) : (
                             <div className="mt-3 flex gap-2">
-                              <Button type="button" size="sm" onClick={() => approve(turn.id)}>Approve</Button>
-                              <Button type="button" size="sm" variant="outline" onClick={() => decline(turn.id)}>Decline</Button>
+                              <Button type="button" size="sm" onClick={() => approve(turn.id)}>
+                                Approve
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => decline(turn.id)}
+                              >
+                                Decline
+                              </Button>
                             </div>
                           )}
                         </div>
@@ -134,17 +172,27 @@ export function VoiceDock() {
             </Conversation>
 
             {speechSource === "unavailable" && speechNote ? (
-              <div role="status" className="flex items-center justify-between gap-2 border-t border-border/70 px-4 py-2 text-xs text-warn">
+              <div
+                role="status"
+                className="flex items-center justify-between gap-2 border-t border-border/70 px-4 py-2 text-xs text-warn"
+              >
                 <span>{speechNote}</span>
                 {canRetrySpeech ? (
-                  <Button type="button" size="sm" variant="ghost" onClick={retrySpeech}><RotateCcw />Retry</Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={retrySpeech}>
+                    <RotateCcw />
+                    Retry
+                  </Button>
                 ) : null}
               </div>
             ) : null}
 
             <div className="border-t border-border/70 p-3">
               <PromptInput onSubmit={submit} className="rounded-2xl border-border bg-secondary/45">
-                <PromptInputTextarea aria-label="Message Hercules" placeholder="Message Hercules…" className="min-h-12 resize-none" />
+                <PromptInputTextarea
+                  aria-label="Message Hercules"
+                  placeholder="Message Hercules…"
+                  className="min-h-12 resize-none"
+                />
                 <PromptInputFooter className="justify-between px-2 pb-2">
                   <Button
                     type="button"
@@ -156,7 +204,11 @@ export function VoiceDock() {
                   >
                     {mode === "idle" ? <Mic /> : <X />}
                   </Button>
-                  <PromptInputSubmit status={status} onStop={stop} className="h-11 w-11 rounded-full" />
+                  <PromptInputSubmit
+                    status={status}
+                    onStop={stop}
+                    className="h-11 w-11 rounded-full"
+                  />
                 </PromptInputFooter>
               </PromptInput>
             </div>
@@ -171,7 +223,13 @@ export function VoiceDock() {
             onActivate={mode === "idle" ? listen : stop}
           />
 
-          <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setOpen(true)} aria-expanded={open} aria-label="Open Hercules conversation">
+          <button
+            type="button"
+            className="min-w-0 flex-1 text-left"
+            onClick={() => setOpen(true)}
+            aria-expanded={open}
+            aria-label="Open Hercules conversation"
+          >
             <span className="tech-label text-voice-accent">
               {mode === "listening"
                 ? "Listening"
@@ -185,7 +243,9 @@ export function VoiceDock() {
                 mode === "listening" ? "text-voice-accent/70" : "text-voice-text-dim",
               )}
             >
-              {mode === "listening" ? "Go ahead, I'm on it." : lastLine || "Ask about loads, hours, the map or money."}
+              {mode === "listening"
+                ? "Go ahead, I'm on it."
+                : lastLine || "Ask about loads, hours, the map or money."}
             </p>
           </button>
 

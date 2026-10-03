@@ -14,11 +14,14 @@ if (!key) throw new Error("ELEVENLABS_API_KEY is required to render the samples"
 
 for (const v of voiceOptions) {
   const t0 = Date.now();
-  const res = await fetch(`${ELEVEN_API}/v1/text-to-speech/${v.eleven}?output_format=mp3_44100_128`, {
-    method: "POST",
-    headers: { "xi-api-key": key, "Content-Type": "application/json" },
-    body: JSON.stringify(elevenRequestBody(v, v.sample)),
-  });
+  const res = await fetch(
+    `${ELEVEN_API}/v1/text-to-speech/${v.eleven}?output_format=mp3_44100_128`,
+    {
+      method: "POST",
+      headers: { "xi-api-key": key, "Content-Type": "application/json" },
+      body: JSON.stringify(elevenRequestBody(v, v.sample)),
+    },
+  );
   if (!res.ok) throw new Error(`${v.id}: HTTP ${res.status}`);
   const bytes = new Uint8Array(await res.arrayBuffer());
   await writeFile(`public/voice-samples/${v.id}.mp3`, bytes);
