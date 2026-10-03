@@ -5,7 +5,10 @@ import { AuthFrame } from "@/components/freight/AuthFrame";
 import { ErrorNote, Field, FButton, FInput } from "@/components/freight/ui";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({ next: typeof s["next"] === "string" && s["next"].startsWith("/") && !s["next"].startsWith("//") ? (s["next"] as string) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } => {
+    const n = s["next"];
+    return typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? { next: n } : {};
+  },
   head: () => ({
     meta: [
       { title: "Sign in — Hercules Freight OS" },

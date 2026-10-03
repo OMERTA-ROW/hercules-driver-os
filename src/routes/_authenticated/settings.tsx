@@ -14,7 +14,7 @@ function Settings() {
   const { email, companies, company, setCompany } = useFreight();
   const [pw, setPw] = useState("");
   const save = async () => {
-    if (pw.length < 8) return toast.error("Use at least 8 characters.");
+    if (pw.length < 8) { toast.error("Use at least 8 characters."); return; }
     const { error } = await supabase.auth.updateUser({ password: pw });
     error ? toast.error("Couldn't change your password.") : toast.success("Password changed.");
     setPw("");

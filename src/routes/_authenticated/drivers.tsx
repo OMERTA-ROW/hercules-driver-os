@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useFreight, useLoads, useTeam, type TeamMember } from "@/lib/freight";
+import { rpc, useFreight, useLoads, useTeam, type TeamMember } from "@/lib/freight";
 import { useInvalidate } from "@/lib/freight-data";
 import { Badge, Empty, ErrorNote, FButton, FInput, Loading, PageHeader, Table, Td } from "@/components/freight/ui";
 
@@ -39,7 +39,8 @@ function Row({ d, delivered, edit }: { d: TeamMember; delivered: number; edit: b
   const [open, setOpen] = useState(false);
   const [cdl, setCdl] = useState(d.cdl_expires ?? "");
   const [med, setMed] = useState(d.medical_expires ?? "");
-  const save = async (patch: Record<string, unknown>) => {
+  const save = async (patch: { available?: boolean; cdl_expires?: string | null; medical_expires?: string | null }) => {
+    await rpc("freight_driver_profile_upsert", { _company: company!.id, _user: d.user_id });
     const { error } = await supabase.from("freight_driver_profiles").update(patch).eq("company_id", company!.id).eq("user_id", d.user_id);
     error ? toast.error("Couldn't save. The driver profile may not exist yet.") : toast.success("Saved.");
     setOpen(false);

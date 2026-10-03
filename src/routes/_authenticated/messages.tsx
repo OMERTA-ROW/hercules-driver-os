@@ -55,7 +55,7 @@ function NewConv({ onMade }: { onMade: (id: string) => void }) {
   const make = async (e: FormEvent) => {
     e.preventDefault();
     const { data, error } = await supabase.from("freight_conversations").insert({ company_id: company!.id, created_by: userId!, subject, driver_user_id: driver || null, load_id: load || null }).select("id").single();
-    if (error) return toast.error("Couldn't start that conversation.");
+    if (error) { toast.error("Couldn't start that conversation."); return; }
     setOpen(false);
     setSubject("");
     void inv();

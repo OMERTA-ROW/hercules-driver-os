@@ -24,7 +24,7 @@ export function Directory({ table, title, sub, cols, canWrite, icon, extra }: { 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from as any)(table).insert(payload);
     setBusy(false);
-    if (error) return toast.error(error.code === "42501" ? "Your role can't add these." : "Check the fields and try again.");
+    if (error) { toast.error(error.code === "42501" ? "Your role can't add these." : "Check the fields and try again."); return; }
     toast.success("Added.");
     setF({});
     setOpen(false);

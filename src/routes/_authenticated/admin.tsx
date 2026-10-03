@@ -30,7 +30,7 @@ function Admin() {
   const invite = async (e: FormEvent) => {
     e.preventDefault();
     const r = await rpc("freight_invite_create", { _company: company!.id, _email: email, _role: role, _hours: Number(hours) });
-    if (!r.ok) return toast.error(r.message);
+    if (!r.ok) { toast.error(r.message); return; }
     setToken(String(r["token"]));
     setEmail("");
     void inv();
