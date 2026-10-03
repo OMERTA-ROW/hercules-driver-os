@@ -23,10 +23,10 @@ export function SetupBubble() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => setSaved(localStorage.getItem(DONE_KEY) === "1"), []);
-  useEffect(() => {
-    if (!open) return;
-    setStep(saved ? "review" : "hello");
-  }, [open, saved]);
+  const handleOpenChange = (next: boolean) => {
+    if (next) setStep(localStorage.getItem(DONE_KEY) === "1" ? "review" : "hello");
+    setOpen(next);
+  };
 
   const i = order.indexOf(step);
   const next = () => setStep(order[Math.min(i + 1, order.length - 1)]!);
@@ -39,7 +39,7 @@ export function SetupBubble() {
   const equipment = useMemo(() => profiles.map((p) => p.unit).join(", "), [profiles]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <button
           type="button"
