@@ -499,6 +499,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          business_type: string
           code: string
           created_at: string
           created_by: string
@@ -512,6 +513,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_type?: string
           code: string
           created_at?: string
           created_by: string
@@ -525,6 +527,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_type?: string
           code?: string
           created_at?: string
           created_by?: string
@@ -786,6 +789,1327 @@ export type Database = {
             columns: ["load_id"]
             isOneToOne: false
             referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_approvals: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          error: string | null
+          executed_at: string | null
+          id: string
+          load_id: string | null
+          payload: Json
+          payload_hash: string
+          reason: string | null
+          requested_by: string
+          status: string
+          target_version: number | null
+          why: string | null
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          error?: string | null
+          executed_at?: string | null
+          id?: string
+          load_id?: string | null
+          payload: Json
+          payload_hash: string
+          reason?: string | null
+          requested_by: string
+          status?: string
+          target_version?: number | null
+          why?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          error?: string | null
+          executed_at?: string | null
+          id?: string
+          load_id?: string | null
+          payload?: Json
+          payload_hash?: string
+          reason?: string | null
+          requested_by?: string
+          status?: string
+          target_version?: number | null
+          why?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_approvals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_approvals_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          company_id: string
+          created_at: string
+          detail: Json
+          entity: string
+          entity_id: string | null
+          id: number
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          company_id: string
+          created_at?: string
+          detail?: Json
+          entity: string
+          entity_id?: string | null
+          id?: number
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          company_id?: string
+          created_at?: string
+          detail?: Json
+          entity?: string
+          entity_id?: string | null
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_automation_rules: {
+        Row: {
+          approval_required: boolean
+          company_id: string
+          conditions: Json
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          approval_required?: boolean
+          company_id: string
+          conditions?: Json
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          approval_required?: boolean
+          company_id?: string
+          conditions?: Json
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_automation_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_automation_runs: {
+        Row: {
+          company_id: string
+          created_at: string
+          dedupe_key: string
+          error: string | null
+          id: string
+          load_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rule_id: string | null
+          status: string
+          title: string
+          why: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          dedupe_key: string
+          error?: string | null
+          id?: string
+          load_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rule_id?: string | null
+          status?: string
+          title: string
+          why: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          dedupe_key?: string
+          error?: string | null
+          id?: string
+          load_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rule_id?: string | null
+          status?: string
+          title?: string
+          why?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_automation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_automation_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "freight_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_carriers: {
+        Row: {
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          dot_number: string | null
+          id: string
+          insurance_expires: string | null
+          mc_number: string | null
+          name: string
+          notes: string | null
+          verification_status: string
+        }
+        Insert: {
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          dot_number?: string | null
+          id?: string
+          insurance_expires?: string | null
+          mc_number?: string | null
+          name: string
+          notes?: string | null
+          verification_status?: string
+        }
+        Update: {
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          dot_number?: string | null
+          id?: string
+          insurance_expires?: string | null
+          mc_number?: string | null
+          name?: string
+          notes?: string | null
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_carriers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_conversations: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          driver_user_id: string | null
+          id: string
+          load_id: string | null
+          shipper_visible: boolean
+          subject: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string
+          driver_user_id?: string | null
+          id?: string
+          load_id?: string | null
+          shipper_visible?: boolean
+          subject: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          driver_user_id?: string | null
+          id?: string
+          load_id?: string | null
+          shipper_visible?: boolean
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_conversations_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_customers: {
+        Row: {
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          kind: string
+          linked_company_id: string | null
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          linked_company_id?: string | null
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          linked_company_id?: string | null
+          name?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_customers_linked_company_id_fkey"
+            columns: ["linked_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_document_reviews: {
+        Row: {
+          company_id: string
+          created_at: string
+          decision: string
+          document_id: string
+          id: string
+          note: string | null
+          reviewer: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          decision: string
+          document_id: string
+          id?: string
+          note?: string | null
+          reviewer: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          decision?: string
+          document_id?: string
+          id?: string
+          note?: string | null
+          reviewer?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_document_reviews_company_id_document_id_fkey"
+            columns: ["company_id", "document_id"]
+            isOneToOne: false
+            referencedRelation: "freight_documents"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          driver_user_id: string | null
+          equipment_id: string | null
+          expires_on: string | null
+          file_name: string
+          id: string
+          kind: string
+          load_id: string | null
+          mime_type: string
+          size_bytes: number
+          status: string
+          storage_path: string
+          uploaded_by: string
+          version: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          driver_user_id?: string | null
+          equipment_id?: string | null
+          expires_on?: string | null
+          file_name: string
+          id?: string
+          kind: string
+          load_id?: string | null
+          mime_type: string
+          size_bytes: number
+          status?: string
+          storage_path: string
+          uploaded_by: string
+          version?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          driver_user_id?: string | null
+          equipment_id?: string | null
+          expires_on?: string | null
+          file_name?: string
+          id?: string
+          kind?: string
+          load_id?: string | null
+          mime_type?: string
+          size_bytes?: number
+          status?: string
+          storage_path?: string
+          uploaded_by?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_documents_company_id_equipment_id_fkey"
+            columns: ["company_id", "equipment_id"]
+            isOneToOne: false
+            referencedRelation: "freight_equipment"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_documents_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_driver_profiles: {
+        Row: {
+          available: boolean
+          cdl_expires: string | null
+          cdl_number: string | null
+          cdl_state: string | null
+          company_id: string
+          display_name: string | null
+          medical_expires: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available?: boolean
+          cdl_expires?: string | null
+          cdl_number?: string | null
+          cdl_state?: string | null
+          company_id: string
+          display_name?: string | null
+          medical_expires?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available?: boolean
+          cdl_expires?: string | null
+          cdl_number?: string | null
+          cdl_state?: string | null
+          company_id?: string
+          display_name?: string | null
+          medical_expires?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_driver_profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_equipment: {
+        Row: {
+          company_id: string
+          created_at: string
+          equipment_type: string | null
+          id: string
+          inspection_expires: string | null
+          insurance_expires: string | null
+          kind: string
+          permit_expires: string | null
+          plate: string | null
+          registration_expires: string | null
+          status: string
+          unit_number: string
+          vin: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          equipment_type?: string | null
+          id?: string
+          inspection_expires?: string | null
+          insurance_expires?: string | null
+          kind: string
+          permit_expires?: string | null
+          plate?: string | null
+          registration_expires?: string | null
+          status?: string
+          unit_number: string
+          vin?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          equipment_type?: string | null
+          id?: string
+          inspection_expires?: string | null
+          insurance_expires?: string | null
+          kind?: string
+          permit_expires?: string | null
+          plate?: string | null
+          registration_expires?: string | null
+          status?: string
+          unit_number?: string
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_equipment_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_exceptions: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string
+          id: string
+          load_id: string
+          raised_by: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description: string
+          id?: string
+          load_id: string
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          load_id?: string
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_exceptions_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_integration_logs: {
+        Row: {
+          company_id: string
+          created_at: string
+          detail: string | null
+          event: string
+          id: number
+          provider: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          detail?: string | null
+          event: string
+          id?: number
+          provider: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          detail?: string | null
+          event?: string
+          id?: number
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_integration_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_integrations: {
+        Row: {
+          category: string
+          company_id: string
+          id: string
+          last_error: string | null
+          provider: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          category: string
+          company_id: string
+          id?: string
+          last_error?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          category?: string
+          company_id?: string
+          id?: string
+          last_error?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_invites: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          email: string
+          expires_at: string
+          id: string
+          revoked: boolean
+          role: string
+          token_hash: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          email: string
+          expires_at: string
+          id?: string
+          revoked?: boolean
+          role: string
+          token_hash: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          revoked?: boolean
+          role?: string
+          token_hash?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_invites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_invoices: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          due_on: string | null
+          id: string
+          load_id: string | null
+          number: string
+          status: string
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          created_by: string
+          customer_id?: string | null
+          due_on?: string | null
+          id?: string
+          load_id?: string | null
+          number: string
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          due_on?: string | null
+          id?: string
+          load_id?: string | null
+          number?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_invoices_company_id_customer_id_fkey"
+            columns: ["company_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "freight_customers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_invoices_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_load_events: {
+        Row: {
+          actor: string | null
+          company_id: string
+          created_at: string
+          from_value: string | null
+          id: number
+          kind: string
+          load_id: string
+          reason: string | null
+          snapshot: Json | null
+          to_value: string | null
+          version: number
+        }
+        Insert: {
+          actor?: string | null
+          company_id: string
+          created_at?: string
+          from_value?: string | null
+          id?: number
+          kind: string
+          load_id: string
+          reason?: string | null
+          snapshot?: Json | null
+          to_value?: string | null
+          version: number
+        }
+        Update: {
+          actor?: string | null
+          company_id?: string
+          created_at?: string
+          from_value?: string | null
+          id?: number
+          kind?: string
+          load_id?: string
+          reason?: string | null
+          snapshot?: Json | null
+          to_value?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_load_events_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_load_financials: {
+        Row: {
+          carrier_pay_cents: number | null
+          company_id: string
+          customer_rate_cents: number | null
+          driver_pay_cents: number | null
+          load_id: string
+          rate_confirmed: boolean
+          updated_at: string
+        }
+        Insert: {
+          carrier_pay_cents?: number | null
+          company_id: string
+          customer_rate_cents?: number | null
+          driver_pay_cents?: number | null
+          load_id: string
+          rate_confirmed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          carrier_pay_cents?: number | null
+          company_id?: string
+          customer_rate_cents?: number | null
+          driver_pay_cents?: number | null
+          load_id?: string
+          rate_confirmed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_load_financials_company_id_load_id_fkey"
+            columns: ["company_id", "load_id"]
+            isOneToOne: false
+            referencedRelation: "freight_loads"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_loads: {
+        Row: {
+          commodity: string | null
+          company_id: string
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          delivered_override_reason: string | null
+          delivery_at: string | null
+          destination: string | null
+          driver_id: string | null
+          driver_response: string | null
+          driver_response_reason: string | null
+          equipment_type: string | null
+          id: string
+          notes: string | null
+          op_status: string | null
+          origin: string | null
+          pickup_at: string | null
+          pod_document_id: string | null
+          reference: string
+          shipper_company_id: string | null
+          status: string
+          trailer_id: string | null
+          truck_id: string | null
+          updated_at: string
+          version: number
+          weight_lb: number | null
+        }
+        Insert: {
+          commodity?: string | null
+          company_id: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by: string
+          customer_id?: string | null
+          delivered_override_reason?: string | null
+          delivery_at?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          driver_response?: string | null
+          driver_response_reason?: string | null
+          equipment_type?: string | null
+          id?: string
+          notes?: string | null
+          op_status?: string | null
+          origin?: string | null
+          pickup_at?: string | null
+          pod_document_id?: string | null
+          reference: string
+          shipper_company_id?: string | null
+          status?: string
+          trailer_id?: string | null
+          truck_id?: string | null
+          updated_at?: string
+          version?: number
+          weight_lb?: number | null
+        }
+        Update: {
+          commodity?: string | null
+          company_id?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          delivered_override_reason?: string | null
+          delivery_at?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          driver_response?: string | null
+          driver_response_reason?: string | null
+          equipment_type?: string | null
+          id?: string
+          notes?: string | null
+          op_status?: string | null
+          origin?: string | null
+          pickup_at?: string | null
+          pod_document_id?: string | null
+          reference?: string
+          shipper_company_id?: string | null
+          status?: string
+          trailer_id?: string | null
+          truck_id?: string | null
+          updated_at?: string
+          version?: number
+          weight_lb?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_loads_company_id_customer_id_fkey"
+            columns: ["company_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "freight_customers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_loads_company_id_driver_id_fkey"
+            columns: ["company_id", "driver_id"]
+            isOneToOne: false
+            referencedRelation: "freight_driver_profiles"
+            referencedColumns: ["company_id", "user_id"]
+          },
+          {
+            foreignKeyName: "freight_loads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_loads_company_id_pod_document_id_fkey"
+            columns: ["company_id", "pod_document_id"]
+            isOneToOne: false
+            referencedRelation: "freight_documents"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_loads_company_id_trailer_id_fkey"
+            columns: ["company_id", "trailer_id"]
+            isOneToOne: false
+            referencedRelation: "freight_equipment"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_loads_company_id_truck_id_fkey"
+            columns: ["company_id", "truck_id"]
+            isOneToOne: false
+            referencedRelation: "freight_equipment"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_loads_shipper_company_id_fkey"
+            columns: ["shipper_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_maintenance: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          cost_cents: number | null
+          created_at: string
+          created_by: string | null
+          description: string
+          equipment_id: string
+          id: string
+          scheduled_for: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          cost_cents?: number | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          equipment_id: string
+          id?: string
+          scheduled_for?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          cost_cents?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          equipment_id?: string
+          id?: string
+          scheduled_for?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_maintenance_company_id_equipment_id_fkey"
+            columns: ["company_id", "equipment_id"]
+            isOneToOne: false
+            referencedRelation: "freight_equipment"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_member_roles: {
+        Row: {
+          company_id: string
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_member_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_messages: {
+        Row: {
+          author: string
+          body: string
+          company_id: string
+          conversation_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          author?: string
+          body: string
+          company_id: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          author?: string
+          body?: string
+          company_id?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_messages_company_id_conversation_id_fkey"
+            columns: ["company_id", "conversation_id"]
+            isOneToOne: false
+            referencedRelation: "freight_conversations"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_notifications: {
+        Row: {
+          body: string | null
+          company_id: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_payment_records: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          id: string
+          invoice_id: string | null
+          method: string
+          recorded_by: string
+          reference: string | null
+          settlement_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          method: string
+          recorded_by: string
+          reference?: string | null
+          settlement_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          recorded_by?: string
+          reference?: string | null
+          settlement_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_payment_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_payment_records_company_id_invoice_id_fkey"
+            columns: ["company_id", "invoice_id"]
+            isOneToOne: false
+            referencedRelation: "freight_invoices"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_payment_records_company_id_settlement_id_fkey"
+            columns: ["company_id", "settlement_id"]
+            isOneToOne: false
+            referencedRelation: "freight_settlements"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      freight_settlements: {
+        Row: {
+          amount_cents: number
+          carrier_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          driver_user_id: string | null
+          id: string
+          period_end: string | null
+          period_start: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents: number
+          carrier_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          driver_user_id?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          carrier_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          driver_user_id?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_settlements_company_id_carrier_id_fkey"
+            columns: ["company_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "freight_carriers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "freight_settlements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
