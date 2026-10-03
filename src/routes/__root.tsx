@@ -33,6 +33,7 @@ import { ComplianceProvider } from "@/lib/compliance";
 import { ComplianceBridge } from "@/components/hercules/ComplianceBridge";
 import { LiveVoiceBridge } from "@/components/hercules/LiveVoiceBridge";
 import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
+import { SetupBubble } from "@/components/hercules/SetupBubble";
 
 function NotFoundComponent() {
   return (
@@ -162,6 +163,7 @@ function RootComponent() {
                                   {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                                   <Outlet />
                                   <TripVehiclePrompt />
+                                  <SetupBubble />
                                   <LiveVoiceBridge />
                                   <ArrivalBridge />
                                   <ComplianceBridge />
