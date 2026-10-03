@@ -987,24 +987,27 @@
 
 @media print {
   @page { margin: 0.45in; }
-  body * { visibility: hidden !important; }
-  #hercules-bol-print,
-  #hercules-bol-print * { visibility: visible !important; }
+  body > * { display: none !important; }
+  body > [data-radix-portal] { display: block !important; }
+  body > [data-radix-portal] > * { display: none !important; }
+  body > [data-radix-portal] > [role="dialog"] { display: block !important; }
+  body { overflow: visible !important; padding: 0 !important; background: white !important; }
+  [role="dialog"] > * { display: none !important; }
+  [role="dialog"] > #hercules-bol-print { display: block !important; }
   #hercules-bol-print {
-    position: absolute;
-    inset: 0;
+    position: static;
     width: 100%;
-    min-height: 100%;
+    min-height: auto;
     overflow: visible;
     background: white !important;
     color: black !important;
     font-family: Arial, sans-serif;
-    break-inside: avoid;
   }
   #hercules-bol-print section,
   #hercules-bol-print tr,
-  #hercules-bol-print div { break-inside: avoid; }
+  #hercules-bol-print div { break-inside: avoid-page; }
   #hercules-bol-print table { break-inside: auto; }
+  #hercules-bol-print thead { display: table-header-group; }
 }
 
 /* Larger round choice cards (two lines of text) in the same bubble language. */

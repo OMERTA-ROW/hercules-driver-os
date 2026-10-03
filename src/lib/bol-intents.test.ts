@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { bolIntent } from "./bol-intents";
 import { isSafeEmailRecipient } from "@/components/hercules/BolWorkspace";
-import { missingBolFields, type BolDraft } from "./bol";
+import { hasUnsavedBolWork, missingBolFields, type BolDraft } from "./bol";
 import { createClient } from "@supabase/supabase-js";
 
 const filled: BolDraft = {
@@ -26,6 +26,17 @@ describe("BOL deterministic commands", () => {
 describe("BOL validation", () => {
   it("reports no missing core fields for a filled draft", () => expect(missingBolFields(filled)).toEqual([]));
   it("names unknown shipment facts", () => expect(missingBolFields({ ...filled, shipperName: "", items: [{ ...filled.items[0]!, weight: "" }] })).toEqual(["shipper name", "freight weight"]));
+  it("requires a full street address instead of treating city/state as complete", () => {
+    expect(missingBolFields({ ...filled, shipperAddress: "Chicago, IL" })).toContain("full shipper street address");
+  });
+  it("validates every item and rejects non-positive or non-numeric quantities", () => {
+    const missing = missingBolFields({ ...filled, items: [filled.items[0]!, { description: "", handlingUnits: "-1", weight: "NaN", weightUnit: "lb" }] });
+    expect(missing).toEqual(["item 2 description", "item 2 positive handling-unit count", "item 2 positive freight weight"]);
+  });
+  it("detects unsaved work before replacing a draft", () => {
+    expect(hasUnsavedBolWork(filled)).toBe(true);
+    expect(hasUnsavedBolWork({ ...filled, id: "saved" })).toBe(false);
+  });
   it("accepts one safe recipient and rejects malformed or injected values", () => {
     expect(isSafeEmailRecipient("driver@example.com")).toBe(true);
     expect(isSafeEmailRecipient("driver@example.com\nBcc:x@example.com")).toBe(false);
