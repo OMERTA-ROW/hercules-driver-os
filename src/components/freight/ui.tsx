@@ -40,7 +40,7 @@ export function Card({ className, children }: { className?: string; children: Re
   return <section className={cn("hfo-card p-5", className)}>{children}</section>;
 }
 
-export function PageHeader({ title, sub, actions }: { title: string; sub?: string; actions?: ReactNode }) {
+export function PageHeader({ title, sub, actions }: { title: string; sub?: string | undefined; actions?: ReactNode }) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
       <div>
@@ -127,7 +127,7 @@ export function ErrorNote({ children }: { children: ReactNode }) {
   );
 }
 
-export function Field({ label, hint, children, required }: { label: string; hint?: string; children: ReactNode; required?: boolean }) {
+export function Field({ label, hint, children, required }: { label: string; hint?: string | undefined; children: ReactNode; required?: boolean | undefined }) {
   return (
     <label className="block text-sm">
       <span className="mb-1 block font-semibold text-foreground">
