@@ -48,6 +48,17 @@ describe("bubble styling", () => {
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain(".surface-motion-zone::after { display: none; }");
   });
+
+  it("keeps the decorative liquid orb original, matte, round, and texture-free", () => {
+    const orb = css.slice(css.indexOf("/* Original Hercules Liquid Orb"));
+    expect(orb).toContain("background: #2d2b29");
+    expect(orb).toContain("border-radius: 50%");
+    expect(orb).toContain("liquid-orb-surface 30s");
+    expect(orb).toContain('.liquid-orb[data-motion="off"]');
+    expect(orb).not.toContain("box-shadow");
+    expect(orb).not.toContain("gradient(");
+    expect(orb).not.toContain("liquid-orb-grain");
+  });
 });
 
 describe("single Shapher theme", () => {
