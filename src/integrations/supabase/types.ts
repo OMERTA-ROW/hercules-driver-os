@@ -2159,6 +2159,56 @@ export type Database = {
         }
         Relationships: []
       }
+      hercules_role_requests: {
+        Row: {
+          company_id: string
+          id: string
+          reason: string
+          required_documents: string[]
+          review_reason: string | null
+          reviewer_id: string | null
+          role: Database["public"]["Enums"]["hercules_role"]
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          id?: string
+          reason: string
+          required_documents?: string[]
+          review_reason?: string | null
+          reviewer_id?: string | null
+          role: Database["public"]["Enums"]["hercules_role"]
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          id?: string
+          reason?: string
+          required_documents?: string[]
+          review_reason?: string | null
+          reviewer_id?: string | null
+          role?: Database["public"]["Enums"]["hercules_role"]
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hercules_role_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hercules_user_roles: {
         Row: {
           created_at: string
@@ -2919,6 +2969,23 @@ export type Database = {
           _user: string
         }
         Returns: boolean
+      }
+      hercules_is_company_admin: {
+        Args: { _company: string; _user: string }
+        Returns: boolean
+      }
+      hercules_role_request_decide: {
+        Args: { _reason: string; _request: string; _status: string }
+        Returns: Json
+      }
+      hercules_role_request_submit: {
+        Args: {
+          _company: string
+          _docs: string[]
+          _reason: string
+          _role: Database["public"]["Enums"]["hercules_role"]
+        }
+        Returns: Json
       }
       hercules_role_set: {
         Args: {

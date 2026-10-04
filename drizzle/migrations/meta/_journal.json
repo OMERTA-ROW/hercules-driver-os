@@ -50,6 +50,13 @@
       "when": 1791077937966,
       "tag": "0006_hercules_account_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791078860528,
+      "tag": "0007_hercules_role_requests",
+      "breakpoints": true
     }
   ]
 }
