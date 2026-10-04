@@ -18,6 +18,7 @@ export function SurfaceMotionSwitch() {
       <button
         type="button"
         role="switch"
+        aria-label="Surface Motion"
         aria-checked={surfaceMotion}
         aria-describedby="surface-motion-help"
         onClick={() => setSurfaceMotion(!surfaceMotion)}
