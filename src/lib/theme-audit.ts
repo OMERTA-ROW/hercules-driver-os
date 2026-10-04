@@ -28,6 +28,7 @@ export function parseHex(value: string): Oklch | null {
   const match = /^#([\da-f]{6})$/i.exec(value.trim());
   if (!match) return null;
   const hex = match[1];
+  if (!hex) return null;
   const channel = (offset: number) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
   const toLinear = (v: number) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   const r = toLinear(channel(0));

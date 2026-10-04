@@ -1,6 +1,5 @@
 import { Package, Phone, Truck, Wrench, X } from "lucide-react";
 import { countdownLabel, minutesOut, useArrivals, type Arrival } from "@/lib/arrivals";
-import { serviceOf } from "@/data/delivery";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -11,14 +10,13 @@ import { Button } from "@/components/ui/button";
 
 function Logo({ a }: { a: Arrival }) {
   if (a.kind === "delivery" && a.service) {
-    const s = serviceOf(a.service);
+    const short = a.org.slice(0, 3).toUpperCase();
     return (
       <span
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold tracking-wide"
-        style={{ background: s.fill, color: s.text }}
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-sm font-bold tracking-wide text-foreground"
         aria-hidden
       >
-        {s.short}
+        {short}
       </span>
     );
   }
@@ -36,12 +34,12 @@ function Card({ a }: { a: Arrival }) {
 
   return (
     <div
-      className={`pointer-events-auto w-[min(92vw,26rem)] rounded-2xl border bg-black/95 p-4 backdrop-blur-sm ${
+      className={`pointer-events-auto w-[min(92vw,26rem)] rounded-2xl border bg-card p-4 ${
         a.status === "overdue"
-          ? "border-destructive/60 shadow-[0_0_36px_-8px_hsl(var(--destructive)/0.5)]"
+          ? "border-foreground"
           : hot
-            ? "border-primary/70 shadow-[0_0_40px_-8px_hsl(var(--primary)/0.55)]"
-            : "border-primary/30 shadow-[0_0_32px_-12px_hsl(280_90%_60%/0.45)]"
+            ? "border-foreground"
+            : "border-border"
       }`}
       role="status"
       aria-live="polite"
@@ -49,7 +47,7 @@ function Card({ a }: { a: Arrival }) {
       <div className="flex items-start gap-3">
         <Logo a={a} />
         <div className="min-w-0 flex-1">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-violet-300/80">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {a.kind === "delivery" ? "Delivery inbound" : "Roadside inbound"} · {a.org}
           </p>
           <p className="truncate text-lg font-bold uppercase tracking-wide text-foreground">
@@ -78,7 +76,7 @@ function Card({ a }: { a: Arrival }) {
             </p>
           ) : null}
           {a.quotedMin ? (
-            <p className="mt-1 text-xs uppercase tracking-wide text-violet-300/70">
+            <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
               Quoted {a.quotedMin} min on the call
             </p>
           ) : null}

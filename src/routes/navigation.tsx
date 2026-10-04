@@ -211,7 +211,7 @@ function NavigationScreen() {
       {/* PROACTIVE HAZARD WARNING — big, distance-based, hands-free */}
       {warning ? (
         <div
-          className={`mb-3 rounded-2xl border-2 p-4 backdrop-blur ${
+          className={`mb-3 rounded-2xl border-2 bg-card p-4 ${
             warning.severity === "critical"
               ? "border-destructive bg-destructive/20"
               : warning.severity === "caution"
@@ -599,7 +599,7 @@ function PickupBanner() {
   if (!activeRun?.route) return null;
   const r = activeRun;
   return (
-    <div className="mb-3 rounded-xl border border-primary/55 bg-primary/8 p-3 shadow-[0_0_36px_-14px_hsl(var(--primary)/0.5)]">
+    <div className="mb-3 rounded-xl border border-border bg-card p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <Label>Part pickup · dispatched on your word</Label>

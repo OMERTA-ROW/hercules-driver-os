@@ -86,8 +86,8 @@ function AdapterCard({
       ) : null}
 
       <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex aspect-square w-full max-w-[180px] shrink-0 items-center justify-center rounded-xl border border-primary/35 bg-background shadow-[0_0_40px_-14px_var(--primary)]">
-          <Zap className="h-20 w-20 text-primary drop-shadow-[0_0_18px_var(--primary)]" />
+        <div className="flex aspect-square w-full max-w-[180px] shrink-0 items-center justify-center rounded-xl border border-border bg-background">
+          <Zap className="h-20 w-20 text-primary" />
         </div>
 
         <div className="min-w-0 flex-1">

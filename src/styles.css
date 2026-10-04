@@ -1707,3 +1707,120 @@
     box-shadow: none !important;
   }
 }
+
+/* Final fixed-theme guard: legacy selectors above remain for source-history
+   compatibility, but can never win the live Shapher cascade. */
+:root,
+[data-theme],
+[data-colorway] {
+  color-scheme: dark;
+  --background: #2d2b29;
+  --foreground: #f4efe6;
+  --card: #34312f;
+  --card-foreground: #f4efe6;
+  --popover: #34312f;
+  --popover-foreground: #f4efe6;
+  --primary: #f4efe6;
+  --primary-foreground: #2d2b29;
+  --secondary: #292725;
+  --secondary-foreground: #f4efe6;
+  --muted: #292725;
+  --muted-foreground: #cbc4b9;
+  --accent: #373431;
+  --accent-foreground: #f4efe6;
+  --destructive: #f4efe6;
+  --destructive-foreground: #2d2b29;
+  --border: #6f6962;
+  --input: #817a72;
+  --ring: #f4efe6;
+  --steel: #292725;
+  --steel-foreground: #f4efe6;
+  --hazard: #f4efe6;
+  --hazard-foreground: #2d2b29;
+  --go: #f4efe6;
+  --go-foreground: #2d2b29;
+  --warn: #f4efe6;
+  --warn-foreground: #2d2b29;
+  --info: #f4efe6;
+  --info-foreground: #2d2b29;
+  --violet: #f4efe6;
+  --voice-surface: #2d2b29;
+  --voice-line: #6f6962;
+  --voice-text: #f4efe6;
+  --voice-text-dim: #cbc4b9;
+  --voice-accent: #f4efe6;
+  --voice-accent-soft: #6f6962;
+  --orb-canvas: #2d2b29;
+  --orb-core: #2d2b29;
+  --orb-halo: #34312f;
+  --orb-fill: #2d2b29;
+  --orb-ink: #f4efe6;
+  --surface-1: #292725;
+  --surface-2: #34312f;
+  --bubble-bg: #2d2b29;
+  --bubble-edge: #6f6962;
+  --bubble-on-bg: #34312f;
+  --bubble-on-edge: #f4efe6;
+  --theme-shadow: transparent;
+  --theme-glow: transparent;
+  --gradient-steel: #2d2b29;
+  --gradient-hazard: #34312f;
+  --screen-dim: 0;
+}
+
+.panel,
+.glass,
+.bubble-bar,
+.bubble-card,
+.matte-control,
+.matte-popover,
+.voice-surface,
+.matte-map .gm-control-active,
+.matte-map .gm-svpc,
+.matte-map .gm-fullscreen-control,
+.matte-map .gm-style-mtc button {
+  background: var(--card) !important;
+  background-image: none !important;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.bubble-tab,
+.bubble-tab:hover,
+.glow-ring,
+.glow-control,
+.matte-control {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+.bubble-tab-on,
+.bubble-card-on {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border-color: var(--foreground) !important;
+  box-shadow: none !important;
+}
+
+.edge-gold,
+.hazard-stripes,
+.inner-grid,
+.orb-core {
+  background: var(--background) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+@media print {
+  #hercules-bol-print,
+  #hercules-bol-print * {
+    background: white !important;
+    color: black !important;
+    border-color: black !important;
+  }
+}
