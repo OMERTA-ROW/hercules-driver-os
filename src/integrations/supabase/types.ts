@@ -2233,6 +2233,75 @@ export type Database = {
         }
         Relationships: []
       }
+      hercules_verification_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          doc_type: string
+          expires_on: string | null
+          file_name: string
+          id: string
+          mime_type: string
+          request_id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number
+          status: string
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          doc_type: string
+          expires_on?: string | null
+          file_name: string
+          id?: string
+          mime_type: string
+          request_id: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes: number
+          status?: string
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          doc_type?: string
+          expires_on?: string | null
+          file_name?: string
+          id?: string
+          mime_type?: string
+          request_id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number
+          status?: string
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hercules_verification_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hercules_verification_documents_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "hercules_role_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loads: {
         Row: {
           assigned_driver_id: string | null
@@ -2997,6 +3066,10 @@ export type Database = {
       }
       hercules_switch_role: {
         Args: { _role: Database["public"]["Enums"]["hercules_role"] }
+        Returns: Json
+      }
+      hercules_vault_review: {
+        Args: { _accept: boolean; _doc: string; _note: string }
         Returns: Json
       }
       load_book: { Args: { _load: string; _vehicle?: string }; Returns: Json }
