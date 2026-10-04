@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { doors, type AccountKind } from "@/data/accounts";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/sign-in")({
@@ -46,7 +45,7 @@ function SignIn() {
   const door = doors.find((d) => d.kind === kind)!;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <main className="surface-motion-zone flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between">
           <Link
@@ -55,7 +54,6 @@ function SignIn() {
           >
             HERC<span className="text-foreground">ULES</span>
           </Link>
-          <ThemeToggle size="sm" />
         </div>
 
         <Panel>

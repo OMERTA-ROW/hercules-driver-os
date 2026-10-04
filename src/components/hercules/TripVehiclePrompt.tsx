@@ -31,7 +31,7 @@ export function TripVehiclePrompt() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[85] p-3 sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-[26rem]">
-      <div className="glass rounded-2xl border border-primary/40 p-4 shadow-[0_0_40px_-14px_var(--primary)]">
+      <div className="glass rounded-2xl border border-border p-4">
         <Label>Start of trip</Label>
         <h2 className="mt-1 font-display text-xl uppercase tracking-[0.1em]">
           What are you in today?

@@ -1,38 +1,31 @@
-import { Circle, Waves } from "lucide-react";
-import { motionOptions, useTheme } from "@/lib/theme";
-import { orbColorways, useVoice } from "@/lib/voice";
-import { cn } from "@/lib/utils";
+import { Waves } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 
-/** Compact app-wide Flat White, Grey, or Black selector. */
-export function ThemeToggle({ className, size = "md" }: { className?: string; size?: "sm" | "md" }) {
-  const { colorway, setColorway } = useVoice();
+export function SurfaceMotionSwitch() {
+  const { surfaceMotion, setSurfaceMotion, reducedMotion } = useTheme();
   return (
-    <div role="radiogroup" aria-label="Appearance" className={cn("inline-flex items-center gap-1 rounded-full border border-border bg-background p-1", className)}>
-      {orbColorways.map((option) => (
-        <button key={option.id} type="button" role="radio" aria-checked={colorway === option.id} aria-label={option.label} title={option.hint} onClick={() => setColorway(option.id)} className={cn("flex h-11 w-11 items-center justify-center rounded-full bg-background text-foreground transition-colors", colorway === option.id ? "border-2 border-foreground" : "border border-transparent hover:border-foreground")}>
-          <Circle className={size === "sm" ? "h-4 w-4" : "h-5 w-5"} fill="currentColor" />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-export function MotionPicker() {
-  const { motion, setMotion } = useTheme();
-  return (
-    <div role="radiogroup" aria-label="Motion" className="grid gap-2 sm:grid-cols-3">
-      {motionOptions.map((o) => {
-        const active = motion === o.id;
-        return (
-          <button key={o.id} type="button" role="radio" aria-checked={active} onClick={() => setMotion(o.id)} className={cn("bubble-card min-h-14 p-4 text-left", active && "bubble-card-on")}>
-            <div className="flex items-center gap-2">
-              <Waves className="h-5 w-5" />
-              <span className="font-display text-sm uppercase tracking-[0.12em]">{o.label}</span>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">{o.hint}</p>
-          </button>
-        );
-      })}
+    <div className="flex min-h-16 items-center justify-between gap-4 rounded-lg border border-border bg-card p-3">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 font-display text-sm uppercase tracking-[0.12em]">
+          <Waves className="h-5 w-5" /> Surface Motion
+        </div>
+        <p id="surface-motion-help" className="mt-1 text-xs text-muted-foreground">
+          {reducedMotion
+            ? "Your device requests reduced motion, so surface and speaking ripples stay still."
+            : "Adds a brief, subtle ripple only when you touch an empty surface."}
+        </p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-label="Surface Motion"
+        aria-checked={surfaceMotion}
+        aria-describedby="surface-motion-help"
+        onClick={() => setSurfaceMotion(!surfaceMotion)}
+        className="surface-switch flex h-8 w-14 shrink-0 items-center rounded-full border-2 border-foreground p-1"
+      >
+        <span className="h-5 w-5 rounded-full bg-foreground transition-transform" data-on={surfaceMotion ? "true" : "false"} />
+      </button>
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { featureLabels, plans, TRIAL_DAYS, type PlanId } from "@/data/plans";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/sign-up")({
@@ -44,7 +43,7 @@ function SignUp() {
   const monthly = plan === "fleet" ? selected.price * Math.max(3, seats) : selected.price;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <main className="surface-motion-zone flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between">
           <Link
@@ -53,7 +52,6 @@ function SignUp() {
           >
             HERC<span className="text-foreground">ULES</span>
           </Link>
-          <ThemeToggle size="sm" />
         </div>
         <Panel>
           <Label>Create account</Label>

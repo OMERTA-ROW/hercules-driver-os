@@ -155,7 +155,7 @@ function DispatchView() {
           Fleet-wide map
         </PanelTitle>
         <div className="grid gap-3 xl:grid-cols-[3fr_2fr]">
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-border bg-black">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-border bg-background">
             {/* corridor guide */}
             <svg
               className="absolute inset-0 h-full w-full"
@@ -191,7 +191,7 @@ function DispatchView() {
                     "absolute -translate-x-1/2 -translate-y-1/2 rounded-[1.75rem] border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-all",
                     active
                       ? "z-10 border-primary bg-primary/25 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)]"
-                      : "border-border/80 bg-black/80 text-foreground/85 hover:border-primary/50",
+                      : "border-border bg-background text-foreground/85 hover:border-foreground",
                   )}
                 >
                   <span
@@ -424,7 +424,7 @@ function DispatchView() {
 
       {/* EXPLICIT CONFIRMATION BEFORE ANY OVERRIDE */}
       {confirm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4">
           <Panel className="w-full max-w-md border-primary/45">
             <Label>Confirm intervention</Label>
             <h2 className="mt-1 text-xl font-bold uppercase">{confirm.override}</h2>

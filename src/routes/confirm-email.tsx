@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { Panel, Label, Pill } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -46,7 +45,7 @@ function ConfirmEmail() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <main className="surface-motion-zone flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-xl">
         <div className="mb-5 flex items-center justify-between">
           <Link
@@ -55,7 +54,6 @@ function ConfirmEmail() {
           >
             HERC<span className="text-foreground">ULES</span>
           </Link>
-          <ThemeToggle size="sm" />
         </div>
 
         <Panel>

@@ -20,7 +20,6 @@ import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
 import { useVehicles } from "@/lib/live";
 import { Pill } from "./primitives";
-import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/lib/auth";
 import type { Feature } from "@/data/plans";
 
@@ -58,7 +57,7 @@ export function AppShell({
   const canReset = !account || can("loadReset");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="surface-motion-zone min-h-screen bg-background">
       <div className="mx-auto flex w-full max-w-[1800px]">
         {/* Left rail — a floating bubble rail for a cab-mounted landscape tablet */}
         <aside className="sticky top-0 hidden h-screen w-[124px] shrink-0 flex-col gap-3 overflow-y-auto px-2 py-4 lg:flex xl:w-[204px] xl:px-4">
@@ -106,7 +105,6 @@ export function AppShell({
                 ) : null}
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
-                <ThemeToggle size="sm" />
                 <div className="hidden text-right sm:block">
                   <div className="font-display text-sm uppercase tracking-[0.12em]">
                     {account?.name ?? "Not signed in"}

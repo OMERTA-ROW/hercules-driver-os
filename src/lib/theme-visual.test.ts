@@ -1,6 +1,6 @@
 /**
- * VISUAL REGRESSION — flat bubble styling and readable contrast across
- * every screen and every theme, checked from the real stylesheet and the
+ * VISUAL REGRESSION — Shapher styling and readable contrast across every
+ * screen, checked from the real stylesheet and the
  * real component source instead of blessed screenshots.
  */
 import { describe, expect, it } from "vitest";
@@ -39,18 +39,18 @@ describe("bubble styling", () => {
     expect(hits.map((h) => `${h.path}:${h.line} ${h.radius}`)).toEqual([]);
   });
 
-  it("falls back to solid surfaces without blur or with reduced transparency", () => {
-    expect(css).toContain("@supports not (backdrop-filter: blur(4px))");
-    expect(css).toContain("@media (prefers-reduced-transparency: reduce)");
+  it("uses the local grain and disables active surface motion when requested", () => {
+    expect(css).toContain('url("./assets/shapher-grain.png")');
+    expect(css).toContain('[data-surface-motion="off"]');
   });
 
-  it("honours a driver's reduced-motion choice as well as the system setting", () => {
-    expect(css).toContain('[data-motion="reduced"]');
-    expect(css).toContain('[data-motion="full"]');
+  it("honours the system reduced-motion setting", () => {
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(css).toContain(".surface-motion-zone::after { display: none; }");
   });
 });
 
-describe("three flat themes", () => {
+describe("single Shapher theme", () => {
   const required = [
     "--background",
     "--card",
@@ -61,12 +61,13 @@ describe("three flat themes", () => {
     "--ring",
   ];
 
-  it.each(colorwayIds)("%s defines a complete flat token set", (id) => {
+  it.each(colorwayIds)("%s defines a complete token set", (id) => {
     const tokens = resolveTokens(css, id);
     for (const name of required) expect(tokens[name], name).toBeTruthy();
   });
 
-  it("removes legacy color choices and animates ripples only while speaking", () => {
+  it("fixes the exact base and animates orb ripples only while speaking", () => {
+    expect(css).toContain("--background: #2d2b29");
     expect(css).not.toContain('[data-colorway="pink"]');
     expect(css).not.toContain('[data-colorway="turquoise"]');
     expect(css).toContain(".orb-state-speaking .orb-ripple-ring");
@@ -75,7 +76,7 @@ describe("three flat themes", () => {
   });
 });
 
-describe("contrast in every colorway and exposure", () => {
+describe("Shapher contrast", () => {
   const pairs: [string, string, number][] = [
     ["--foreground", "--background", 4.5],
     ["--card-foreground", "--card", 4.5],

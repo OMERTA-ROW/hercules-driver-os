@@ -20,10 +20,10 @@ function Card({ r }: { r: PickupRun }) {
   return (
     <div
       className={
-        "pointer-events-auto w-[min(92vw,27rem)] rounded-2xl border bg-black/95 p-4 backdrop-blur-sm " +
+        "pointer-events-auto w-[min(92vw,27rem)] rounded-2xl border bg-card p-4 " +
         (held
-          ? "border-violet/50 shadow-[0_0_32px_-12px_hsl(280_90%_60%/0.5)]"
-          : "border-primary/60 shadow-[0_0_40px_-10px_hsl(var(--primary)/0.5)]")
+          ? "border-foreground"
+          : "border-border")
       }
       role="status"
       aria-live="polite"
@@ -33,7 +33,7 @@ function Card({ r }: { r: PickupRun }) {
           <Package className="h-6 w-6" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-violet-300/80">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {held
               ? "Pickup held — part not ready"
               : routed
@@ -62,7 +62,7 @@ function Card({ r }: { r: PickupRun }) {
             {r.site.parking}
           </p>
           {routed && r.route?.hazards.length ? (
-            <p className="mt-1 text-xs text-violet-300/80">
+            <p className="mt-1 text-xs text-muted-foreground">
               On the way in: {r.route.hazards.map((h) => h.name).join(" · ")}
             </p>
           ) : null}

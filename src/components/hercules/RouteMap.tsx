@@ -6,7 +6,6 @@ import type { TruckStop } from "@/data/stops";
 import { chainMarkerSvg } from "./ChainMarker";
 import { RealMap, type RealMapStatus } from "./RealMap";
 import type { MapsApi } from "@/lib/google-maps";
-import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -226,7 +225,6 @@ export function RouteMap({
   hazards = [],
   stops = [],
 }: Props) {
-  const { theme } = useTheme();
   const [view, setView] = useState<BaseView>("map");
   const [camera, setCamera] = useState<CameraMode>("nav3d");
   const [headingUp, setHeadingUp] = useState(true);
@@ -416,7 +414,7 @@ export function RouteMap({
         zoom={zoom}
         showTraffic={traffic}
         mapTypeId={view === "map" ? "roadmap" : view}
-        {...(view === "map" && theme !== "day" ? { styles: darkMapStyle } : {})}
+        {...(view === "map" ? { styles: darkMapStyle } : {})}
         tilt={camera === "nav3d" ? 55 : 0}
         heading={headingLocked ? heading : 0}
         followCenter={followTruck}
