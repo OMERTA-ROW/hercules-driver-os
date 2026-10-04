@@ -51,6 +51,8 @@ export const routeRoles: Record<string, HerculesRole[]> = {
   "/parts": personal,
   "/store": personal,
   "/credits": [...personal, "broker"],
+  "/pricing": ["driver", "dispatcher", "broker", "shipper", "fleet_manager", "finance", "company_admin", "platform_admin"],
+  "/welcome": ["driver", "dispatcher", "broker", "shipper", "fleet_manager", "finance", "company_admin", "platform_admin"],
 };
 
 export function allowedFor(path: string, role: HerculesRole | null): boolean {

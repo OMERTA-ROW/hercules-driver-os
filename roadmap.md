@@ -215,5 +215,5 @@ telemetry, parts suppliers, delivery partners, load boards.
 - [x] Verify requested existing pages on desktop/mobile and report missing or access-blocked names
 - [x] Run tests, type checks, and production build
 
-- [ ] Role lockdown on existing pages (roles, switcher, Access Denied, Account Pending)
-- [ ] Verify solid voice bubble ripple runs only during real audio playback
+- [x] Role lockdown on existing pages (roles, switcher, Access Denied, Account Pending)
+- [x] Verify solid voice bubble ripple runs only during real audio playback
