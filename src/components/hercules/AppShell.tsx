@@ -62,15 +62,17 @@ export function AppShell({
       (!n.feature || !account || can(n.feature as Feature)) &&
       (!account || allowedFor(n.to, access.active)),
   );
-  const gate: "ok" | "loading" | "pending" | "denied" = !account
+  const gate: "ok" | "loading" | "error" | "pending" | "denied" = !account
     ? "ok"
     : access.loading
       ? "loading"
-      : !access.active
-        ? "pending"
-        : allowedFor(pathname, access.active)
-          ? "ok"
-          : "denied";
+      : access.error
+        ? "error"
+        : !access.active
+          ? "pending"
+          : allowedFor(pathname, access.active)
+            ? "ok"
+            : "denied";
   const canReset = !account || can("loadReset");
 
   return (
@@ -198,6 +200,20 @@ export function AppShell({
               children
             ) : gate === "loading" ? (
               <p role="status" className="text-sm text-muted-foreground">Checking your access…</p>
+            ) : gate === "error" ? (
+              <section role="alert" className="panel mx-auto max-w-xl p-6 text-center">
+                <h2 className="font-display text-xl uppercase tracking-[0.14em]">Couldn't check your access</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  The connection dropped while loading your role. Check your signal and try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void access.reload()}
+                  className="mt-4 inline-flex min-h-11 items-center rounded-full border-2 border-foreground px-5 font-display uppercase tracking-[0.12em]"
+                >
+                  Try again
+                </button>
+              </section>
             ) : gate === "pending" ? (
               <section className="panel mx-auto max-w-xl p-6 text-center">
                 <h2 className="font-display text-xl uppercase tracking-[0.14em]">Account pending</h2>
