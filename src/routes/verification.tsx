@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useMemberships } from "@/lib/company";
 import { roleLabels, useAccess, type HerculesRole } from "@/lib/access";
+import { VerificationVault } from "@/components/hercules/VerificationVault";
 
 export const Route = createFileRoute("/verification")({
   head: () => ({
@@ -120,6 +121,7 @@ function Verification() {
                 <div className="flex justify-between gap-2"><span className="font-display uppercase">{roleLabels[r.role]}</span><Pill tone="neutral">{statusLabel[r.status]}</Pill></div>
                 <p className="text-xs text-muted-foreground">Submitted {new Date(r.submitted_at).toLocaleDateString()}</p>
                 {r.review_reason ? <p className="mt-1 text-sm">Reviewer note: {r.review_reason}</p> : null}
+                <VerificationVault request={r} userId={userId} admin={false} />
               </li>))}</ul>
           )}
         </Panel>
@@ -127,7 +129,7 @@ function Verification() {
         {queue.length > 0 ? (
           <Panel className="xl:col-span-2">
             <PanelTitle>Admin review queue</PanelTitle>
-            <ul className="space-y-2">{queue.map((r) => <QueueItem key={r.id} r={r} />)}</ul>
+            <ul className="space-y-2">{queue.map((r) => <QueueItem key={r.id} r={r} userId={userId} />)}</ul>
           </Panel>
         ) : null}
       </div>
@@ -135,7 +137,7 @@ function Verification() {
   );
 }
 
-function QueueItem({ r }: { r: Req }) {
+function QueueItem({ r, userId }: { r: Req; userId: string }) {
   const qc = useQueryClient();
   const [status, setStatus] = useState("under_review");
   const [note, setNote] = useState("");
@@ -153,7 +155,7 @@ function QueueItem({ r }: { r: Req }) {
     <li className="rounded-lg border border-border p-3">
       <div className="flex justify-between gap-2"><span className="font-display uppercase">{roleLabels[r.role]}</span><Pill tone="neutral">{statusLabel[r.status]}</Pill></div>
       <p className="mt-1 text-sm">{r.reason}</p>
-      {r.required_documents.length ? <p className="text-xs text-muted-foreground">Documents to review: {r.required_documents.join(", ")}</p> : null}
+      <VerificationVault request={r} userId={userId} admin />
       <div className="mt-2 flex flex-wrap gap-2">
         <select aria-label="New status" className="rounded-lg border border-border bg-background p-2" value={status} onChange={(e) => setStatus(e.target.value)}>
           {["documents_required", "under_review", "needs_correction", "verified", "approved", "rejected", "expired", "suspended"].map((s) => <option key={s} value={s}>{statusLabel[s]}</option>)}

@@ -16,10 +16,10 @@ const ALLOWED = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const MAX = 10 * 1024 * 1024;
 const OPEN = ["not_started", "documents_required", "submitted", "under_review", "needs_correction"];
 
-export function expiryState(expires: string | null): { label: string; tone: "neutral" | "warn" | "bad" } {
+export function expiryState(expires: string | null): { label: string; tone: "neutral" | "warn" | "alert" } {
   if (!expires) return { label: "No expiry", tone: "neutral" };
   const days = Math.floor((new Date(expires + "T23:59:59").getTime() - Date.now()) / 86400000);
-  if (days < 0) return { label: `Expired ${expires}`, tone: "bad" };
+  if (days < 0) return { label: `Expired ${expires}`, tone: "alert" };
   if (days <= 30) return { label: `Expires in ${days}d`, tone: "warn" };
   return { label: `Expires ${expires}`, tone: "neutral" };
 }
@@ -127,7 +127,7 @@ export function VerificationVault({ request, userId, admin }: {
     <div className="mt-2 space-y-2">
       {types.map((t) => {
         const list = (docs.data ?? []).filter((d) => d.doc_type === t);
-        const ok = list.some((d) => d.status === "accepted" && expiryState(d.expires_on).tone !== "bad");
+        const ok = list.some((d) => d.status === "accepted" && expiryState(d.expires_on).tone !== "alert");
         return (
           <div key={t} className="rounded-lg border border-border p-2">
             <div className="flex items-center justify-between gap-2 text-sm">
