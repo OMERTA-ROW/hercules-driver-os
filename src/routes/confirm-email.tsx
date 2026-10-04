@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { Panel, Label, Pill } from "@/components/hercules/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -55,7 +54,6 @@ function ConfirmEmail() {
           >
             HERC<span className="text-foreground">ULES</span>
           </Link>
-          <ThemeToggle size="sm" />
         </div>
 
         <Panel>

@@ -20,7 +20,6 @@ import { VoiceDock } from "./VoiceDock";
 import { LoadResetButton } from "./LoadReset";
 import { useVehicles } from "@/lib/live";
 import { Pill } from "./primitives";
-import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/lib/auth";
 import type { Feature } from "@/data/plans";
 
@@ -106,7 +105,6 @@ export function AppShell({
                 ) : null}
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
-                <ThemeToggle size="sm" />
                 <div className="hidden text-right sm:block">
                   <div className="font-display text-sm uppercase tracking-[0.12em]">
                     {account?.name ?? "Not signed in"}

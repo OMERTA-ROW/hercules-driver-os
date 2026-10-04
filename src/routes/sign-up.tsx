@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { featureLabels, plans, TRIAL_DAYS, type PlanId } from "@/data/plans";
-import { ThemeToggle } from "@/components/hercules/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/sign-up")({
@@ -53,7 +52,6 @@ function SignUp() {
           >
             HERC<span className="text-foreground">ULES</span>
           </Link>
-          <ThemeToggle size="sm" />
         </div>
         <Panel>
           <Label>Create account</Label>
