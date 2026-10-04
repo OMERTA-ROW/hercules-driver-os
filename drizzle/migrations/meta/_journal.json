@@ -36,6 +36,13 @@
       "when": 1791070744421,
       "tag": "0004_secure_bol_load_references",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791077742694,
+      "tag": "0005_bind_freight_docs_read_to_caller",
+      "breakpoints": true
     }
   ]
 }
