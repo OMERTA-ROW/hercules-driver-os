@@ -1825,22 +1825,39 @@
   }
 }
 
-/* Hercules Liquid Orb — same-hue clay, no shine, no glow, decorative only */
-.liquid-orb { width: clamp(180px, 16vw, 280px); aspect-ratio: 1; contain: strict; }
+/* Original Hercules Liquid Orb — perfectly round, matte, and decorative only. */
+.liquid-orb {
+  width: clamp(180px, 16vw, 280px);
+  aspect-ratio: 1;
+  contain: strict;
+}
 .liquid-orb-body {
-  position: absolute; inset: 0; overflow: hidden;
-  background: #2f2d2b;
-  border-radius: 50% 49% 51% 50% / 50% 51% 49% 50%;
-  box-shadow: inset -14px -18px 36px #292725, inset 12px 14px 30px #33312f;
-  will-change: border-radius, transform;
-  animation: liquid-orb-morph 28s ease-in-out infinite;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
+  border-radius: 50%;
+  background: #2d2b29;
 }
-.liquid-orb-grain { position: absolute; inset: 0; opacity: 0.035; mix-blend-mode: soft-light; }
-@keyframes liquid-orb-morph {
-  0%, 100% { border-radius: 50% 49% 51% 50% / 50% 51% 49% 50%; transform: rotate(0deg) scale(1); }
-  33% { border-radius: 52% 48% 50% 51% / 48% 52% 50% 50%; transform: rotate(4deg) scale(1.015); }
-  66% { border-radius: 48% 51% 49% 52% / 51% 49% 52% 48%; transform: rotate(-3deg) scale(0.99); }
+
+.liquid-orb-surface {
+  position: absolute;
+  inset: 3%;
+  display: block;
+  border: 1px solid color-mix(in oklab, var(--foreground) 5%, transparent);
+  border-radius: 50%;
+  background: #2d2b29;
+  transform-origin: 52% 48%;
+  will-change: transform;
+  animation: liquid-orb-surface 30s ease-in-out infinite;
 }
-.liquid-orb[data-motion="off"] .liquid-orb-body { animation: none; }
-@media (prefers-reduced-motion: reduce) { .liquid-orb-body { animation: none !important; } }
+
+@keyframes liquid-orb-surface {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  35% { transform: translate3d(1.2%, -0.8%, 0) scale(1.023, 0.982); }
+  70% { transform: translate3d(-1%, 1.1%, 0) scale(0.985, 1.021); }
+}
+
+.liquid-orb[data-motion="off"] .liquid-orb-surface { animation: none; }
+@media (prefers-reduced-motion: reduce) { .liquid-orb-surface { animation: none !important; } }
 @media print { .liquid-orb { display: none !important; } }
