@@ -9,6 +9,7 @@ import {
 
 export type DisplayTheme = "shapher";
 const SURFACE_MOTION_KEY = "hercules.surface-motion";
+const LIQUID_ORB_KEY = "hercules.liquid-orb";
 const LEGACY_KEYS = [
   "hercules.display-theme",
   "hercules.auto-night",
@@ -21,6 +22,8 @@ type Ctx = {
   surfaceMotion: boolean;
   setSurfaceMotion: (enabled: boolean) => void;
   reducedMotion: boolean;
+  liquidOrb: boolean;
+  setLiquidOrb: (enabled: boolean) => void;
   motionActive: boolean;
 };
 
@@ -29,6 +32,8 @@ const ThemeContext = createContext<Ctx>({
   surfaceMotion: true,
   setSurfaceMotion: () => {},
   reducedMotion: false,
+  liquidOrb: true,
+  setLiquidOrb: () => {},
   motionActive: true,
 });
 
@@ -45,6 +50,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [surfaceMotion, setSurfaceMotionState] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
   const motionActive = surfaceMotion && !reducedMotion;
+  const [liquidOrb, setLiquidOrbState] = useState(true);
+  const setLiquidOrb = useCallback((enabled: boolean) => {
+    setLiquidOrbState(enabled);
+    localStorage.setItem(LIQUID_ORB_KEY, enabled ? "1" : "0");
+  }, []);
 
   const setSurfaceMotion = useCallback((enabled: boolean) => {
     setSurfaceMotionState(enabled);
@@ -57,12 +67,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("hercules.orb-colorway", "shapher");
     const stored = localStorage.getItem(SURFACE_MOTION_KEY);
     setSurfaceMotionState(stored !== "0");
+    setLiquidOrbState(localStorage.getItem(LIQUID_ORB_KEY) !== "0");
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const syncReduced = () => setReducedMotion(media.matches);
     syncReduced();
     media.addEventListener("change", syncReduced);
     const onStorage = (e: StorageEvent) => {
       if (e.key === SURFACE_MOTION_KEY) setSurfaceMotionState(e.newValue !== "0");
+      if (e.key === LIQUID_ORB_KEY) setLiquidOrbState(e.newValue !== "0");
     };
     window.addEventListener("storage", onStorage);
     return () => {
@@ -103,6 +115,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setSurfaceMotion,
         reducedMotion,
         motionActive,
+        liquidOrb,
+        setLiquidOrb,
       }}
     >
       {children}
