@@ -17,7 +17,7 @@ import {
   Pill,
   DriverApprovedNote,
 } from "@/components/hercules/primitives";
-import { SurfaceMotionSwitch } from "@/components/hercules/ThemeToggle";
+import { SurfaceMotionSwitch, LiquidOrbSwitch } from "@/components/hercules/ThemeToggle";
 import { VoicePicker } from "@/components/hercules/VoicePicker";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -219,7 +219,10 @@ function Settings() {
             Shapher is the single HERCULES appearance: solid warm charcoal, warm white type, and a
             restrained rocky grain.
           </p>
-          <SurfaceMotionSwitch />
+          <div className="space-y-3">
+            <LiquidOrbSwitch />
+            <SurfaceMotionSwitch />
+          </div>
           <p className="mt-3 text-xs text-muted-foreground">
             This preference is kept on this device. Reduced-motion settings always take priority.
           </p>
