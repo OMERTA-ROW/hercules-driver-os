@@ -1026,6 +1026,261 @@
   }
 }
 
+/* ============================================================ SHAPHER SURFACE
+ * One non-metallic Hercules appearance. #2D2B29 is the fixed canvas; all
+ * surfaces stay within four percent of it. Decorative texture is local,
+ * static, and kept behind content. Status remains explicit in words/icons.
+ */
+:root,
+[data-theme="shapher"],
+[data-colorway="shapher"] {
+  color-scheme: dark;
+  --background: #2d2b29;
+  --foreground: #f4efe6;
+  --card: #34312f;
+  --card-foreground: #f4efe6;
+  --popover: #34312f;
+  --popover-foreground: #f4efe6;
+  --primary: #f4efe6;
+  --primary-foreground: #2d2b29;
+  --secondary: #292725;
+  --secondary-foreground: #f4efe6;
+  --muted: #292725;
+  --muted-foreground: #cbc4b9;
+  --accent: #373431;
+  --accent-foreground: #f4efe6;
+  --destructive: #f4efe6;
+  --destructive-foreground: #2d2b29;
+  --border: #6f6962;
+  --input: #817a72;
+  --ring: #f4efe6;
+  --steel: #292725;
+  --steel-foreground: #f4efe6;
+  --hazard: #f4efe6;
+  --hazard-foreground: #2d2b29;
+  --go: #f4efe6;
+  --go-foreground: #2d2b29;
+  --warn: #f4efe6;
+  --warn-foreground: #2d2b29;
+  --info: #f4efe6;
+  --info-foreground: #2d2b29;
+  --chart-1: #f4efe6;
+  --chart-2: #dcd5cb;
+  --chart-3: #c3bcb2;
+  --chart-4: #aaa49b;
+  --chart-5: #918c85;
+  --violet: #f4efe6;
+  --voice-surface: #2d2b29;
+  --voice-line: #6f6962;
+  --voice-text: #f4efe6;
+  --voice-text-dim: #cbc4b9;
+  --voice-accent: #f4efe6;
+  --voice-accent-soft: #6f6962;
+  --orb-canvas: #2d2b29;
+  --orb-core: #2d2b29;
+  --orb-halo: #34312f;
+  --orb-fill: #2d2b29;
+  --orb-ink: #f4efe6;
+  --surface-1: #292725;
+  --surface-2: #34312f;
+  --bubble-bg: #2d2b29;
+  --bubble-edge: #6f6962;
+  --bubble-on-bg: #34312f;
+  --bubble-on-edge: #f4efe6;
+  --theme-shadow: transparent;
+  --theme-glow: transparent;
+  --gradient-steel: #2d2b29;
+  --gradient-hazard: #34312f;
+  --screen-dim: 0;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--background);
+  }
+
+  body {
+    position: relative;
+    isolation: isolate;
+    background-image: none;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url("./assets/shapher-grain.png") repeat;
+    opacity: 0.03;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 3px;
+  }
+}
+
+.surface-motion-zone {
+  position: relative;
+  isolation: isolate;
+}
+
+.surface-motion-zone::after {
+  content: "";
+  position: absolute;
+  left: var(--surface-x, 50%);
+  top: var(--surface-y, 50%);
+  z-index: -1;
+  width: 72px;
+  height: 72px;
+  border: 1px solid #44413e;
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+
+[data-surface-motion="on"] .surface-motion-zone.surface-ripple-active::after {
+  animation: shapher-surface-ripple 600ms ease-out both;
+}
+
+@keyframes shapher-surface-ripple {
+  0% { opacity: 0.28; transform: translate(-50%, -50%) scale(0.4); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+}
+
+.panel,
+.glass,
+.bubble-bar,
+.bubble-card,
+.matte-control,
+.matte-popover,
+.voice-surface,
+[data-slot="input-group"],
+[role="dialog"],
+[role="menu"],
+[role="listbox"] {
+  background: var(--card) !important;
+  background-image: none !important;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  filter: none;
+}
+
+:where(header, nav, aside, form, input, textarea, select) {
+  background-color: var(--background);
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+:where(button, [role="button"], [role="tab"], [role="radio"], [role="switch"]) {
+  background-image: none !important;
+  color: var(--foreground) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.bubble-tab,
+.bubble-tab:hover,
+.bubble-tab-on,
+.bubble-card-on,
+.glow-ring,
+.glow-control,
+.matte-control {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+.bubble-tab-on,
+.bubble-card-on {
+  background: var(--card) !important;
+  border-color: var(--foreground) !important;
+}
+
+.edge-gold,
+.hazard-stripes,
+.inner-grid,
+.orb-core {
+  background: var(--background) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.corner-ticks::before,
+.corner-ticks::after {
+  border-color: var(--border);
+}
+
+.orb-solid-core {
+  border-color: var(--foreground);
+  background: var(--orb-fill);
+  color: var(--orb-ink);
+  box-shadow: none;
+}
+
+.orb-ripple-ring {
+  border-color: var(--foreground);
+}
+
+[data-surface-motion="off"] .orb-state-speaking .orb-ripple-ring {
+  animation: none !important;
+}
+
+[data-surface-motion="off"] .orb-state-speaking .orb-ripple-ring-one {
+  display: block;
+  inset: 1%;
+  opacity: 0.7;
+}
+
+[data-surface-motion="off"] .orb-state-speaking .orb-ripple-ring-two {
+  display: none;
+}
+
+.surface-switch span[data-on="true"] {
+  transform: translateX(1.5rem);
+}
+
+.surface-switch span[data-on="false"] {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .surface-motion-zone::after { display: none; }
+  .orb-state-speaking .orb-ripple-ring { animation: none !important; }
+  .orb-state-speaking .orb-ripple-ring-one { display: block; inset: 1%; opacity: 0.7; }
+  .orb-state-speaking .orb-ripple-ring-two { display: none; }
+}
+
+@media print {
+  body::before,
+  .surface-motion-zone::after { display: none !important; }
+  #hercules-bol-print,
+  #hercules-bol-print * {
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
+    border-color: black !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+}
+
 /* Google renders its own controls. Bring those controls into the same bubble
    language without changing any map behavior. */
 .matte-map .gm-control-active,

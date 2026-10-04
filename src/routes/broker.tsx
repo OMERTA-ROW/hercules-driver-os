@@ -501,7 +501,7 @@ function BrokerView() {
 
       {/* EXPLICIT CONFIRMATION BEFORE POSTING */}
       {pending ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4">
           <Panel className="w-full max-w-md border-primary/45">
             <Label>Confirm posting</Label>
             <h2 className="mt-1 text-xl font-bold uppercase">

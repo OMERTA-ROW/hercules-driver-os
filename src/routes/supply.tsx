@@ -515,7 +515,7 @@ function SupplyScreen() {
       {/* DRIVER APPROVED read-back — the only way an order is ever placed. */}
       {pending ? (
         <div className="fixed inset-0 z-[90] flex items-end justify-center bg-background/80 p-4 sm:items-center">
-          <div className="glass w-full max-w-lg p-5 shadow-[0_0_40px_-12px_color-mix(in_oklab,var(--primary)_60%,var(--violet))]">
+          <div className="glass w-full max-w-lg p-5">
             <div className="flex items-center gap-3">
               <ShoppingBasket className="h-6 w-6 text-primary" />
               <h3 className="text-lg font-semibold uppercase tracking-wide">

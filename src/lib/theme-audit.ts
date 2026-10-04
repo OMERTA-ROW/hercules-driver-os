@@ -2,8 +2,8 @@
  * THEME AUDIT — the maths behind the automated visual regression tests.
  *
  * These helpers read the real design-system stylesheet and the real component
- * source, so the tests fail whenever a colorway loses its bubble tokens, a glow
- * stops complementing its base, a text pair falls under contrast, or a control
+ * source, so the tests fail whenever the Shapher surface loses its tokens, a text
+ * pair falls under contrast, or a control
  * regains square corners. No screenshots, no snapshots to bless: the checks are
  * computed from the same tokens the browser uses.
  */
@@ -22,6 +22,27 @@ export function parseOklch(value: string): Oklch | null {
     h: Number(m[3]),
     alpha: m[4] === undefined ? 1 : Number(m[4]),
   };
+}
+
+export function parseHex(value: string): Oklch | null {
+  const match = /^#([\da-f]{6})$/i.exec(value.trim());
+  if (!match) return null;
+  const hex = match[1];
+  const channel = (offset: number) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+  const toLinear = (v: number) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  const r = toLinear(channel(0));
+  const g = toLinear(channel(2));
+  const b = toLinear(channel(4));
+  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+  const l3 = Math.cbrt(l);
+  const m3 = Math.cbrt(m);
+  const s3 = Math.cbrt(s);
+  const L = 0.2104542553 * l3 + 0.793617785 * m3 - 0.0040720468 * s3;
+  const a = 1.9779984951 * l3 - 2.428592205 * m3 + 0.4505937099 * s3;
+  const bb = 0.0259040371 * l3 + 0.7827717662 * m3 - 0.808675766 * s3;
+  return { l: L, c: Math.hypot(a, bb), h: ((Math.atan2(bb, a) * 180) / Math.PI + 360) % 360, alpha: 1 };
 }
 
 /** oklch -> linear sRGB (unclamped channels are clamped to the gamut). */
@@ -148,7 +169,7 @@ function varsFor(blocks: Block[], test: (selector: string) => boolean) {
   return out;
 }
 
-export const colorwayIds = ["white", "grey", "black"] as const;
+export const colorwayIds = ["shapher"] as const;
 export type ColorwayId = (typeof colorwayIds)[number];
 export const exposures = ["flat"] as const;
 export type Exposure = (typeof exposures)[number];
@@ -188,7 +209,7 @@ export function resolveTokens(
     const value = raw[name];
     if (!value) return null;
     resolving.add(name);
-    const direct = parseOklch(value);
+    const direct = parseOklch(value) ?? parseHex(value);
     const ref = /^var\((--[^)]+)\)$/.exec(value)?.[1];
     const color = direct ?? (ref ? resolve(ref) : null);
     resolving.delete(name);
