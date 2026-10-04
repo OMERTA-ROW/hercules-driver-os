@@ -43,6 +43,13 @@
       "when": 1791077742694,
       "tag": "0005_bind_freight_docs_read_to_caller",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791077937966,
+      "tag": "0006_hercules_account_roles",
+      "breakpoints": true
     }
   ]
 }

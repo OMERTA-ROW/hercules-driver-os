@@ -2117,6 +2117,72 @@ export type Database = {
           },
         ]
       }
+      hercules_access_audit: {
+        Row: {
+          created_at: string
+          detail: Json
+          event: string
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event: string
+          id?: never
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event?: string
+          id?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      hercules_active_role: {
+        Row: {
+          role: Database["public"]["Enums"]["hercules_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          role: Database["public"]["Enums"]["hercules_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          role?: Database["public"]["Enums"]["hercules_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hercules_user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["hercules_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["hercules_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["hercules_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       loads: {
         Row: {
           assigned_driver_id: string | null
@@ -2836,10 +2902,48 @@ export type Database = {
         Returns: Json
       }
       freight_team: { Args: { _company: string }; Returns: Json }
+      hercules_audit: {
+        Args: { _detail: Json; _event: string }
+        Returns: undefined
+      }
+      hercules_has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["hercules_role"][]
+          _user: string
+        }
+        Returns: boolean
+      }
+      hercules_has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["hercules_role"]
+          _user: string
+        }
+        Returns: boolean
+      }
+      hercules_role_set: {
+        Args: {
+          _grant: boolean
+          _role: Database["public"]["Enums"]["hercules_role"]
+          _target: string
+        }
+        Returns: Json
+      }
+      hercules_switch_role: {
+        Args: { _role: Database["public"]["Enums"]["hercules_role"] }
+        Returns: Json
+      }
       load_book: { Args: { _load: string; _vehicle?: string }; Returns: Json }
     }
     Enums: {
-      [_ in never]: never
+      hercules_role:
+        | "driver"
+        | "dispatcher"
+        | "broker"
+        | "shipper"
+        | "fleet_manager"
+        | "finance"
+        | "company_admin"
+        | "platform_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2966,6 +3070,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      hercules_role: [
+        "driver",
+        "dispatcher",
+        "broker",
+        "shipper",
+        "fleet_manager",
+        "finance",
+        "company_admin",
+        "platform_admin",
+      ],
+    },
   },
 } as const
