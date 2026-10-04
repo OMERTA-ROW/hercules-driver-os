@@ -105,7 +105,6 @@ export function useAccess() {
     [reload],
   );
 
-  void key;
   return {
     signedIn: !!userId,
     roles: q.data?.roles ?? [],
