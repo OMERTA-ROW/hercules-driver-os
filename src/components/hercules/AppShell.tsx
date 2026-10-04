@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useAccess, allowedFor, roleLabels, type HerculesRole } from "@/lib/access";
 import {
   Gauge,
   Package,
@@ -54,7 +55,22 @@ export function AppShell({
   const { data: vehicles } = useVehicles();
   const rig = vehicles?.find((v) => v.active) ?? vehicles?.[0] ?? null;
 
-  const items = nav.filter((n) => !n.feature || !account || can(n.feature as Feature));
+  const access = useAccess();
+  const { pathname } = useLocation();
+  const items = nav.filter(
+    (n) =>
+      (!n.feature || !account || can(n.feature as Feature)) &&
+      (!account || allowedFor(n.to, access.active)),
+  );
+  const gate: "ok" | "loading" | "pending" | "denied" = !account
+    ? "ok"
+    : access.loading
+      ? "loading"
+      : !access.active
+        ? "pending"
+        : allowedFor(pathname, access.active)
+          ? "ok"
+          : "denied";
   const canReset = !account || can("loadReset");
 
   return (
@@ -117,6 +133,25 @@ export function AppShell({
                       : "No vehicle on file"}
                   </div>
                 </div>
+                {account && access.active ? (
+                  <label className="flex items-center gap-2 text-xs">
+                    <span className="sr-only">Active role</span>
+                    {access.roles.length > 1 ? (
+                      <select
+                        aria-label="Active role"
+                        value={access.active}
+                        onChange={(e) => void access.switchRole(e.target.value as HerculesRole)}
+                        className="min-h-11 rounded-full border border-foreground bg-background px-3 font-display uppercase tracking-[0.12em]"
+                      >
+                        {access.roles.map((r) => (
+                          <option key={r} value={r}>{roleLabels[r]}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <Pill tone="info">{roleLabels[access.active]}</Pill>
+                    )}
+                  </label>
+                ) : null}
                 {account ? (
                   account.status === "trial" ? (
                     <Pill tone="warn" className="hidden md:inline-flex">
@@ -159,7 +194,28 @@ export function AppShell({
           </nav>
 
           <main className="rise-in px-3 pb-[16.5rem] pt-4 sm:px-5 lg:pb-44 lg:pt-6">
-            {children}
+            {gate === "ok" ? (
+              children
+            ) : gate === "loading" ? (
+              <p role="status" className="text-sm text-muted-foreground">Checking your access…</p>
+            ) : gate === "pending" ? (
+              <section className="panel mx-auto max-w-xl p-6 text-center">
+                <h2 className="font-display text-xl uppercase tracking-[0.14em]">Account pending</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Your account has no active role yet. Ask your company admin to assign one, or contact Hercules support.
+                </p>
+              </section>
+            ) : (
+              <section role="alert" className="panel mx-auto max-w-xl p-6 text-center">
+                <h2 className="font-display text-xl uppercase tracking-[0.14em]">403 · Access denied</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Your {access.active ? roleLabels[access.active] : ""} role can't open this page.
+                </p>
+                <Link to={items[0]?.to ?? "/settings"} className="mt-4 inline-flex min-h-11 items-center rounded-full border-2 border-foreground px-5 font-display uppercase tracking-[0.12em]">
+                  Return to my workspace
+                </Link>
+              </section>
+            )}
           </main>
         </div>
       </div>
