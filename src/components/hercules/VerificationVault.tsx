@@ -40,7 +40,7 @@ export function useVaultDocs(requestId: string) {
 
 async function openDoc(path: string) {
   const { data, error } = await supabase.storage.from("verification-docs").createSignedUrl(path, 60);
-  if (error || !data) return toast.error("Could not open file", { description: error?.message });
+  if (error || !data) { toast.error("Could not open file", { description: error?.message }); return; }
   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
 }
 
