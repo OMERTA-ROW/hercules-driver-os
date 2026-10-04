@@ -148,6 +148,9 @@ function Settings() {
                 <Button variant="outline" size="lg" asChild>
                   <Link to="/pricing">Compare plans</Link>
                 </Button>
+                <Button variant="outline" size="lg" asChild>
+                  <Link to="/verification">Request additional role</Link>
+                </Button>
                 <Button
                   variant="outline"
                   size="lg"
