@@ -208,9 +208,9 @@ telemetry, parts suppliers, delivery partners, load boards.
 
 ## Shapher single-theme correction
 
-- [ ] Replace the three legacy appearances with one fixed #2D2B29 Shapher theme
-- [ ] Add local subtle grain and empty-surface motion with a persisted accessible switch
-- [ ] Remove gold, chromatic, gradient, glass, blur, glow, and metallic styling across shared and standalone pages
-- [ ] Preserve white-paper/black-ink BOL printing and all existing behavior
-- [ ] Verify requested existing pages on desktop/mobile and report missing or access-blocked names
-- [ ] Run tests, type checks, and production build
+- [x] Replace the three legacy appearances with one fixed #2D2B29 Shapher theme
+- [x] Add local subtle grain and empty-surface motion with a persisted accessible switch
+- [x] Remove gold, chromatic, gradient, glass, blur, glow, and metallic styling across shared and standalone pages
+- [x] Preserve white-paper/black-ink BOL printing and all existing behavior
+- [x] Verify requested existing pages on desktop/mobile and report missing or access-blocked names
+- [x] Run tests, type checks, and production build
