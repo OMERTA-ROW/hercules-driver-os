@@ -35,6 +35,7 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as StopsRouteImport } from './routes/stops'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SupplyRouteImport } from './routes/supply'
+import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
@@ -170,6 +171,11 @@ const SupplyRoute = SupplyRouteImport.update({
   path: '/supply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerificationRoute = VerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
+  '/verification': typeof VerificationRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
+  '/verification': typeof VerificationRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   '/stops': typeof StopsRoute
   '/store': typeof StoreRoute
   '/supply': typeof SupplyRoute
+  '/verification': typeof VerificationRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/stops'
     | '/store'
     | '/supply'
+    | '/verification'
     | '/voice'
     | '/welcome'
     | '/zeus'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/stops'
     | '/store'
     | '/supply'
+    | '/verification'
     | '/voice'
     | '/welcome'
     | '/zeus'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/stops'
     | '/store'
     | '/supply'
+    | '/verification'
     | '/voice'
     | '/welcome'
     | '/zeus'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   StopsRoute: typeof StopsRoute
   StoreRoute: typeof StoreRoute
   SupplyRoute: typeof SupplyRoute
+  VerificationRoute: typeof VerificationRoute
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verification': {
+      id: '/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof VerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voice': {
       id: '/voice'
       path: '/voice'
@@ -662,6 +682,7 @@ const rootRouteChildren: RootRouteChildren = {
   StopsRoute: StopsRoute,
   StoreRoute: StoreRoute,
   SupplyRoute: SupplyRoute,
+  VerificationRoute: VerificationRoute,
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
