@@ -114,12 +114,10 @@ function rateLine(l: LoadRow) {
 
 /* ------------------------------------------------------------------ ORB LOOK */
 
-export type OrbColorway = "white" | "grey" | "black";
+export type OrbColorway = "shapher";
 
 export const orbColorways: { id: OrbColorway; label: string; hint: string }[] = [
-  { id: "white", label: "Flat White", hint: "White surface with black lettering" },
-  { id: "grey", label: "Flat Grey", hint: "Neutral grey surface with black lettering" },
-  { id: "black", label: "Flat Black", hint: "Black surface with gold lettering" },
+  { id: "shapher", label: "Shapher", hint: "Solid warm charcoal with quiet rocky grain" },
 ];
 
 /* ---------------------------------------------------------------- VOICE CAST */
@@ -737,27 +735,11 @@ export type SpeechSource = "premium" | "sample" | "unavailable" | null;
 
 const VoiceContext = createContext<Ctx | null>(null);
 
-const COLOR_KEY = "hercules.orb-colorway";
-/** When this device last changed the colorway — the tie-breaker between tabs. */
-const COLOR_AT_KEY = "hercules.orb-colorway.at";
 const VOICE_KEY = "hercules.voice";
 
 export function migrateColorway(value: unknown): OrbColorway | null {
-  if (value === "white" || value === "day") return "white";
-  if (value === "grey" || value === "gray" || value === "pink" || value === "turquoise") return "grey";
-  if (value === "black" || value === "gold" || value === "night") return "black";
+  if (typeof value === "string" && value.length > 0) return "shapher";
   return null;
-}
-
-function applyColorway(colorway: OrbColorway) {
-  if (typeof document !== "undefined") {
-    document.documentElement.setAttribute("data-colorway", colorway);
-  }
-}
-
-function storedColorwayAt(): number {
-  const raw = Number(localStorage.getItem(COLOR_AT_KEY));
-  return Number.isFinite(raw) ? raw : 0;
 }
 
 let seq = 0;
@@ -800,7 +782,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<VoiceMode>("idle");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [topic, setTopic] = useState<Topic>("none");
-  const [colorway, setColorwayState] = useState<OrbColorway>("black");
+  const colorway: OrbColorway = "shapher";
   const [voiceId, setVoiceIdState] = useState<VoiceId>("hercules");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const promptIdx = useRef(0);
@@ -812,112 +794,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
-  /* ---- COLORWAY, KEPT IN STEP -------------------------------------------
-     The same account can be open in two tabs and on two devices. Every change
-     carries the moment it was made, and the most recent choice wins — so a tab
-     left open overnight never silently undoes what the driver just picked. */
-  const colorwayAt = useRef(0);
-
-  const adoptColorway = useCallback((next: OrbColorway, at: number) => {
-    if (at < colorwayAt.current) return;
-    colorwayAt.current = at;
-    setColorwayState(next);
-    applyColorway(next);
-  }, []);
-
   useEffect(() => {
-    const c = localStorage.getItem(COLOR_KEY);
-    const migrated = migrateColorway(c) ?? migrateColorway(localStorage.getItem("hercules.display-theme"));
-    if (migrated) {
-      colorwayAt.current = storedColorwayAt();
-      setColorwayState(migrated);
-      localStorage.setItem(COLOR_KEY, migrated);
-      applyColorway(migrated);
-    } else {
-      applyColorway("black");
-    }
     const v = localStorage.getItem(VOICE_KEY) as VoiceId | null;
     if (v && voiceOptions.some((o) => o.id === v)) setVoiceIdState(v);
-
-    let alive = true;
-    type Session = Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"];
-
-    const pushAccountColorway = async (value: OrbColorway, at: number) => {
-      const { error } = await supabase.auth.updateUser({
-        data: { matte_colorway: value, matte_colorway_at: at },
-      });
-      if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
-    };
-
-    /** Newest wins in both directions: account -> device and device -> account. */
-    const syncAccountColorway = async (session: Session) => {
-      if (!alive || !session) return;
-      const meta = session.user.user_metadata ?? {};
-      const remote = meta["matte_colorway"];
-      const remoteAt = Number(meta["matte_colorway_at"]) || 0;
-      const localAt = storedColorwayAt();
-      const local = localStorage.getItem(COLOR_KEY);
-
-      const migratedRemote = migrateColorway(remote);
-      const migratedLocal = migrateColorway(local);
-      if (migratedRemote && remoteAt >= localAt) {
-        localStorage.setItem(COLOR_KEY, migratedRemote);
-        localStorage.setItem(COLOR_AT_KEY, String(remoteAt));
-        adoptColorway(migratedRemote, remoteAt);
-        return;
-      }
-      if (migratedLocal) await pushAccountColorway(migratedLocal, localAt || Date.now());
-    };
-
-    const refresh = () =>
-      void supabase.auth
-        .getSession()
-        .then(({ data }) => syncAccountColorway(data.session))
-        .catch(() => undefined);
-    refresh();
-
-    const authSubscription = supabase.auth.onAuthStateChange?.((event, session) => {
-      if (event === "SIGNED_IN") void syncAccountColorway(session);
-    }).data.subscription;
-
-    // Another tab on this device changed it: follow along, no refresh needed.
-    const onStorage = (e: StorageEvent) => {
-      const next = migrateColorway(e.newValue);
-      if (e.key !== COLOR_KEY || !next) return;
-      adoptColorway(next, storedColorwayAt() || Date.now());
-    };
-    // Coming back to this tab re-checks the account, so another device lands here.
-    const onVisible = () => {
-      if (document.visibilityState === "visible") refresh();
-    };
-    window.addEventListener("storage", onStorage);
-    document.addEventListener("visibilitychange", onVisible);
-
-    return () => {
-      alive = false;
-      authSubscription?.unsubscribe();
-      window.removeEventListener("storage", onStorage);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [adoptColorway]);
-
-  const setColorway = useCallback((c: OrbColorway) => {
-    const at = Date.now();
-    colorwayAt.current = at;
-    setColorwayState(c);
-    localStorage.setItem(COLOR_KEY, c);
-    applyColorway(c);
-    void supabase.auth
-      .getSession()
-      .then(async ({ data }) => {
-        if (!data.session) return;
-        const { error } = await supabase.auth.updateUser({
-          data: { matte_colorway: c, matte_colorway_at: at },
-        });
-        if (error) console.error(`[theme] account colorway save failed: ${error.message}`);
-      })
-      .catch(() => undefined);
   }, []);
+
+  const setColorway = useCallback((_c: OrbColorway) => {}, []);
 
   const setVoice = useCallback((id: VoiceId) => {
     setVoiceIdState(id);
@@ -1381,7 +1263,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 const inertVoice: Ctx = {
   mode: "idle",
   turns: [],
-  colorway: "black",
+  colorway: "shapher",
   setColorway: () => {},
   voice: voiceOptions[0]!,
   setVoice: () => {},

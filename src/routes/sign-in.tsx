@@ -45,7 +45,7 @@ function SignIn() {
   const door = doors.find((d) => d.kind === kind)!;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <main className="surface-motion-zone flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between">
           <Link

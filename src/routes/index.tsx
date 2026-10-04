@@ -31,7 +31,7 @@ function OrbHome() {
   const live = mode !== "idle";
 
   return (
-    <main className="orb-canvas relative flex min-h-screen flex-col overflow-hidden">
+    <main className="orb-canvas surface-motion-zone relative flex min-h-screen flex-col overflow-hidden">
       <div className="absolute right-4 top-4 z-30">
         <DotMenu />
       </div>

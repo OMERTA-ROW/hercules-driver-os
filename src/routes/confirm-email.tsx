@@ -45,7 +45,7 @@ function ConfirmEmail() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <main className="surface-motion-zone flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-xl">
         <div className="mb-5 flex items-center justify-between">
           <Link

@@ -5,7 +5,6 @@ import {
   Check,
   TriangleAlert,
   Volume2,
-  Circle,
   Waves,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,9 +17,7 @@ import {
   Pill,
   DriverApprovedNote,
 } from "@/components/hercules/primitives";
-import { MotionPicker } from "@/components/hercules/ThemeToggle";
-import { Orb } from "@/components/hercules/Orb";
-import { useVoice, orbColorways } from "@/lib/voice";
+import { SurfaceMotionSwitch } from "@/components/hercules/ThemeToggle";
 import { VoicePicker } from "@/components/hercules/VoicePicker";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -39,7 +36,7 @@ export const Route = createFileRoute("/settings")({
       {
         name: "description",
         content:
-          "Manage your HERCULES subscription, matte colorway, voice, and display brightness.",
+          "Manage your HERCULES subscription, Shapher appearance, surface motion, and voice.",
       },
       { property: "og:title", content: "Settings & Subscription — HERCULES" },
       {
@@ -213,25 +210,18 @@ function Settings() {
         </Panel>
 
         <Panel>
-          <PanelTitle right={<Pill tone="primary">Applies app-wide</Pill>}>
-            <span className="inline-flex items-center gap-2">
-              <Circle className="h-5 w-5 text-primary" /> Appearance
-            </span>
-          </PanelTitle>
-          <OrbPicker />
-        </Panel>
-
-        <Panel>
           <PanelTitle right={<Pill tone="info">Saved instantly</Pill>}>
             <span className="inline-flex items-center gap-2">
-              <Waves className="h-5 w-5 text-primary" /> Motion
+              <Waves className="h-5 w-5 text-primary" /> Appearance
             </span>
           </PanelTitle>
-          <MotionPicker />
+          <p className="mb-3 text-sm text-muted-foreground">
+            Shapher is the single HERCULES appearance: solid warm charcoal, warm white type, and a
+            restrained rocky grain.
+          </p>
+          <SurfaceMotionSwitch />
           <p className="mt-3 text-xs text-muted-foreground">
-            Choose Calm and every bubble lift, glow and screen transition stops, even if this device
-            asks for full motion. Choose Full motion and it stays on even if the device asks for
-            less. Your pick is kept for next time you start up.
+            This preference is kept on this device. Reduced-motion settings always take priority.
           </p>
         </Panel>
 
@@ -291,36 +281,6 @@ function HazardToggles() {
           All off
         </Button>
       </div>
-    </div>
-  );
-}
-
-/** App-wide flat theme, previewed with the same solid orb used on the road. */
-function OrbPicker() {
-  const { colorway, setColorway, mode } = useVoice();
-  return (
-    <div className="grid gap-2 sm:grid-cols-3">
-      {orbColorways.map((o) => {
-        const active = colorway === o.id;
-        return (
-          <button
-            key={o.id}
-            type="button"
-            onClick={() => setColorway(o.id)}
-            aria-pressed={active}
-            className={cn(
-              "bubble-card flex flex-col items-center gap-3 p-4",
-              active && "bubble-card-on",
-            )}
-          >
-            <Orb className="w-24" mode={active ? mode : "idle"} colorway={o.id} />
-            <span className="font-display text-sm font-light uppercase tracking-[0.18em]">
-              {o.label}
-            </span>
-            <span className="text-center text-xs text-muted-foreground">{o.hint}</span>
-          </button>
-        );
-      })}
     </div>
   );
 }

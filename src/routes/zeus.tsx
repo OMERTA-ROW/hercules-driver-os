@@ -53,7 +53,7 @@ function ZeusOnboarding() {
   const onboarded = account?.kind === "zeusFleet" ? account : null;
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8">
+    <main className="surface-motion-zone min-h-screen bg-background px-4 py-8">
       <div className="mx-auto w-full max-w-5xl">
         <div className="mb-5 flex items-center justify-between">
           <Link

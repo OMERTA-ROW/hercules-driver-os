@@ -3,7 +3,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -45,7 +44,6 @@ function applyTheme() {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [surfaceMotion, setSurfaceMotionState] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const rippleRef = useRef<HTMLSpanElement>(null);
   const motionActive = surfaceMotion && !reducedMotion;
 
   const setSurfaceMotion = useCallback((enabled: boolean) => {
@@ -84,13 +82,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       if (!(target instanceof Element)) return;
       if (!target.closest(".surface-motion-zone")) return;
       if (target.closest("button, a, input, textarea, select, form, [role='button'], [role='dialog'], .panel, .bubble-bar, [data-no-surface-motion]")) return;
-      const ripple = rippleRef.current;
-      if (!ripple) return;
-      ripple.style.setProperty("--surface-x", `${event.clientX}px`);
-      ripple.style.setProperty("--surface-y", `${event.clientY}px`);
-      ripple.classList.remove("surface-ripple-active");
-      void ripple.offsetWidth;
-      ripple.classList.add("surface-ripple-active");
+      const zone = target.closest<HTMLElement>(".surface-motion-zone");
+      if (!zone) return;
+      const rect = zone.getBoundingClientRect();
+      zone.style.setProperty("--surface-x", `${event.clientX - rect.left}px`);
+      zone.style.setProperty("--surface-y", `${event.clientY - rect.top}px`);
+      zone.classList.remove("surface-ripple-active");
+      void zone.offsetWidth;
+      zone.classList.add("surface-ripple-active");
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
@@ -106,7 +105,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         motionActive,
       }}
     >
-      <span ref={rippleRef} className="shapher-surface-ripple" aria-hidden />
       {children}
     </ThemeContext.Provider>
   );
