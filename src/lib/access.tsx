@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
@@ -63,44 +64,55 @@ export function allowedFor(path: string, role: HerculesRole | null): boolean {
   return !!roles && roles.includes(role);
 }
 
+type AccessData = { roles: HerculesRole[]; active: HerculesRole | null };
+
+async function fetchAccess(userId: string): Promise<AccessData> {
+  const [r, a] = await Promise.all([
+    supabase.from("hercules_user_roles").select("role").eq("user_id", userId),
+    supabase.from("hercules_active_role").select("role").eq("user_id", userId).maybeSingle(),
+  ]);
+  if (r.error) throw r.error;
+  if (a.error) throw a.error;
+  const held = (r.data ?? []).map((x) => x.role as HerculesRole);
+  const act = a.data?.role as HerculesRole | undefined;
+  return { roles: held, active: act && held.includes(act) ? act : (held[0] ?? null) };
+}
+
+/** Role lookup cached per account so page changes don't re-gate; failures surface as `error`, never as "no role". */
 export function useAccess() {
   const { account } = useAuth();
   const userId = account?.id ?? null;
-  const [roles, setRoles] = useState<HerculesRole[]>([]);
-  const [active, setActive] = useState<HerculesRole | null>(null);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
+  const key = ["hercules-access", userId] as const;
+  const q = useQuery({
+    queryKey: key,
+    queryFn: () => fetchAccess(userId as string),
+    enabled: !!userId,
+    staleTime: 5 * 60_000,
+    retry: 2,
+  });
 
-  const load = useCallback(async () => {
-    if (!userId) {
-      setRoles([]);
-      setActive(null);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const [r, a] = await Promise.all([
-      supabase.from("hercules_user_roles").select("role").eq("user_id", userId),
-      supabase.from("hercules_active_role").select("role").eq("user_id", userId).maybeSingle(),
-    ]);
-    const held = (r.data ?? []).map((x) => x.role as HerculesRole);
-    setRoles(held);
-    const act = a.data?.role as HerculesRole | undefined;
-    setActive(act && held.includes(act) ? act : (held[0] ?? null));
-    setLoading(false);
-  }, [userId]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const reload = useCallback(async () => {
+    await qc.invalidateQueries({ queryKey: ["hercules-access", userId] });
+  }, [qc, userId]);
 
   const switchRole = useCallback(
     async (role: HerculesRole) => {
       const { data, error } = await supabase.rpc("hercules_switch_role", { _role: role });
-      if (!error && (data as { ok?: boolean } | null)?.ok) await load();
+      if (!error && (data as { ok?: boolean } | null)?.ok) await reload();
       return !error;
     },
-    [load],
+    [reload],
   );
 
-  return { signedIn: !!userId, roles, active, loading, switchRole, reload: load };
+  void key;
+  return {
+    signedIn: !!userId,
+    roles: q.data?.roles ?? [],
+    active: q.data?.active ?? null,
+    loading: !!userId && q.isPending,
+    error: !!userId && q.isError && !q.data,
+    switchRole,
+    reload,
+  };
 }
