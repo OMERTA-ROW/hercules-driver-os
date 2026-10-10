@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { LiquidOrb } from "@/components/hercules/LiquidOrb";
 import { doors, type AccountKind } from "@/data/accounts";
 import { cn } from "@/lib/utils";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -26,6 +27,9 @@ export const Route = createFileRoute("/sign-in")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { next?: string | undefined } => ({
+    next: typeof s["next"] === "string" ? oauthReturnPath(s["next"]) : undefined,
+  }),
   component: SignIn,
 });
 
@@ -38,6 +42,7 @@ const doorIcon: Record<AccountKind, typeof Truck> = {
 function SignIn() {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [kind, setKind] = useState<AccountKind>("solo");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -136,6 +141,10 @@ function SignIn() {
                     return;
                   }
                   toast.success(`Signed in — ${door.name}`);
+                  if (next && next !== "/") {
+                    window.location.assign(next);
+                    return;
+                  }
                   void navigate({ to: kind === "solo" ? "/" : "/company" });
                 })();
               }}

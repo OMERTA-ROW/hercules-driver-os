@@ -26,6 +26,7 @@ import { Route as FinancialsRouteImport } from './routes/financials'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NavigationRouteImport } from './routes/navigation'
 import { Route as PartsRouteImport } from './routes/parts'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -39,6 +40,8 @@ import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ZeusRouteImport } from './routes/zeus'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -126,6 +129,11 @@ const LoadsRoute = LoadsRouteImport.update({
   path: '/loads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NavigationRoute = NavigationRouteImport.update({
   id: '/navigation',
   path: '/navigation',
@@ -191,6 +199,17 @@ const ZeusRoute = ZeusRouteImport.update({
   path: '/zeus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -215,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/mcp': typeof McpRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -228,6 +248,8 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -248,6 +270,7 @@ export interface FileRoutesByTo {
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/mcp': typeof McpRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -261,6 +284,8 @@ export interface FileRoutesByTo {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -282,6 +307,7 @@ export interface FileRoutesById {
   '/fleet': typeof FleetRoute
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
+  '/mcp': typeof McpRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -295,6 +321,8 @@ export interface FileRoutesById {
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/zeus': typeof ZeusRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -317,6 +345,7 @@ export interface FileRouteTypes {
     | '/fleet'
     | '/health'
     | '/loads'
+    | '/mcp'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -330,6 +359,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -350,6 +381,7 @@ export interface FileRouteTypes {
     | '/fleet'
     | '/health'
     | '/loads'
+    | '/mcp'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -363,6 +395,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -383,6 +417,7 @@ export interface FileRouteTypes {
     | '/fleet'
     | '/health'
     | '/loads'
+    | '/mcp'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -396,6 +431,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/welcome'
     | '/zeus'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -417,6 +454,7 @@ export interface RootRouteChildren {
   FleetRoute: typeof FleetRoute
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
+  McpRoute: typeof McpRoute
   NavigationRoute: typeof NavigationRoute
   PartsRoute: typeof PartsRoute
   PricingRoute: typeof PricingRoute
@@ -430,6 +468,8 @@ export interface RootRouteChildren {
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   ZeusRoute: typeof ZeusRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -554,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/navigation': {
       id: '/navigation'
       path: '/navigation'
@@ -645,6 +692,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZeusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -673,6 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   FleetRoute: FleetRoute,
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
+  McpRoute: McpRoute,
   NavigationRoute: NavigationRoute,
   PartsRoute: PartsRoute,
   PricingRoute: PricingRoute,
@@ -686,6 +748,9 @@ const rootRouteChildren: RootRouteChildren = {
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   ZeusRoute: ZeusRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

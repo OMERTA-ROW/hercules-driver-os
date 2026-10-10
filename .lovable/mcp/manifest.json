@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "sdk_version": "3.0.5",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://qfkgocvlksiyihviuzdy.supabase.co/auth/v1",
+    "require_oauth_client_claim": true,
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "hercules-driver-s-command",
+      "version": "0.1.0",
+      "title": "Hercules Driver's Command"
+    },
+    "tools": [
+      {
+        "name": "get_my_roles",
+        "title": "Get my roles",
+        "description": "List the Hercules roles granted to the signed-in user and which one is active.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_vehicles",
+        "title": "List my vehicles",
+        "description": "List the vehicles the signed-in user can see, with dimensions and weight on file.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_loads",
+        "title": "List loads",
+        "description": "List loads visible to the signed-in user, newest first. Read-only; nothing is booked.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by load status.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "limit": {
+              "description": "Max rows (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_documents",
+        "title": "List my documents",
+        "description": "List the signed-in user's documents (including BOL drafts) with status and expiry. File contents are not returned.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "description": "Filter by document kind, e.g. bol.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
