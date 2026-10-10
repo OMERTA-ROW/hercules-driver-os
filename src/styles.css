@@ -1827,9 +1827,20 @@
 
 /* Original Hercules Liquid Orb — perfectly round, matte, and decorative only. */
 .liquid-orb {
-  width: clamp(180px, 16vw, 280px);
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  width: 180px !important;
+  height: 180px !important;
+  top: 120px !important;
+  right: 40px !important;
+  bottom: auto !important;
+  z-index: 2147483647 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
   aspect-ratio: 1;
-  contain: strict;
+  contain: layout style;
 }
 .liquid-orb-body {
   position: absolute;
