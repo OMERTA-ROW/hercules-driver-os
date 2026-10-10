@@ -22,3 +22,5 @@
 - Use one fixed Shapher appearance across Hercules: #2D2B29 base, warm-white type, same-hue surfaces, subtle local grain, and optional reduced-motion-safe surface ripple; no selectable colorways, gradients, glass, glow, or metallic styling, because uniform contrast is safety-critical.
 
 - Account roles live in hercules_user_roles (server-granted only via onboarding trigger or hercules_role_set); page access map is src/lib/access.tsx — keeps role grants out of client control.
+
+- Agent integrations (MCP) live in src/lib/mcp/ with read-only, OAuth-protected tools that query as the caller via RLS — outside assistants must never book, send or change data without in-app confirmation.
