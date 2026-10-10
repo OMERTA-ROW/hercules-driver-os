@@ -27,8 +27,8 @@ export const Route = createFileRoute("/sign-in")({
       },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { next?: string } => ({
-    next: typeof s.next === "string" ? oauthReturnPath(s.next) : undefined,
+  validateSearch: (s: Record<string, unknown>): { next?: string | undefined } => ({
+    next: typeof s["next"] === "string" ? oauthReturnPath(s["next"]) : undefined,
   }),
   component: SignIn,
 });
