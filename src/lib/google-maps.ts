@@ -20,12 +20,24 @@ export type MapsApi = typeof google.maps;
 const env = import.meta.env as Record<string, string | undefined>;
 
 /**
- * Browser (referrer-restricted) key. A project-supplied key wins; otherwise the
- * key injected by the Google Maps Platform connector is used. Never put a
- * server key in a VITE_ variable — these ship to the browser.
+ * Browser (referrer-restricted) key, chosen by hostname:
+ * - On Lovable preview/publish domains (*.lovable.app, *.lovableproject.com)
+ *   the managed connector key is used — it is referrer-restricted to those.
+ * - Everywhere else (custom domains such as herculeshighway.com) the
+ *   project-supplied key VITE_GOOGLE_MAPS_API_KEY is used, since the managed
+ *   key's referrer list cannot include custom domains.
+ * Never put a server key in a VITE_ variable — these ship to the browser.
  */
-export const MAPS_KEY =
-  env["VITE_GOOGLE_MAPS_API_KEY"] || env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] || "";
+const MANAGED_KEY = env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] || "";
+const OWN_KEY = env["VITE_GOOGLE_MAPS_API_KEY"] || "";
+
+function isLovableHost(): boolean {
+  if (typeof window === "undefined") return true;
+  const h = window.location.hostname;
+  return h.endsWith(".lovable.app") || h.endsWith(".lovableproject.com") || h === "localhost";
+}
+
+export const MAPS_KEY = isLovableHost() ? MANAGED_KEY || OWN_KEY : OWN_KEY || MANAGED_KEY;
 
 /** Usage-tracking channel, when the connector provides one. */
 const MAPS_CHANNEL = env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID"] || "";
