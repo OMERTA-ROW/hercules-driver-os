@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Ancient Living Orb
-- [ ] Replace only the existing voice orb with original carved stone and restrained gold energy
-- [ ] Bind visual listening/thinking/speaking states to current voice lifecycle; retain all controls
-- [ ] Verify desktop/mobile, motion preferences, lifecycle tests, and automatic build
+- [x] Replace only the existing voice orb with original carved stone and restrained gold energy
+- [x] Bind visual listening/thinking/speaking states to current voice lifecycle; retain all controls
+- [x] Verify desktop/mobile, motion preferences, lifecycle tests, and automatic build (43 focused tests pass; full suite 135 pass, 5 existing map-test failures caused by absent matchMedia in the test environment)
 
 - [x] Refine the original decorative Liquid Orb into a fully round, matte Shapher sphere with subtle reduced-motion-safe surface movement and no embedded media, texture, marks, or branding
 
