@@ -123,7 +123,9 @@ describe("live reply lifecycle", () => {
     await act(async () => h.api.announce("Fuel stop in ten miles."));
     await flush();
     expect(pending.length).toBe(1);
+    expect(h.api.orbState).toBe("thinking");
     await act(async () => h.api.stop());
+    expect(h.api.orbState).toBe("idle");
     await act(async () => pending[0]!.resolve(live("late")));
     expect(played).toEqual([]);
     expect(spoken).toEqual([]);
@@ -139,6 +141,7 @@ describe("live reply lifecycle", () => {
     });
     await act(async () => pending[0]!.resolve(live("long-line")));
     expect(h.api.mode).toBe("speaking");
+    expect(h.api.orbState).toBe("speaking");
     // The fixed read-time estimate (~2s) passes; the real audio is still playing.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10_000);
@@ -146,6 +149,7 @@ describe("live reply lifecycle", () => {
     expect(h.api.mode).toBe("speaking");
     await act(async () => liveEl("long-line").onended?.());
     expect(h.api.mode).toBe("idle");
+    expect(h.api.orbState).toBe("idle");
     h.unmount();
   });
 
@@ -157,6 +161,7 @@ describe("live reply lifecycle", () => {
     const el = liveEl("err-line");
     await act(async () => el.onerror?.());
     expect(h.api.mode).toBe("idle");
+    expect(h.api.orbState).toBe("idle");
     expect(el.src).toBe("");
     h.unmount();
   });
@@ -280,6 +285,7 @@ describe("free static previews", () => {
     await flush();
     expect(speakLine).not.toHaveBeenCalled();
     expect(h.api.speechSource).toBe("sample");
+    expect(h.api.orbState).toBe("speaking");
     h.unmount();
   });
 

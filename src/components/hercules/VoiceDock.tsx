@@ -29,6 +29,7 @@ export function VoiceDock() {
   const bol = useBol();
   const {
     mode,
+    orbState,
     turns,
     colorway,
     listen,
@@ -75,6 +76,7 @@ export function VoiceDock() {
               <Orb
                 className="w-12 shrink-0"
                 mode={mode}
+                visualState={orbState}
                 colorway={colorway}
                 onActivate={mode === "idle" ? listen : stop}
               />
@@ -236,6 +238,7 @@ export function VoiceDock() {
           <Orb
             className="w-14 shrink-0 sm:w-16"
             mode={mode}
+            visualState={orbState}
             colorway={colorway}
             onActivate={mode === "idle" ? listen : stop}
           />

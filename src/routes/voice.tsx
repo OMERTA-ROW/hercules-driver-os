@@ -14,6 +14,8 @@ export const Route = createFileRoute("/voice")({
           "Talk to HERCULES: ask, follow up, and have your clock, loads, money, and road read aloud. Nothing commits without your explicit yes.",
       },
       { property: "og:title", content: "Talk — HERCULES" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content: "Talk to HERCULES like a partner — hands on the wheel, eyes on the road.",
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/voice")({
 });
 
 function VoicePage() {
-  const { mode, colorway, listen, stop, voice, lastLine } = useVoice();
+  const { mode, orbState, colorway, listen, stop, voice, lastLine } = useVoice();
 
   return (
     <AppShell title="Talk" subtitle={`Talking with ${voice.name} — ask, follow up, keep going`}>
@@ -33,6 +35,7 @@ function VoicePage() {
           <Orb
             className="w-[min(60vw,360px)]"
             mode={mode}
+            visualState={orbState}
             colorway={colorway}
             onActivate={mode === "idle" ? listen : stop}
           />

@@ -13,6 +13,8 @@ export const Route = createFileRoute("/")({
           "One orb, one conversation. HERCULES runs the truck by voice — clock, loads, money, road ahead — and never commits anything without your word.",
       },
       { property: "og:title", content: "HERCULES — Voice-First Driver OS" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content: "Talk to it like a partner. It proposes, you decide.",
