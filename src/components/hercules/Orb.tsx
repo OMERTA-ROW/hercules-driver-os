@@ -1,65 +1,99 @@
 import { cn } from "@/lib/utils";
 import { useVoice, type OrbColorway, type VoiceMode } from "@/lib/voice";
+import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/lib/theme";
+import { getVoiceLevel } from "@/lib/voice-level";
+import ancientOrb from "@/assets/ancient-living-orb.png";
 
-/** Solid Hercules control. Ripples exist only while real audio owns speaking mode. */
+/** Original mineral artifact. Animation never owns the voice lifecycle. */
 export function Orb({
   className,
   mode,
   colorway: _colorway,
   onActivate,
+  visualState = mode,
 }: {
   className?: string | undefined;
   mode: VoiceMode;
   colorway: OrbColorway;
   onActivate?: () => void;
+  visualState?: VoiceMode | "thinking";
 }) {
-  const speaking = mode === "speaking";
+  const { motionActive } = useTheme();
+  const surfaceRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    surface.style.setProperty("--ancient-level", "0");
+    if (!motionActive || (visualState !== "listening" && visualState !== "speaking")) return;
+    let frame = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      if (now - last >= 50) {
+        surface.style.setProperty("--ancient-level", String(getVoiceLevel()));
+        last = now;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      surface.style.setProperty("--ancient-level", "0");
+    };
+  }, [motionActive, visualState]);
   const label =
-    mode === "listening"
+    visualState === "listening"
       ? "Hercules is listening to you"
-      : speaking
+      : visualState === "thinking"
+        ? "Hercules is preparing a response"
+      : visualState === "speaking"
         ? "Hercules is speaking"
-        : "Hercules orb, idle";
+        : "Hercules ancient living orb, idle";
   const body = (
     <span
+      ref={surfaceRef}
       className={cn(
-        "hercules-solid-orb relative block aspect-square w-full",
-        speaking && "orb-state-speaking",
+        "hercules-solid-orb ancient-living-orb relative block aspect-square w-full",
       )}
+      data-orb-state={visualState}
+      data-orb-motion={motionActive ? "on" : "off"}
       role="img"
       aria-label={label}
     >
-      <span aria-hidden className="orb-ripple-ring orb-ripple-ring-one" />
-      <span aria-hidden className="orb-ripple-ring orb-ripple-ring-two" />
-      <span aria-hidden className="orb-solid-core">
-        <span className="font-display text-[clamp(0.55rem,18cqw,1.1rem)] font-semibold">H</span>
+      <span aria-hidden className="ancient-orb-ring ancient-orb-ring-one" />
+      <span aria-hidden className="ancient-orb-ring ancient-orb-ring-two" />
+      <span aria-hidden className="ancient-orb-stone">
+        <img src={ancientOrb} alt="" width={1024} height={1024} draggable={false} decoding="async" className="ancient-orb-art" />
       </span>
     </span>
   );
 
   if (!onActivate) return <span className={cn("block", className)}>{body}</span>;
   return (
-    <button
+    <Button
+      variant="ghost"
       type="button"
       onClick={onActivate}
       className={cn(
-        "block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "ancient-orb-control block h-auto min-h-0 rounded-full border-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
       aria-label={mode === "idle" ? "Talk to Hercules" : "Stop Hercules voice"}
     >
       {body}
-    </button>
+    </Button>
   );
 }
 
 /** Convenience wrapper bound to the real voice lifecycle. */
 export function LiveOrb({ className }: { className?: string | undefined }) {
-  const { mode, colorway, listen, stop } = useVoice();
+  const { mode, orbState, colorway, listen, stop } = useVoice();
   return (
     <Orb
       className={className}
       mode={mode}
+      visualState={orbState}
       colorway={colorway}
       onActivate={mode === "idle" ? listen : stop}
     />

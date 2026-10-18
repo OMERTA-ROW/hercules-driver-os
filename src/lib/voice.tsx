@@ -691,6 +691,8 @@ const driverPrompts = [
 
 type Ctx = {
   mode: VoiceMode;
+  /** Visual-only state: pending responses are not audible speech. */
+  orbState: VoiceMode | "thinking";
   turns: Turn[];
   colorway: OrbColorway;
   setColorway: (c: OrbColorway) => void;
@@ -780,6 +782,7 @@ const RETRYABLE = new Set(["provider", "rate_limited", "network", "playback", "e
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const bol = useOptionalBol();
   const [mode, setMode] = useState<VoiceMode>("idle");
+  const [audioPlaying, setAudioPlaying] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [topic, setTopic] = useState<Topic>("none");
   const colorway: OrbColorway = "shapher";
@@ -858,6 +861,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   /** Stop audio AND forget any stale Retry/notes — Stop, Clear, voice change. */
   const resetSpeech = useCallback(() => {
+    setAudioPlaying(false);
     killAudio();
     setRetryable(null);
     setSpeechNote(null);
@@ -878,6 +882,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       // Silence whatever is playing and claim this generation. A Stop or a newer
       // line bumps the token again, which invalidates everything below.
       killAudio();
+      setAudioPlaying(false);
       const gen = speechGen.current;
       const stale = () => gen !== speechGen.current;
       speechPending.current = true;
@@ -922,6 +927,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           detachLevel.current = null;
           disposeEl(clip);
           audio.current = null;
+          setAudioPlaying(false);
           setMode("idle");
         };
         clip.onended = finish;
@@ -949,6 +955,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         }
         if (audio.current !== clip) return null; // ended/errored already
         setMode("speaking"); // for the real lifetime of the audio
+        setAudioPlaying(true);
         setSpeechSource("premium");
         setSpeechNote(null);
         return "premium";
@@ -987,6 +994,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
          call, no credits, ever. If the clip can't load the driver sees that
          and may retry the clip; it never falls through to metered speech. */
       killAudio(); // first: it clears any previous previewing state
+      setAudioPlaying(false);
       setPreviewing(id);
       setRetryable(null);
       const sampleGen = speechGen.current;
@@ -1016,6 +1024,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (heard && audio.current === clip) {
+        setAudioPlaying(true);
         detachLevel.current = attachAudioLevel(clip);
         setSpeechSource("sample");
         setSpeechNote("Sample clip of the real voice — no credits used.");
@@ -1025,6 +1034,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           detachLevel.current = null;
           disposeEl(clip);
           audio.current = null;
+          setAudioPlaying(false);
           setPreviewing(null);
         };
         clip.onended = end;
@@ -1230,6 +1240,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const value: Ctx = {
     mode,
+    orbState: audioPlaying ? "speaking" : mode === "speaking" ? "thinking" : mode,
     turns,
     colorway,
     setColorway,
@@ -1262,6 +1273,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
  */
 const inertVoice: Ctx = {
   mode: "idle",
+  orbState: "idle",
   turns: [],
   colorway: "shapher",
   setColorway: () => {},
