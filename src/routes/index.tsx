@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LiveOrb } from "@/components/hercules/Orb";
 import { DotMenu } from "@/components/hercules/DotMenu";
 import { useVoice } from "@/lib/voice";
+import caveImage from "@/assets/hercules-cave.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,14 +30,22 @@ export const Route = createFileRoute("/")({
  * Every other surface in the app is reachable by voice or through that menu.
  */
 function OrbHome() {
-  const { mode, voice, lastLine } = useVoice();
+  const { mode, voice, lastLine, orbState } = useVoice();
   const live = mode !== "idle";
 
   return (
     <main className="orb-canvas surface-motion-zone relative flex min-h-screen flex-col overflow-hidden">
+      {/* Decorative cave scene: image, orb light reflected on rock, mist, readability scrim. */}
+      <div aria-hidden className="cave-scene pointer-events-none absolute inset-0 z-0" data-cave-state={orbState}>
+        <img src={caveImage} alt="" width={1920} height={1088} decoding="async" className="cave-image" />
+        <span className="cave-reflection" />
+        <span className="cave-mist" />
+        <span className="cave-scrim" />
+      </div>
       <div className="absolute right-4 top-4 z-30">
         <DotMenu />
       </div>
+
 
       <div className="relative z-10 flex flex-1 items-center justify-center px-6">
         <LiveOrb className="w-[min(74vw,min(62vh,520px))]" />
