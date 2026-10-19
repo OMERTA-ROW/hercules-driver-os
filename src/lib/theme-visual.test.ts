@@ -50,7 +50,9 @@ describe("bubble styling", () => {
   });
 
   it("keeps the decorative liquid orb original, matte, round, and texture-free", () => {
-    const orb = css.slice(css.indexOf("/* Original Hercules Liquid Orb"));
+    const start = css.indexOf("/* Original Hercules Liquid Orb");
+    const caveAt = css.indexOf("/* Hercules cave scene", start);
+    const orb = css.slice(start, caveAt === -1 ? undefined : caveAt);
     expect(orb).toContain("background: #2d2b29");
     expect(orb).toContain("border-radius: 50%");
     expect(orb).toContain("liquid-orb-surface 30s");
