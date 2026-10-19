@@ -1978,4 +1978,4 @@
 @media (prefers-reduced-motion: reduce) { .cave-reflection, .cave-mist { animation: none !important; transition: none; } }
 [data-surface-motion="off"] .cave-reflection, [data-surface-motion="off"] .cave-mist { animation: none !important; }
 @media print { .cave-scene { display: none !important; } }
-.orb-canvas .ancient-orb-control, .orb-canvas .ancient-orb-control:hover { background: transparent; }
+.orb-canvas .ancient-orb-control, .orb-canvas .ancient-orb-control:hover { background: transparent !important; box-shadow: none !important; }
