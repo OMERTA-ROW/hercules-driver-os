@@ -1979,3 +1979,27 @@
 [data-surface-motion="off"] .cave-reflection, [data-surface-motion="off"] .cave-mist { animation: none !important; }
 @media print { .cave-scene { display: none !important; } }
 .orb-canvas .ancient-orb-control, .orb-canvas .ancient-orb-control:hover { background: transparent !important; box-shadow: none !important; }
+
+/* Hercules conversation workspace (scoped to the chat panel) */
+:root {
+  --chat-bg: oklch(0 0 0);
+  --chat-surface: oklch(0.22 0.004 70);
+  --chat-surface-strong: oklch(0.27 0.005 70);
+  --chat-text: oklch(0.95 0.012 85);
+  --chat-muted: oklch(0.74 0.012 80);
+  --chat-gold: oklch(0.8 0.11 82);
+  --chat-line: oklch(0.32 0.006 70);
+}
+.chat-workspace { background: var(--chat-bg) !important; color: var(--chat-text); border-color: var(--chat-line) !important; }
+.chat-workspace .chat-muted { color: var(--chat-muted); }
+.chat-workspace .chat-gold { color: var(--chat-gold); }
+.chat-workspace .chat-line { border-color: var(--chat-line) !important; }
+.chat-workspace .chat-user-bubble { background: var(--chat-surface) !important; color: var(--chat-text) !important; border: 0 !important; border-radius: 1.25rem !important; max-width: min(85%, 32rem); }
+.chat-workspace .chat-assistant { color: var(--chat-text); user-select: text; }
+.chat-workspace .chat-assistant pre { max-width: 100%; overflow-x: auto; background: var(--chat-surface) !important; border-radius: .75rem; }
+.chat-workspace .chat-composer { background: var(--chat-surface) !important; border: 1px solid var(--chat-line) !important; border-radius: 1.5rem !important; }
+.chat-workspace .chat-composer textarea { background: transparent !important; color: var(--chat-text); }
+.chat-workspace .chat-card { background: var(--chat-surface) !important; border: 1px solid var(--chat-line) !important; color: var(--chat-text); }
+.chat-workspace button:focus-visible, .chat-workspace textarea:focus-visible { outline: 2px solid var(--chat-gold); outline-offset: 2px; }
+.chat-workspace .chat-target { min-width: 44px; min-height: 44px; }
+.chat-workspace .chat-safe { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
