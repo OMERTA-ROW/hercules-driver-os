@@ -50,7 +50,7 @@ describe("VoiceDock conversation", () => {
     const box = screen.getByLabelText("Message Hercules");
     fireEvent.change(box, { target: { value: "  how many hours left  " } });
     fireEvent.submit(box.closest("form")!);
-    await vi.waitFor(() => expect(api.say).toHaveBeenCalledWith("how many hours left"));
+    await vi.waitFor(() => expect(api["say"]).toHaveBeenCalledWith("how many hours left"));
   });
 
   it("shows typed and spoken turns in one transcript", () => {
@@ -67,7 +67,7 @@ describe("VoiceDock conversation", () => {
   it("offers Stop while speaking and calls stop", () => {
     setup({ mode: "speaking", orbState: "speaking" });
     fireEvent.click(screen.getByRole("button", { name: "Stop speaking" }));
-    expect(api.stop).toHaveBeenCalled();
+    expect(api["stop"]).toHaveBeenCalled();
   });
 
   it("offers Cancel while thinking", () => {
