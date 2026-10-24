@@ -70,9 +70,9 @@ export function VoiceDock() {
           <section
             ref={panelRef}
             aria-label="Hercules conversation"
-            className="panel mb-2 flex h-[min(68vh,560px)] min-h-[360px] flex-col overflow-hidden !rounded-[1.75rem] border-border"
+            className="chat-workspace mb-2 flex h-[min(72vh,620px)] min-h-[360px] flex-col overflow-hidden rounded-[1.75rem] border"
           >
-            <header className="flex min-h-16 items-center gap-3 border-b border-border/70 px-3 py-2">
+            <header className="chat-line flex min-h-16 items-center gap-3 border-b px-3 py-2">
               <Orb
                 className="w-12 shrink-0"
                 mode={mode}
@@ -116,12 +116,15 @@ export function VoiceDock() {
               </Button>
             </header>
 
+            <p className="sr-only" role="status" aria-live="polite">
+              {mode === "listening" ? "Listening" : orbState === "thinking" ? "Thinking" : mode === "speaking" ? "Speaking" : ""}
+            </p>
             <Conversation className="min-h-0">
-              <ConversationContent className="gap-5 p-4">
+              <ConversationContent className="mx-auto w-full max-w-2xl gap-6 px-4 py-5">
                 {turns.length === 0 ? (
                   <ConversationEmptyState
-                    className="min-h-48 p-5"
-                    icon={<MessageCircle className="h-7 w-7 text-primary" />}
+                    className="min-h-48 p-5 [&_p]:text-[color:var(--chat-muted)]"
+                    icon={<MessageCircle className="chat-gold h-7 w-7" />}
                     title="Talk to Hercules"
                     description="Ask about loads, hours, the road ahead, or money. Nothing is committed without your approval."
                   />
@@ -130,8 +133,10 @@ export function VoiceDock() {
                     <Message key={turn.id} from={turn.from === "driver" ? "user" : "assistant"}>
                       <MessageContent
                         className={cn(
-                          "leading-relaxed",
-                          turn.from === "driver" && "border border-foreground bg-background text-foreground",
+                          "leading-relaxed text-[0.95rem]",
+                          turn.from === "driver"
+                            ? "chat-user-bubble whitespace-pre-wrap break-words"
+                            : "chat-assistant w-full",
                         )}
                       >
                         {turn.from === "hercules" ? (
@@ -141,25 +146,26 @@ export function VoiceDock() {
                         )}
                       </MessageContent>
                       {turn.proposal ? (
-                        <div className="ml-0 max-w-sm rounded-2xl border border-foreground bg-background p-3 text-sm">
-                          <p className="font-medium">{turn.proposal.summary}</p>
+                        <div className="chat-card max-w-sm rounded-2xl p-4 text-sm" role="group" aria-label="Action needing your approval">
+                          <p className="chat-gold text-xs uppercase tracking-[0.14em]">Needs your approval</p>
+                          <p className="mt-1 font-medium">{turn.proposal.summary}</p>
                           {turn.proposal.total ? (
-                            <p className="mt-1 text-primary">{turn.proposal.total}</p>
+                            <p className="chat-gold mt-1">{turn.proposal.total}</p>
                           ) : null}
                           {turn.status ? (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Check className="h-3.5 w-3.5" />
+                            <p className="chat-muted mt-2 flex items-center gap-1.5 text-xs">
+                              {turn.status === "approved" ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
                               {turn.status === "approved" ? "Approved by you" : "Declined"}
                             </p>
                           ) : (
                             <div className="mt-3 flex gap-2">
-                              <Button type="button" size="sm" onClick={() => approve(turn.id)}>
+                              <Button type="button" className="chat-target" onClick={() => approve(turn.id)}>
                                 Approve
                               </Button>
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="outline"
+                                className="chat-target"
                                 onClick={() => decline(turn.id)}
                               >
                                 Decline
@@ -171,6 +177,7 @@ export function VoiceDock() {
                     </Message>
                   ))
                 )}
+
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
@@ -190,13 +197,13 @@ export function VoiceDock() {
               </div>
             ) : null}
 
-            <div className="border-t border-border/70 p-3">
+            <div className="chat-line chat-safe border-t px-3 pt-3">
               <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Paperwork</span>
+                <span className="chat-muted text-xs">Paperwork</span>
                 <Button
                   type="button"
-                  size="sm"
                   variant="outline"
+                  className="chat-target"
                   disabled={bol.busy}
                   onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
                     if (!result.ok) toast.error(result.message);
@@ -206,7 +213,7 @@ export function VoiceDock() {
                   {bol.draft ? "Open BOL" : "Create BOL"}
                 </Button>
               </div>
-              <PromptInput onSubmit={submit} className="rounded-2xl border-border bg-background">
+              <PromptInput onSubmit={submit} className="chat-composer">
                 <PromptInputTextarea
                   aria-label="Message Hercules"
                   placeholder="Message Hercules…"
@@ -217,6 +224,7 @@ export function VoiceDock() {
                     type="button"
                     size="icon"
                     variant={mode === "listening" ? "default" : "ghost"}
+                    className="chat-target rounded-full"
                     onClick={mode === "idle" ? listen : stop}
                     aria-label={mode === "idle" ? "Talk to Hercules" : "Stop voice"}
                     title={mode === "idle" ? "Talk" : "Stop"}
