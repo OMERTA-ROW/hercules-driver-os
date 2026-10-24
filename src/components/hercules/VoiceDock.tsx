@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, FileText, MessageCircle, Mic, RotateCcw, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  ChevronDown,
+  FileText,
+  Loader2,
+  MessageCircle,
+  Mic,
+  RotateCcw,
+  Square,
+  Trash2,
+  Volume2,
+  X,
+} from "lucide-react";
 import type { ChatStatus } from "ai";
 import {
   Conversation,
@@ -48,6 +61,30 @@ export function VoiceDock() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const status: ChatStatus = mode === "speaking" ? "streaming" : "ready";
+  const chatState =
+    speechSource === "unavailable" && speechNote
+      ? "error"
+      : mode === "listening"
+        ? "listening"
+        : orbState === "thinking"
+          ? "thinking"
+          : orbState === "speaking"
+            ? "speaking"
+            : "ready";
+  const stateLabel = {
+    error: "Voice unavailable — replies shown as text",
+    listening: "Listening…",
+    thinking: "Thinking…",
+    speaking: `${voice.name} speaking…`,
+    ready: "Ready by voice or text",
+  }[chatState];
+  const StateIcon = {
+    error: AlertTriangle,
+    listening: Mic,
+    thinking: Loader2,
+    speaking: Volume2,
+    ready: MessageCircle,
+  }[chatState];
 
   useEffect(() => {
     if (!open) return;
@@ -84,14 +121,23 @@ export function VoiceDock() {
                 <h2 className="chat-gold font-display text-base font-medium uppercase tracking-[0.12em]">
                   Hercules
                 </h2>
-                <p className="chat-muted truncate text-xs">
-                  {mode === "listening"
-                    ? "Listening…"
-                    : mode === "speaking"
-                      ? `${voice.name} speaking…`
-                      : "Ready by voice or text"}
+                <p className="chat-muted flex items-center gap-1.5 truncate text-xs" data-chat-state={chatState}>
+                  <StateIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {stateLabel}
                 </p>
               </div>
+              {orbState === "speaking" || orbState === "thinking" ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="chat-target rounded-full"
+                  onClick={stop}
+                  aria-label={orbState === "speaking" ? "Stop speaking" : "Cancel reply"}
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  {orbState === "speaking" ? "Stop" : "Cancel"}
+                </Button>
+              ) : null}
               {turns.length ? (
                 <Button
                   type="button"
@@ -117,7 +163,10 @@ export function VoiceDock() {
             </header>
 
             <p className="sr-only" role="status" aria-live="polite">
-              {mode === "listening" ? "Listening" : orbState === "thinking" ? "Thinking" : mode === "speaking" ? "Speaking" : ""}
+              {stateLabel}
+            </p>
+            <p className="chat-muted chat-line border-b px-4 py-1.5 text-[0.7rem]">
+              Typed and spoken messages share this session only. Nothing is saved after you clear or reload.
             </p>
             <Conversation className="min-h-0">
               <ConversationContent className="mx-auto w-full max-w-2xl gap-6 px-4 py-5">
