@@ -224,3 +224,8 @@ telemetry, parts suppliers, delivery partners, load boards.
 
 - [x] Role lockdown on existing pages (roles, switcher, Access Denied, Account Pending)
 - [x] Verify solid voice bubble ripple runs only during real audio playback
+
+## Chat bubble conversation upgrade (Oct 24)
+- [x] Clear listening/thinking/speaking/error states, Stop/Cancel control, session-only privacy note
+- [ ] Natural AI replies (needs owner OK to use Lovable AI credits; replies are currently rule-based)
+- [ ] Signed-in screen check of the chat panel (no test account)
