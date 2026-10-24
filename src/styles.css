@@ -1957,6 +1957,8 @@
 .liquid-orb[data-motion="off"] .liquid-orb-surface { animation: none; }
 @media (prefers-reduced-motion: reduce) { .liquid-orb-surface { animation: none !important; } }
 @media print { .liquid-orb { display: none !important; } }
+/* On phones the fixed orb would cover the chat panel; keep it desktop-only. */
+@media (max-width: 640px) { .liquid-orb { display: none !important; } }
 
 /* Hercules cave scene — home orb screen only; decorative, never interactive. */
 .cave-scene { overflow: hidden; }
