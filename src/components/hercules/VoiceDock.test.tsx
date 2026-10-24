@@ -1,6 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 const api: Record<string, unknown> = {};
 vi.mock("@/lib/voice", () => ({ useVoice: () => api }));
 vi.mock("@/lib/bol", () => ({ useBol: () => ({ busy: false, draft: null, handleCommand: vi.fn() }) }));
