@@ -81,10 +81,10 @@ export function VoiceDock() {
                 onActivate={mode === "idle" ? listen : stop}
               />
               <div className="min-w-0 flex-1">
-                <h2 className="font-display text-base font-medium uppercase tracking-[0.12em]">
+                <h2 className="chat-gold font-display text-base font-medium uppercase tracking-[0.12em]">
                   Hercules
                 </h2>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="chat-muted truncate text-xs">
                   {mode === "listening"
                     ? "Listening…"
                     : mode === "speaking"
