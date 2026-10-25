@@ -2577,9 +2577,11 @@ export type Database = {
           axles: number | null
           company_code: string | null
           created_at: string
+          dimensions_confirmed: boolean
           equipment_type: string
           gross_weight_lb: number | null
           hazmat: boolean
+          hazmat_class: string | null
           height_inches: number | null
           id: string
           label: string
@@ -2588,6 +2590,7 @@ export type Database = {
           model: string | null
           model_year: number | null
           owner_id: string
+          trailer_type: string | null
           unit_number: string | null
           updated_at: string
           vin: string | null
@@ -2600,9 +2603,11 @@ export type Database = {
           axles?: number | null
           company_code?: string | null
           created_at?: string
+          dimensions_confirmed?: boolean
           equipment_type?: string
           gross_weight_lb?: number | null
           hazmat?: boolean
+          hazmat_class?: string | null
           height_inches?: number | null
           id?: string
           label: string
@@ -2611,6 +2616,7 @@ export type Database = {
           model?: string | null
           model_year?: number | null
           owner_id: string
+          trailer_type?: string | null
           unit_number?: string | null
           updated_at?: string
           vin?: string | null
@@ -2623,9 +2629,11 @@ export type Database = {
           axles?: number | null
           company_code?: string | null
           created_at?: string
+          dimensions_confirmed?: boolean
           equipment_type?: string
           gross_weight_lb?: number | null
           hazmat?: boolean
+          hazmat_class?: string | null
           height_inches?: number | null
           id?: string
           label?: string
@@ -2634,6 +2642,7 @@ export type Database = {
           model?: string | null
           model_year?: number | null
           owner_id?: string
+          trailer_type?: string | null
           unit_number?: string | null
           updated_at?: string
           vin?: string | null
