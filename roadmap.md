@@ -1,5 +1,24 @@
 # Roadmap
 
+## Owner add-on queue — Oct 25 (separate from paused work)
+
+Queue follows any genuinely in-progress chat work; existing unchecked historical tasks are not automatically resumed. Inspection/planning begun for 2 → 1; no add-on is verified complete.
+
+| Priority / original item | Status | Next step / dependency |
+| --- | --- | --- |
+| First — 2. Shared Vehicle Profile | Inspected; implementation pending | Reuse existing VehicleProfile and account-owned equipment; persist trailer type and hazmat instead of resetting hazmat to None; validate dimensions without template substitutions; route, hazards and parts consume the same active profile. |
+| Second — 1. Truck routing + missed-turn reroute | Inspected; live connection blocked | Existing truckRouting export is mock; replace with authenticated HERE adapter, Google basemap only; same provider for reroutes. HERE credentials/service consent required; Trimble alternative. Never fall back to a mock legal route on provider failure. |
+| 3. Corridor hazards + cache | Queued | Route-bounded low clearances, scales, grades and runaway ramps; real hazard source required. |
+| 4. Offline trip bundle | Queued | Save route, hazards and stops before trip; distinguish cached age, unavailable live updates and Google basemap offline limitations. |
+| 5. HOS-aware parking suggestions | Queued | Real remaining drive-time source and parking availability; speak early; booking requires driver confirmation and connected provider. |
+| 6. ElevenLabs conversational tools + interruption + wake word | Queued | Inspect existing speech/cancellation and credit gates; agent/service consent and browser/platform wake-word limits; no automatic route/book/order/diagnose commitments. |
+| 7. Bluetooth J1939 plain-English ECU | Queued | Real supported adapter/protocol/hardware needed; feed existing Breakdown Assist and parts; never assert safe-to-drive from unverified data. |
+| 8. Document classification + expiry | Queued | Reuse existing private documents/review; classification provider and human review; reminders at 30/14/3 days. |
+| 9. Driver voice hazard network | Queued | Authenticated route-scoped reports, freshness and review safeguards; no fabricated community alerts. |
+| 10. HERCULES fee ledger | Queued | Show actual charged service-fee records, not estimates or hypothetical fees. |
+
+Global: preserve current appearance/orb and single voice-first interface; no publication, billing changes or unrelated integration/review resumption. Unwired capability must be labelled Demo, not live. Each item needs separate implemented/tested/blocked evidence.
+
 ## Ancient Living Orb
 - [x] Replace only the existing voice orb with original carved stone and restrained gold energy
 - [x] Bind visual listening/thinking/speaking states to current voice lifecycle; retain all controls
