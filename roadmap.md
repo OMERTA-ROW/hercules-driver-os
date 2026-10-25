@@ -2,11 +2,11 @@
 
 ## Owner add-on queue — Oct 25 (separate from paused work)
 
-Queue follows any genuinely in-progress chat work; existing unchecked historical tasks are not automatically resumed. Inspection/planning begun for 2 → 1; no add-on is verified complete.
+Queue follows any genuinely in-progress chat work; existing unchecked historical tasks are not automatically resumed. Vehicle persistence groundwork is implemented; the full shared-profile rollout and remaining add-ons stay queued.
 
 | Priority / original item | Status | Next step / dependency |
 | --- | --- | --- |
-| First — 2. Shared Vehicle Profile | Inspected; implementation pending | Reuse existing VehicleProfile and account-owned equipment; persist trailer type and hazmat instead of resetting hazmat to None; validate dimensions without template substitutions; route, hazards and parts consume the same active profile. |
+| First — 2. Shared Vehicle Profile | Persistence groundwork implemented; full rollout pending | Added migration 0009 and explicit width/trailer/hazmat/confirmation fields; missing measurements no longer become catalog defaults. Pure conversion/validation tests added. Authenticated save/reload and downstream parts integration remain unverified/pending. |
 | Second — 1. Truck routing + missed-turn reroute | Inspected; live connection blocked | Existing truckRouting export is mock; replace with authenticated HERE adapter, Google basemap only; same provider for reroutes. HERE credentials/service consent required; Trimble alternative. Never fall back to a mock legal route on provider failure. |
 | 3. Corridor hazards + cache | Queued | Route-bounded low clearances, scales, grades and runaway ramps; real hazard source required. |
 | 4. Offline trip bundle | Queued | Save route, hazards and stops before trip; distinguish cached age, unavailable live updates and Google basemap offline limitations. |

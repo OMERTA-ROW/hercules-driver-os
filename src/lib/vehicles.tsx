@@ -25,6 +25,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef,
   type ReactNode,
 } from "react";
 import { asksVehiclePerTrip, tierForTrucks, type FleetTier } from "@/data/accounts";
@@ -35,6 +36,8 @@ import {
 } from "@/data/fleet-assignments";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
+import { rowToProfile, validateVehicleDims, type VehicleDims } from "./vehicle-profile";
+export type { VehicleDims } from "./vehicle-profile";
 import {
   defaultProfile,
   rulesFor,
@@ -90,46 +93,7 @@ type Ctx = {
   ready: boolean;
 };
 
-/** What the driver actually measured or read off the door sticker. */
-export type VehicleDims = {
-  heightFt: number;
-  lengthFt: number;
-  grossWeightLbs: number;
-  axles: number;
-};
-
 const VehicleContext = createContext<Ctx | null>(null);
-
-type VehicleRow = {
-  id: string;
-  label: string | null;
-  unit_number: string | null;
-  equipment_type: string | null;
-  height_inches?: number | null;
-  length_inches?: number | null;
-  gross_weight_lb?: number | null;
-  axles?: number | null;
-};
-
-/** A saved row back into the routing profile the rest of the app reads. */
-function rowToProfile(row: VehicleRow): VehicleProfile {
-  const [kind, sub] = (row.equipment_type ?? "eighteen:dryVan").split(":");
-  const spec = specFor((kind || "eighteen") as VehicleKind, sub as EighteenSub | undefined);
-  // The driver's own numbers win over the type's starting values.
-  const heightFt = row.height_inches ? row.height_inches / 12 : spec.heightFt;
-  return {
-    ...spec,
-    heightFt: Number(heightFt.toFixed(1)),
-    // Clearance to watch for stays a foot above the real height of the vehicle.
-    minClearanceFt: Number(Math.max(heightFt + 1, spec.minClearanceFt).toFixed(1)),
-    lengthFt: row.length_inches ? Number((row.length_inches / 12).toFixed(1)) : spec.lengthFt,
-    grossWeightLbs: row.gross_weight_lb ?? spec.grossWeightLbs,
-    axles: row.axles ?? spec.axles,
-    id: row.id,
-    unit: row.unit_number?.trim() || row.label?.trim() || spec.label,
-    hazmat: "None",
-  };
-}
 
 export function VehicleProvider({ children }: { children: ReactNode }) {
   const { account, userId } = useAuth();
@@ -140,14 +104,17 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
-  const load = useCallback(async (uid: string) => {
+  const generation = useRef(0);
+  const load = useCallback(async (uid: string, gen = generation.current) => {
+    try {
     const { data, error } = await supabase
       .from("vehicles")
       .select(
-        "id, label, unit_number, equipment_type, height_inches, length_inches, gross_weight_lb, axles",
+        "id, label, unit_number, equipment_type, height_inches, length_inches, gross_weight_lb, axles, width_inches, hazmat, hazmat_class, trailer_type, dimensions_confirmed",
       )
       .eq("owner_id", uid)
       .order("created_at", { ascending: true });
+    if (gen !== generation.current) return;
     if (error) {
       // Honest failure: an unreadable list is NOT an empty list.
       setLoadError("Your equipment could not be read just now. Check your connection and retry.");
@@ -155,11 +122,21 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       return;
     }
     setLoadError(null);
-    setProfiles((data ?? []).map((r) => rowToProfile(r as VehicleRow)));
+    setProfiles((data ?? []).map((r) => rowToProfile(r)));
+    } catch {
+      if (gen !== generation.current) return;
+      setProfiles([]);
+      setLoadError("Your equipment could not be read just now. Check your connection and retry.");
+    }
   }, []);
 
   useEffect(() => {
     let alive = true;
+    const gen = ++generation.current;
+    setProfiles([]);
+    setActiveId(null);
+    setAnsweredTrip(null);
+    setSaving(false);
     setReady(false);
     void (async () => {
       if (!userId) {
@@ -176,11 +153,12 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       } catch {
         /* ignore unreadable local state */
       }
-      await load(userId);
+      await load(userId, gen);
       if (alive) setReady(true);
     })();
     return () => {
       alive = false;
+      generation.current++;
     };
   }, [userId, load]);
 
@@ -228,21 +206,11 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       }
       if (name.length > 40) return { ok: false, message: "Keep the name under 40 characters." };
       const spec = specFor(kind, sub);
-      const d: VehicleDims = dims ?? {
-        heightFt: spec.heightFt,
-        lengthFt: spec.lengthFt,
-        grossWeightLbs: spec.grossWeightLbs,
-        axles: spec.axles,
-      };
-      // Reject nonsense before it can shape a route or a warning.
-      if (!(d.heightFt >= 3 && d.heightFt <= 20))
-        return { ok: false, message: "Height should be between 3 and 20 feet." };
-      if (!(d.lengthFt >= 6 && d.lengthFt <= 120))
-        return { ok: false, message: "Length should be between 6 and 120 feet." };
-      if (!(d.grossWeightLbs >= 1000 && d.grossWeightLbs <= 250000))
-        return { ok: false, message: "Weight should be between 1,000 and 250,000 pounds." };
-      if (!(Number.isInteger(d.axles) && d.axles >= 2 && d.axles <= 13))
-        return { ok: false, message: "Axles should be a whole number between 2 and 13." };
+      if (!dims) return { ok: false, message: "Enter and confirm your actual dimensions, trailer and hazmat first." };
+      const d = dims;
+      const validation = validateVehicleDims(d);
+      if (validation) return { ok: false, message: validation };
+      const gen = generation.current;
       setSaving(true);
       const base = {
         owner_id: userId,
@@ -253,8 +221,14 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         length_inches: Math.round(d.lengthFt * 12),
         gross_weight_lb: d.grossWeightLbs,
         axles: d.axles,
+        width_inches: Math.round(d.widthIn),
+        trailer_type: d.trailerType.trim(),
+        hazmat_class: d.hazmat,
+        hazmat: d.hazmat !== "None",
+        dimensions_confirmed: true,
       };
       const code = account?.company?.code ?? null;
+      try {
       let { error } = code
         ? await supabase.from("vehicles").insert({ ...base, company_code: code })
         : await supabase.from("vehicles").insert(base);
@@ -264,12 +238,13 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       if (error && code && /not_company_member/.test(error.message)) {
         ({ error } = await supabase.from("vehicles").insert(base));
       }
-      setSaving(false);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       if (error) {
         console.error(`[vehicles] save failed: ${error.message}`);
         return { ok: false, message: "That did not save. Nothing was changed — try again." };
       }
-      await load(userId);
+      await load(userId, gen);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       // A second unit on the account means the trip question starts firing.
       try {
         localStorage.removeItem(tripKey(userId));
@@ -278,6 +253,11 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       }
       setAnsweredTrip(null);
       return { ok: true, message: `${spec.label} saved to your account.` };
+      } catch {
+        return { ok: false, message: "Equipment could not save. Your entered fields are unchanged; try again." };
+      } finally {
+        if (gen === generation.current) setSaving(false);
+      }
     },
     [account?.company?.code, load, userId],
   );
@@ -285,20 +265,28 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   const removeProfile = useCallback(
     async (id: string): Promise<SaveResult> => {
       if (!userId) return { ok: false, message: "Sign in first." };
+      const gen = generation.current;
       setSaving(true);
+      try {
       const { error } = await supabase
         .from("vehicles")
         .delete()
         .eq("id", id)
         .eq("owner_id", userId);
-      setSaving(false);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       if (error) {
         console.error(`[vehicles] remove failed: ${error.message}`);
         return { ok: false, message: "That could not be removed. Nothing was changed." };
       }
-      await load(userId);
+      await load(userId, gen);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       if (id === activeId) setActiveId(null);
       return { ok: true, message: "Removed from your account." };
+      } catch {
+        return { ok: false, message: "Equipment could not be removed. Try again." };
+      } finally {
+        if (gen === generation.current) setSaving(false);
+      }
     },
     [activeId, load, userId],
   );

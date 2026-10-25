@@ -64,6 +64,13 @@
       "when": 1791079012169,
       "tag": "0008_hercules_verification_vault",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792965199429,
+      "tag": "0009_vehicle_truck_routing_profile",
+      "breakpoints": true
     }
   ]
 }

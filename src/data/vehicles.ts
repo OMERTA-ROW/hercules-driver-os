@@ -197,6 +197,9 @@ export type VehicleProfile = VehicleSpec & {
   /** Driver's own name for it — "the Pete", "Unit 4471". */
   unit: string;
   hazmat: "None" | "Flammable" | "Corrosive" | "Explosive";
+  /** Explicit trailer configuration; absent on legacy/demo profiles. */
+  trailerType?: string;
+  dimensionsConfirmed?: boolean;
 };
 
 export function specKey(kind: VehicleKind, sub?: EighteenSub) {
@@ -296,7 +299,7 @@ export function routingPayload(p: VehicleProfile) {
     axles: p.axles,
     hazmat: p.hazmat,
     minClearanceFt: p.minClearanceFt,
-    trailerType: p.label,
+    trailerType: p.trailerType ?? "Unknown",
     allowedClasses: rules.allowedClasses,
     backRoadsAllowed: rules.backRoadsAllowed,
     weightRestrictionChecks: rules.weightRestrictionChecks,
@@ -314,6 +317,8 @@ export function makeProfile(
     id: `VEH-${specKey(kind, sub)}-${Math.random().toString(36).slice(2, 7)}`,
     unit: unit || "My unit",
     hazmat: "None",
+    trailerType: spec.pullsTrailer ? spec.label : "No trailer",
+    dimensionsConfirmed: false,
   };
 }
 

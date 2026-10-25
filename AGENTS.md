@@ -25,3 +25,5 @@
 - Account roles live in hercules_user_roles (server-granted only via onboarding trigger or hercules_role_set); page access map is src/lib/access.tsx — keeps role grants out of client control.
 
 - Agent integrations (MCP) live in src/lib/mcp/ with read-only, OAuth-protected tools that query as the caller via RLS — outside assistants must never book, send or change data without in-app confirmation.
+
+- Vehicle row conversion and routing-input validation live in src/lib/vehicle-profile.ts; legacy equipment remains unconfirmed until explicit measurements, trailer and hazmat are saved, so catalog defaults cannot masquerade as measured routing data.

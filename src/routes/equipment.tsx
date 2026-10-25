@@ -20,6 +20,7 @@ import {
   vehicleCatalog,
   type EighteenSub,
   type VehicleKind,
+  type VehicleProfile,
 } from "@/data/vehicles";
 import { hazardMeta } from "@/data/hazards";
 import { useVehicle } from "@/lib/vehicles";
@@ -70,18 +71,22 @@ function EquipmentScreen() {
   const [sub, setSub] = useState<EighteenSub>("dryVan");
   const [unit, setUnit] = useState("");
   // The type's numbers are only a starting draft — the driver confirms or corrects them.
-  const [dims, setDims] = useState({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+  const [dims, setDims] = useState({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "", widthIn: "" });
+  const [trailerType, setTrailerType] = useState("");
+  const [hazmat, setHazmat] = useState<VehicleProfile["hazmat"] | "">("");
   const [checked, setChecked] = useState(false);
 
   const pickedSpec = specFor(kind, kind === "eighteen" ? sub : undefined);
   const pickedRules = rulesFor(pickedSpec);
 
-  /** Whatever is typed in, falling back to the type's starting value. */
   const enteredDims = {
-    heightFt: Number(dims.heightFt) || pickedSpec.heightFt,
-    lengthFt: Number(dims.lengthFt) || pickedSpec.lengthFt,
-    grossWeightLbs: Number(dims.grossWeightLbs) || pickedSpec.grossWeightLbs,
-    axles: Number(dims.axles) || pickedSpec.axles,
+    heightFt: Number(dims.heightFt),
+    lengthFt: Number(dims.lengthFt),
+    widthIn: Number(dims.widthIn),
+    grossWeightLbs: Number(dims.grossWeightLbs),
+    axles: Number(dims.axles),
+    trailerType,
+    hazmat: hazmat as VehicleProfile["hazmat"],
   };
 
   async function save() {
@@ -91,7 +96,9 @@ function EquipmentScreen() {
       return;
     }
     setUnit("");
-    setDims({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "" });
+    setDims({ heightFt: "", lengthFt: "", grossWeightLbs: "", axles: "", widthIn: "" });
+    setTrailerType("");
+    setHazmat("");
     setChecked(false);
     toast.success(res.message, {
       description: "I will ask what you are in at the start of every trip.",
@@ -159,7 +166,9 @@ function EquipmentScreen() {
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {p.unit} · {p.heightFt}' tall · {p.lengthFt}' long ·{" "}
-                        {p.grossWeightLbs.toLocaleString()} lb · {p.axles} axles
+                        {p.grossWeightLbs.toLocaleString()} lb · {p.axles} axles · {p.widthIn} in wide
+                        · {p.trailerType ?? "Unknown trailer"} · Hazmat: {p.dimensionsConfirmed ? p.hazmat : "Unconfirmed"}
+                        {!p.dimensionsConfirmed ? " · Needs confirmation — add a confirmed profile before routing" : ""}
                       </p>
                       <p className="mt-1 text-xs">
                         {rules.backRoadsAllowed ? (
@@ -319,6 +328,7 @@ function EquipmentScreen() {
                     ph: String(pickedSpec.grossWeightLbs),
                   },
                   { k: "axles" as const, label: "Axles", ph: String(pickedSpec.axles) },
+                  { k: "widthIn" as const, label: "Width (inches)", ph: String(pickedSpec.widthIn) },
                 ] as const
               ).map((f) => (
                 <div key={f.k}>
@@ -334,6 +344,13 @@ function EquipmentScreen() {
                 </div>
               ))}
             </div>
+            <Label className="mt-3 block">Trailer type</Label>
+            <Input aria-label="Trailer type" value={trailerType} onChange={(e) => setTrailerType(e.target.value)} placeholder="53-foot dry van / No trailer" className="mt-1 h-12" />
+            <Label className="mt-3 block">Hazardous goods</Label>
+            <select aria-label="Hazardous goods" value={hazmat} onChange={(e) => setHazmat(e.target.value as VehicleProfile["hazmat"])} className="mt-1 h-12 w-full rounded-md border border-border bg-background text-foreground">
+              <option value="">Confirm class</option>
+              {["None", "Flammable", "Corrosive", "Explosive"].map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
             <label className="mt-3 flex items-start gap-2 text-xs">
               <input
                 type="checkbox"
