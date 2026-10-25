@@ -17,7 +17,14 @@ Queue follows any genuinely in-progress chat work; existing unchecked historical
 | 9. Driver voice hazard network | Queued | Authenticated route-scoped reports, freshness and review safeguards; no fabricated community alerts. |
 | 10. HERCULES fee ledger | Queued | Show actual charged service-fee records, not estimates or hypothetical fees. |
 
-Global: preserve current appearance/orb and single voice-first interface; no publication, billing changes or unrelated integration/review resumption. Unwired capability must be labelled Demo, not live. Each item needs separate implemented/tested/blocked evidence.
+Global: queued appearance requirement is a voice-first black orb, 100% black background, gold/purple glow, and no visible buttons except on the map screen. This queue update does not apply a redesign. No publication, billing changes or unrelated integration/review resumption. Unwired capability must be labelled Demo, not live. Each item needs separate implemented/tested/blocked evidence. Commercial routing credentials must remain a server-only API key secret; obtain provider setup and usage consent before live requests.
+
+### Current status report (queue only)
+- No full add-on is verified done. Item 2 has implemented profile-saving groundwork (17 focused tests passed previously); authenticated save/reload and complete downstream integration remain pending.
+- Items 1, 3, 5, 7 and 8 contain existing demonstration or partial functionality, not the requested live end-to-end capability.
+- Item 1 is blocked on commercial routing credentials/usage consent; item 3 on a real corridor hazard source; item 5 on real HOS, parking and booking connections; item 6 on agent/tool setup and supported wake-word behavior; item 7 on compatible J1939 hardware/protocol access.
+- Items 4, 9 and 10 remain queued and unimplemented as specified. Item 8 remains queued for real document reading/classification and verified expiry reminder behavior.
+- Google Maps live behavior is not agent-verified; validate later on an authorized deployed origin without publishing this queue update.
 
 ## Ancient Living Orb
 - [x] Replace only the existing voice orb with original carved stone and restrained gold energy
