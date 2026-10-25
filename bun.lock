@@ -6,7 +6,6 @@
       "name": "tanstack_start_ts",
       "dependencies": {
         "@googlemaps/js-api-loader": "^2.1.1",
-        "@here/flexpolyline": "^0.1.0",
         "@hookform/resolvers": "^5.2.2",
         "@lovable.dev/mcp-js": "^3.0.5",
         "@radix-ui/react-accordion": "^1.2.12",
@@ -269,8 +268,6 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
 
     "@googlemaps/js-api-loader": ["@googlemaps/js-api-loader@2.1.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@googlemaps/js-api-loader/-/js-api-loader-2.1.1.tgz", { "dependencies": { "@types/google.maps": "^3.53.1" } }, "sha512-yUpAwksbHrlZIWD49JmveNSfBG4oAK0AwMknfSaPMnP5N7UT8oFRVCqwjGb1XQovi//7KLbPQKZpbofiLGzpDw=="],
-
-    "@here/flexpolyline": ["@here/flexpolyline@0.1.0", "", {}, "sha512-aiFWozFqTbeAG6S8AOH9QPF7UYjChE1ApV+0dK4kiWp+S2MIJXD/WzHZ9kwd8hDC8gHRAl/yVtJ50uVf26/ygQ=="],
 
     "@hono/node-server": ["@hono/node-server@1.19.17", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@hono/node-server/-/node-server-1.19.17.tgz", { "peerDependencies": { "hono": "^4" } }, "sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ=="],
 
