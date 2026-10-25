@@ -106,6 +106,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
   const generation = useRef(0);
   const load = useCallback(async (uid: string, gen = generation.current) => {
+    try {
     const { data, error } = await supabase
       .from("vehicles")
       .select(
@@ -122,6 +123,11 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     }
     setLoadError(null);
     setProfiles((data ?? []).map((r) => rowToProfile(r)));
+    } catch {
+      if (gen !== generation.current) return;
+      setProfiles([]);
+      setLoadError("Your equipment could not be read just now. Check your connection and retry.");
+    }
   }, []);
 
   useEffect(() => {
@@ -237,7 +243,8 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         console.error(`[vehicles] save failed: ${error.message}`);
         return { ok: false, message: "That did not save. Nothing was changed — try again." };
       }
-      await load(userId);
+      await load(userId, gen);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       // A second unit on the account means the trip question starts firing.
       try {
         localStorage.removeItem(tripKey(userId));
@@ -258,20 +265,28 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   const removeProfile = useCallback(
     async (id: string): Promise<SaveResult> => {
       if (!userId) return { ok: false, message: "Sign in first." };
+      const gen = generation.current;
       setSaving(true);
+      try {
       const { error } = await supabase
         .from("vehicles")
         .delete()
         .eq("id", id)
         .eq("owner_id", userId);
-      setSaving(false);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       if (error) {
         console.error(`[vehicles] remove failed: ${error.message}`);
         return { ok: false, message: "That could not be removed. Nothing was changed." };
       }
-      await load(userId);
+      await load(userId, gen);
+      if (gen !== generation.current) return { ok: false, message: "Account changed; reopen your equipment." };
       if (id === activeId) setActiveId(null);
       return { ok: true, message: "Removed from your account." };
+      } catch {
+        return { ok: false, message: "Equipment could not be removed. Try again." };
+      } finally {
+        if (gen === generation.current) setSaving(false);
+      }
     },
     [activeId, load, userId],
   );
