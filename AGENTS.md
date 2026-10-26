@@ -21,6 +21,7 @@
 <!-- HERCULES:END -->
 - Keep one shared workspace theme with restrained accent edges; artwork and state animations remain scoped to the voice Orb/home scene, preserving contrast without a competing interface.
 - Orb presentation reads a separate playback-derived state and the existing voice-level meter without changing command modes; this separates pending responses from audible speech while preserving voice behavior.
+- Render internal orb clouds with a bounded-resolution domain-warped canvas field, pausing offscreen and under reduced motion; this evolves formations without rotating a static sphere or changing voice logic.
 - Mount the single VoiceDock inside the shared root providers, using a full conversation presentation on home and a collapsible dock elsewhere; this preserves session UI across navigation without competing chats.
 
 - Account roles live in hercules_user_roles (server-granted only via onboarding trigger or hercules_role_set); page access map is src/lib/access.tsx — keeps role grants out of client control.

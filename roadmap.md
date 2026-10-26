@@ -1,5 +1,9 @@
 # Roadmap
 
+## Oct 26 — organic internal vapor correction
+- [ ] Replace rigid bitmap rotation with evolving procedural internal cloud flow and stable spherical edge.
+- [ ] Verify idle/listening/speaking amplitude fallback, static reduced motion, desktop/mobile rendering and regression tests; preview only.
+
 ## Oct 26 — final conversational screen and royal vapor orb
 - [x] Read owner directive; linked Notion blueprint is sign-in protected, so its private content remains unavailable.
 - [x] Replace home cavern with true-black conversation using the single existing dock; preserve session input, voice and approval controls. Root-mounted dock retains unsent drafts through minimize and page navigation; BOL remains in the composer.
