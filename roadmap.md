@@ -1,5 +1,12 @@
 # Roadmap
 
+## Oct 26 — final conversational screen and royal vapor orb
+- [x] Read owner directive; linked Notion blueprint is sign-in protected, so its private content remains unavailable.
+- [ ] Replace home cavern with true-black conversation using the single existing dock; preserve session input, voice and approval controls.
+- [ ] Create original royal-purple/pearly-white vapor orb with gold rim and playback-derived state animations.
+- [ ] Verify desktop/mobile, keyboard, send, scroll, collapse, microphone errors, stop, reduced motion, focused tests and preview build; no live metered speech or publication.
+- No paid integrations, billing or authorization changes; unrelated add-ons remain paused.
+
 ## Oct 26 — dashboard refresh and audited add-on discovery
 - [x] Audit the three named commits: demo-add-ons and remaining-features commits only recorded plans; vehicle-profile commit added real persistence/UI groundwork.
 - [x] Add all ten audited statuses to the existing dashboard, with existing-screen links, role-respecting access and no fake activation.

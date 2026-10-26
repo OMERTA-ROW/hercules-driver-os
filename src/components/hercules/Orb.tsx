@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { getVoiceLevel } from "@/lib/voice-level";
-import ancientOrb from "@/assets/ancient-living-orb.png";
+import royalOrb from "@/assets/royal-vapor-orb.png";
 
-/** Original mineral artifact. Animation never owns the voice lifecycle. */
+/** Original vapor sphere. Playback, never animation, owns the speaking state. */
 export function Orb({
   className,
   mode,
@@ -25,13 +25,13 @@ export function Orb({
   useEffect(() => {
     const surface = surfaceRef.current;
     if (!surface) return;
-    surface.style.setProperty("--ancient-level", "0");
+    surface.style.setProperty("--orb-level", "0");
     if (!motionActive || (visualState !== "listening" && visualState !== "speaking")) return;
     let frame = 0;
     let last = 0;
     const tick = (now: number) => {
       if (now - last >= 50) {
-        surface.style.setProperty("--ancient-level", String(getVoiceLevel()));
+        surface.style.setProperty("--orb-level", String(getVoiceLevel()));
         last = now;
       }
       frame = requestAnimationFrame(tick);
@@ -39,7 +39,7 @@ export function Orb({
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame);
-      surface.style.setProperty("--ancient-level", "0");
+      surface.style.setProperty("--orb-level", "0");
     };
   }, [motionActive, visualState]);
   const label =
@@ -49,22 +49,22 @@ export function Orb({
         ? "Hercules is preparing a response"
       : visualState === "speaking"
         ? "Hercules is speaking"
-        : "Hercules ancient living orb, idle";
+        : "Hercules royal vapor orb, idle";
   const body = (
     <span
       ref={surfaceRef}
       className={cn(
-        "hercules-solid-orb ancient-living-orb relative block aspect-square w-full",
+        "hercules-solid-orb royal-vapor-orb relative block aspect-square w-full",
       )}
       data-orb-state={visualState}
       data-orb-motion={motionActive ? "on" : "off"}
       role="img"
       aria-label={label}
     >
-      <span aria-hidden className="ancient-orb-ring ancient-orb-ring-one" />
-      <span aria-hidden className="ancient-orb-ring ancient-orb-ring-two" />
-      <span aria-hidden className="ancient-orb-stone">
-        <img src={ancientOrb} alt="" width={1024} height={1024} draggable={false} decoding="async" className="ancient-orb-art" />
+      <span aria-hidden className="vapor-orb-flare" />
+      <span aria-hidden className="vapor-orb-sphere">
+        <img src={royalOrb} alt="" width={1024} height={1024} draggable={false} decoding="async" className="vapor-orb-art" />
+        <span className="vapor-orb-clouds"><img src={royalOrb} alt="" width={1024} height={1024} draggable={false} loading="lazy" decoding="async" /></span>
       </span>
     </span>
   );
@@ -76,7 +76,7 @@ export function Orb({
       type="button"
       onClick={onActivate}
       className={cn(
-        "ancient-orb-control block h-auto min-h-0 rounded-full border-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "vapor-orb-control block h-auto min-h-0 rounded-full border-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
       aria-label={mode === "idle" ? "Talk to Hercules" : "Stop Hercules voice"}

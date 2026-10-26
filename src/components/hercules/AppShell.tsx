@@ -17,7 +17,6 @@ import {
   Fuel,
   LifeBuoy,
 } from "lucide-react";
-import { VoiceDock } from "./VoiceDock";
 import { LiquidOrb } from "./LiquidOrb";
 import { LoadResetButton } from "./LoadReset";
 import { useVehicles } from "@/lib/live";
@@ -236,7 +235,6 @@ export function AppShell({
           </main>
         </div>
       </div>
-      <VoiceDock />
     </div>
   );
 }
