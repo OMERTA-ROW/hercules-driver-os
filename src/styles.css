@@ -2026,6 +2026,7 @@
  .chat-screen .conversation-empty-content { justify-content: flex-start; }
  .chat-screen .conversation-empty { margin-block: 0; flex-shrink: 0; }
  .chat-screen .conversation-empty-content { padding-block: .5rem; }
- .chat-screen .conversation-empty { padding: .5rem; gap: .4rem; }
+ .chat-screen .conversation-empty { padding: 0; gap: .25rem; }
+ .chat-screen .conversation-empty p { display: none; }
  .chat-screen [role="log"] h3 { font-size: 1.25rem; }
 }
