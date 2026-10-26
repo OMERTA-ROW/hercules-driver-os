@@ -1,5 +1,11 @@
 # Roadmap
 
+## Oct 26 — broker intake/debrief slice
+- [ ] Inspect blueprint, existing broker/company permissions and connected inbox/delivery providers.
+- [ ] Build feasible persistent intake/review/approval foundation and login debrief with honest connection labels.
+- [ ] Specify durable webhook/outbox retries/idempotency; activate only a configured verified channel.
+- [ ] Test authorization/workflow rules, desktop/mobile and preview; report unconnected/unverified blockers, no untested publication.
+
 ## Oct 26 — organic internal vapor correction
 - [x] Replace rigid bitmap rotation with independently advected, domain-warped procedural noise clouds and stable spherical gold edge. Canvas field capped at 112×112, small orbs 56×56, with offscreen/background/reduced-motion pausing; no per-frame React rendering.
 - [x] Verify desktop/phone preview cloud pixels evolve at fixed positions, no overflow/runtime errors, reduced motion stays pixel-identical; 35 focused tests pass, automatic build/typecheck pass. State dynamics tests cover speaking baseline without amplitude and increased flow/light with amplitude; existing mocked playback tests cover Stop/end/error. No live metered audio or deployment.
