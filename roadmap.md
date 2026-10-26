@@ -1,5 +1,11 @@
 # Roadmap
 
+## Oct 26 — expanded reviewer assignments and release groundwork
+- [x] Extend real company-scoped debrief to dispatchers and brokers; itemized batch review, carrier/driver per load, priority and time-zone-aware release windows.
+- [x] Persist guarded assignments, atomic approvals, conflict checks, cancellation/reschedule and immutable audit; driver-scoped prioritized stack.
+- [x] Verify organic vapor (changing canvas pixels; reduced motion static) and tested speaking brightness dynamics; 57 focused tests and rollback checks pass, automatic build/typecheck OK; desktop/phone broker/dispatcher/driver signed-out checks pass.
+- Blocked: no accounts for authenticated end-to-end checks, no trusted driver/carrier verification provisioning or finalized BOL file workflow, and no connected inbox/scheduler/sender. Timed release is persisted but not activated; no sends, paid calls or publication.
+
 ## Oct 26 — broker intake/debrief slice
 - [x] Inspect blueprint and providers: Notion connection returns object_not_found; no broker email, sender or durable executor connected.
 - [x] Add persistent company-scoped manual intake/category/urgency/status records, immutable approval history, verified carrier/recipient/owned finalized BOL approval RPC and blocked outbox. Broker login destination uses server roles; legacy network is collapsed and Demo-labeled.

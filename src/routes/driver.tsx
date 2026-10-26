@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useHours, useMileage, useVehicles } from "@/lib/live";
+import { DriverLoadStack } from "@/components/hercules/DriverLoadStack";
 import { voiceCommands } from "@/data/voice-commands";
 
 export const Route = createFileRoute("/driver")({
@@ -46,6 +47,7 @@ function Driver() {
 
   return (
     <AppShell title="Driver" subtitle={account?.email ?? "Not signed in"}>
+      <DriverLoadStack/>
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
           <PanelTitle

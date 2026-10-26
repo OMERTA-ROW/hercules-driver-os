@@ -31,3 +31,4 @@
 - Vehicle row conversion and routing-input validation live in src/lib/vehicle-profile.ts; legacy equipment remains unconfirmed until explicit measurements, trailer and hazmat are saved, so catalog defaults cannot masquerade as measured routing data.
 - The dashboard capability directory uses src/data/feature-status.ts independently of paid add-on entitlements; planned/demo discovery must never activate subscriptions or bypass existing screen access.
 - Broker intake/review uses company-scoped broker_* records and authenticated RPCs, separate from legacy device-only network demos; approved outbox intents stay blocked until a verified sender and durable worker are configured.
+- Reviewer batches use one atomic company-serialized RPC and verified driver/carrier mappings; zoned times use Temporal with DST ambiguity rejection, and assigned stacks use a caller-scoped projection so private BOL packets never leak to drivers.
