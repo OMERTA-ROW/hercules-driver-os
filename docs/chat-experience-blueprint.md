@@ -1,5 +1,8 @@
 # Hercules Conversation Workspace Blueprint
 
+## Final owner directive — October 26, 2026
+The linked Notion page requires sign-in; private blueprint contents could not be read. Implement the owner's written directive using a true-black home conversation screen, original royal-purple orb with pearly-white internal vapor and a subtle gold rim, and the existing shared text/voice session. No cavern background or floating navigation substitute. Listening pulses subtly, thinking flows, and luminous speaking flare/faster vapor activate only from actual playback state. Reduced motion is static. One root-mounted conversation persists drafts and UI across route navigation; no second chat or new provider. Existing auth, credits, approvals, BOL, personas and integrations remain unchanged.
+
 ## Goal
 Replace the crude chat presentation with a polished, familiar conversational workspace (not a copy of proprietary ChatGPT internals). True black `#000` chat background, dark charcoal surfaces, readable warm-white text, restrained gold accents. User messages right-aligned in rounded dark-gray bubbles with sensible max width; Hercules replies left-aligned as open readable blocks on the background. Generous spacing, centered transcript, selectable text, accessible contrast/focus, reduced motion.
 

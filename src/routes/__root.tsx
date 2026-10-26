@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -36,6 +37,7 @@ import { LiveVoiceBridge } from "@/components/hercules/LiveVoiceBridge";
 import { TripVehiclePrompt } from "@/components/hercules/TripVehiclePrompt";
 import { BolProvider } from "@/lib/bol";
 import { BolWorkspace } from "@/components/hercules/BolWorkspace";
+import { VoiceDock } from "@/components/hercules/VoiceDock";
 
 function NotFoundComponent() {
   return (
@@ -145,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { pathname } = useLocation();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -165,6 +168,7 @@ function RootComponent() {
                                   <VoiceProvider>
                                     {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                                     <Outlet />
+                                    <VoiceDock presentation={pathname === "/" ? "screen" : "dock"} />
                                     <TripVehiclePrompt />
                                     <LiveVoiceBridge />
                                     <ArrivalBridge />

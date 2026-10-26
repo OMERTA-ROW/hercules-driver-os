@@ -31,7 +31,7 @@ function VoicePage() {
   return (
     <AppShell title="Talk" subtitle={`Talking with ${voice.name} — ask, follow up, keep going`}>
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
-        <div className="glass flex w-full flex-col items-center justify-center gap-6 p-8">
+        <div className="flex w-full flex-col items-center justify-center gap-6 p-8">
           <Orb
             className="w-[min(60vw,360px)]"
             mode={mode}

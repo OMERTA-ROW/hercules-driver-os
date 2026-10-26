@@ -49,7 +49,9 @@ describe("VoiceDock conversation", () => {
     setup();
     const box = screen.getByLabelText("Message Hercules");
     fireEvent.change(box, { target: { value: "  how many hours left  " } });
-    fireEvent.submit(box.closest("form")!);
+    const form = box.closest("form");
+    if (!form) throw new Error("Composer form missing");
+    fireEvent.submit(form);
     await vi.waitFor(() => expect(api["say"]).toHaveBeenCalledWith("how many hours left"));
   });
 
@@ -88,6 +90,30 @@ describe("VoiceDock conversation", () => {
   it("Escape minimizes the panel", () => {
     setup();
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByLabelText("Message Hercules")).toBeNull();
+    expect(screen.queryByRole("textbox", { name: "Message Hercules" })).toBeNull();
+  });
+
+  it("retains an unsent multiline draft after minimizing and reopening", () => {
+    setup();
+    fireEvent.change(screen.getByLabelText("Message Hercules"), { target: { value: "first line\nsecond line" } });
+    fireEvent.click(screen.getByRole("button", { name: "Minimize conversation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Hercules conversation" }));
+    expect((screen.getByLabelText("Message Hercules") as HTMLTextAreaElement).value).toBe("first line\nsecond line");
+  });
+
+  it("calls the existing listening control and cancels listening", () => {
+    setup();
+    fireEvent.click(screen.getByRole("button", { name: "Talk to Hercules" }));
+    expect(api["listen"]).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not submit empty input", () => {
+    setup();
+    const box = screen.getByLabelText("Message Hercules");
+    fireEvent.change(box, { target: { value: "   " } });
+    const form = box.closest("form");
+    if (!form) throw new Error("Composer form missing");
+    fireEvent.submit(form);
+    expect(api["say"]).not.toHaveBeenCalled();
   });
 });

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
+  ArrowUp,
   Check,
   ChevronDown,
   FileText,
   Loader2,
   MessageCircle,
+  Maximize2,
   Mic,
   RotateCcw,
   Square,
@@ -38,7 +40,7 @@ import { toast } from "sonner";
  * VOICE DOCK — the original traveling orb, now opening the same real
  * conversation in a compact text-and-voice panel.
  */
-export function VoiceDock() {
+export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "screen" }) {
   const bol = useBol();
   const {
     mode,
@@ -59,6 +61,13 @@ export function VoiceDock() {
     retrySpeech,
   } = useVoice();
   const [open, setOpen] = useState(false);
+  const [minimizedScreen, setMinimizedScreen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [draft, setDraft] = useState("");
+  const isScreen = presentation === "screen" && !minimizedScreen;
+  const visible = isScreen || open;
+  const minimize = () => { setOpen(false); setMinimizedScreen(true); };
+  const reopen = () => { setOpen(true); setMinimizedScreen(false); };
   const panelRef = useRef<HTMLDivElement>(null);
   const status: ChatStatus = mode === "speaking" ? "streaming" : "ready";
   const chatState =
@@ -87,27 +96,30 @@ export function VoiceDock() {
   }[chatState];
 
   useEffect(() => {
-    if (!open) return;
+    if (!visible) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") { setOpen(false); setMinimizedScreen(true); }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [visible]);
 
   const submit = ({ text }: { text: string }) => {
     const clean = text.trim();
-    if (clean) say(clean);
+    if (!clean) return;
+    say(clean);
+    setDraft("");
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
-      <div className="pointer-events-auto ml-auto w-full max-w-xl px-3 pb-3 sm:px-4 sm:pb-4">
-        {open ? (
+    <div className={cn("conversation-host pointer-events-none fixed inset-x-0 bottom-0 z-40", isScreen && "conversation-host-screen", expanded && !isScreen && "conversation-host-expanded")}>
+      <div className={cn("conversation-frame pointer-events-auto ml-auto w-full max-w-xl px-3 pb-3 sm:px-4 sm:pb-4", isScreen && "conversation-frame-screen")}>
+
           <section
             ref={panelRef}
             aria-label="Hercules conversation"
-            className="chat-workspace mb-2 flex h-[min(72vh,620px)] min-h-[360px] flex-col overflow-hidden rounded-[1.75rem] border"
+            hidden={!visible}
+            className={cn("chat-workspace mb-2 flex h-[min(72dvh,720px)] min-h-[360px] flex-col overflow-hidden rounded-[1.75rem] border", isScreen && "chat-screen", !visible && "!hidden")}
           >
             <header className="chat-line flex min-h-16 items-center gap-3 border-b px-3 py-2">
               <Orb
@@ -154,7 +166,7 @@ export function VoiceDock() {
                 type="button"
                 size="icon"
                 variant="ghost"
-                onClick={() => setOpen(false)}
+                onClick={minimize}
                 aria-label="Minimize conversation"
                 title="Minimize"
               >
@@ -162,6 +174,7 @@ export function VoiceDock() {
               </Button>
             </header>
 
+            {!isScreen ? <Button className="chat-expand" type="button" size="icon" variant="ghost" onClick={() => setExpanded((current) => !current)} aria-label={expanded ? "Restore conversation size" : "Expand conversation"} title={expanded ? "Restore size" : "Expand"}><Maximize2 /></Button> : null}
             <p className="sr-only" role="status" aria-live="polite">
               {stateLabel}
             </p>
@@ -169,13 +182,13 @@ export function VoiceDock() {
               Typed and spoken messages share this session only. Nothing is saved after you clear or reload.
             </p>
             <Conversation className="min-h-0">
-              <ConversationContent className="mx-auto w-full max-w-2xl gap-6 px-4 py-5">
+              <ConversationContent className={cn("mx-auto w-full max-w-2xl gap-6 px-4 py-5", turns.length === 0 && "conversation-empty-content")}>
                 {turns.length === 0 ? (
                   <ConversationEmptyState
-                    className="min-h-48 p-5 [&_p]:text-[color:var(--chat-muted)]"
-                    icon={<MessageCircle className="chat-gold h-7 w-7" />}
-                    title="Talk to Hercules"
-                    description="Ask about loads, hours, the road ahead, or money. Nothing is committed without your approval."
+                    className="conversation-empty min-h-0 p-5 [&_p]:text-[color:var(--chat-muted)]"
+                    icon={<Orb className={isScreen ? "conversation-main-orb" : "w-32"} mode={mode} visualState={orbState} colorway={colorway} onActivate={mode === "idle" ? listen : stop} />}
+                    title="Hercules"
+                    description="What’s on the road ahead?"
                   />
                 ) : (
                   turns.map((turn) => (
@@ -228,7 +241,7 @@ export function VoiceDock() {
                 )}
 
               </ConversationContent>
-              <ConversationScrollButton />
+              <ConversationScrollButton aria-label="Jump to latest message" title="Latest message" />
             </Conversation>
 
             {speechSource === "unavailable" && speechNote ? (
@@ -247,28 +260,30 @@ export function VoiceDock() {
             ) : null}
 
             <div className="chat-line chat-safe border-t px-3 pt-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="chat-muted text-xs">Paperwork</span>
+              <PromptInput onSubmit={submit} className="chat-composer">
+                <PromptInputTextarea
+                  aria-label="Message Hercules"
+                  placeholder="Message Hercules…"
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  className="min-h-12 resize-none"
+                />
+                <PromptInputFooter className="justify-between px-2 pb-2">
+                  <div className="flex items-center gap-1">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
+                  size="icon"
                   className="chat-target"
+                  aria-label={bol.draft ? "Open BOL" : "Create BOL"}
+                  title={bol.draft ? "Open BOL" : "Create BOL"}
                   disabled={bol.busy}
                   onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
                     if (!result.ok) toast.error(result.message);
                   })}
                 >
                   <FileText />
-                  {bol.draft ? "Open BOL" : "Create BOL"}
                 </Button>
-              </div>
-              <PromptInput onSubmit={submit} className="chat-composer">
-                <PromptInputTextarea
-                  aria-label="Message Hercules"
-                  placeholder="Message Hercules…"
-                  className="min-h-12 resize-none"
-                />
-                <PromptInputFooter className="justify-between px-2 pb-2">
                   <Button
                     type="button"
                     size="icon"
@@ -280,18 +295,19 @@ export function VoiceDock() {
                   >
                     {mode === "idle" ? <Mic /> : <X />}
                   </Button>
+                  </div>
                   <PromptInputSubmit
                     status={status}
                     onStop={stop}
                     className="h-11 w-11 rounded-full"
-                  />
+                    aria-label={status === "streaming" ? "Stop reply" : "Send message"}
+                  >{status === "streaming" ? <Square /> : <ArrowUp />}</PromptInputSubmit>
                 </PromptInputFooter>
               </PromptInput>
             </div>
           </section>
-        ) : null}
 
-        <div className="bubble-bar flex items-center gap-3 !rounded-[2rem] p-2.5">
+        {!isScreen ? <div className="conversation-launcher flex items-center gap-3 p-2.5">
           <Orb
             className="w-14 shrink-0 sm:w-16"
             mode={mode}
@@ -300,19 +316,16 @@ export function VoiceDock() {
             onActivate={mode === "idle" ? listen : stop}
           />
 
-          <button
+          <Button
+            variant="ghost"
             type="button"
-            className="min-w-0 flex-1 text-left"
-            onClick={() => setOpen(true)}
-            aria-expanded={open}
+            className="h-auto min-w-0 flex-1 flex-col items-start gap-0 text-left whitespace-normal"
+            onClick={reopen}
+            aria-expanded={visible}
             aria-label="Open Hercules chat from latest reply"
           >
             <span className="tech-label text-voice-accent">
-              {mode === "listening"
-                ? "Listening"
-                : mode === "speaking"
-                  ? `${voice.name} speaking`
-                  : "Voice ready — tap the orb or say “Hercules”"}
+              {stateLabel}
             </span>
             <p
               className={cn(
@@ -324,20 +337,20 @@ export function VoiceDock() {
                 ? "Go ahead, I'm on it."
                 : lastLine || "Ask about loads, hours, the map or money."}
             </p>
-          </button>
+          </Button>
 
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            onClick={() => setOpen((current) => !current)}
+            onClick={visible ? minimize : reopen}
             aria-label={open ? "Minimize Hercules conversation" : "Open Hercules conversation"}
-            aria-expanded={open}
+            aria-expanded={visible}
             title={open ? "Minimize conversation" : "Open conversation"}
           >
             {open ? <ChevronDown /> : <MessageCircle />}
           </Button>
-        </div>
+        </div> : null}
       </div>
     </div>
   );
