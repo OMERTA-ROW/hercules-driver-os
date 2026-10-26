@@ -566,6 +566,48 @@ export type Database = {
           },
         ]
       }
+      broker_driver_recipients: {
+        Row: {
+          carrier_id: string
+          company_id: string
+          display_name: string
+          recipient_email: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          carrier_id: string
+          company_id: string
+          display_name: string
+          recipient_email: string
+          user_id: string
+          verified_at: string
+        }
+        Update: {
+          carrier_id?: string
+          company_id?: string
+          display_name?: string
+          recipient_email?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_driver_recipients_company_id_carrier_id_fkey"
+            columns: ["company_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "freight_carriers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "broker_driver_recipients_company_id_user_id_fkey"
+            columns: ["company_id", "user_id"]
+            isOneToOne: true
+            referencedRelation: "company_members"
+            referencedColumns: ["company_id", "user_id"]
+          },
+        ]
+      }
       broker_inbox_events: {
         Row: {
           attempts: number
@@ -691,6 +733,89 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: true
             referencedRelation: "broker_inbox_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_load_releases: {
+        Row: {
+          cancelled_at: string | null
+          carrier_id: string
+          company_id: string
+          created_at: string
+          delivery_at: string
+          draft_id: string
+          driver_email: string
+          driver_id: string
+          id: string
+          outbox_id: string
+          pickup_at: string
+          priority: number
+          release_at: string
+          time_zone: string
+          version: number
+        }
+        Insert: {
+          cancelled_at?: string | null
+          carrier_id: string
+          company_id: string
+          created_at?: string
+          delivery_at: string
+          draft_id: string
+          driver_email: string
+          driver_id: string
+          id?: string
+          outbox_id: string
+          pickup_at: string
+          priority?: number
+          release_at: string
+          time_zone: string
+          version?: number
+        }
+        Update: {
+          cancelled_at?: string | null
+          carrier_id?: string
+          company_id?: string
+          created_at?: string
+          delivery_at?: string
+          draft_id?: string
+          driver_email?: string
+          driver_id?: string
+          id?: string
+          outbox_id?: string
+          pickup_at?: string
+          priority?: number
+          release_at?: string
+          time_zone?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_load_releases_company_id_carrier_id_fkey"
+            columns: ["company_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "freight_carriers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "broker_load_releases_company_id_draft_id_fkey"
+            columns: ["company_id", "draft_id"]
+            isOneToOne: false
+            referencedRelation: "broker_intake_drafts"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "broker_load_releases_company_id_driver_id_fkey"
+            columns: ["company_id", "driver_id"]
+            isOneToOne: false
+            referencedRelation: "broker_driver_recipients"
+            referencedColumns: ["company_id", "user_id"]
+          },
+          {
+            foreignKeyName: "broker_load_releases_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: true
+            referencedRelation: "broker_delivery_outbox"
             referencedColumns: ["id"]
           },
         ]
@@ -3140,6 +3265,22 @@ export type Database = {
           _urgent: boolean
         }
         Returns: string
+      }
+      broker_my_stack: { Args: never; Returns: Json }
+      broker_release_change: {
+        Args: {
+          _cancel: boolean
+          _confirmed: boolean
+          _id: string
+          _release_at: string
+          _version: number
+          _zone: string
+        }
+        Returns: number
+      }
+      broker_review_batch: {
+        Args: { _company: string; _confirmed: boolean; _items: Json }
+        Returns: Json
       }
       company_code_gen: { Args: { _len?: number }; Returns: string }
       company_create: {
