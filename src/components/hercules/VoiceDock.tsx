@@ -182,7 +182,7 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
               Typed and spoken messages share this session only. Nothing is saved after you clear or reload.
             </p>
             <Conversation className="min-h-0">
-              <ConversationContent className="mx-auto w-full max-w-2xl gap-6 px-4 py-5">
+              <ConversationContent className={cn("mx-auto w-full max-w-2xl gap-6 px-4 py-5", turns.length === 0 && "conversation-empty-content")}>
                 {turns.length === 0 ? (
                   <ConversationEmptyState
                     className="conversation-empty min-h-0 p-5 [&_p]:text-[color:var(--chat-muted)]"
@@ -260,21 +260,6 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
             ) : null}
 
             <div className="chat-line chat-safe border-t px-3 pt-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="chat-muted text-xs">Paperwork</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="chat-target"
-                  disabled={bol.busy}
-                  onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
-                    if (!result.ok) toast.error(result.message);
-                  })}
-                >
-                  <FileText />
-                  {bol.draft ? "Open BOL" : "Create BOL"}
-                </Button>
-              </div>
               <PromptInput onSubmit={submit} className="chat-composer">
                 <PromptInputTextarea
                   aria-label="Message Hercules"
@@ -284,6 +269,21 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                   className="min-h-12 resize-none"
                 />
                 <PromptInputFooter className="justify-between px-2 pb-2">
+                  <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="chat-target"
+                  aria-label={bol.draft ? "Open BOL" : "Create BOL"}
+                  title={bol.draft ? "Open BOL" : "Create BOL"}
+                  disabled={bol.busy}
+                  onClick={() => void bol.handleCommand(bol.draft ? "open" : "create").then((result) => {
+                    if (!result.ok) toast.error(result.message);
+                  })}
+                >
+                  <FileText />
+                </Button>
                   <Button
                     type="button"
                     size="icon"
@@ -295,6 +295,7 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                   >
                     {mode === "idle" ? <Mic /> : <X />}
                   </Button>
+                  </div>
                   <PromptInputSubmit
                     status={status}
                     onStop={stop}
@@ -324,11 +325,7 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
             aria-label="Open Hercules chat from latest reply"
           >
             <span className="tech-label text-voice-accent">
-              {mode === "listening"
-                ? "Listening"
-                : mode === "speaking"
-                  ? `${voice.name} speaking`
-                  : "Voice ready — tap the orb or say “Hercules”"}
+              {stateLabel}
             </span>
             <p
               className={cn(
