@@ -8,6 +8,7 @@ import {
   DollarSign,
   ShieldAlert,
   UserCog,
+  Users,
   Mic,
   Truck,
   FileText,
@@ -39,7 +40,7 @@ const nav = [
   { to: "/driver", label: "Driver", icon: UserCog, feature: "driver" },
   { to: "/fleet", label: "Fleet", icon: Truck, feature: "fleet" },
   { to: "/documents", label: "Docs", icon: FileText, feature: null },
-  { to: "/members", label: "Members", icon: UserCog, feature: null },
+  { to: "/members", label: "Members", icon: Users, feature: null },
   { to: "/voice", label: "Talk", icon: Mic, feature: "voice" },
   { to: "/settings", label: "Settings", icon: SettingsIcon, feature: null },
 ] as const;
