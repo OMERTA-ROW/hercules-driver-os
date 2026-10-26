@@ -6,7 +6,9 @@ import { createVaporField, vaporDynamics, type VaporState } from "@/lib/vapor-fl
 export function CloudVapor({ state, motion }: { state: VaporState; motion: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef(state);
+  const redrawRef = useRef<(() => void) | null>(null);
   stateRef.current = state;
+  useEffect(() => { redrawRef.current?.(); }, [state]);
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", { alpha: false });
@@ -52,6 +54,7 @@ export function CloudVapor({ state, motion }: { state: VaporState; motion: boole
       }
       frame = requestAnimationFrame(tick);
     };
+    redrawRef.current = () => draw(0);
     const sync = () => {
       cancelAnimationFrame(frame); last = 0;
       draw(0);
@@ -60,7 +63,7 @@ export function CloudVapor({ state, motion }: { state: VaporState; motion: boole
     const observer = new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? false; last = 0; });
     observer.observe(canvas);
     reduced.addEventListener("change", sync); sync();
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); reduced.removeEventListener("change", sync); };
+    return () => { redrawRef.current = null; cancelAnimationFrame(frame); observer.disconnect(); reduced.removeEventListener("change", sync); };
   }, [motion]);
   return <canvas ref={canvasRef} className="vapor-orb-field" aria-hidden />;
 }
