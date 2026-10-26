@@ -191,7 +191,13 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                     description="What’s on the road ahead?"
                   />
                 ) : (
-                  turns.map((turn) => (
+                  <>
+                  {isScreen ? (
+                    <div className="conversation-pinned-orb" data-main-orb>
+                      <Orb className="conversation-main-orb conversation-main-orb-compact" mode={mode} visualState={orbState} colorway={colorway} onActivate={mode === "idle" ? listen : stop} />
+                    </div>
+                  ) : null}
+                  {turns.map((turn) => (
                     <Message key={turn.id} from={turn.from === "driver" ? "user" : "assistant"}>
                       <MessageContent
                         className={cn(
@@ -237,7 +243,8 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                         </div>
                       ) : null}
                     </Message>
-                  ))
+                  ))}
+                  </>
                 )}
 
               </ConversationContent>
