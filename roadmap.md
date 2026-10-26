@@ -1,5 +1,9 @@
 # Roadmap
 
+## Oct 26 — original responsive orb refinement
+- [ ] Apply owner clamp sizing, safe-area centering and static reduced-motion gradient; preserve chat and reviewer work.
+- [ ] Target 30–60fps main cloud field with bounded phone resolution; verify evolving internal clouds, stationary sphere, desktop/phone/short-screen fit and tests.
+
 ## Oct 26 — expanded reviewer assignments and release groundwork
 - [x] Extend real company-scoped debrief to dispatchers and brokers; itemized batch review, carrier/driver per load, priority and time-zone-aware release windows.
 - [x] Persist guarded assignments, atomic approvals, conflict checks, cancellation/reschedule and immutable audit; driver-scoped prioritized stack.

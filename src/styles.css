@@ -1832,17 +1832,19 @@
   --vapor-pearl: oklch(0.96 0.018 300);
   --vapor-gold: oklch(0.79 0.1 85);
   --vapor-shadow: 0 0 42px color-mix(in oklab, var(--vapor-flare) 55%, transparent);
+  --vapor-static: radial-gradient(ellipse at 35% 35%, var(--vapor-pearl), var(--vapor-flare) 35%, var(--vapor-purple) 75%);
 }
 .vapor-orb-control, .vapor-orb-control:hover { background: transparent !important; box-shadow: none !important; overflow: visible; }
 .vapor-orb-control:active { transform: none !important; }
 .royal-vapor-orb { pointer-events: none; --orb-level: 0; }
-.vapor-orb-sphere { position: absolute; inset: 5%; border-radius: 50%; overflow: hidden; border: 1px solid var(--vapor-gold); background: var(--vapor-purple); isolation: isolate; }
+.vapor-orb-sphere { position: absolute; inset: 5%; border-radius: 50%; overflow: hidden; border: 1px solid var(--vapor-gold); background: var(--vapor-static); isolation: isolate; }
 .vapor-orb-field { display: block; width: 100%; height: 100%; border-radius: 50%; }
 .vapor-orb-flare { position: absolute; inset: 7%; border-radius: 50%; background: var(--vapor-purple); opacity: 0; box-shadow: var(--vapor-shadow); }
 .royal-vapor-orb[data-orb-state="listening"] .vapor-orb-sphere { scale: calc(1 + var(--orb-level) * .012); }
 .royal-vapor-orb[data-orb-state="speaking"] .vapor-orb-flare { opacity: calc(.55 + var(--orb-level) * .4); background: var(--vapor-flare); }
 .royal-vapor-orb[data-orb-motion="off"] * { animation: none !important; transform: none !important; scale: 1 !important; }
-@media (prefers-reduced-motion: reduce) { .royal-vapor-orb * { animation: none !important; transform: none !important; scale: 1 !important; } }
+.royal-vapor-orb[data-orb-motion="off"] .vapor-orb-field { display: none; }
+@media (prefers-reduced-motion: reduce) { .royal-vapor-orb * { animation: none !important; transform: none !important; scale: 1 !important; } .royal-vapor-orb .vapor-orb-field { display: none; } }
 @media print { .royal-vapor-orb { display: none !important; } }
 
 /* Original Hercules Liquid Orb — perfectly round, matte, and decorative only. */
@@ -1998,7 +2000,8 @@
 .chat-workspace .chat-user-bubble { max-width: 100%; }
 .chat-screen .conversation-empty { margin-block: auto; flex: 1; }
 .chat-screen [role="log"] h3 { font-size: 1.75rem; font-weight: 500; }
-.conversation-main-orb { width: min(36vh, 280px); }
+.conversation-main-orb { width: clamp(180px, 42vw, 320px); max-width: 100%; flex-shrink: 0; margin-inline: auto; }
+.conversation-main-orb .vapor-orb-sphere { inset: 0; }
 .chat-screen .chat-safe { width: 100%; max-width: 48rem; margin-inline: auto; border: 0 !important; }
 
 .chat-screen .chat-composer { margin-top: .5rem; }
@@ -2012,17 +2015,15 @@
 @media (max-width: 640px) {
   .conversation-frame-screen { padding-inline: .5rem; }
   .chat-screen > header { padding-inline: .5rem; }
-  .conversation-main-orb { width: min(22dvh, 190px); }
   .chat-screen .chat-safe { padding-inline: .25rem; }
   .conversation-host-expanded .chat-workspace { height: 80dvh; }
 }
 @media print { .conversation-host { display: none !important; } }
 
-.chat-screen .conversation-empty-content { min-height: 100%; justify-content: center; }
+.chat-screen .conversation-empty-content { min-height: 100%; justify-content: center; padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
 .chat-screen .conversation-empty { height: auto; flex: none; }
 @media (max-height: 650px) {
  .chat-screen .conversation-empty-content { padding-block: .5rem; }
  .chat-screen .conversation-empty { padding: .5rem; gap: .4rem; }
- .chat-screen .conversation-main-orb { width: 80px; }
  .chat-screen [role="log"] h3 { font-size: 1.25rem; }
 }

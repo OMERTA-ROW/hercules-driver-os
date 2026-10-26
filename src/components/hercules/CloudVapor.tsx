@@ -13,7 +13,8 @@ export function CloudVapor({ state, motion }: { state: VaporState; motion: boole
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", { alpha: false });
     if (!canvas || !ctx) return;
-    const size = canvas.getBoundingClientRect().width < 80 ? 56 : 112;
+    const compact = canvas.getBoundingClientRect().width < 80;
+    const size = compact ? 56 : window.matchMedia("(max-width: 640px)").matches ? 80 : 96;
     canvas.width = size; canvas.height = size;
     const noise = createVaporField();
     const pixels = ctx.createImageData(size, size);
@@ -49,7 +50,7 @@ export function CloudVapor({ state, motion }: { state: VaporState; motion: boole
       ctx.putImageData(pixels, 0, 0);
     };
     const tick = (now: number) => {
-      if (visible && !document.hidden && now - last >= (size < 80 ? 100 : 55)) {
+      if (visible && !document.hidden && now - last >= (compact ? 100 : 30)) {
         draw(last ? Math.min((now - last) / 1000, 0.15) : 0); last = now;
       }
       frame = requestAnimationFrame(tick);
