@@ -47,6 +47,7 @@ export const routeRoles: Record<string, HerculesRole[]> = {
   "/fleet": ["fleet_manager", "company_admin"],
   "/equipment": ["dispatcher", "fleet_manager", "company_admin"],
   "/company": ["company_admin"],
+  "/members": ["company_admin", "platform_admin"],
   "/compliance": ["fleet_manager", "company_admin"],
   "/supply": ["fleet_manager", "company_admin"],
   "/parts": personal,

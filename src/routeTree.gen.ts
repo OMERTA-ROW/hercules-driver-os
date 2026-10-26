@@ -27,6 +27,7 @@ import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as LoadsRouteImport } from './routes/loads'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MembersRouteImport } from './routes/members'
 import { Route as NavigationRouteImport } from './routes/navigation'
 import { Route as PartsRouteImport } from './routes/parts'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -134,6 +135,11 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MembersRoute = MembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NavigationRoute = NavigationRouteImport.update({
   id: '/navigation',
   path: '/navigation',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/mcp': typeof McpRoute
+  '/members': typeof MembersRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/mcp': typeof McpRoute
+  '/members': typeof MembersRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/loads': typeof LoadsRoute
   '/mcp': typeof McpRoute
+  '/members': typeof MembersRoute
   '/navigation': typeof NavigationRoute
   '/parts': typeof PartsRoute
   '/pricing': typeof PricingRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/mcp'
+    | '/members'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/mcp'
+    | '/members'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/loads'
     | '/mcp'
+    | '/members'
     | '/navigation'
     | '/parts'
     | '/pricing'
@@ -455,6 +467,7 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   LoadsRoute: typeof LoadsRoute
   McpRoute: typeof McpRoute
+  MembersRoute: typeof MembersRoute
   NavigationRoute: typeof NavigationRoute
   PartsRoute: typeof PartsRoute
   PricingRoute: typeof PricingRoute
@@ -601,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/members': {
+      id: '/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof MembersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/navigation': {
       id: '/navigation'
       path: '/navigation'
@@ -735,6 +755,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   LoadsRoute: LoadsRoute,
   McpRoute: McpRoute,
+  MembersRoute: MembersRoute,
   NavigationRoute: NavigationRoute,
   PartsRoute: PartsRoute,
   PricingRoute: PricingRoute,
