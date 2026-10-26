@@ -2005,3 +2005,69 @@
 .chat-workspace button:focus-visible, .chat-workspace textarea:focus-visible { outline: 2px solid var(--chat-gold); outline-offset: 2px; }
 .chat-workspace .chat-target { min-width: 44px; min-height: 44px; }
 .chat-workspace .chat-safe { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
+
+/* Audited Hercules command workspace. One fixed palette, no feature activation. */
+:root,
+[data-theme],
+[data-colorway] {
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.95 0.01 85);
+  --card: oklch(0.16 0.003 80);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.19 0.003 80);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.8 0.12 85);
+  --primary-foreground: oklch(0.12 0 0);
+  --secondary: oklch(0.21 0.005 80);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.17 0.003 80);
+  --muted-foreground: oklch(0.74 0.008 85);
+  --accent: oklch(0.25 0.04 305);
+  --accent-foreground: var(--foreground);
+  --violet: oklch(0.77 0.12 305);
+  --border: oklch(0.33 0.009 85);
+  --input: var(--border);
+  --ring: var(--primary);
+  --steel: var(--card);
+  --steel-foreground: var(--foreground);
+  --voice-surface: var(--background);
+  --voice-line: var(--border);
+  --voice-text: var(--foreground);
+  --voice-text-dim: var(--muted-foreground);
+  --voice-accent: var(--primary);
+  --voice-accent-soft: var(--border);
+  --orb-canvas: var(--background);
+  --orb-fill: var(--background);
+  --orb-ink: var(--primary);
+  --surface-1: var(--background);
+  --surface-2: var(--card);
+  --bubble-bg: var(--background);
+  --bubble-edge: var(--border);
+  --bubble-on-bg: var(--card);
+  --bubble-on-edge: var(--primary);
+  --workspace-gold-glow: 0 0 20px -10px color-mix(in oklab, var(--primary) 45%, transparent);
+  --workspace-violet-glow: 0 0 22px -12px color-mix(in oklab, var(--violet) 40%, transparent);
+}
+.hercules-workspace { letter-spacing: 0; }
+.hercules-workspace .liquid-orb { display: none !important; }
+.workspace-rail { border-right: 1px solid var(--border); }
+.workspace-rail .bubble-bar { border: 0; border-radius: 0 !important; background: var(--background) !important; padding: 0 !important; }
+.workspace-rail .bubble-tab { border: 0; border-radius: 6px; justify-content: flex-start; }
+.hercules-workspace .bubble-tab-on {
+  background: var(--card) !important;
+  color: var(--primary) !important;
+  box-shadow: inset 2px 0 var(--primary), var(--workspace-gold-glow) !important;
+}
+.workspace-header .edge-gold { background: var(--primary) !important; height: 2px; }
+.workspace-header h1, .workspace-rail [class*="tracking-"], .capability-directory [class*="tracking-"] { letter-spacing: 0; }
+.hercules-workspace .panel { border-radius: 8px; }
+.capability-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+.capability-item[data-capability-status="Partial"] { border-top: 2px solid var(--primary); }
+.capability-item[data-capability-status="Demo"] { border-top: 2px solid var(--violet); }
+.capability-status { border-left: 2px solid currentColor; padding-left: 8px; }
+.capability-link { border-bottom: 1px solid transparent; }
+.capability-link:hover { border-bottom-color: var(--primary); }
+.capability-link:focus-visible, .home-status-link:focus-visible { outline-color: var(--primary); }
+.home-status-link { text-shadow: var(--workspace-gold-glow); }
+.hercules-workspace nav.bubble-bar, .hercules-workspace nav .bubble-bar { box-shadow: var(--workspace-violet-glow) !important; }
+@media print { .capability-directory, .home-status-link { display: none !important; } }
