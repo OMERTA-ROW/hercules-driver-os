@@ -19,7 +19,7 @@
 - BOL drafts stay in the owner-scoped documents model; print and email actions require explicit local confirmation because no external provider is assumed.
 
 <!-- HERCULES:END -->
-- Keep the shared app theme fixed; artwork, energy accents and state animations are scoped to the voice Orb and the home orb screen cave scene (decorative, behind a readability scrim); this preserves workspace contrast and avoids a competing interface.
+- Keep one shared workspace theme with restrained accent edges; artwork and state animations remain scoped to the voice Orb/home scene, preserving contrast without a competing interface.
 - Orb presentation reads a separate playback-derived state and the existing voice-level meter without changing command modes; this separates pending responses from audible speech while preserving voice behavior.
 
 - Account roles live in hercules_user_roles (server-granted only via onboarding trigger or hercules_role_set); page access map is src/lib/access.tsx — keeps role grants out of client control.
@@ -27,3 +27,4 @@
 - Agent integrations (MCP) live in src/lib/mcp/ with read-only, OAuth-protected tools that query as the caller via RLS — outside assistants must never book, send or change data without in-app confirmation.
 
 - Vehicle row conversion and routing-input validation live in src/lib/vehicle-profile.ts; legacy equipment remains unconfirmed until explicit measurements, trailer and hazmat are saved, so catalog defaults cannot masquerade as measured routing data.
+- The dashboard capability directory uses src/data/feature-status.ts independently of paid add-on entitlements; planned/demo discovery must never activate subscriptions or bypass existing screen access.

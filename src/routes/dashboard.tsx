@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Gauge, Package, ShieldAlert, Wrench, Navigation2 } from "lucide-react";
 import { AppShell } from "@/components/hercules/AppShell";
+import { CapabilityDirectory } from "@/components/hercules/CapabilityDirectory";
 import {
   Panel,
   PanelTitle,
@@ -29,16 +30,16 @@ import {
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — HERCULES" },
+      { title: "Driver Dashboard & Add-on Status — HERCULES" },
       {
         name: "description",
         content:
-          "Your clock, your current load, your miles and your money — all read from your own records, never estimated.",
+          "Your driving records and the audited HERCULES add-on directory: partial capabilities, Demo previews and planned trucking features.",
       },
-      { property: "og:title", content: "Dashboard — HERCULES" },
+      { property: "og:title", content: "Driver Dashboard & Add-on Status — HERCULES" },
       {
         property: "og:description",
-        content: "Hours, load, miles, money, and vehicle health at a glance.",
+        content: "Your driving records and honest status for ten requested trucking add-ons.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -61,8 +62,9 @@ function Dashboard() {
 
   if (!account) {
     return (
-      <AppShell title="Dashboard" subtitle="Not signed in">
-        <Panel>
+      <AppShell title="Driver's command" subtitle="Dashboard · Add-ons · Your day">
+        <CapabilityDirectory />
+        <div className="mt-8 border-t border-border pt-6">
           <EmptyState
             title="Sign in to see your day"
             action={
@@ -73,13 +75,15 @@ function Dashboard() {
           >
             Everything here comes from your own account. Nothing is filled in for you.
           </EmptyState>
-        </Panel>
+        </div>
       </AppShell>
     );
   }
 
   return (
-    <AppShell title="Dashboard" subtitle={rig ? rig.label : "No vehicle on file"}>
+    <AppShell title="Driver's command" subtitle={rig ? rig.label : "Dashboard · No vehicle on file"}>
+      <CapabilityDirectory />
+      <h2 className="mb-4 mt-10 border-t border-border pt-6 font-display text-2xl uppercase">Your day</h2>
       <div className="grid gap-4">
         <div className="grid gap-4 lg:grid-cols-2">
           {/* CLOCK */}

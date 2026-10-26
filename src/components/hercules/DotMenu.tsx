@@ -23,6 +23,7 @@ import {
   Coins,
   Sparkles,
   X,
+  Layers,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import type { Feature } from "@/data/plans";
@@ -36,6 +37,7 @@ import { cn } from "@/lib/utils";
 const sections = [
   { to: "/welcome", label: "Get Set Up", icon: Sparkles, feature: null },
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
+  { to: "/dashboard", label: "Add-on Status", icon: Layers, feature: null },
   { to: "/loads", label: "Load Board", icon: Package, feature: "loads" },
   { to: "/health", label: "Vehicle Health", icon: Wrench, feature: "health" },
   { to: "/financials", label: "Financials", icon: DollarSign, feature: "financials" },
@@ -114,7 +116,7 @@ export function DotMenu({ className }: { className?: string | undefined }) {
             <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto overscroll-contain p-3">
               {items.map((s) => (
                 <Link
-                  key={s.to}
+                  key={s.label}
                   to={s.to}
                   onClick={() => setOpen(false)}
                   className="matte-control glow-control flex min-h-[76px] flex-col justify-between rounded-[1.5rem] border border-primary/20 bg-card p-3 transition-all hover:border-primary/60 hover:bg-primary/8 supports-[backdrop-filter]:bg-card/55"

@@ -28,6 +28,8 @@ export const Route = createFileRoute("/fleet")({
         property: "og:description",
         content: "Every truck, every driver, one screen — with consolidated reporting.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Fleet,

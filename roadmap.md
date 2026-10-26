@@ -1,5 +1,14 @@
 # Roadmap
 
+## Oct 26 — dashboard refresh and audited add-on discovery
+- [x] Audit the three named commits: demo-add-ons and remaining-features commits only recorded plans; vehicle-profile commit added real persistence/UI groundwork.
+- [x] Add all ten audited statuses to the existing dashboard, with existing-screen links, role-respecting access and no fake activation.
+- [x] Refresh shared preview workspace in black/gold/purple; preserve original orb, single chat, approval rules and white-paper BOL printing.
+- [x] Verify desktop/mobile discovery, navigation, chat controls, 62 focused tests and automatic preview builds. Authenticated checks blocked: no auth users; existing unsent chat drafts clear on minimize.
+- [x] Resolve flagged dependency advisory with DOMPurify 3.4.17 override, lockfile and scan confirmation; other newly reported dependency advisories remain outside this listed fix.
+- Audit evidence and remaining limitations: `docs/add-on-ui-audit.md`.
+- Production remains unchanged until publication is explicitly requested. No queued provider-dependent feature is made live by this update.
+
 ## Owner add-on queue — Oct 25 (separate from paused work)
 
 Queue follows any genuinely in-progress chat work; existing unchecked historical tasks are not automatically resumed. Vehicle persistence groundwork is implemented; the full shared-profile rollout and remaining add-ons stay queued.

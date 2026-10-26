@@ -25,6 +25,8 @@ export const Route = createFileRoute("/sign-in")({
         property: "og:description",
         content: "Same shared model, separate login doors, separate permissions.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   validateSearch: (s: Record<string, unknown>): { next?: string | undefined } => ({

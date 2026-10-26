@@ -36,13 +36,15 @@ export const Route = createFileRoute("/settings")({
       {
         name: "description",
         content:
-          "Manage your HERCULES subscription, Shapher appearance, surface motion, and voice.",
+          "Manage your HERCULES subscription, display motion, voice and account preferences.",
       },
       { property: "og:title", content: "Settings & Subscription — HERCULES" },
       {
         property: "og:description",
         content: "Your plan, your trial, your screen brightness. You approve every change.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Settings,
