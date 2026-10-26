@@ -243,7 +243,8 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                         </div>
                       ) : null}
                     </Message>
-                  ))
+                  ))}
+                  </>
                 )}
 
               </ConversationContent>

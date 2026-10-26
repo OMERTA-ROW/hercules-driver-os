@@ -1844,6 +1844,11 @@
 .royal-vapor-orb[data-orb-state="speaking"] .vapor-orb-flare { opacity: calc(.55 + var(--orb-level) * .4); background: var(--vapor-flare); }
 .royal-vapor-orb[data-orb-motion="off"] * { animation: none !important; transform: none !important; scale: 1 !important; }
 .royal-vapor-orb[data-orb-motion="off"] .vapor-orb-field { display: none; }
+.conversation-pinned-orb { display: flex; justify-content: center; padding-block: .5rem 1rem; }
+.conversation-main-orb { min-width: 120px; aspect-ratio: 1; }
+.conversation-main-orb.conversation-main-orb-compact { width: clamp(140px, 30vw, 220px); }
+.vapor-orb-sphere { min-width: 1px; min-height: 1px; }
+@media (max-height: 650px) { .conversation-main-orb.conversation-main-orb-compact { width: 120px; } }
 @media (prefers-reduced-motion: reduce) { .royal-vapor-orb * { animation: none !important; transform: none !important; scale: 1 !important; } .royal-vapor-orb .vapor-orb-field { display: none; } }
 @media print { .royal-vapor-orb { display: none !important; } }
 
