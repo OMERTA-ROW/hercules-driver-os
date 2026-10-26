@@ -1,5 +1,9 @@
 # Roadmap
 
+## Oct 26 — organic internal vapor correction
+- [x] Replace rigid bitmap rotation with independently advected, domain-warped procedural noise clouds and stable spherical gold edge. Canvas field capped at 112×112, small orbs 56×56, with offscreen/background/reduced-motion pausing; no per-frame React rendering.
+- [x] Verify desktop/phone preview cloud pixels evolve at fixed positions, no overflow/runtime errors, reduced motion stays pixel-identical; 35 focused tests pass, automatic build/typecheck pass. State dynamics tests cover speaking baseline without amplitude and increased flow/light with amplitude; existing mocked playback tests cover Stop/end/error. No live metered audio or deployment.
+
 ## Oct 26 — final conversational screen and royal vapor orb
 - [x] Read owner directive; linked Notion blueprint is sign-in protected, so its private content remains unavailable.
 - [x] Replace home cavern with true-black conversation using the single existing dock; preserve session input, voice and approval controls. Root-mounted dock retains unsent drafts through minimize and page navigation; BOL remains in the composer.

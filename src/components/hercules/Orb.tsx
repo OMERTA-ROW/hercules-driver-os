@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { getVoiceLevel } from "@/lib/voice-level";
-import royalOrb from "@/assets/royal-vapor-orb.png";
+import { CloudVapor } from "./CloudVapor";
 
 /** Original vapor sphere. Playback, never animation, owns the speaking state. */
 export function Orb({
@@ -63,8 +63,7 @@ export function Orb({
     >
       <span aria-hidden className="vapor-orb-flare" />
       <span aria-hidden className="vapor-orb-sphere">
-        <img src={royalOrb} alt="" width={1024} height={1024} draggable={false} decoding="async" className="vapor-orb-art" />
-        <span className="vapor-orb-clouds"><img src={royalOrb} alt="" width={1024} height={1024} draggable={false} loading="lazy" decoding="async" /></span>
+        <CloudVapor state={visualState} motion={motionActive} />
       </span>
     </span>
   );

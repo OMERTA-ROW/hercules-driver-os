@@ -4,6 +4,7 @@ const state = vi.hoisted(() => ({ motionActive: true }));
 vi.mock("@/lib/theme", () => ({ useTheme: () => state }));
 vi.mock("@/lib/voice", () => ({ useVoice: () => ({}) }));
 vi.mock("@/lib/voice-level", () => ({ getVoiceLevel: () => 0.5 }));
+vi.mock("./CloudVapor", () => ({ CloudVapor: () => null }));
 import { Orb } from "./Orb";
 
 describe("Hercules orb presentation", () => {
