@@ -10,6 +10,9 @@ import { LiquidOrb } from "@/components/hercules/LiquidOrb";
 import { doors, type AccountKind } from "@/data/accounts";
 import { cn } from "@/lib/utils";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
+import { useServerFn } from "@tanstack/react-start";
+import { brokerLoginRoles } from "@/lib/broker-intake.functions";
+import { loginDestination } from "@/lib/broker-intake";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -49,6 +52,7 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const readLoginRoles = useServerFn(brokerLoginRoles);
 
   const door = doors.find((d) => d.kind === kind)!;
 
@@ -147,7 +151,13 @@ function SignIn() {
                     window.location.assign(next);
                     return;
                   }
-                  void navigate({ to: kind === "solo" ? "/" : "/company" });
+                  try {
+                    const roles = await readLoginRoles();
+                    void navigate({ to: loginDestination(roles, kind) });
+                  } catch {
+                    toast.error("Could not check your role. Sign-in succeeded; open your workspace from the menu.");
+                    void navigate({ to: "/" });
+                  }
                 })();
               }}
             >
