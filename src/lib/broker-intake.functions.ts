@@ -34,7 +34,7 @@ export const approveReviewBatch = createServerFn({ method: "POST" }).middleware(
   });
 export const changeReviewRelease = createServerFn({method:"POST"}).middleware([requireSupabaseAuth]).inputValidator(releaseChangeSchema)
   .handler(async({data,context})=>{
-    const {data:version,error}=await context.supabase.rpc("broker_release_change",{_id:data.id,_version:data.version,_cancel:data.cancel,_release_at:data.releaseAt ?? undefined,_zone:data.timeZone,_confirmed:data.confirmed});
+    const {data:version,error}=await context.supabase.rpc("broker_release_change",{_id:data.id,_version:data.version,_cancel:data.cancel,_release_at:data.releaseAt ?? "1970-01-01T00:00:00Z",_zone:data.timeZone,_confirmed:data.confirmed});
     if(error)throw new Error(error.message);
     return {version};
   });
