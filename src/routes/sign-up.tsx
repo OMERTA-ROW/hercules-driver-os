@@ -24,6 +24,8 @@ export const Route = createFileRoute("/sign-up")({
         content:
           "Start your 7-day trial with no card and no charge. Pick the tier that fits how you run.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SignUp,

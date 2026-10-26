@@ -22,6 +22,8 @@ export const Route = createFileRoute("/pricing")({
         property: "og:description",
         content: "Three tiers. No free plan. 7-day free trial on every one of them.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Pricing,
