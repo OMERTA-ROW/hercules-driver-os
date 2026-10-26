@@ -1,10 +1,11 @@
 # Roadmap
 
 ## Oct 26 — broker intake/debrief slice
-- [ ] Inspect blueprint, existing broker/company permissions and connected inbox/delivery providers.
-- [ ] Build feasible persistent intake/review/approval foundation and login debrief with honest connection labels.
-- [ ] Specify durable webhook/outbox retries/idempotency; activate only a configured verified channel.
-- [ ] Test authorization/workflow rules, desktop/mobile and preview; report unconnected/unverified blockers, no untested publication.
+- [x] Inspect blueprint and providers: Notion connection returns object_not_found; no broker email, sender or durable executor connected.
+- [x] Add persistent company-scoped manual intake/category/urgency/status records, immutable approval history, verified carrier/recipient/owned finalized BOL approval RPC and blocked outbox. Broker login destination uses server roles; legacy network is collapsed and Demo-labeled.
+- [x] Persist unique provider event IDs and unique approved outbox intents, retry/lease fields; document signed-webhook/worker/reconciliation architecture. Activation blocked until real inbox/sender/executor and trusted recipient verification are configured; no public unconfigured webhook or fake 24/7 processing.
+- [x] Desktop 1280×1800 and phone 390×844: debrief, truthful connection state, no overflow/runtime errors, chat draft preserved. 20 focused tests pass; rollback-only privilege/trigger checks pass; automatic build/typecheck pass. Confirmed authenticated direct draft approval/outbox insertion privileges are revoked and unique event/draft constraints exist.
+- Authenticated save/reload/carrier approval end-to-end remains blocked: no auth users to mint; sandbox test role cannot SET ROLE authenticated. Missing trusted recipient verification/finalized BOL file workflow and provider-dependent ingestion/delivery remain blocked. No sends, metered calls or publication.
 
 ## Oct 26 — organic internal vapor correction
 - [x] Replace rigid bitmap rotation with independently advected, domain-warped procedural noise clouds and stable spherical gold edge. Canvas field capped at 112×112, small orbs 56×56, with offscreen/background/reduced-motion pausing; no per-frame React rendering.

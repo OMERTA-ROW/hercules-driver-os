@@ -1,0 +1,4 @@
+REVOKE INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER ON public.broker_inbox_events,public.broker_intake_drafts,public.broker_delivery_outbox,public.broker_review_history FROM anon,authenticated;
+REVOKE SELECT ON public.broker_inbox_events,public.broker_intake_drafts,public.broker_delivery_outbox,public.broker_review_history FROM anon;
+CREATE OR REPLACE FUNCTION public.broker_review_history_immutable() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN RAISE EXCEPTION 'Broker approval history is immutable'; END $$;
+CREATE TRIGGER broker_history_immutable BEFORE UPDATE OR DELETE ON public.broker_review_history FOR EACH ROW EXECUTE FUNCTION public.broker_review_history_immutable();

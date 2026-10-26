@@ -27,6 +27,7 @@ import type { Feature } from "@/data/plans";
 const nav = [
   { to: "/", label: "Orb", icon: Orbit, feature: null },
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
+  { to: "/broker", label: "Broker Desk", icon: Package, feature: null },
   { to: "/equipment", label: "Vehicle Profile", icon: Truck, feature: null },
   { to: "/navigation", label: "Navigation", icon: Navigation2, feature: null },
   { to: "/stops", label: "Stops", icon: Fuel, feature: null },

@@ -497,6 +497,242 @@ export type Database = {
         }
         Relationships: []
       }
+      broker_delivery_outbox: {
+        Row: {
+          approved_at: string
+          approved_by: string
+          attempts: number
+          carrier_id: string
+          company_id: string
+          created_at: string
+          draft_id: string
+          id: string
+          last_error: string | null
+          locked_until: string | null
+          next_attempt_at: string
+          packet: Json
+          provider_message_id: string | null
+          recipient_email: string
+          status: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by: string
+          attempts?: number
+          carrier_id: string
+          company_id: string
+          created_at?: string
+          draft_id: string
+          id?: string
+          last_error?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          packet: Json
+          provider_message_id?: string | null
+          recipient_email: string
+          status?: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string
+          attempts?: number
+          carrier_id?: string
+          company_id?: string
+          created_at?: string
+          draft_id?: string
+          id?: string
+          last_error?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          packet?: Json
+          provider_message_id?: string | null
+          recipient_email?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_delivery_outbox_company_id_carrier_id_fkey"
+            columns: ["company_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "freight_carriers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "broker_delivery_outbox_company_id_draft_id_fkey"
+            columns: ["company_id", "draft_id"]
+            isOneToOne: false
+            referencedRelation: "broker_intake_drafts"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
+      broker_inbox_events: {
+        Row: {
+          attempts: number
+          company_id: string
+          created_at: string
+          external_id: string
+          id: string
+          last_error: string | null
+          locked_until: string | null
+          next_attempt_at: string
+          payload: Json
+          provider: string
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          company_id: string
+          created_at?: string
+          external_id: string
+          id?: string
+          last_error?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          provider: string
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          company_id?: string
+          created_at?: string
+          external_id?: string
+          id?: string
+          last_error?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          provider?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_inbox_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_intake_drafts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          company_id: string
+          created_at: string
+          created_by: string
+          destination: string
+          email_subject: string
+          event_id: string | null
+          id: string
+          notes: string
+          origin: string
+          reference: string
+          selected_carrier_id: string | null
+          status: string
+          urgent: boolean
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          destination?: string
+          email_subject?: string
+          event_id?: string | null
+          id?: string
+          notes?: string
+          origin?: string
+          reference: string
+          selected_carrier_id?: string | null
+          status?: string
+          urgent?: boolean
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          destination?: string
+          email_subject?: string
+          event_id?: string | null
+          id?: string
+          notes?: string
+          origin?: string
+          reference?: string
+          selected_carrier_id?: string | null
+          status?: string
+          urgent?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_intake_drafts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_intake_drafts_company_id_selected_carrier_id_fkey"
+            columns: ["company_id", "selected_carrier_id"]
+            isOneToOne: false
+            referencedRelation: "freight_carriers"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "broker_intake_drafts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "broker_inbox_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_review_history: {
+        Row: {
+          action: string
+          actor_id: string
+          company_id: string
+          created_at: string
+          detail: Json
+          draft_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          company_id: string
+          created_at?: string
+          detail?: Json
+          draft_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          company_id?: string
+          created_at?: string
+          detail?: Json
+          draft_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_review_history_company_id_draft_id_fkey"
+            columns: ["company_id", "draft_id"]
+            isOneToOne: false
+            referencedRelation: "broker_intake_drafts"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           business_type: string
@@ -1026,6 +1262,8 @@ export type Database = {
           mc_number: string | null
           name: string
           notes: string | null
+          recipient_verified_at: string | null
+          recipient_verified_email: string | null
           verification_status: string
         }
         Insert: {
@@ -1040,6 +1278,8 @@ export type Database = {
           mc_number?: string | null
           name: string
           notes?: string | null
+          recipient_verified_at?: string | null
+          recipient_verified_email?: string | null
           verification_status?: string
         }
         Update: {
@@ -1054,6 +1294,8 @@ export type Database = {
           mc_number?: string | null
           name?: string
           notes?: string | null
+          recipient_verified_at?: string | null
+          recipient_verified_email?: string | null
           verification_status?: string
         }
         Relationships: [
@@ -2876,6 +3118,29 @@ export type Database = {
         Returns: Json
       }
       ai_set_quality_pref: { Args: { _pref: string }; Returns: string }
+      broker_can_review: { Args: { _company: string }; Returns: boolean }
+      broker_intake_approve: {
+        Args: {
+          _carrier: string
+          _confirmed: boolean
+          _document: string
+          _draft: string
+        }
+        Returns: string
+      }
+      broker_intake_create: {
+        Args: {
+          _category: string
+          _company: string
+          _destination: string
+          _notes: string
+          _origin: string
+          _reference: string
+          _subject: string
+          _urgent: boolean
+        }
+        Returns: string
+      }
       company_code_gen: { Args: { _len?: number }; Returns: string }
       company_create: {
         Args: {

@@ -19,6 +19,7 @@ import { NetworkProvider, useNetwork } from "@/lib/network";
 import { RoleGate, ScopeStrip } from "@/components/network/RoleGate";
 import { laneCandidates, loadStageLabel, loadStages, type PostedLoad } from "@/data/network";
 import { cn } from "@/lib/utils";
+import { BrokerDebrief } from "@/components/hercules/BrokerDebrief";
 
 export const Route = createFileRoute("/broker")({
   head: () => ({
@@ -44,11 +45,14 @@ export const Route = createFileRoute("/broker")({
 function BrokerRoute() {
   return (
     <NetworkProvider>
-      <AppShell title="Broker Desk" subtitle="Post freight into the HERCULES network and track it">
-        <ScopeStrip />
-        <RoleGate min="broker">
-          <BrokerView />
-        </RoleGate>
+      <AppShell title="Broker Desk" subtitle="Intake, exceptions and carrier packet review">
+        <BrokerDebrief />
+        <details className="mt-8 border-t border-border pt-4">
+          <summary className="min-h-11 cursor-pointer text-sm text-violet">Demo · Legacy sample broker workspace</summary>
+          <p className="my-3 text-sm text-muted-foreground">Sample capacity, postings and status changes below stay on this device. No carriers are contacted, no load is booked, and these are not live network records.</p>
+          <ScopeStrip />
+          <RoleGate min="broker"><BrokerView /></RoleGate>
+        </details>
       </AppShell>
     </NetworkProvider>
   );

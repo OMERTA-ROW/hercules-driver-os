@@ -71,6 +71,27 @@
       "when": 1792965199429,
       "tag": "0009_vehicle_truck_routing_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792975636232,
+      "tag": "0010_broker_intake_review_outbox",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792975748982,
+      "tag": "0011_protect_broker_recipient_verification",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792975816133,
+      "tag": "0012_broker_explicit_write_privileges",
+      "breakpoints": true
     }
   ]
 }
