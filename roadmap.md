@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Oct 26 — original responsive orb refinement
-- [ ] Apply owner clamp sizing, safe-area centering and static reduced-motion gradient; preserve chat and reviewer work.
-- [ ] Target 30–60fps main cloud field with bounded phone resolution; verify evolving internal clouds, stationary sphere, desktop/phone/short-screen fit and tests.
+- [x] Apply owner clamp sizing, safe-area centering and static reduced-motion gradient; preserve chat and reviewer work.
+- [x] Main cloud field measured 30–31fps in desktop/phone sandbox; 96px desktop and 80px phone canvas. Changing fixed-position pixels, no sphere rotation, 320px desktop/180px phone diameter, full short-phone circle and unobstructed composer verified; reduced motion static gradient. 54 focused tests and automatic build/typecheck pass. No metered speech or publication; real-device sustained performance/live speech remain unverified.
 
 ## Oct 26 — expanded reviewer assignments and release groundwork
 - [x] Extend real company-scoped debrief to dispatchers and brokers; itemized batch review, carrier/driver per load, priority and time-zone-aware release windows.
