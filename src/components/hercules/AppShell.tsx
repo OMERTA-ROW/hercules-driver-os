@@ -28,6 +28,7 @@ import type { Feature } from "@/data/plans";
 const nav = [
   { to: "/", label: "Orb", icon: Orbit, feature: null },
   { to: "/dashboard", label: "Dashboard", icon: Gauge, feature: "dashboard" },
+  { to: "/equipment", label: "Vehicle Profile", icon: Truck, feature: null },
   { to: "/navigation", label: "Navigation", icon: Navigation2, feature: null },
   { to: "/stops", label: "Stops", icon: Fuel, feature: null },
   { to: "/breakdown", label: "Breakdown", icon: LifeBuoy, feature: null },
@@ -76,17 +77,17 @@ export function AppShell({
   const canReset = !account || can("loadReset");
 
   return (
-    <div className="surface-motion-zone isolate min-h-screen bg-background">
+    <div className="hercules-workspace surface-motion-zone isolate min-h-screen bg-background">
       <LiquidOrb />
       <div className="mx-auto flex w-full max-w-[1800px]">
         {/* Left rail — a floating bubble rail for a cab-mounted landscape tablet */}
-        <aside className="sticky top-0 hidden h-screen w-[124px] shrink-0 flex-col gap-3 overflow-y-auto px-2 py-4 lg:flex xl:w-[204px] xl:px-4">
+        <aside className="workspace-rail sticky top-0 hidden h-screen w-[124px] shrink-0 flex-col gap-5 overflow-y-auto px-2 py-6 lg:flex xl:w-[204px] xl:px-4">
           <Link to="/" className="px-2 text-center xl:text-left">
             <div className="font-display text-lg font-bold uppercase tracking-[0.08em] text-primary xl:text-2xl xl:tracking-[0.14em]">
               HERC
               <span className="text-foreground">ULES</span>
             </div>
-            <div className="label-cap mt-1">by Zeus</div>
+            <div className="label-cap mt-1">Driver's command</div>
           </Link>
           <div className="bubble-bar !flex-col !items-stretch !rounded-[2rem] !p-2">
             {items.map((n) => (
@@ -105,7 +106,7 @@ export function AppShell({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-border bg-background">
+          <header className="workspace-header sticky top-0 z-30 border-b border-border bg-background">
             <div
               aria-hidden
               className="edge-gold h-px w-full"

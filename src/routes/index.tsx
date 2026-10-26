@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import { LiveOrb } from "@/components/hercules/Orb";
 import { DotMenu } from "@/components/hercules/DotMenu";
 import { useVoice } from "@/lib/voice";
@@ -53,6 +54,9 @@ function OrbHome() {
 
       {/* One quiet line of state — the spoken word, written down. */}
       <div className="relative z-10 mx-auto w-full max-w-2xl px-6 pb-10 text-center">
+        <Link to="/dashboard" className="home-status-link mb-6 inline-flex min-h-11 items-center gap-3 border-b border-primary/40 text-sm text-primary">
+          Driver dashboard · Add-on status <ArrowUpRight className="size-4" aria-hidden />
+        </Link>
         <p className="tech-label">
           {mode === "listening"
             ? "Listening"
