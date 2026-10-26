@@ -2,9 +2,10 @@
 
 ## Oct 26 — final conversational screen and royal vapor orb
 - [x] Read owner directive; linked Notion blueprint is sign-in protected, so its private content remains unavailable.
-- [ ] Replace home cavern with true-black conversation using the single existing dock; preserve session input, voice and approval controls.
-- [ ] Create original royal-purple/pearly-white vapor orb with gold rim and playback-derived state animations.
-- [ ] Verify desktop/mobile, keyboard, send, scroll, collapse, microphone errors, stop, reduced motion, focused tests and preview build; no live metered speech or publication.
+- [x] Replace home cavern with true-black conversation using the single existing dock; preserve session input, voice and approval controls. Root-mounted dock retains unsent drafts through minimize and page navigation; BOL remains in the composer.
+- [x] Create original royal-purple/pearly-white vapor orb with gold rim and playback-derived state animations; CSS-layered artwork, not simulated 3D fluid physics.
+- [x] Verify desktop/mobile (1280×1800, 390×844, 390×560), keyboard/send, history scroll/latest button, collapse/reopen, cross-page continuity, microphone failure, static reduced motion and automatic preview build/typecheck. 62 focused tests pass; full suite 158 pass, 5 existing map tests fail from missing matchMedia in their test environment.
+- Live microphone capture/audio playback and authenticated flows remain unverified: sandbox cannot capture real speech and session mint reports no auth users. Metered speech was deliberately not called; no confirmed credit shortage. Private Notion page unavailable without access. No publication.
 - No paid integrations, billing or authorization changes; unrelated add-ons remain paused.
 
 ## Oct 26 — dashboard refresh and audited add-on discovery
