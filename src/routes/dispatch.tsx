@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Bot, Check, Radar, Truck } from "lucide-react";
+import { BrokerDebrief } from "@/components/hercules/BrokerDebrief";
 import { AppShell } from "@/components/hercules/AppShell";
 import {
   Panel,
@@ -33,12 +34,12 @@ export const Route = createFileRoute("/dispatch")({
       {
         name: "description",
         content:
-          "Hands-off dispatch for 100+ vehicle fleets: fleet-wide map, loads HERCULES matched and routed with its reasoning shown, and an exceptions-only queue with override.",
+          "Review saved intake drafts, driver assignments and requested packet releases. Background inbox and delivery need connection.",
       },
       { property: "og:title", content: "Dispatch Watch — HERCULES" },
       {
         property: "og:description",
-        content: "HERCULES dispatches. The dispatcher supervises and handles exceptions.",
+        content: "Company-scoped dispatcher debrief, itemized approvals and requested load releases.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,12 +53,10 @@ function DispatchRoute() {
     <NetworkProvider>
       <AppShell
         title="Dispatch Watch"
-        subtitle="HERCULES dispatches — you supervise and handle exceptions"
+        subtitle="Intake, assignments and release review"
       >
-        <ScopeStrip />
-        <RoleGate min="dispatcher">
-          <DispatchView />
-        </RoleGate>
+        <BrokerDebrief mode="dispatcher"/>
+        <details className="mt-6 border-t border-border pt-4"><summary className="cursor-pointer text-sm text-violet">Demo · Legacy fleet workspace — sample data, no real dispatch</summary><ScopeStrip/><RoleGate min="dispatcher"><DispatchView/></RoleGate></details>
       </AppShell>
     </NetworkProvider>
   );
@@ -104,7 +103,7 @@ function DispatchView() {
           <Bot className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <p className="text-sm">
             <strong className="uppercase tracking-[0.1em] text-primary">Hands off.</strong> HERCULES
-            matched and routed all {autoRouted} live loads on its own, and every driver approved
+            matched and routed all {autoRouted} demo loads on its own, and every driver approved
             their own run. There is no assignment desk here — you watch the fleet and step in on the{" "}
             {exceptions.length} open exception{exceptions.length === 1 ? "" : "s"}.
           </p>
@@ -113,7 +112,7 @@ function DispatchView() {
 
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         <Panel>
-          <PanelTitle right={<Pill tone="go">Live</Pill>}>Fleet moving</PanelTitle>
+          <PanelTitle right={<Pill tone="neutral">Demo</Pill>}>Fleet moving</PanelTitle>
           <Metric value={`${rolling}/${trucks.length}`} unit="rolling" tone="go" />
           <p className="mt-3 text-xs text-muted-foreground">
             Every unit carries its active vehicle profile — routing follows that profile, not a
