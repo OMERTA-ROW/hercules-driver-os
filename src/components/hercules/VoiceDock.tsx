@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
+  ArrowUp,
   Check,
   ChevronDown,
   FileText,
@@ -184,7 +185,7 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
               <ConversationContent className="mx-auto w-full max-w-2xl gap-6 px-4 py-5">
                 {turns.length === 0 ? (
                   <ConversationEmptyState
-                    className="min-h-48 p-5 [&_p]:text-[color:var(--chat-muted)]"
+                    className="conversation-empty min-h-0 p-5 [&_p]:text-[color:var(--chat-muted)]"
                     icon={<Orb className={isScreen ? "conversation-main-orb" : "w-32"} mode={mode} visualState={orbState} colorway={colorway} onActivate={mode === "idle" ? listen : stop} />}
                     title="Hercules"
                     description="What’s on the road ahead?"
@@ -299,7 +300,7 @@ export function VoiceDock({ presentation = "dock" }: { presentation?: "dock" | "
                     onStop={stop}
                     className="h-11 w-11 rounded-full"
                     aria-label={status === "streaming" ? "Stop reply" : "Send message"}
-                  />
+                  >{status === "streaming" ? <Square /> : <ArrowUp />}</PromptInputSubmit>
                 </PromptInputFooter>
               </PromptInput>
             </div>

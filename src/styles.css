@@ -2005,7 +2005,7 @@
 .chat-workspace [role="log"] { overscroll-behavior: contain; }
 .chat-workspace .chat-assistant { border-radius: 1rem; padding: .5rem .25rem; max-width: 100%; overflow-wrap: anywhere; }
 .chat-workspace .chat-user-bubble { max-width: 100%; }
-.chat-screen [role="log"] > div { min-height: 100%; }
+.chat-screen .conversation-empty { margin-block: auto; flex: 1; }
 .chat-screen [role="log"] h3 { font-size: 1.75rem; font-weight: 500; }
 .conversation-main-orb { width: min(36vh, 280px); }
 .chat-screen .chat-safe { width: 100%; max-width: 48rem; margin-inline: auto; border: 0 !important; }
@@ -2023,7 +2023,7 @@
 @media (max-width: 640px) {
   .conversation-frame-screen { padding-inline: .5rem; }
   .chat-screen > header { padding-inline: .5rem; }
-  .conversation-main-orb { width: min(28dvh, 220px); }
+  .conversation-main-orb { width: min(22dvh, 190px); }
   .chat-screen .chat-safe { padding-inline: .25rem; }
   .conversation-host-expanded .chat-workspace { height: 80dvh; }
 }
