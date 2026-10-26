@@ -16,3 +16,6 @@ Delivery intents are `needs_connection`, never sent. Inbox event uniqueness is c
 
 ## Current blockers
 No accessible broker inbox, sender or durable execution connection was found. The Notion API returned object_not_found: owner must share the page with the Lovable integration. No paid service, fake incoming email, outbound send or production publication occurred.
+
+## Actual verification
+20 focused rule/security/chat/vapor tests pass. Rollback-only SQL asserts client write privileges are absent and approval/recipient guards exist. Live database inspection confirms company/provider/event and per-draft outbox uniqueness and immutable history trigger. Desktop 1280×1800 and phone 390×844 show the debrief, Needs Connection states and preserved chat with no overflow or runtime errors. Automatic preview build/typecheck passes. Session mint reports no auth users; authenticated save/reload/approve is not verified. The sandbox SQL role cannot SET ROLE authenticated, so fixture-based tenant/recipient/duplicate-approval tests are not claimed complete. Existing carrier-table RLS still applies and may withhold rows from brokers without the corresponding company permissions. No real approved document send was attempted.
