@@ -104,6 +104,10 @@ type Ctx = {
   signOut: () => Promise<void>;
   /** Sends the confirmation email again. Never reveals whether an account exists. */
   resendConfirmation: (email: string) => Promise<{ ok: boolean; message: string }>;
+  /** Emails a recovery link. Never reveals whether the address has an account. */
+  requestPasswordReset: (email: string) => Promise<{ ok: boolean; message: string }>;
+  /** Sets a new password from a recovery session on /reset-password. */
+  updatePassword: (password: string) => Promise<{ ok: boolean; message: string }>;
   /** Records the driver's chosen plan. Never marks a subscription paid. */
   changePlan: (plan: PlanId, seats?: number) => Promise<{ ok: boolean; message: string }>;
   refresh: () => Promise<void>;
@@ -122,6 +126,8 @@ const AuthContext = createContext<Ctx>({
   signUp: async () => ({ error: "Auth not ready" }),
   signOut: async () => {},
   resendConfirmation: async () => ({ ok: false, message: "Accounts are not ready yet." }),
+  requestPasswordReset: async () => ({ ok: false, message: "Accounts are not ready yet." }),
+  updatePassword: async () => ({ ok: false, message: "Accounts are not ready yet." }),
   changePlan: async () => ({ ok: false, message: "Accounts are not ready yet." }),
   refresh: async () => {},
   trialDaysLeft: 0,
